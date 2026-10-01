@@ -15,9 +15,7 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 <img src="images/its-shoutime.png" width="200px">
 
-[[homepage]()]
 [[github](https://github.com/its-shoutime)]
-[[portfolio]()]
 
 * Role: Project Advisor
 
