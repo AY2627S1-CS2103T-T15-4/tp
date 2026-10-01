@@ -11,13 +11,14 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
-### John Doe
+### Shou An
 
 <img src="images/its-shoutime.png" width="200px">
 
 [[github](https://github.com/its-shoutime)]
 
 * Role: Project Advisor
+* Responsibilities: Testing, Documentation, Coordinator
 
 ### Kenneth Chia
 
