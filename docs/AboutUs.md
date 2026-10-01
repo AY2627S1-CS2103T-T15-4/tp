@@ -19,14 +19,14 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 * Role: Project Advisor
 
-### Jane Doe
+### Kenneth Chia
 
 <img src="images/Kenneth-Chia.jpg" width="200px">
 
 [[github](http://github.com/Kenneth-Chia)]
 
 * Role: Team Lead
-* Responsibilities: UI
+* Responsibilities: UI, Code Quality, Testing
 
 ### Xander Goh
 
