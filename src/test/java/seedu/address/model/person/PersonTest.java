@@ -19,6 +19,20 @@ import seedu.address.testutil.PersonBuilder;
 public class PersonTest {
 
     @Test
+    public void constructor_nullRemark_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new Person(ALICE.getName(), ALICE.getPhone(),
+                ALICE.getEmail(), ALICE.getAddress(), null, ALICE.getTags()));
+    }
+
+    @Test
+    public void getRemark_personBuilderPreservesRemark() {
+        Person person = new PersonBuilder(ALICE).withRemark("Likes swimming").build();
+        assertEquals(new Remark("Likes swimming"), person.getRemark());
+        assertEquals(person.getRemark(), new PersonBuilder(person).build().getRemark());
+        assertTrue(person.isSamePerson(ALICE));
+    }
+
+    @Test
     public void asObservableList_modifyList_throwsUnsupportedOperationException() {
         Person person = new PersonBuilder().build();
         assertThrows(UnsupportedOperationException.class, () -> person.getTags().remove(0));
@@ -88,6 +102,19 @@ public class PersonTest {
         // different tags -> returns false
         editedAlice = new PersonBuilder(ALICE).withTags(VALID_TAG_HUSBAND).build();
         assertFalse(ALICE.equals(editedAlice));
+    }
+
+    @Test
+    public void equals_differentRemarks_returnsFalse() {
+        Person original = new PersonBuilder(ALICE).withRemark("Likes swimming").build();
+        Person edited = new PersonBuilder(original).withRemark("Likes baseball").build();
+        Person copy = new PersonBuilder(original).build();
+
+        assertFalse(original.equals(edited));
+        assertFalse(edited.equals(original));
+        assertTrue(original.isSamePerson(edited));
+        assertEquals(original, copy);
+        assertEquals(original.hashCode(), copy.hashCode());
     }
 
     @Test
