@@ -296,32 +296,218 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
 
-**Use case: Delete a person**
+(For all use cases below, the **System** is the 'Watchdog' and the **Actor** is the user, unless specified otherwise)
+
+**Use case: UC01 - Add Dog**
 
 **MSS**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1.  User enters the command and the dog details to add a dog.
+2.  System validates the command and dog details.
+3.  System adds the dog and displays a success message.
 
     Use case ends.
 
 **Extensions**
 
-* 2a. The list is empty.
+* 1a. User enters an invalid command format.
 
-  Use case ends.
+    * 1a1. System displays an unknown-command message.
 
-* 3a. The given index is invalid.
+      Use case resumes from step 1.
 
-    * 3a1. AddressBook shows an error message.
+* 2a. System detects invalid dog details.
 
-      Use case resumes at step 2.
+    * 2a1. System requests for correct details.
 
-*{More to be added}*
+      Use case resumes from step 1.
+
+
+
+**Use case: UC02 - View Dog**
+
+**MSS**
+
+1.  User requests to list dogs.
+2.  System shows a list of dogs.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+
+
+**Use case: UC03 - Edit Dog**
+
+**MSS**
+
+1.  User requests to <ins>list dogs (UC03)</ins>.
+2.  User enters the command, dog details and the dog id for the dog to be edited.
+3.  System validates the command, dog details and dog id.
+4.  System edits the dog and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+* 2a. System detects invalid dog details.
+
+    * 2a1. System requests the correct details.
+
+      Use case resumes from step 2.
+
+* 2b. System cannot find the specified dog id.
+
+    * 2b1. System requests for an existing dog id.
+
+      Use case resumes from step 2.
+
+
+
+**Use case: UC04 - Delete Dog**
+
+**MSS**
+
+1.  User requests to <ins>list dogs (UC03)</ins>.
+2.  User enters the command and the dog id for the dog to be deleted.
+3.  System validates the command and dog id.
+4.  System deletes the dog and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+* 2a. System cannot find the specified dog id.
+
+    * 2a1. System requests for an existing dog id.
+
+      Use case resumes from step 2.
+
+
+
+**Use case: UC05 - Add Customer**
+
+**MSS**
+
+1.  User enters the command and the customer details to add a customer.
+2.  System validates the command and customer details.
+3.  System adds the customer and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+* 2a. System detects invalid customer details.
+
+    * 2a1. System requests for correct details.
+
+      Use case resumes from step 1.
+
+
+
+**Use case: UC06 - View Customer**
+
+**MSS**
+
+1.  User requests to list customers.
+2.  System shows a list of customers.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+
+
+**Use case: UC07 - Edit Customer**
+
+**MSS**
+
+1.  User requests to <ins>list customers (UC06)</ins>.
+2.  User enters the command, customer details and the customer id for the customer to be edited.
+3.  System validates the command, customer details and customer id.
+4.  System edits the customer and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+* 2a. System detects invalid customer details.
+
+    * 2a1. System requests the correct details.
+
+      Use case resumes from step 2.
+
+* 2b. System cannot find the specified customer id.
+
+    * 2b1. System requests for an existing customer id.
+
+      Use case resumes from step 2.
+
+
+
+**Use case: UC08 - Delete Customer**
+
+**MSS**
+
+1.  User requests to <ins>list customers (UC06)</ins>.
+2.  User enters the command and the customer id for the customer to be deleted.
+3.  System validates the command and customer id.
+4.  System deletes the customer and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+* 2a. System cannot find the specified customer id.
+
+    * 2a1. System requests for an existing customer id.
+
+      Use case resumes from step 2.
+
+
 
 ### Non-Functional Requirements
 
