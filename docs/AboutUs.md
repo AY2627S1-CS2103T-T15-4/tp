@@ -11,22 +11,23 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
-### John Doe
+### Shou An
 
 <img src="images/its-shoutime.png" width="200px">
 
 [[github](https://github.com/its-shoutime)]
 
 * Role: Project Advisor
+* Responsibilities: Testing, Documentation, Coordinator
 
-### Jane Doe
+### Kenneth Chia
 
-<img src="images/Kenneth-Chia.jpg" width="200px">
+<img src="images/kenneth-chia.png" width="200px">
 
 [[github](http://github.com/Kenneth-Chia)]
 
 * Role: Team Lead
-* Responsibilities: UI
+* Responsibilities: UI, Code Quality, Testing
 
 ### Xander Goh
 
@@ -36,7 +37,7 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[portfolio](team/johndoe.md)]
 
 * Role: Developer
-* Responsibilities: Data
+* Responsibilities: Data, Debugging, Testing
 
 ### Umaiza
 
@@ -54,4 +55,4 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[github](http://github.com/lilosy)]
 
 * Role: Developer
-* Responsibilities: UI
+* Responsibilities: Testing, UI, Code quality
