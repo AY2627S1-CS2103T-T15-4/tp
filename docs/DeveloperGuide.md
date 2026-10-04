@@ -325,16 +325,49 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+NFR-01. **Platform compatibility**: Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
 
-*{More to be added}*
+NFR-02. **Offline operation**: After installation and setup, all core dog and customer management operations shall work without an internet connection.
+
+NFR-03. **Performance**: With up to 500 dog records and 500 customer records, WatchDog shall display the result of an add, edit, delete, list or search command within 2 seconds of submission on the agreed test laptop.
+
+NFR-04. **Startup time**: With the same dataset, WatchDog shall load its saved records and become ready to accept commands within 10 seconds of launch on the agreed test laptop.
+
+NFR-05. **Keyboard usability**: After launch, users shall be able to perform all core dog and customer management operations using the keyboard without requiring mouse interaction.
+
+NFR-06. **Typing efficiency**: A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+
+NFR-07. **Error clarity**: For invalid command syntax, missing required fields or invalid field values, WatchDog shall display an English error message identifying the problem and providing the expected format or accepted values.
+
+NFR-08. **Robustness**: An invalid command or an input that fails validation shall not terminate the application or change existing records. The application shall remain ready to accept the next command.
+
+NFR-09. **Data persistence**: Following successful data changes and a normal application exit, WatchDog shall restore the updated dog records, customer records and their associations when reopened.
+
+NFR-10. **Privacy**: WatchDog shall store dog and customer records locally and shall not transmit their contents to external services.
 
 ### Glossary
 
-* **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
+* **WatchDog**: The application used to manage a dog daycare centre's customer and dog information.
+* **User**: The person operating WatchDog, primarily the dog daycare manager.
+* **Customer**: A person whose contact details are recorded because they use the daycare's services for their dog or dogs.
+* **Dog record**: The information stored about an individual dog, including its ID, name, breed and size.
+* **Customer record**: The information stored about a customer, including their ID, name, primary contact number, email and backup contact number.
+* **Dog ID**: A unique integer assigned by WatchDog to identify a dog record. Dogs with the same name are distinguished by their IDs.
+* **Customer ID**: A unique integer assigned by WatchDog to identify a customer record. Customers with the same name are distinguished by their IDs.
+* **List index**: A record's position in the currently displayed list. Unlike a record ID, this position may change when the list is filtered or reordered.
+* **Dog-customer association**: The recorded relationship indicating which customer owns a dog.
+* **Primary contact number**: The customer's main telephone number, used as the first contact option.
+* **Backup contact number**: An alternative telephone number used when the customer cannot be reached through their primary number.
+* **Breed**: The recorded breed or breed mix of a dog, such as Chihuahua, Shiba Inu or a mixed breed.
+* **Dog size**: The dog's recorded size category: small, medium, large or giant, according to the size chart adopted by the team.
+* **Scheduled attendance**: A planned visit by a dog to the daycare. A scheduled dog is not necessarily currently present.
+* **Check-in / Check-out**: Recording a dog's arrival at or departure from the daycare.
+* **Present dog**: A dog that has checked in and has not yet checked out.
+* **Activity**: A care task planned for a dog, such as feeding, grooming or exercise.
+* **Checklist**: A list of a dog's activities with an indication of which have been completed.
+* **Aggressiveness**: Recorded tendency to show threatening or potentially harmful behaviour towards humans or other dogs, including any known triggers.
+* **Temperament**: A dog's usual behavioural tendencies, such as being calm, shy or friendly. This is broader than aggressiveness.
+* **Care instructions**: Recorded directions for looking after a particular dog, including feeding, exercise and special precautions.
 
 --------------------------------------------------------------------------------------------------------------------
 
