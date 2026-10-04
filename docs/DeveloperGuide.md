@@ -278,9 +278,7 @@ _{Explain here how the data archiving feature will be implemented}_
 * Prefers typing to mouse interactions 
 * Is reasonably comfortable using CLI apps
 
-**Value proposition**: WatchDog helps dog day care centre managers to manage and keep track of all their clients’ dogs, 
-each of the dog’s needs and client information in a centralised application, faster than with a typical mouse-driven 
-GUI application.
+**Value proposition**: WatchDog helps dog day care centre managers to manage and keep track of all their clients’ dogs, each of the dog’s needs and client information in a centralised application, faster than with a typical mouse-driven GUI application.
 
 
 ### User stories
