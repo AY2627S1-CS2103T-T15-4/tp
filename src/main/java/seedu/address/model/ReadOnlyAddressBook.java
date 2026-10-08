@@ -1,6 +1,9 @@
 package seedu.address.model;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import seedu.address.model.customer.Customer;
+import seedu.address.model.dog.Dog;
 import seedu.address.model.person.Person;
 
 /**
@@ -13,5 +16,11 @@ public interface ReadOnlyAddressBook {
      * This list will not contain any duplicate persons.
      */
     ObservableList<Person> getPersonList();
+
+    default ObservableList<Dog> getDogList() {
+        return FXCollections.emptyObservableList();
+    }
+
+    ObservableList<Customer> getCustomerList();
 
 }

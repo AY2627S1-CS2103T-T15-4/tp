@@ -1,72 +1,73 @@
 package seedu.address.model.customer;
 
-import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.model.customer.*;
-import seedu.address.model.customer.Address;
-import seedu.address.model.customer.Name;
-import seedu.address.model.customer.Phone;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
+import static seedu.address.commons.util.AppUtil.checkArgument;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.Objects;
+
+import seedu.address.commons.util.ToStringBuilder;
+
+/**
+ * Represents a customer in the daycare database.
+ * Guarantees: details are present and not null, id is nonnegative, immutable.
+ */
 public class Customer {
 
-    // Identity fields
-    private final seedu.address.model.customer.Name name;
-    private final seedu.address.model.customer.Phone phone;
-    private final seedu.address.model.customer.Email email;
-
-    // Data fields
-    private final seedu.address.model.customer.Address address;
+    private final int id;
+    private final String name;
+    private final String phone;
+    private final String email;
+    private final String backupContact;
 
     /**
-     * Every field must be present and not null.
+     * Every field must be present and not null. {@code id} must be nonnegative.
+     * Name, phone, email, and backup contact are stored as given, including internal spaces and letter case.
      */
-    public Customer(seedu.address.model.customer.Name name, seedu.address.model.customer.Phone phone, seedu.address.model.customer.Email email, seedu.address.model.customer.Address address) {
-        requireAllNonNull(name, phone, email, address);
+    public Customer(int id, String name, String phone, String email, String backupContact) {
+        requireAllNonNull(name, phone, email, backupContact);
+        checkArgument(id >= 0, "Customer id must be nonnegative.");
+        this.id = id;
         this.name = name;
         this.phone = phone;
         this.email = email;
-        this.address = address;
+        this.backupContact = backupContact;
     }
 
-    public Name getName() {
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
         return name;
     }
 
-    public Phone getPhone() {
+    public String getPhone() {
         return phone;
     }
 
-    public Email getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public Address getAddress() {
-        return address;
+    public String getBackupContact() {
+        return backupContact;
     }
 
-
     /**
-     * Returns true if both persons have the same name.
-     * This defines a weaker notion of equality between two persons.
+     * Returns true if both customers have the same id.
+     * This defines a weaker notion of equality between two customers.
      */
-    public boolean isSameCustomer(Customer otherPerson) {
-        if (otherPerson == this) {
+    public boolean isSameCustomer(Customer otherCustomer) {
+        if (otherCustomer == this) {
             return true;
         }
 
-        return otherPerson != null
-                && otherPerson.getName().equals(getName());
+        return otherCustomer != null && otherCustomer.getId() == getId();
     }
 
     /**
-     * Returns true if both persons have the same identity and data fields.
-     * This defines a stronger notion of equality between two persons.
+     * Returns true if both customers have the same identity and data fields.
+     * This defines a stronger notion of equality between two customers.
      */
     @Override
     public boolean equals(Object other) {
@@ -75,29 +76,31 @@ public class Customer {
         }
 
         // instanceof handles nulls
-        if (!(other instanceof Customer otherPerson)) {
+        if (!(other instanceof Customer otherCustomer)) {
             return false;
         }
 
-        return name.equals(otherPerson.name)
-                && phone.equals(otherPerson.phone)
-                && email.equals(otherPerson.email)
-                && address.equals(otherPerson.address);
+        return id == otherCustomer.id
+                && name.equals(otherCustomer.name)
+                && phone.equals(otherCustomer.phone)
+                && email.equals(otherCustomer.email)
+                && backupContact.equals(otherCustomer.backupContact);
     }
 
     @Override
     public int hashCode() {
-        // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address);
+        return Objects.hash(id, name, phone, email, backupContact);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .add("id", id)
                 .add("name", name)
                 .add("phone", phone)
                 .add("email", email)
-                .add("address", address)
+                .add("backupContact", backupContact)
                 .toString();
     }
+
 }
