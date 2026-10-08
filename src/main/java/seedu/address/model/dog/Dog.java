@@ -9,6 +9,14 @@ public class Dog {
     private final String breed;
     private final String size;
 
+    /**
+     * Creates a dog with the given details.
+     *
+     * @param id unique identifier of the dog
+     * @param name name of the dog
+     * @param breed breed of the dog
+     * @param size size of the dog
+     */
     public Dog(int id, String name, String breed, String size) {
         requireNonNull(name);
         requireNonNull(breed);
@@ -19,10 +27,21 @@ public class Dog {
         this.size = size;
     }
 
-    public int getId() { return id; }
-    public String getName() { return name; }
-    public String getBreed() { return breed; }
-    public String getSize() { return size; }
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getBreed() {
+        return breed;
+    }
+
+    public String getSize() {
+        return size;
+    }
 
     @Override
     public String toString() {
