@@ -2,20 +2,12 @@ package seedu.address.model.dog;
 
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.model.person.Address;
-import seedu.address.model.person.Email;
-import seedu.address.model.person.Name;
-import seedu.address.model.person.Phone;
-import seedu.address.model.tag.Tag;
 
 /**
- * Represents a Person in the address book.
+ * Represents a dog in the address book.
  * Guarantees: details are present and not null, field values are validated, immutable.
  */
 public class Dog {
@@ -25,7 +17,11 @@ public class Dog {
     private final Size size;
 
     /**
-     * Every field must be present and not null.
+     * Creates a dog with the given details.
+     *
+     * @param name name of the dog
+     * @param breed breed of the dog
+     * @param size size of the dog
      */
     public Dog(DogName name, Breed breed, Size size) {
         requireAllNonNull(name, breed, size);
@@ -54,9 +50,7 @@ public class Dog {
         if (otherDog == this) {
             return true;
         }
-
-        return otherDog != null
-                && otherDog.getName().equals(getName());
+        return otherDog != null && otherDog.getName().equals(getName());
     }
 
     /**
@@ -68,12 +62,9 @@ public class Dog {
         if (other == this) {
             return true;
         }
-
-        // instanceof handles nulls
         if (!(other instanceof Dog otherDog)) {
             return false;
         }
-
         return name.equals(otherDog.name)
                 && breed.equals(otherDog.breed)
                 && size.equals(otherDog.size);
@@ -81,7 +72,6 @@ public class Dog {
 
     @Override
     public int hashCode() {
-        // use this method for custom fields hashing instead of implementing your own
         return Objects.hash(name, breed, size);
     }
 
@@ -93,5 +83,4 @@ public class Dog {
                 .add("size", size)
                 .toString();
     }
-
 }

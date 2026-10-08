@@ -1,0 +1,106 @@
+package seedu.address.model.customer;
+
+import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
+
+import java.util.Iterator;
+import java.util.List;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import seedu.address.model.customer.exceptions.DuplicateCustomerException;
+
+/**
+ * A list of customers that enforces uniqueness between its elements and does not allow nulls.
+ * A customer is considered unique by comparing using {@code Customer#isSameCustomer(Customer)}.
+ *
+ * @see Customer#isSameCustomer(Customer)
+ */
+public class UniqueCustomerList implements Iterable<Customer> {
+
+    private final ObservableList<Customer> internalList = FXCollections.observableArrayList();
+    private final ObservableList<Customer> internalUnmodifiableList =
+            FXCollections.unmodifiableObservableList(internalList);
+
+    /**
+     * Returns true if the list contains a customer with the same id as {@code toCheck}.
+     */
+    public boolean contains(Customer toCheck) {
+        requireNonNull(toCheck);
+        return internalList.stream().anyMatch(toCheck::isSameCustomer);
+    }
+
+    /**
+     * Adds a customer to the list.
+     * The customer must not already exist in the list.
+     */
+    public void add(Customer toAdd) {
+        requireNonNull(toAdd);
+        if (contains(toAdd)) {
+            throw new DuplicateCustomerException();
+        }
+        internalList.add(toAdd);
+    }
+
+    /**
+     * Replaces the contents of this list with {@code customers}.
+     * {@code customers} must not contain duplicate customers.
+     */
+    public void setCustomers(List<Customer> customers) {
+        requireAllNonNull(customers);
+        if (!customersAreUnique(customers)) {
+            throw new DuplicateCustomerException();
+        }
+
+        internalList.setAll(customers);
+    }
+
+    /**
+     * Returns the backing list as an unmodifiable {@code ObservableList}.
+     */
+    public ObservableList<Customer> asUnmodifiableObservableList() {
+        return internalUnmodifiableList;
+    }
+
+    @Override
+    public Iterator<Customer> iterator() {
+        return internalList.iterator();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+
+        if (!(other instanceof UniqueCustomerList otherUniqueCustomerList)) {
+            return false;
+        }
+
+        return internalList.equals(otherUniqueCustomerList.internalList);
+    }
+
+    @Override
+    public int hashCode() {
+        return internalList.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return internalList.toString();
+    }
+
+    /**
+     * Returns true if {@code customers} contains only unique customers.
+     */
+    private boolean customersAreUnique(List<Customer> customers) {
+        for (int i = 0; i < customers.size() - 1; i++) {
+            for (int j = i + 1; j < customers.size(); j++) {
+                if (customers.get(i).isSameCustomer(customers.get(j))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+}
