@@ -1,61 +1,86 @@
 package seedu.address.model.dog;
 
-import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
-/** Represents a dog in the address book. */
+import java.util.Objects;
+
+import seedu.address.commons.util.ToStringBuilder;
+
+/**
+ * Represents a dog in the address book.
+ * Guarantees: details are present and not null, field values are validated, immutable.
+ */
 public class Dog {
-    private final int id;
-    private final String name;
-    private final String breed;
-    private final String size;
+
+    private final DogName name;
+    private final Breed breed;
+    private final Size size;
 
     /**
      * Creates a dog with the given details.
      *
-     * @param id unique identifier of the dog
      * @param name name of the dog
      * @param breed breed of the dog
      * @param size size of the dog
      */
-    public Dog(int id, String name, String breed, String size) {
-        requireNonNull(name);
-        requireNonNull(breed);
-        requireNonNull(size);
-        this.id = id;
+    public Dog(DogName name, Breed breed, Size size) {
+        requireAllNonNull(name, breed, size);
         this.name = name;
         this.breed = breed;
         this.size = size;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
+    public DogName getName() {
         return name;
     }
 
-    public String getBreed() {
+    public Breed getBreed() {
         return breed;
     }
 
-    public String getSize() {
+    public Size getSize() {
         return size;
     }
 
-    @Override
-    public String toString() {
-        return String.format("%d. %s; Breed: %s; Size: %s", id, name, breed, size);
+    /**
+     * Returns true if both dogs have the same name.
+     * This defines a weaker notion of equality between two dogs.
+     */
+    public boolean isSameDog(Dog otherDog) {
+        if (otherDog == this) {
+            return true;
+        }
+        return otherDog != null && otherDog.getName().equals(getName());
     }
 
+    /**
+     * Returns true if both dogs have the same identity and data fields.
+     * This defines a stronger notion of equality between two dogs.
+     */
     @Override
     public boolean equals(Object other) {
-        return other == this || (other instanceof Dog dog
-                && id == dog.id && name.equals(dog.name) && breed.equals(dog.breed) && size.equals(dog.size));
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof Dog otherDog)) {
+            return false;
+        }
+        return name.equals(otherDog.name)
+                && breed.equals(otherDog.breed)
+                && size.equals(otherDog.size);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(id, name, breed, size);
+        return Objects.hash(name, breed, size);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("name", name)
+                .add("breed", breed)
+                .add("size", size)
+                .toString();
     }
 }
