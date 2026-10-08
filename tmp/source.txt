@@ -1,0 +1,434 @@
+---PAGE 1---
+SOLUTION v3!!!
+NATIONAL UNIVERSITY OF SINGAPORE
+DO NOT PRINT!!!!
+SCHOOL OF COMPUTING
+SEMESTER II AY2025/26
+CS2106: Introduction to Operating Systems
+Midterm Assessment
+March 2026 Time Allowed: 1 Hour
+INSTRUCTIONS TO CANDIDATES:
+1. This question paper contains FOURTEEN ( 14 ) questions and comprises NINE ( 9 )
+printed pages including this page.
+2. An Answer Sheet, comprising TWO ( 2 ) printed page, is provided for you.
+3. Answer ALL questions within the space provided on the Answer Sheet.
+4. Maximum score is 40 marks.
+5. This is a CLOSED BOOK test. However, a single-sheet double-sided A4 reference sheet
+is allowed.
+6. Calculators and computing devices such as laptops, smartphones and tablets are not
+allowed.
+7. Write and shade your STUDENT NUMBER on the Answer Sheet using a dark colour pen
+/ pencil.
+8. Write legibly with a pen or pencil (at least 2B).
+9. Submit only the Answer Sheet at the end of the test. You may keep the question paper.
+~~~ END OF INSTRUCTIONS ~~~
+---PAGE 2---
+CS2106 2526S2 Midterm - Solution
+Section 1: MCQ ( Each question = 2 marks )
+MCQ 1 and 2 are based on the following code fragment:
+int main( int argc, char** argv )
+{
+int x, y;
+x = fork();
+y = getpid();
+printf("* x = %d | y = %d\n", x, y);
+x = fork();
+y = getpid();
+printf("# x = %d | y = %d\n", x, y);
+return 0;
+}
+1. How many printf() messsages in total will be printed?
+a. 2
+b. 4
+c. 8
+d. 16
+e. None of the above
+ANS: e. 2 printf() after the first fork(), 4 printf() after the second fork(). Total = 6.
+2. Given the partial printout below in addition to the original source code:
+………………………………
+* x = 0 | y = 78162
+# x = 78163 | y = 78161
+# x = 78164 | y = 78162
+………………………………
+Which of the following statements is FALSE?
+a. Process 78161 is the parent of process 78163.
+b. Process 78164 is not the direct child of process 78161.
+c. Process 78161 the only process with two child processes.
+d. Process 78163 is the direct child of process 78161.
+e. We do not have enough information to deduce the relationship between process
+78161 and 78162.
+ANS: e.
+2 | Page
+---PAGE 3---
+CS2106 2526S2 Midterm - Solution
+We use the print out to explain why a certain option is true:
+a. # x = 78163 | y = 78161
+b. # x = 78164 | y = 78162
+c. * x = 0 | y = 78162 (78162 is the child of master process), # x = 78163 | y = 78161
+(78161 has another child 78163). Due to the code structure, only the master process
+can have two children. With only 4 processes created, we can deduce that 78161 is the
+master process, hence is the only process with two children.
+d. # x = 78163 | y = 78161
+e. By process of elimination 😊. Or, by the same logic in (c), we have enough info
+(code + print out) to deduce the entire family tree.
+3 | Page
+---PAGE 4---
+CS2106 2526S2 Midterm - Solution
+MCQ 3 to 5 are based on the following process state transition diagram:
+Q3 to Q5 looks like they are testing on process state, but they incorporated some other
+aspects (e.g. system call, how process execute instructions etc)
+3. If the running process Q reaches the end of the main() function, which of the process
+transition will be be triggered for process Q?
+a. Running  Blocked
+b. Running  Ready
+c. Running  Terminate
+d. Running  New
+e. None of the above
+ANS: c. Give away 😊
+4. If the running process P executes a “getpid()” system call, which of the process
+transition will be be triggered for process P?
+a. Running  Blocked
+b. Running  Ready
+c. Running  Terminate
+d. Running  New
+e. None of the above
+ANS: e. getPID() is a system call, but system call is actually just code execution under kernel
+mode, i.e. it will continue to run (stay in running state)
+4 | Page
+---PAGE 5---
+CS2106 2526S2 Midterm - Solution
+5. If the running process R is currently in a busy-waiting loop in order to enter critical
+section, which of the process transition will be be triggered for process R?
+a. Running  Blocked
+b. Running  Ready
+c. Running  Terminate
+d. Running  New
+e. None of the above
+ANS: e. Same as Q4, busy waiting loop is a "while (….);" where the code repeatedly test the
+condition, i.e. running all the time. This is to test whether you understand how busy
+waiting loop works.
+5 | Page
+---PAGE 6---
+CS2106 2526S2 Midterm - Solution
+6. Given the following two code behavior:
+Code A Code B
+// M is a sempahore
+// initialized to 1
+While (1) { // forever While (1) { // forever
+// Computation heavy
+Wait(M);
+// Critical Section }
+// Computation heavy
+Signal(M);
+}
+Which of the following scenarios can cause Priority Inversion? The table below
+summarizes the priority of the existing processes on the system. For example, option
+(a) shows that there is one high priority process running Code A and one low priority
+process running code B.
+High Priority Medium Priority Low Priority
+a. 1 Process running A 1 Process running B
+b. 1 Process running B 1 Process running A 1 Process running B
+c. 2 Processes running A 1 Processes running B
+d. 1 Process running A 1 Process running B 1 Process running A
+e. None of the above
+ANS: d.
+Key requirement for priority inversion: One high and one low tasks that utilize the same
+resource. The task with medium priority just need to be there doing some work. In this
+case the “resource” is represented as the “mutex” (as a process needs to acquire it to
+perform work).
+7. Which of the following statements is a potential disadvantage of microkernel
+architecture compared to monolithic kernels?
+a. Less modular design, which makes updates difficult
+b. Increased overhead from frequent context switches and IPC between user-space
+services
+c. Unable to support modern hardware devices
+d. Lower security due to all services running in kernel mode
+e. None of the above
+ANS: b. Test of basic understanding of OS structure.
+6 | Page
+---PAGE 7---
+CS2106 2526S2 Midterm - Solution
+8. Given the following pseudo-code
+// CPU Bound Code
+// takes about 300ms
+if (fork() != 0) { // Parent
+// CPU Bound Code
+// takes about 200ms
+} else {
+// Child Process
+// CPU Bound Code
+// takes about 100ms
+}
+// Both Parent and Child ends here
+Which one of the following scheduling setups allow parent process to finish before the
+child process?
+a. MLFQ with 200ms time quantum, where fork() implementation requires reading
+binary file from secondary storage.
+b. Non-preemtive FCFS, where fork() implementation requires reading binary file from
+secondary storage.
+c. Pre-emptive SRT, where fork() implementation is purely CPU bound.
+d. Pre-emptive Priority scheduling, where the child has higher priority and the fork()
+involves only CPU bound instructions.[Updated during midterm]
+e. None of the above
+ANS: b or e (alternative)
+The info about the fork() implementation is not really a red-herring. Rather, it shows the
+potential of fork() incurring an I/O (which gets the parent process blocked). We will explain
+why other options wont work briefly:
+a. By the time the parent reaches fork(), it would have lower priority (as early 300ms
+will see a demotion in priority). As the newly created child will have the highest
+priority, the parent wont secure the CPU to finish execution before the child.
+b. Parent blocked but will need to come back to running to finish fork(), which creates
+the child process. Since this is FCFS, the parent will just continue to the end,
+finishing before the child.
+c. Child has shorter remaining CPU time after fork(), so will pre-empt the parent.
+d. With pure CPU work in fork(), the parent will continue execution. However, since
+this is a pre-emptive scheduling, child with higher priority will kick out the parent,
+finishing the work before the parent.
+7 | Page
+---PAGE 8---
+CS2106 2526S2 Midterm - Solution
+Reason to accept (e):
+The two acceptable answers depends on the timing of "when the child is created fully and
+placed on ready queue".
+The intention was:
+[Parent execute fork()][Parent blocked due to file reading in fork()] [Scheduler kicks in for
+other process to run] [Parent finish file I/O, go back to queue] [Scheduler kicks in to pick
+Parent eventually][Parent completes fork()] [Child process become ready, added to ready
+queue] [Parent execute the rest of code]
+However, we accept that the timing in which child process become ready (fully created and
+added to ready queue) can be more explicit / clarified. Hence the alternative is accepted.
+8 | Page
+---PAGE 9---
+CS2106 2526S2 Midterm - Solution
+Section 2: MRQ ( Each question = 0.5 x 4 = 2 marks )
+Question 9 to 12 are multiple response question (MRQ). You need to evaluate each
+suboption given in the question to either True or False. Shade the correponding option in
+in the answer sheet. Each suboption is worth 0.5 marks.
+9. Evaluate each of the following statements regarding the overhead of Context Switch.
+Overhead refers to the time needed to perform the context switch of one process to
+the other.
+On processor with more general purpose registers, more time is needed for
+a
+context switching.
+On a platform using purely user thread implementation, the number of
+b
+threads in a process does not impact the overhead of context switch.
+c Processes with more stack frames incurs larger overhead of context switch.
+Given that process only records their parent PID, but not their child PID(s);
+d number of child processes in a process does not impact the overhead of
+context switch.
+Ans:
+a. TRUE. Register is part of the hardware context and need to be saved / restored. So,
+more reigsters == more time needed.
+b. TRUE. Kernel is not aware of thread, i.e. there is no different whether a process has
+thread or not.
+c. FALSE. Only $SP, $FP is saved regardless of size of stack region.
+d. TRUE. The clarification is given as it is possible to keep the child process IDs, then more
+child processes could mean more info to save / restore. If only fixed amount of info is
+needed, there is no difference in the context switching time.
+9 | Page
+---PAGE 10---
+CS2106 2526S2 Midterm - Solution
+10. Refer to the following OS component interaction diagram:
+Evaluate the following statements.
+When a non-system call user function is executed, interaction (B) will take
+a
+place.
+When a non-system call library call is used (e.g. a math function), interaction
+b
+(B) will take place.
+c When a system call is used, interaction (C) will take place.
+Even if the program consists only an empty main(), interaction (A) will take
+d
+place.
+Ans:
+a. b. TRUE. (B) represents instruction executions, so will be used as long as there is
+any instruction executed.
+c. TRUE. Whether the system call is “direct” (from user code go into OS kernal mode, or
+via a library wrapper, the interaction (C) is needed.
+d. (A) represent instruction execution by OS (i.e. executing some code in the kernal
+space). Even with an empty main(), certain system call, e.g., exit() will still be called.
+10 | Page
+---PAGE 11---
+CS2106 2526S2 Midterm - Solution
+11. Given the following pseudo code fragment:
+Semaphore S = 4; //S has an initial value of 4
+//each process runs the following
+Wait(S);
+// Code section A
+Signal(S);
+Evaluate the following statements:
+a There cannot be more than 4 sleeping processes waiting on S.
+At any point in time, there cannot be more than 4 processes executing in the
+b
+“Code Section A”
+c Code Section A is not a critical section.
+If there are more than 4 processes running this code fragment, the value of S
+d
+can go beyond 4 eventually.
+Ans:
+a. FALSE. You can have any number of processes waiting of S (after it’s value reaches
+0, e.g.waited four times by processes that are still working in section A).
+b. TRUE. The number of tasks in the code section A is bounded by initial semaphore
+value (as there is no free signal() in the code without a wait()).
+c. TRUE. As we can have more than 1 task in code section A, this is not a critical
+section.
+d. FALSE. There is no signal() without a wait() in this code, so the value of semaphore S
+will be bounded by initial value of 4.
+11 | Page
+---PAGE 12---
+CS2106 2526S2 Midterm - Solution
+12. Evaluate each of the following statements regarding the Inter-Process Communication.
+You should answer according to the coverage of our course.
+Message passing IPC is generally faster than shared memory IPC because it
+a
+requires fewer system calls.
+In shared memory IPC, processes must explicitly synchronize access to the
+b
+shared memory region to avoid race conditions.
+Unix pipes are unidirectional, meaning data can only flow in one direction
+c
+through a single pipe.
+Unix signals can carry large amounts of data between processes, making them
+d
+suitable for transferring files or complex data structures.
+Ans:
+a. FALSE. Shared memory only involve system call to setup at the start, while message
+passing incurs a system call for every message related operation.
+b. TRUE. We need a shared modifiable resource to have race condition and shared
+memory provides that.
+c. TRUE + FALSE. Just basic testing of how Unix pipes are setup. Update: as we use the
+term “pipes” instead of more explicitly refer to “pipe() system call as used in
+lecture”. We agree that it could be interpreted to the general pipe
+implementations which include other duplex variants.
+d. FALSE. Signals (like ctrl-c, ctrl-z, kill, etc) essentially carry no data.
+12 | Page
+---PAGE 13---
+CS2106 2526S2 Midterm - Solution
+Section 3: Short Questions ( 16 marks )
+Question 13 ( 7 marks )
+Below is the partial OS context information stored in the Process Control Block (PCB) of 3
+currently existing processes A, B and C on a system. “---” represents value not relevant to
+the question.
+PCB -- A PCB -- B PCB -- C
+Predicted 200ms Predicted 100ms Predicted 100ms
+Actual --- Actual 200ms Actual ---
+Process State Ready Process State Blocked Process State Ready
+This system uses non-preemptive shortest job first scheduling, with the following
+implementation:
+ When a Process become ready, the predicted CPU time will be calculated based on
+exponential average, i.e. Predicted = α x Actual + (1-α) x Predicted . This
+new
+predicted CPU time will be written into the Predicted field, overwritten the
+previous prediction.
+ Process will then be updated to be in “Ready” state. The Predicted will be used for
+the scheduling decision.
+ At appropriate time (see part (c) below), the Actual CPU usage will be recorded,
+facilitating the next round of prediction.
+a. Suppose Process B has just been unblocked from I/O. Give the Predicted CPU time,
+if we use α = 0.5 [1 mark]
+b. Following (a) and the implementation steps, which process will be selected for
+running? [1 mark]
+c. When should we record the Actual CPU usage? Use the given partial sentence to
+give your answer. [2 marks]
+d. If a process alternate between CPU intensive and IO intensive phases, would a
+larger or smaller α gives more accurate prediction? [1 mark]
+e. If we copy the Parent’s current Predicted as a default value for any newly created
+child process, does this disadvantage other ready processes? Why? [2 marks]
+Ans:
+a. Simply apply the formula. Predicted = 0.5 x 100ms + 0.5 x 200ms = 150ms
+b. Process C has the shortest predicted CPU {200, 150, 100}.
+13 | Page
+---PAGE 14---
+CS2106 2526S2 Midterm - Solution
+c. We should record the Actual CPU time when the process blocks.
+Further info (not needed in the answer): the elapsed time is simply current time –
+when this process gain access to CPU.
+Additional Note after marking:
+ Not credit were given if only termination is mentioned. (this missed the key
+understanding that a task will revisit the CPU multiple times, an extension of ideas
+learned later in the same lecture). If we record only upon termination, the actual
+value is not useful. If you give “upon blocking or termination” is ok, as the
+“blocking” is the correct answer.
+d. Large α. Essentially emphasize only on the actual time and pay little / no attention
+to how it behave in the past. This allows the predicted time to quickly adapt when
+the process changes phase.
+e. Yes. From the fact that the parent process is running  it has short enough
+predicted CPU time to have won the previous scheduler round  the child will gain
+the same advantage.
+Note: marks is awarded only with correct reasoning. Minor flaw in reasoning with
+correct Yes/ No will get 1 mark.
+Additional Note after marking:
+Partial credit were given for following:
+ Need additional assumptions. E.g., something of the form “if xyz happens, then
+abc will….”. In particular, answers that says “if parent’s predicted value is the
+lowest….” (this missed the point that the parent is running, i.e. it is the lowest
+among current ready tasks (as specified in the question).
+No credit for:
+ Generic statements, e.g. “SJF is biased for tasks with short running time”, “SJF
+can cause starvation etc” (question is looking for you to apply the ideas /
+concepts in a specific scenario).
+14 | Page
+---PAGE 15---
+CS2106 2526S2 Midterm - Solution
+Question 14 ( 9 marks )
+This question looks at various scenarios involving race condition and semaphore
+synchronization.
+All scenarios shares the following setup:
+//global variables
+int x = 100;
+Semaphore S1; //init value mentioned in scenario
+Semaphore S2; //init value mentioned in scenario
+All scenarios have two processes run the code A and B provided in the scenario
+concurrently.
+For each scenario, give the total number of values that x can take, the minimum and
+maximum values of x. For example, if x can take values 5, 7, 2, 3, then total = 4, min = 2,
+max = 7.
+Each scenario is worth 3 marks.
+Code A Code B
+Wait( S1 ); Wait( S1 );
+a.
+x = x + 2; x = x – 2;
+S1 initialized to 1
+x = x + 2; x = x – 2;
+Signal( S1 ); Signal( S1 );
+Code A Code B
+b. Wait( S1 ); Wait( S2 );
+S1 initialized to 0 x = x + 2; x = x – 2;
+S2 initialized to 1 x = x + 2; x = x – 2;
+Signal( S2 ); Signal( S1 );
+Code A Code B
+c. Wait( S1 ); Wait( S2 );
+S1 initialized to 1 x = x + 2; x = x – 2;
+S2 initialized to 1 x = x + 2; x = x – 2;
+Signal( S1 ); Signal( S2 );
+Ans:
+a. The codes are protected with a standard critical section. So, two sequencing
+possible: A-B, or B-A. Since A and B cancel each other out. There is only one value
+possible, total = 1, min = max = 100.
+b. The code are sequentialized, since A and B cancel each other out. total = 1, min =
+max = 100.
+15 | Page
+---PAGE 16---
+CS2106 2526S2 Midterm - Solution
+Comment (after sending the paper for printing): We could have tweaked the
+arithmetic operations a bit more to distinguish the (a) and (b) scenarios.
+Unfortunately, Uncle Soo “cleverly” chose a set of operations that cancel each
+other out, giving both the same answers (though with different behaviors).
+Opportunity missed for better questions.
+c. The code uses different semaphores, i.e. independent from each other, which
+allows the full interleaving paterns.
+Key idea for the different values:
+- In first or second iterations, A reads the value of (x=100) into register and swap
+out.
+- B perform both lines.
+- A swap in with the outdated x value.
+Depending on whether A swap after first and second increment, you can get A to
+add 2 or 4 to the original value of X  102, 104 is possible.
+Mirror image give you the pattern to generate where B uses the outdated value of x
+ 96, 98.
+Possible values of x are 96, 98, 100, 102, 104. Total = 5, min = 96, max = 104.
+~~~ End of Paper *8) ~~~
+The weird *8) is an emoji siganture that looks a bit like Uncle Soo: Short hair, spectacles,
+grin.
+16 | Page
