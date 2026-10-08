@@ -270,71 +270,322 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Target user profile**:
 
-* has a need to manage a significant number of contacts
-* prefers desktop apps over other types of applications
-* can type fast
-* prefers typing to mouse interactions
-* is reasonably comfortable using CLI apps
+* Is a dog day care centre manager 
+* Has a need to manage multiple dogs and customers 
+* Has a need to keep track of each dog’s information and schedule 
+* Has a need to keep track of every dog’s owner and their information 
+* Can type fast 
+* Prefers typing to mouse interactions 
+* Is reasonably comfortable using CLI apps
 
-**Value proposition**: Manage contacts faster than with a typical mouse-driven GUI application.
+**Value proposition**: WatchDog helps dog day care centre managers to manage and keep track of all their clients’ dogs, each of the dog’s needs and client information in a centralised application, faster than with a typical mouse-driven GUI application.
 
 
 ### User stories
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …                                    | I want to …                 | So that I can…                                                        |
-|----------|--------------------------------------------|------------------------------|------------------------------------------------------------------------|
-| `* * *`  | new user                                   | see usage instructions       | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person             |                                                                        |
-| `* * *`  | user                                       | delete a person              | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name        | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name         | locate a person easily                                                 |
-
-*{More to be added}*
+| Priority | As a/an                                                | I want to...                                                               | So that I can...                                                  |
+|----------|--------------------------------------------------------|----------------------------------------------------------------------------|-------------------------------------------------------------------|
+| `* * *`  | Dog day-care manager setting up the system             | Create a customer profile                                                  | I can store each customer’s information in one place              |
+| `* * *`  | Dog day-care manager                                   | Add customer contact information                                           | I can contact customers when necessary                            |
+| `* * *`  | Dog day-care manager                                   | Add a dog’s information to an information card                             | I can keep track of each dog’s needs                              |
+| `* * *`  | Dog day-care manager                                   | Link customer profiles to their dogs                                       | I can identify which dogs belong to each customer                 |
+| `* * *`  | Busy dog day-care manager                              | Search for a specific customer                                             | I can quickly find their information                              |
+| `* * *`  | Dog day-care manager                                   | Edit customer details                                                      | I can keep customer information up to date                        |
+| `* * *`  | Dog day-care manager                                   | Edit dog details                                                           | I can record new or changed information                           |
+| `* * *`  | Dog day-care manager                                   | Create and edit activity records                                           | I can update activities when plans change                         |
+| `* * *`  | Forgetful dog day-care manager                         | Maintain a checklist for each dog                                          | I can ensure that all required tasks are completed                |
+| `* * *`  | Dog day-care manager managing multiple dogs            | Schedule activities for customers and their dogs                           | I can keep track of upcoming activities                           |
+| `* * *`  | Dog day-care manager preparing for the day             | View all activities scheduled for a particular day                         | I know what needs to be prepared each day                         |
+| `* * *`  | Dog day-care manager                                   | View a list of dogs currently present                                      | I can monitor the dogs at the day-care centre                     |
+| `* * *`  | Dog day-care manager                                   | Record when a dog checks in and checks out                                 | I can accurately track which dogs are currently present           |
+| `* * *`  | Dog day-care manager                                   | Mark scheduled activities as completed                                     | I can keep track of which tasks have been carried out             |
+| `* * *`  | Dog day-care manager responsible for dog safety        | Record multiple emergency contacts for each dog                            | I can contact someone if the owner is unavailable                 |
+| `* * *`  | Dog day-care manager entering information              | View clear error messages when invalid information or commands are entered | I can correct mistakes without crashing the program               |
+| `* *`    | Dog day-care manager                                   | View all dogs belonging to a specific customer                             | I can see every dog owned by that customer                        |
+| `* *`    | Busy dog day-care manager                              | Filter dogs by characteristics such as size, breed, or temperament         | I can quickly find dogs with specific characteristics             |
+| `* *`    | Busy dog day-care manager                              | Filter dogs based on their required activities                             | I can identify which dogs need a particular activity              |
+| `* *`    | Dog day-care manager                                   | Add new categories or filters                                              | I can customise searches as the business changes                  |
+| `* *`    | Forgetful dog day-care manager                         | View the total number of dogs enrolled for each day                        | I can determine whether there is enough capacity for new bookings |
+| `* *`    | Dog day-care manager managing customer records         | Reassign a dog to a different customer profile                             | I can accurately record changes in ownership                      |
+| `* *`    | Unorganised dog day-care manager                       | Remove a dog from the database                                             | I can keep the database free of irrelevant information            |
+| `* *`    | Unorganised dog day-care manager                       | Remove a customer from the database                                        | I can maintain an organised list of active customers              |
+| `* *`    | Dog day-care manager                                   | Add and view recently updated pictures of dogs                             | I can easily identify each dog                                    |
+| `* *`    | Busy dog day-care manager                              | Sort the daily dog or activity list                                        | I can allocate staff more efficiently                             |
+| `* *`    | Dog day-care manager managing capacity                 | Set the maximum daily capacity for activities                              | I can prevent too many activities from being registered           |
+| `* *`    | Dog day-care manager managing schedules                | Define the operating hours of the day-care centre                          | I can ensure activities are scheduled within working hours        |
+| `* *`    | Forgetful dog day-care manager                         | Automate recurring attendance schedules                                    | I do not have to enter the same schedule repeatedly               |
+| `* *`    | Dog day-care manager                                   | Create a backup file of the database                                       | I can recover the data if it is lost                              |
+| `* *`    | Dog day-care manager                                   | Record notes or incidents for each dog                                     | I can keep track of important events during a dog’s stay          |
+| `* *`    | Dog day-care manager                                   | View a dog’s activity and attendance history                               | I can review the dog’s previous visits and care                   |
+| `* *`    | Busy dog day-care manager                              | View upcoming bookings in a calendar or list                               | I can plan staffing and resources in advance                      |
+| `*`      | New dog day-care manager                               | Access a quick-start guide                                                 | I can learn to use WatchDog quickly and confidently               |
+| `*`      | Careless dog day-care manager                          | Recover recently deleted data                                              | I can undo accidental deletions                                   |
+| `*`      | Dog day-care manager working with colleagues           | Share the database with colleagues                                         | My colleagues can also access and manage dog information          |
+| `*`      | Dog day-care manager concerned about dietary safety    | Use AI to review a dog’s diet based on its recorded information            | I can identify potential dietary concerns                         |
+| `*`      | Dog day-care manager concerned about medication safety | Use AI to review a dog’s medication based on its recorded information      | I can identify potential medication concerns                      |
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
 
-**Use case: Delete a person**
+(For all use cases below, the **System** is the 'Watchdog' and the **Actor** is the user, unless specified otherwise)
+
+**Use case: UC01 - Add Dog**
 
 **MSS**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1.  User enters the command and the dog details to add a dog.
+2.  System validates the command and dog details.
+3.  System adds the dog and displays a success message.
 
     Use case ends.
 
 **Extensions**
 
-* 2a. The list is empty.
+* 1a. User enters an invalid command format.
 
-  Use case ends.
+    * 1a1. System displays an unknown-command message.
 
-* 3a. The given index is invalid.
+      Use case resumes from step 1.
 
-    * 3a1. AddressBook shows an error message.
+* 2a. System detects invalid dog details.
 
-      Use case resumes at step 2.
+    * 2a1. System requests for correct details.
 
-*{More to be added}*
+      Use case resumes from step 1.
+
+
+
+**Use case: UC02 - View Dog**
+
+**MSS**
+
+1.  User requests to list dogs.
+2.  System shows a list of dogs.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+
+
+**Use case: UC03 - Edit Dog**
+
+**MSS**
+
+1.  User requests to <ins>list dogs (UC03)</ins>.
+2.  User enters the command, dog details and the dog id for the dog to be edited.
+3.  System validates the command, dog details and dog id.
+4.  System edits the dog and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+* 2a. System detects invalid dog details.
+
+    * 2a1. System requests the correct details.
+
+      Use case resumes from step 2.
+
+* 2b. System cannot find the specified dog id.
+
+    * 2b1. System requests for an existing dog id.
+
+      Use case resumes from step 2.
+
+
+
+**Use case: UC04 - Delete Dog**
+
+**MSS**
+
+1.  User requests to <ins>list dogs (UC03)</ins>.
+2.  User enters the command and the dog id for the dog to be deleted.
+3.  System validates the command and dog id.
+4.  System deletes the dog and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+* 2a. System cannot find the specified dog id.
+
+    * 2a1. System requests for an existing dog id.
+
+      Use case resumes from step 2.
+
+
+
+**Use case: UC05 - Add Customer**
+
+**MSS**
+
+1.  User enters the command and the customer details to add a customer.
+2.  System validates the command and customer details.
+3.  System adds the customer and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+* 2a. System detects invalid customer details.
+
+    * 2a1. System requests for correct details.
+
+      Use case resumes from step 1.
+
+
+
+**Use case: UC06 - View Customer**
+
+**MSS**
+
+1.  User requests to list customers.
+2.  System shows a list of customers.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+
+
+**Use case: UC07 - Edit Customer**
+
+**MSS**
+
+1.  User requests to <ins>list customers (UC06)</ins>.
+2.  User enters the command, customer details and the customer id for the customer to be edited.
+3.  System validates the command, customer details and customer id.
+4.  System edits the customer and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+* 2a. System detects invalid customer details.
+
+    * 2a1. System requests the correct details.
+
+      Use case resumes from step 2.
+
+* 2b. System cannot find the specified customer id.
+
+    * 2b1. System requests for an existing customer id.
+
+      Use case resumes from step 2.
+
+
+
+**Use case: UC08 - Delete Customer**
+
+**MSS**
+
+1.  User requests to <ins>list customers (UC06)</ins>.
+2.  User enters the command and the customer id for the customer to be deleted.
+3.  System validates the command and customer id.
+4.  System deletes the customer and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an invalid command format.
+
+    * 1a1. System displays an unknown-command message.
+
+      Use case resumes from step 1.
+
+* 2a. System cannot find the specified customer id.
+
+    * 2a1. System requests for an existing customer id.
+
+      Use case resumes from step 2.
+
+
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+NFR-01. **Platform compatibility**: Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
 
-*{More to be added}*
+NFR-02. **Offline operation**: After installation and setup, all core dog and customer management operations shall work without an internet connection.
+
+NFR-03. **Performance**: With up to 500 dog records and 500 customer records, WatchDog shall display the result of an add, edit, delete, list or search command within 2 seconds of submission on the agreed test laptop.
+
+NFR-04. **Startup time**: With the same dataset, WatchDog shall load its saved records and become ready to accept commands within 10 seconds of launch on the agreed test laptop.
+
+NFR-05. **Keyboard usability**: After launch, users shall be able to perform all core dog and customer management operations using the keyboard without requiring mouse interaction.
+
+NFR-06. **Typing efficiency**: A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+
+NFR-07. **Error clarity**: For invalid command syntax, missing required fields or invalid field values, WatchDog shall display an English error message identifying the problem and providing the expected format or accepted values.
+
+NFR-08. **Robustness**: An invalid command or an input that fails validation shall not terminate the application or change existing records. The application shall remain ready to accept the next command.
+
+NFR-09. **Data persistence**: Following successful data changes and a normal application exit, WatchDog shall restore the updated dog records, customer records and their associations when reopened.
+
+NFR-10. **Privacy**: WatchDog shall store dog and customer records locally and shall not transmit their contents to external services.
 
 ### Glossary
 
-* **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
+* **WatchDog**: The application used to manage a dog daycare centre's customer and dog information.
+* **User**: The person operating WatchDog, primarily the dog daycare manager.
+* **Customer**: A person whose contact details are recorded because they use the daycare's services for their dog or dogs.
+* **Dog record**: The information stored about an individual dog, including its ID, name, breed and size.
+* **Customer record**: The information stored about a customer, including their ID, name, primary contact number, email and backup contact number.
+* **Dog ID**: A unique integer assigned by WatchDog to identify a dog record. Dogs with the same name are distinguished by their IDs.
+* **Customer ID**: A unique integer assigned by WatchDog to identify a customer record. Customers with the same name are distinguished by their IDs.
+* **List index**: A record's position in the currently displayed list. Unlike a record ID, this position may change when the list is filtered or reordered.
+* **Dog-customer association**: The recorded relationship indicating which customer owns a dog.
+* **Primary contact number**: The customer's main telephone number, used as the first contact option.
+* **Backup contact number**: An alternative telephone number used when the customer cannot be reached through their primary number.
+* **Breed**: The recorded breed or breed mix of a dog, such as Chihuahua, Shiba Inu or a mixed breed.
+* **Dog size**: The dog's recorded size category: small, medium, large or giant, according to the size chart adopted by the team.
+* **Scheduled attendance**: A planned visit by a dog to the daycare. A scheduled dog is not necessarily currently present.
+* **Check-in / Check-out**: Recording a dog's arrival at or departure from the daycare.
+* **Present dog**: A dog that has checked in and has not yet checked out.
+* **Activity**: A care task planned for a dog, such as feeding, grooming or exercise.
+* **Checklist**: A list of a dog's activities with an indication of which have been completed.
+* **Aggressiveness**: Recorded tendency to show threatening or potentially harmful behaviour towards humans or other dogs, including any known triggers.
+* **Temperament**: A dog's usual behavioural tendencies, such as being calm, shy or friendly. This is broader than aggressiveness.
+* **Care instructions**: Recorded directions for looking after a particular dog, including feeding, exercise and special precautions.
 
 --------------------------------------------------------------------------------------------------------------------
 

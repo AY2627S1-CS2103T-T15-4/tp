@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.person.Person;
 
@@ -13,6 +14,8 @@ import seedu.address.model.person.Person;
 public interface Model {
     /** {@code Predicate} that always evaluates to true */
     Predicate<Person> PREDICATE_SHOW_ALL_PERSONS = unused -> true;
+
+    Predicate<Customer> PREDICATE_SHOW_ALL_CUSTOMERS = unused -> true;
 
     /**
      * Returns the user prefs.
@@ -67,6 +70,10 @@ public interface Model {
     default ObservableList<Dog> getDogList() {
         return getAddressBook().getDogList();
     }
+
+    ObservableList<Customer> getFilteredCustomerList();
+
+    void updateFilteredCustomerList(Predicate<Customer> predicate);
 
     /**
      * Updates the filter of the filtered person list to filter by the given {@code predicate}.

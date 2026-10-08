@@ -6,6 +6,7 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * Helper functions for handling strings.
@@ -36,6 +37,24 @@ public class StringUtil {
 
         return Arrays.stream(wordsInPreppedSentence)
                 .anyMatch(preppedWord::equalsIgnoreCase);
+    }
+
+    /**
+     * Returns true if {@code text} contains {@code query}, ignoring case using locale-independent lowercasing.
+     * Leading and trailing whitespace in the query is ignored; internal whitespace is matched literally.
+     *
+     * @throws NullPointerException if either argument is null.
+     * @throws IllegalArgumentException if the query is blank.
+     */
+    public static boolean containsSubstringIgnoreCase(String text, String query) {
+        requireNonNull(text);
+        requireNonNull(query);
+
+        String trimmedQuery = query.strip();
+        checkArgument(!trimmedQuery.isEmpty(), "Query cannot be blank");
+
+        return text.toLowerCase(Locale.ROOT)
+                .contains(trimmedQuery.toLowerCase(Locale.ROOT));
     }
 
     /**

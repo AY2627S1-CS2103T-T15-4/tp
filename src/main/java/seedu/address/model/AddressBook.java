@@ -3,10 +3,13 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import java.util.Objects;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.model.customer.Customer;
+import seedu.address.model.customer.UniqueCustomerList;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
@@ -19,6 +22,7 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     private final UniquePersonList persons = new UniquePersonList();
     private final ObservableList<Dog> dogs = FXCollections.observableArrayList();
+    private final UniqueCustomerList customers = new UniqueCustomerList();
 
     public AddressBook() {}
 
@@ -48,6 +52,11 @@ public class AddressBook implements ReadOnlyAddressBook {
 
         setPersons(newData.getPersonList());
         dogs.setAll(newData.getDogList());
+        setCustomers(newData.getCustomerList());
+    }
+
+    public void setCustomers(List<Customer> customers) {
+        this.customers.setCustomers(customers);
     }
 
     //// person-level operations
@@ -87,12 +96,24 @@ public class AddressBook implements ReadOnlyAddressBook {
         persons.remove(key);
     }
 
+    /** Returns true if a customer with the same identity as {@code customer} exists. */
+    public boolean hasCustomer(Customer customer) {
+        requireNonNull(customer);
+        return customers.contains(customer);
+    }
+
+    /** Adds the given customer to the address book. */
+    public void addCustomer(Customer customer) {
+        customers.add(customer);
+    }
+
     //// util methods
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .add("persons", persons)
+                .add("customers", customers)
                 .toString();
     }
 
@@ -107,6 +128,11 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     @Override
+    public ObservableList<Customer> getCustomerList() {
+        return customers.asUnmodifiableObservableList();
+    }
+
+    @Override
     public boolean equals(Object other) {
         if (other == this) {
             return true;
@@ -117,11 +143,13 @@ public class AddressBook implements ReadOnlyAddressBook {
             return false;
         }
 
-        return persons.equals(otherAddressBook.persons);
+        return persons.equals(otherAddressBook.persons)
+                && dogs.equals(otherAddressBook.dogs)
+                && customers.equals(otherAddressBook.customers);
     }
 
     @Override
     public int hashCode() {
-        return persons.hashCode();
+        return Objects.hash(persons, dogs, customers);
     }
 }
