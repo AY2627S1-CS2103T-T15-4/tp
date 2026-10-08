@@ -5,10 +5,12 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 import java.util.Objects;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.UniqueCustomerList;
+import seedu.address.model.dog.Dog;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
 
@@ -19,6 +21,7 @@ import seedu.address.model.person.UniquePersonList;
 public class AddressBook implements ReadOnlyAddressBook {
 
     private final UniquePersonList persons = new UniquePersonList();
+    private final ObservableList<Dog> dogs = FXCollections.observableArrayList();
     private final UniqueCustomerList customers = new UniqueCustomerList();
 
     public AddressBook() {}
@@ -48,13 +51,10 @@ public class AddressBook implements ReadOnlyAddressBook {
         requireNonNull(newData);
 
         setPersons(newData.getPersonList());
+        dogs.setAll(newData.getDogList());
         setCustomers(newData.getCustomerList());
     }
 
-    /**
-     * Replaces the contents of the customer list with {@code customers}.
-     * {@code customers} must not contain duplicate customers.
-     */
     public void setCustomers(List<Customer> customers) {
         this.customers.setCustomers(customers);
     }
@@ -96,18 +96,13 @@ public class AddressBook implements ReadOnlyAddressBook {
         persons.remove(key);
     }
 
-    /**
-     * Returns true if a customer with the same id as {@code customer} exists in the address book.
-     */
+    /** Returns true if a customer with the same identity as {@code customer} exists. */
     public boolean hasCustomer(Customer customer) {
         requireNonNull(customer);
         return customers.contains(customer);
     }
 
-    /**
-     * Adds a customer to the address book.
-     * The customer must not already exist in the address book.
-     */
+    /** Adds the given customer to the address book. */
     public void addCustomer(Customer customer) {
         customers.add(customer);
     }
@@ -128,6 +123,11 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     @Override
+    public ObservableList<Dog> getDogList() {
+        return FXCollections.unmodifiableObservableList(dogs);
+    }
+
+    @Override
     public ObservableList<Customer> getCustomerList() {
         return customers.asUnmodifiableObservableList();
     }
@@ -144,11 +144,12 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
 
         return persons.equals(otherAddressBook.persons)
+                && dogs.equals(otherAddressBook.dogs)
                 && customers.equals(otherAddressBook.customers);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(persons, customers);
+        return Objects.hash(persons, dogs, customers);
     }
 }
