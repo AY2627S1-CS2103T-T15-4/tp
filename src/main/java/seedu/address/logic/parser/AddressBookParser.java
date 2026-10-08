@@ -29,6 +29,7 @@ public class AddressBookParser {
      * Used for initial separation of command word and args.
      */
     private static final Pattern BASIC_COMMAND_FORMAT = Pattern.compile("(?<commandWord>\\S+)(?<arguments>.*)");
+    private static final Pattern LIST_DOG_COMMAND_FORMAT = Pattern.compile("list\\s+dog");
     private static final Logger logger = LogsCenter.getLogger(AddressBookParser.class);
 
     /**
@@ -39,7 +40,7 @@ public class AddressBookParser {
      * @throws ParseException if the user input does not conform to the expected format
      */
     public Command parseCommand(String userInput) throws ParseException {
-        if (userInput.trim().equals(ListDogCommand.COMMAND_WORD)) {
+        if (LIST_DOG_COMMAND_FORMAT.matcher(userInput.trim()).matches()) {
             return new ListDogCommand();
         }
         final Matcher matcher = BASIC_COMMAND_FORMAT.matcher(userInput.trim());
