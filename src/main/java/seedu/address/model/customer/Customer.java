@@ -14,16 +14,16 @@ import seedu.address.commons.util.ToStringBuilder;
 public class Customer {
 
     private final int id;
-    private final String name;
-    private final String phone;
-    private final String email;
-    private final String backupContact;
+    private final Name name;
+    private final Phone phone;
+    private final Email email;
+    private final BackupContact backupContact;
 
     /**
      * Every field must be present and not null. {@code id} must be nonnegative.
      * Name, phone, email, and backup contact are stored as given, including internal spaces and letter case.
      */
-    public Customer(int id, String name, String phone, String email, String backupContact) {
+    public Customer(int id, Name name, Phone phone, Email email, BackupContact backupContact) {
         requireAllNonNull(name, phone, email, backupContact);
         checkArgument(id >= 0, "Customer id must be nonnegative.");
         this.id = id;
@@ -37,19 +37,19 @@ public class Customer {
         return id;
     }
 
-    public String getName() {
+    public Name getName() {
         return name;
     }
 
-    public String getPhone() {
+    public Phone getPhone() {
         return phone;
     }
 
-    public String getEmail() {
+    public Email getEmail() {
         return email;
     }
 
-    public String getBackupContact() {
+    public BackupContact getBackupContact() {
         return backupContact;
     }
 

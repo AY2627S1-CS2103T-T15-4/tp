@@ -64,6 +64,28 @@ public interface Model {
      */
     void setPerson(Person target, Person editedPerson);
 
+
+    boolean hasCustomer(Customer customer);
+
+    /**
+     * Deletes the given customer.
+     * The customer must exist in the address book.
+     */
+    void deleteCustomer(Customer customer);
+
+    /**
+     * Adds the given customer.
+     * {@code customer} must not already exist in the address book.
+     */
+    void addCustomer(Customer customer);
+
+    /**
+     * Replaces the given customer {@code target} with {@code editedCustomer}.
+     * {@code target} must exist in the address book.
+     * The person identity of {@code editedCustomer} must not be the same as another existing customer in the address book.
+     */
+    void setCustomer(Customer target, Customer editedCustomer);
+
     /** Returns an unmodifiable view of the filtered person list */
     ObservableList<Person> getFilteredPersonList();
 

@@ -27,7 +27,7 @@ public class AddCustomerCommand extends Command{
 
     @Override
     public CommandResult execute(Model model) {
-        return new CommandResult("Hello from remark");
+        return new CommandResult("Hello from AddCustomer");
     }
 
 }

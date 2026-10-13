@@ -9,6 +9,9 @@ import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.model.customer.exceptions.DuplicateCustomerException;
+import seedu.address.model.person.Person;
+import seedu.address.model.person.exceptions.DuplicatePersonException;
+import seedu.address.model.person.exceptions.PersonNotFoundException;
 
 /**
  * A list of customers that enforces uniqueness between its elements and does not allow nulls.
@@ -40,6 +43,37 @@ public class UniqueCustomerList implements Iterable<Customer> {
             throw new DuplicateCustomerException();
         }
         internalList.add(toAdd);
+    }
+
+    /**
+     * Replaces the customer {@code target} in the list with {@code editedCustomer}.
+     * {@code target} must exist in the list.
+     * The customer identity of {@code editedCustomer} must not be the same as another existing customer in the list.
+     */
+    public void setCustomer(Customer target, Customer editedCustomer) {
+        requireAllNonNull(target, editedCustomer);
+
+        int index = internalList.indexOf(target);
+        if (index == -1) {
+            throw new PersonNotFoundException();
+        }
+
+        if (!target.isSameCustomer(editedCustomer) && contains(editedCustomer)) {
+            throw new DuplicateCustomerException();
+        }
+
+        internalList.set(index, editedCustomer);
+    }
+
+    /**
+     * Removes the equivalent customer from the list.
+     * The customer must exist in the list.
+     */
+    public void remove(Customer toRemove) {
+        requireNonNull(toRemove);
+        if (!internalList.remove(toRemove)) {
+            throw new PersonNotFoundException();
+        }
     }
 
     /**

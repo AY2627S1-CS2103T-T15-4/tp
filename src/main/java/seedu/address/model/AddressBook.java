@@ -107,6 +107,20 @@ public class AddressBook implements ReadOnlyAddressBook {
         customers.add(customer);
     }
 
+    public void setCustomer(Customer target, Customer editedCustomer) {
+        requireNonNull(editedCustomer);
+
+        customers.setCustomer(target, editedCustomer);
+    }
+
+    /**
+     * Removes {@code key} from this {@code AddressBook}.
+     * {@code key} must exist in the address book.
+     */
+    public void removeCustomer(Customer key) {
+        customers.remove(key);
+    }
+
     //// util methods
 
     @Override
