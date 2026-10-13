@@ -107,6 +107,10 @@ public class AddressBook implements ReadOnlyAddressBook {
         customers.add(customer);
     }
 
+    public void addDog(Dog dog){
+        dogs.add(dog);
+    }
+
     //// util methods
 
     @Override

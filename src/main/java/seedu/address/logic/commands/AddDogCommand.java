@@ -17,7 +17,7 @@ import seedu.address.model.person.Person;
  */
 public class AddDogCommand extends Command {
 
-    public static final String COMMAND_WORD = "add";
+    public static final String COMMAND_WORD = "add dog";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a dog to WatchDog! "
             + "Parameters: "

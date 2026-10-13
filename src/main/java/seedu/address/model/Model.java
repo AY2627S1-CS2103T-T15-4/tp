@@ -17,6 +17,8 @@ public interface Model {
 
     Predicate<Customer> PREDICATE_SHOW_ALL_CUSTOMERS = unused -> true;
 
+    Predicate<Dog> PREDICATE_SHOW_ALL_DOGS = unused -> true;
+
     /**
      * Returns the user prefs.
      */
@@ -80,4 +82,7 @@ public interface Model {
      * @throws NullPointerException if {@code predicate} is null.
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
+
+    void addDog(Dog dog);
+    void hasDog(Dog dog);
 }

@@ -3,6 +3,7 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.io.File;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -24,6 +25,7 @@ public class ModelManager implements Model {
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
     private final FilteredList<Customer> filteredCustomers;
+    private final FilteredList<Dog> filteredDogs;
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
@@ -37,6 +39,7 @@ public class ModelManager implements Model {
         this.userPrefs = new UserPrefs(userPrefs);
         filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
         filteredCustomers = new FilteredList<>(this.addressBook.getCustomerList());
+        filteredDogs = new FilteredList<>(this.addressBook.getDogList());
     }
 
     public ModelManager() {
@@ -95,6 +98,18 @@ public class ModelManager implements Model {
         requireAllNonNull(target, editedPerson);
 
         addressBook.setPerson(target, editedPerson);
+    }
+
+    //=========== Dog Operations =============================================================================
+    @Override
+    public void hasDog(Dog dog){
+        addressBook.addDog(dog);
+        update
+    }
+
+    @Override
+    public Dog addDog(Dog dog){
+        
     }
 
     //=========== Filtered Person List Accessors =============================================================

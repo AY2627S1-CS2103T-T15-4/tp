@@ -5,7 +5,7 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 
 /**
  * Represents a Person's name in the address book.
- * Guarantees: immutable; is valid as declared in {@link #isValidName(String)}
+ * Guarantees: immutable; is valid as declared in {@link #isValidSize(String)}
  */
 public class Size {
 
@@ -27,14 +27,14 @@ public class Size {
      */
     public Size(String sizeInput) {
         requireNonNull(sizeInput);
-        checkArgument(isValidName(sizeInput), MESSAGE_CONSTRAINTS);
+        checkArgument(isValidSize(sizeInput), MESSAGE_CONSTRAINTS);
         size = sizeInput;
     }
 
     /**
      * Returns true if a given string is a valid name.
      */
-    public static boolean isValidName(String test) {
+    public static boolean isValidSize(String test) {
         return test.matches(SIZE_REGEX);
     }
 

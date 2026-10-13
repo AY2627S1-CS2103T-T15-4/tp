@@ -4,8 +4,8 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
 /**
- * Represents a Person's name in the address book.
- * Guarantees: immutable; is valid as declared in {@link #isValidName(String)}
+ * Represents a Dog's breed in the address book.
+ * Guarantees: immutable; is valid as declared in {@link #isValidBreed(String)}
  */
 public class Breed {
 
@@ -27,14 +27,14 @@ public class Breed {
      */
     public Breed(String breedInput) {
         requireNonNull(breedInput);
-        checkArgument(isValidName(breedInput), MESSAGE_CONSTRAINTS);
+        checkArgument(isValidBreed(breedInput), MESSAGE_CONSTRAINTS);
         breed = breedInput;
     }
 
     /**
      * Returns true if a given string is a valid name.
      */
-    public static boolean isValidName(String test) {
+    public static boolean isValidBreed(String test) {
         return test.matches(VALIDATION_REGEX);
     }
 

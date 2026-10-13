@@ -12,6 +12,7 @@ import seedu.address.commons.util.ToStringBuilder;
  */
 public class Dog {
 
+    private final int id;
     private final DogName name;
     private final Breed breed;
     private final Size size;
@@ -23,11 +24,33 @@ public class Dog {
      * @param breed breed of the dog
      * @param size size of the dog
      */
-    public Dog(DogName name, Breed breed, Size size) {
+    public Dog(int id, DogName name, Breed breed, Size size) {
         requireAllNonNull(name, breed, size);
+        if (id < 0) {
+            throw new IllegalArgumentException("Dog id must be nonnegative.");
+        }
+        this.id = id;
         this.name = name;
         this.breed = breed;
         this.size = size;
+    }
+
+
+    /**
+     * Creates a dog without an assigned persistent ID.
+     * This constructor is retained temporarily for existing parser/tests;
+     * new dogs should receive their ID through the model/address book.
+     */
+    public Dog(DogName name, Breed breed, Size size) {
+        requireAllNonNull(name, breed, size);
+        this.id = -1; //unassigned id
+        this.name = name;
+        this.breed = breed;
+        this.size = size;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public DogName getName() {
@@ -43,14 +66,14 @@ public class Dog {
     }
 
     /**
-     * Returns true if both dogs have the same name.
+     * Returns true if both dogs have the same ID.
      * This defines a weaker notion of equality between two dogs.
      */
     public boolean isSameDog(Dog otherDog) {
         if (otherDog == this) {
             return true;
         }
-        return otherDog != null && otherDog.getName().equals(getName());
+        return otherDog != null && otherDog.getId() == getId();
     }
 
     /**
@@ -65,19 +88,22 @@ public class Dog {
         if (!(other instanceof Dog otherDog)) {
             return false;
         }
-        return name.equals(otherDog.name)
+        return id != -1
+                && id == otherDog.id
+                && name.equals(otherDog.name)
                 && breed.equals(otherDog.breed)
                 && size.equals(otherDog.size);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, breed, size);
+        return Objects.hash(id, name, breed, size);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .add("id", id)
                 .add("name", name)
                 .add("breed", breed)
                 .add("size", size)
