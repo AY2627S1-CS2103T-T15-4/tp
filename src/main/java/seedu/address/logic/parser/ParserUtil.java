@@ -125,6 +125,12 @@ public class ParserUtil {
         return tagSet;
     }
 
+    /**
+     * Parses a string into a {@code DogName}.
+     * Leading and trailing whitespace is trimmed.
+     *
+     * @throws ParseException if the given name is invalid
+     */
     public static DogName parseDogName(String name) throws ParseException {
         requireNonNull(name);
         String trimmedName = name.trim();
@@ -134,6 +140,12 @@ public class ParserUtil {
         return new DogName(trimmedName);
     }
 
+    /**
+     * Parses a string into a {@code Breed}.
+     * Leading and trailing whitespace is trimmed.
+     *
+     * @throws ParseException if the given breed is invalid
+     */
     public static Breed parseBreed(String breed) throws ParseException {
         requireNonNull(breed);
         String trimmedBreed = breed.trim();
@@ -143,6 +155,12 @@ public class ParserUtil {
         return new Breed(trimmedBreed);
     }
 
+    /**
+     * Parses a string into a {@code Size}.
+     * Leading and trailing whitespace is trimmed.
+     *
+     * @throws ParseException if the given size is invalid
+     */
     public static Size parseSize(String size) throws ParseException {
         requireNonNull(size);
         String trimmedSize = size.trim();

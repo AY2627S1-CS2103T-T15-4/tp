@@ -1,8 +1,8 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_BREED;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_SIZE;
 
 import seedu.address.commons.util.ToStringBuilder;
@@ -24,7 +24,7 @@ public class AddDogCommand extends Command {
             + "Example: " + COMMAND_WORD + " "
             + PREFIX_NAME + "Cookie "
             + PREFIX_BREED + "Golden Retriever "
-            + PREFIX_SIZE+ "Large";
+            + PREFIX_SIZE + "Large";
 
     public static final String MESSAGE_SUCCESS = "New dog added: %1$s";
     public static final String MESSAGE_DUPLICATE_DOG = "This dog already exists.";
