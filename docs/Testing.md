@@ -31,9 +31,9 @@ You can run tests in two ways.
 
 ## Types of tests
 
-`RecordListPanelTest` and `MainWindowTest` exercise JavaFX card rendering and filter updates.
-They require a graphical display. On headless Linux, run them with `xvfb-run -a ./gradlew check coverage`;
-without a display, these UI tests are skipped. The GitHub Linux coverage job uses Xvfb.
+`RecordListPanelTest` exercises JavaFX card rendering and live list updates. It requires a graphical
+display. On headless Linux, run it with `xvfb-run ./gradlew test --tests seedu.address.ui.RecordListPanelTest`
+when Xvfb is installed; otherwise these UI tests are skipped. The remaining tests do not require Xvfb.
 
 This project has three types of tests:
 
