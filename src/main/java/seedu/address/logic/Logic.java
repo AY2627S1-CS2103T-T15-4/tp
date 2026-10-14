@@ -6,6 +6,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.customer.Customer;
+import seedu.address.model.dog.Dog;
 import seedu.address.model.person.Person;
 
 /**
@@ -26,6 +27,9 @@ public interface Logic {
 
     /** Returns an unmodifiable view of the filtered list of customers */
     ObservableList<Customer> getFilteredCustomerList();
+
+    /** Returns an unmodifiable observable view of all dogs. */
+    ObservableList<Dog> getDogList();
 
     /**
      * Returns the user prefs' GUI settings.
