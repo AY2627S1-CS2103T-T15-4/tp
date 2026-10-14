@@ -13,6 +13,8 @@ public class ListDogCommand extends Command {
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
+        model.updateFilteredCustomerList(customer -> false);
+        model.updateFilteredDogList(dog -> true);
         if (model.getDogList().isEmpty()) {
             return new CommandResult(MESSAGE_EMPTY);
         }

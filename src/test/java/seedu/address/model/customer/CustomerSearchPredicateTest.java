@@ -1,0 +1,50 @@
+package seedu.address.model.customer;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+
+public class CustomerSearchPredicateTest {
+    private final Customer customer = new Customer(42, "Little Buddy", "91234567", "buddy@example.com", "98765432");
+
+    @Test
+    public void test_matchesOnlyChosenField() {
+        assertTrue(new CustomerSearchPredicate(" BUD ").test(customer));
+        assertTrue(new CustomerSearchPredicate("little bud").test(customer));
+        assertFalse(new CustomerSearchPredicate("91234567").test(customer));
+        assertFalse(new CustomerSearchPredicate("42").test(customer));
+        assertTrue(new CustomerSearchPredicate(42).test(customer));
+        assertFalse(new CustomerSearchPredicate(4).test(customer));
+    }
+
+    @Test
+    public void constructor_invalidQuery_throwsException() {
+        assertThrows(NullPointerException.class, () -> new CustomerSearchPredicate(null));
+        assertThrows(IllegalArgumentException.class, () -> new CustomerSearchPredicate("  "));
+        assertThrows(IllegalArgumentException.class, () -> new CustomerSearchPredicate(-1));
+    }
+
+    @Test
+    public void test_nullCustomer_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new CustomerSearchPredicate("Buddy").test(null));
+    }
+
+    @Test
+    public void equals_comparesSearchFieldAndValue() {
+        CustomerSearchPredicate predicate = new CustomerSearchPredicate("Buddy");
+        assertEquals(predicate, predicate);
+        assertEquals(predicate, new CustomerSearchPredicate("Buddy"));
+        assertEquals(predicate.hashCode(), new CustomerSearchPredicate("Buddy").hashCode());
+        assertEquals(new CustomerSearchPredicate(42), new CustomerSearchPredicate(42));
+        assertEquals(new CustomerSearchPredicate(42).hashCode(), new CustomerSearchPredicate(42).hashCode());
+        assertNotEquals(predicate, new CustomerSearchPredicate("Max"));
+        assertFalse(new CustomerSearchPredicate("42").equals(new CustomerSearchPredicate(42)));
+        assertFalse(new CustomerSearchPredicate(42).equals(new CustomerSearchPredicate(4)));
+        assertFalse(new CustomerSearchPredicate(42).equals(null));
+        assertNotEquals(predicate, new Object());
+    }
+}

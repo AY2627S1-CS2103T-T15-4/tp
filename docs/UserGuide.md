@@ -130,6 +130,62 @@ Examples:
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
 
+### Searching customers and dogs together: `search`
+
+Format: `search n/NAME_QUERY` or `search id/ID`
+
+* Searches all customers and dogs using the same name and ID rules as category-specific searches below.
+* Use exactly one field. Names match a case-insensitive substring; IDs must be integers from
+  `0` to `2147483647`. Blank, repeated, combined and unknown fields are rejected.
+* Matching customer cards appear first, followed by matching dog cards. The result bar shows both counts.
+* Customer and dog IDs are independent. `search id/0` can show both a customer and a dog with ID 0.
+* Each search replaces both displayed filters without changing stored records. No matches clears the panel.
+* Use `search customer ...` or `search dog ...` to narrow the next search to a category.
+
+Examples: `search n/alex`, `search id/42`.
+
+### Searching dogs: `search dog`
+
+Shows matching dogs as cards in the main panel, including their persistent IDs.
+The result bar shows the number of matches.
+
+Format: `search dog n/NAME_QUERY` or `search dog id/ID`
+
+* Use exactly one field: `n/` for a name or `id/` for an ID. Blank values, repeated fields,
+  unknown prefixes, and combining both fields are rejected with usage instructions.
+* Name matching ignores case and accepts partial names. For example, `search dog n/bud`
+  matches both `Buddy` and `Little Bud`. Dogs with the same name are all returned.
+* Multiple words form one substring, not separate keywords: `n/little bud` matches
+  `Little Buddy`. Spaces inside the query are matched literally; surrounding whitespace is ignored.
+* IDs are persistent record IDs, not positions in a displayed list. Use a whole number from
+  `0` to `2147483647`, without a sign. Leading zeros are accepted.
+* A valid search with no matches reports `0 dogs found.` and clears the card panel.
+* Each search examines all stored dogs and displays only matching dog cards. Stored records are unchanged.
+* Use `list dog` to show all dogs again.
+
+Examples:
+
+* `search dog n/bud`
+* `search dog n/Little Buddy`
+* `search dog id/0`
+
+### Searching customers: `search customer`
+
+Shows matching customers as cards in the main panel. The result bar shows the match count.
+
+Format: `search customer n/NAME_QUERY` or `search customer id/ID`
+
+* Use exactly one field. Blank values, repeated fields, unknown prefixes and combined fields are rejected.
+* Names match a case-insensitive substring. Multiple words form one phrase, with internal spaces matched literally.
+  For example, `search customer n/alex` matches both `Alex Tan` and `Alexandra Lim`.
+* All customers with matching names are shown, even when they share a name.
+* IDs are persistent customer IDs, not card positions. Use an integer from `0` to `2147483647`.
+* Each search considers all stored customers. No matches clears the panel and reports `0 customers found.`.
+* Search hides dog cards without deleting records. Use `list customer` to restore all customer cards,
+  or `search dog` / `list dog` to display dogs again.
+
+Examples: `search customer n/Alex Tan`, `search customer id/42`.
+
 ### Deleting a person: `delete`
 
 Deletes the specified person from the address book.
@@ -207,5 +263,8 @@ Action     | Format, Examples
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Search all** | `search n/NAME_QUERY` or `search id/ID`<br> e.g., `search n/alex`
+**Search customers** | `search customer n/NAME_QUERY` or `search customer id/ID`<br> e.g., `search customer n/alex`
+**Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
 **List**   | `list`
 **Help**   | `help`
