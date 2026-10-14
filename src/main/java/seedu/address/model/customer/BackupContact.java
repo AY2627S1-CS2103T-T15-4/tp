@@ -44,11 +44,11 @@ public class BackupContact {
         }
 
         // instanceof handles nulls
-        if (!(other instanceof Phone otherPhone)) {
+        if (!(other instanceof BackupContact otherBackupContact)) {
             return false;
         }
 
-        return value.equals(otherPhone.value);
+        return value.equals(otherBackupContact.value);
     }
 
     @Override

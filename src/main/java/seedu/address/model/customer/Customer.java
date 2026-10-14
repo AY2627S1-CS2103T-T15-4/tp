@@ -33,6 +33,19 @@ public class Customer {
         this.backupContact = backupContact;
     }
 
+    /**
+     * Constructs a customer from raw field values.
+     *
+     * @param id A nonnegative customer identifier.
+     * @param name A valid customer name.
+     * @param phone A valid primary phone number.
+     * @param email A valid email address.
+     * @param backupContact A valid backup phone number.
+     */
+    public Customer(int id, String name, String phone, String email, String backupContact) {
+        this(id, new Name(name), new Phone(phone), new Email(email), new BackupContact(backupContact));
+    }
+
     public int getId() {
         return id;
     }

@@ -49,7 +49,7 @@ public class Name {
         }
 
         // instanceof handles nulls
-        if (!(other instanceof seedu.address.model.person.Name otherName)) {
+        if (!(other instanceof Name otherName)) {
             return false;
         }
 
