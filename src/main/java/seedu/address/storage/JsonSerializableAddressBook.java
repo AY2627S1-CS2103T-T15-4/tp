@@ -12,6 +12,7 @@ import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.customer.Customer;
+import seedu.address.model.dog.Dog;
 import seedu.address.model.person.Person;
 
 /**
@@ -22,20 +23,28 @@ class JsonSerializableAddressBook {
 
     public static final String MESSAGE_DUPLICATE_PERSON = "Persons list contains duplicate person(s).";
     public static final String MESSAGE_DUPLICATE_CUSTOMER = "Customers list contains duplicate customer(s).";
+    public static final String MESSAGE_DUPLICATE_DOG = "Dog list contains duplicate dog(s).";
 
     private final List<JsonAdaptedPerson> persons = new ArrayList<>();
     private final List<JsonAdaptedCustomer> customers = new ArrayList<>();
-
-    /**
-     * Constructs a {@code JsonSerializableAddressBook} with the given persons and customers.
-     */
+    private final List<JsonAdaptedDog> dogs = new ArrayList<>();
+    private final Integer nextDogId;
+    /** Constructs a serializable address book from JSON fields. */
     @JsonCreator
     public JsonSerializableAddressBook(@JsonProperty("persons") List<JsonAdaptedPerson> persons,
-            @JsonProperty("customers") List<JsonAdaptedCustomer> customers) {
-        this.persons.addAll(persons);
+            @JsonProperty("customers") List<JsonAdaptedCustomer> customers,
+            @JsonProperty("dogs") List<JsonAdaptedDog> dogs,
+            @JsonProperty("nextDogId") Integer nextDogId) {
+        if (persons != null) {
+            this.persons.addAll(persons);
+        }
         if (customers != null) {
             this.customers.addAll(customers);
         }
+        if (dogs != null) {
+            this.dogs.addAll(dogs);
+        }
+        this.nextDogId = nextDogId;
     }
 
     /**
@@ -48,6 +57,8 @@ class JsonSerializableAddressBook {
         customers.addAll(source.getCustomerList().stream()
                 .map(JsonAdaptedCustomer::new)
                 .collect(Collectors.toList()));
+        dogs.addAll(source.getDogList().stream().map(JsonAdaptedDog::new).collect(Collectors.toList()));
+        nextDogId = source.getNextDogId();
     }
 
     /**
@@ -71,6 +82,19 @@ class JsonSerializableAddressBook {
             }
             addressBook.addCustomer(customer);
         }
+
+        for (JsonAdaptedDog jsonAdaptedDog : dogs) {
+            Dog dog = jsonAdaptedDog.toModelType();
+            if (addressBook.hasDog(dog)) {
+                throw new IllegalValueException(MESSAGE_DUPLICATE_DOG);
+            }
+            addressBook.addDogFromStorage(dog);
+        }
+
+        if (nextDogId != null && nextDogId >= 0) {
+            addressBook.setNextDogId(nextDogId);
+        }
+
         return addressBook;
     }
 

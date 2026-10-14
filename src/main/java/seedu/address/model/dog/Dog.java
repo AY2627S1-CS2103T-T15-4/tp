@@ -88,8 +88,7 @@ public class Dog {
         if (!(other instanceof Dog otherDog)) {
             return false;
         }
-        return id != -1
-                && id == otherDog.id
+        return id == otherDog.id
                 && name.equals(otherDog.name)
                 && breed.equals(otherDog.breed)
                 && size.equals(otherDog.size);

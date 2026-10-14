@@ -45,6 +45,17 @@ public class Breed {
     }
 
     @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof Breed otherBreed)) {
+            return false;
+        }
+        return breed.equals(otherBreed.breed);
+    }
+
+    @Override
     public int hashCode() {
         return breed.hashCode();
     }

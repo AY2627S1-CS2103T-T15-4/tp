@@ -17,6 +17,10 @@ import org.junit.jupiter.api.Test;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.model.customer.Customer;
+import seedu.address.model.dog.Breed;
+import seedu.address.model.dog.Dog;
+import seedu.address.model.dog.DogName;
+import seedu.address.model.dog.Size;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.exceptions.DuplicatePersonException;
 import seedu.address.testutil.PersonBuilder;
@@ -75,6 +79,43 @@ public class AddressBookTest {
         Person editedAlice = new PersonBuilder(ALICE).withAddress(VALID_ADDRESS_BOB).withTags(VALID_TAG_HUSBAND)
                 .build();
         assertTrue(addressBook.hasPerson(editedAlice));
+    }
+
+    @Test
+    public void addDog_assignsIncreasingIds() {
+        Dog firstDog = addressBook.addDog(new Dog(new DogName("Cookie"),
+                new Breed("Golden Retriever"), new Size("Large")));
+        Dog secondDog = addressBook.addDog(new Dog(new DogName("Milo"),
+                new Breed("Poodle"), new Size("Small")));
+
+        assertEquals(0, firstDog.getId());
+        assertEquals(1, secondDog.getId());
+        assertEquals(List.of(firstDog, secondDog), addressBook.getDogList());
+    }
+
+    @Test
+    public void addDogFromStorage_preservesIdAndAdvancesCounter() {
+        Dog storedDog = new Dog(7, new DogName("Cookie"),
+                new Breed("Golden Retriever"), new Size("Large"));
+        addressBook.addDogFromStorage(storedDog);
+
+        Dog addedDog = addressBook.addDog(new Dog(new DogName("Milo"),
+                new Breed("Poodle"), new Size("Small")));
+
+        assertEquals(7, addressBook.getDogList().get(0).getId());
+        assertEquals(8, addedDog.getId());
+    }
+
+    @Test
+    public void hasDog_sameId_returnsTrue() {
+        Dog storedDog = new Dog(3, new DogName("Cookie"),
+                new Breed("Golden Retriever"), new Size("Large"));
+        addressBook.addDogFromStorage(storedDog);
+
+        Dog sameIdentity = new Dog(3, new DogName("Different Name"),
+                new Breed("Poodle"), new Size("Small"));
+
+        assertTrue(addressBook.hasDog(sameIdentity));
     }
 
     @Test

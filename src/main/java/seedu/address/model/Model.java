@@ -17,8 +17,6 @@ public interface Model {
 
     Predicate<Customer> PREDICATE_SHOW_ALL_CUSTOMERS = unused -> true;
 
-    Predicate<Dog> PREDICATE_SHOW_ALL_DOGS = unused -> true;
-
     /**
      * Returns the user prefs.
      */
@@ -83,6 +81,9 @@ public interface Model {
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
 
-    void addDog(Dog dog);
-    void hasDog(Dog dog);
+    /** Adds a dog and returns the dog with its assigned persistent ID. */
+    Dog addDog(Dog dog);
+
+    /** Returns whether a dog with the same persistent ID exists. */
+    boolean hasDog(Dog dog);
 }

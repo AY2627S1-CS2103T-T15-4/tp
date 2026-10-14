@@ -44,7 +44,18 @@ public class Size {
         return size;
     }
 
-        @Override
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof Size otherSize)) {
+            return false;
+        }
+        return size.equals(otherSize.size);
+    }
+
+    @Override
     public int hashCode() {
         return size.hashCode();
     }
