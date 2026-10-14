@@ -13,9 +13,11 @@ public class ListCommand extends Command {
     public static final String COMMAND_WORD = "list";
 
     public static final String MESSAGE_SUCCESS = "Listed all customers.";
+    public static final String MESSAGE_MISSING_CATEGORY = "Please input which category you’d like to view. "
+            + "Use the following format: list <category> (e.g list dog, list customer)";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + " customer: Lists all customers.\n"
-            + "Example: " + COMMAND_WORD + " customer";
+    public static final String MESSAGE_USAGE = "list customer: Lists all customers.\n"
+            + "list dog: Lists all dogs.";
 
 
     @Override

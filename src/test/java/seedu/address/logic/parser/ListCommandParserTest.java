@@ -21,9 +21,14 @@ public class ListCommandParserTest {
     @Test
     public void parse_invalidArgs_throwsParseException() {
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, ListCommand.MESSAGE_USAGE);
-        assertParseFailure(parser, "", expectedMessage);
         assertParseFailure(parser, "dog", expectedMessage);
         assertParseFailure(parser, "Customer", expectedMessage);
+    }
+
+    @Test
+    public void parse_missingCategory_throwsHelpfulParseException() {
+        assertParseFailure(parser, "", ListCommand.MESSAGE_MISSING_CATEGORY);
+        assertParseFailure(parser, "   ", ListCommand.MESSAGE_MISSING_CATEGORY);
     }
 
 }
