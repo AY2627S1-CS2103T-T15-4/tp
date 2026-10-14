@@ -2,17 +2,14 @@ package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static seedu.address.ui.JavaFxTestUtil.runOnFxThread;
+import static seedu.address.ui.JavaFxTestUtil.startJavaFx;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.Scene;
@@ -40,16 +37,8 @@ public class RecordListPanelTest {
     private static final Customer ALEX = new Customer(7, "Alex", "91234567", "alex@example.com", "98765432");
 
     @BeforeAll
-    public static void startJavaFx() throws Exception {
-        // JavaFX controls need a display. Linux CI can run these tests under xvfb-run.
-        assumeTrue(!System.getProperty("os.name").startsWith("Linux") || System.getenv("DISPLAY") != null,
-                "JavaFX UI tests require a display (use xvfb-run on headless Linux)");
-        CountDownLatch started = new CountDownLatch(1);
-        Platform.startup(() -> {
-            Platform.setImplicitExit(false);
-            started.countDown();
-        });
-        assertTrue(started.await(10, TimeUnit.SECONDS));
+    public static void setUpJavaFx() throws Exception {
+        startJavaFx();
     }
 
     @Test
@@ -207,9 +196,4 @@ public class RecordListPanelTest {
         return (ListView<Supplier<Region>>) panel.getRoot().lookup("#recordListView");
     }
 
-    private static void runOnFxThread(Runnable assertions) throws Exception {
-        FutureTask<Void> task = new FutureTask<>(assertions, null);
-        Platform.runLater(task);
-        task.get(10, TimeUnit.SECONDS);
-    }
 }
