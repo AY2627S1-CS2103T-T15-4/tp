@@ -35,9 +35,9 @@ public class CustomerCard extends UiPart<Region> {
         super(FXML);
         this.customer = customer;
         id.setText(customer.getId() + ". ");
-        name.setText(customer.getName());
-        phone.setText(customer.getPhone());
-        email.setText(customer.getEmail());
-        backupContact.setText(customer.getBackupContact());
+        name.setText(customer.getName().fullName);
+        phone.setText(customer.getPhone().value);
+        email.setText(customer.getEmail().value);
+        backupContact.setText(customer.getBackupContact().value);
     }
 }
