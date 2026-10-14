@@ -130,6 +130,20 @@ Examples:
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
 
+### Searching customers and dogs together: `search`
+
+Format: `search n/NAME_QUERY` or `search id/ID`
+
+* Searches all customers and dogs using the same name and ID rules as category-specific searches below.
+* Use exactly one field. Names match a case-insensitive substring; IDs must be integers from
+  `0` to `2147483647`. Blank, repeated, combined and unknown fields are rejected.
+* Matching customer cards appear first, followed by matching dog cards. The result bar shows both counts.
+* Customer and dog IDs are independent. `search id/0` can show both a customer and a dog with ID 0.
+* Each search replaces both displayed filters without changing stored records. No matches clears the panel.
+* Use `search customer ...` or `search dog ...` to narrow the next search to a category.
+
+Examples: `search n/alex`, `search id/42`.
+
 ### Searching dogs: `search dog`
 
 Shows matching dogs as cards in the main panel, including their persistent IDs.
@@ -249,6 +263,7 @@ Action     | Format, Examples
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Search all** | `search n/NAME_QUERY` or `search id/ID`<br> e.g., `search n/alex`
 **Search customers** | `search customer n/NAME_QUERY` or `search customer id/ID`<br> e.g., `search customer n/alex`
 **Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
 **List**   | `list`

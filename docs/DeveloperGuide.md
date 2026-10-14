@@ -165,7 +165,13 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 ### Dog and customer search
 
-`AddressBookParser` routes `search` to `SearchDogCommandParser`, which accepts
+Without a category, `SearchCommandParser` accepts one name or ID field and creates a `SearchCommand`.
+It reuses `CustomerSearchPredicate` and `DogSearchPredicate` to update both observable lists.
+Customer and dog IDs are independent, so an ID search can match both categories.
+The existing `RecordListPanel` renders customers first, then dogs; feedback reports both counts.
+
+`AddressBookParser` routes `search` to `SearchCommandParser`, which dispatches explicit categories.
+For dog searches, `SearchDogCommandParser` accepts
 `dog n/NAME_QUERY` or `dog id/ID`. It rejects empty values, additional prefixes, unsupported
 categories and invalid IDs before command execution. IDs are nonnegative Java integers;
 they are not AB3's one-based list indices.
@@ -185,7 +191,7 @@ the real model, including duplicate names, consecutive searches and unchanged st
 
 Customer search follows the same command/parser/predicate structure through
 `SearchCustomerCommandParser`, `SearchCustomerCommand` and `CustomerSearchPredicate`.
-`AddressBookParser` dispatches the `customer` category to its parser and retains dog parsing.
+`SearchCommandParser` dispatches the `customer` category to its parser and retains dog parsing.
 The command updates the existing customer filter and hides dogs using the dog filter.
 Customer names use `StringUtil.containsSubstringIgnoreCase`; IDs use `Customer.getId()`.
 Search does not depend on an add-customer command: any customers loaded into the model can be searched.
