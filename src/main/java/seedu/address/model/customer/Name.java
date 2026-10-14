@@ -3,6 +3,9 @@ package seedu.address.model.customer;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
+/**
+ * Represents a customer's name and validates its format.
+ */
 public class Name {
     public static final String MESSAGE_CONSTRAINTS =
             "Names should only contain alphanumeric characters and spaces, and should not be blank";
