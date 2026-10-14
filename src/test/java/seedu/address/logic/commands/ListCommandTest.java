@@ -31,6 +31,15 @@ public class ListCommandTest {
     }
 
     @Test
+    public void execute_noCustomers_showsEmptyMessage() {
+        Model emptyModel = new ModelManager();
+        Model expectedModel = new ModelManager();
+        assertCommandSuccess(new ListCommand(), emptyModel,
+                new CommandResult(ListCommand.MESSAGE_EMPTY, CommandResult.DisplayedRecords.CUSTOMERS),
+                expectedModel);
+    }
+
+    @Test
     public void execute_listIsNotFiltered_showsSameList() {
         assertCommandSuccess(new ListCommand(), model, customersOnlyResult(), expectedModel);
     }

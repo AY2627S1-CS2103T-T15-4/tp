@@ -23,6 +23,9 @@ public class ListCommandParserTest {
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, ListCommand.MESSAGE_USAGE);
         assertParseFailure(parser, "dog", expectedMessage);
         assertParseFailure(parser, "Customer", expectedMessage);
+        assertParseFailure(parser, "customers", expectedMessage);
+        assertParseFailure(parser, "customer extra", expectedMessage);
+        assertParseFailure(parser, "customer 1", expectedMessage);
     }
 
     @Test
