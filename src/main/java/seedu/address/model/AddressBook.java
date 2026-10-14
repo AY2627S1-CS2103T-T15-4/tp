@@ -16,7 +16,7 @@ import seedu.address.model.person.UniquePersonList;
 
 /**
  * Wraps all data at the address-book level.
- * Duplicates are not allowed for entities with defined identity rules.
+ * Duplicates are not allowed (by .isSamePerson comparison).
  */
 public class AddressBook implements ReadOnlyAddressBook {
 
@@ -114,6 +114,20 @@ public class AddressBook implements ReadOnlyAddressBook {
     /** Adds the given customer to the address book. */
     public void addCustomer(Customer customer) {
         customers.add(customer);
+    }
+
+    public void setCustomer(Customer target, Customer editedCustomer) {
+        requireNonNull(editedCustomer);
+
+        customers.setCustomer(target, editedCustomer);
+    }
+
+    /**
+     * Removes {@code key} from this {@code AddressBook}.
+     * {@code key} must exist in the address book.
+     */
+    public void removeCustomer(Customer key) {
+        customers.remove(key);
     }
 
     /**

@@ -14,16 +14,16 @@ import seedu.address.commons.util.ToStringBuilder;
 public class Customer {
 
     private final int id;
-    private final String name;
-    private final String phone;
-    private final String email;
-    private final String backupContact;
+    private final Name name;
+    private final Phone phone;
+    private final Email email;
+    private final BackupContact backupContact;
 
     /**
      * Every field must be present and not null. {@code id} must be nonnegative.
      * Name, phone, email, and backup contact are stored as given, including internal spaces and letter case.
      */
-    public Customer(int id, String name, String phone, String email, String backupContact) {
+    public Customer(int id, Name name, Phone phone, Email email, BackupContact backupContact) {
         requireAllNonNull(name, phone, email, backupContact);
         checkArgument(id >= 0, "Customer id must be nonnegative.");
         this.id = id;
@@ -33,23 +33,36 @@ public class Customer {
         this.backupContact = backupContact;
     }
 
+    /**
+     * Constructs a customer from raw field values.
+     *
+     * @param id A nonnegative customer identifier.
+     * @param name A valid customer name.
+     * @param phone A valid primary phone number.
+     * @param email A valid email address.
+     * @param backupContact A valid backup phone number.
+     */
+    public Customer(int id, String name, String phone, String email, String backupContact) {
+        this(id, new Name(name), new Phone(phone), new Email(email), new BackupContact(backupContact));
+    }
+
     public int getId() {
         return id;
     }
 
-    public String getName() {
+    public Name getName() {
         return name;
     }
 
-    public String getPhone() {
+    public Phone getPhone() {
         return phone;
     }
 
-    public String getEmail() {
+    public Email getEmail() {
         return email;
     }
 
-    public String getBackupContact() {
+    public BackupContact getBackupContact() {
         return backupContact;
     }
 
