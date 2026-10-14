@@ -5,15 +5,12 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 import java.util.Objects;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.UniqueCustomerList;
-import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
-import seedu.address.model.dog.DogName;
-import seedu.address.model.dog.Size;
+import seedu.address.model.dog.UniqueDogList;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
 
@@ -24,7 +21,7 @@ import seedu.address.model.person.UniquePersonList;
 public class AddressBook implements ReadOnlyAddressBook {
 
     private final UniquePersonList persons = new UniquePersonList();
-    private final ObservableList<Dog> dogs = FXCollections.observableArrayList();
+    private final UniqueDogList dogs = new UniqueDogList();
     private final UniqueCustomerList customers = new UniqueCustomerList();
     private int nextDogId;
 
@@ -57,13 +54,14 @@ public class AddressBook implements ReadOnlyAddressBook {
         requireNonNull(newData);
 
         setPersons(newData.getPersonList());
-        dogs.setAll(newData.getDogList());
+        dogs.setDogs(newData.getDogList());
         setCustomers(newData.getCustomerList());
 
         int restoredNextDogId = newData.getNextDogId();
         this.nextDogId = restoredNextDogId >= 0
                 ? restoredNextDogId
-                : dogs.stream().mapToInt(Dog::getId).max().orElse(-1) + 1;
+                : dogs.asUnmodifiableObservableList().stream()
+                        .mapToInt(Dog::getId).max().orElse(-1) + 1;
     }
 
     public void setCustomers(List<Customer> customers) {
@@ -126,10 +124,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      */
     public Dog addDog(Dog dog) {
         requireNonNull(dog);
-        DogName n = dog.getName();
-        Breed b = dog.getBreed();
-        Size s = dog.getSize();
-        Dog newDog = new Dog(nextDogId, n, b, s);
+        Dog newDog = new Dog(nextDogId, dog.getName(), dog.getBreed(), dog.getSize());
         dogs.add(newDog);
         nextDogId++;
         return newDog;
@@ -170,7 +165,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      */
     public boolean hasDog(Dog dog) {
         requireNonNull(dog);
-        return dog.getId() >= 0 && dogs.stream().anyMatch(dog::isSameDog);
+        return dogs.contains(dog);
     }
 
     //// util methods
@@ -190,7 +185,7 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     @Override
     public ObservableList<Dog> getDogList() {
-        return FXCollections.unmodifiableObservableList(dogs);
+        return dogs.asUnmodifiableObservableList();
     }
 
     @Override
