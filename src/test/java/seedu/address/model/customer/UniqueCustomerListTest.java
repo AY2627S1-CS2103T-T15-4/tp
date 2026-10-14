@@ -57,8 +57,7 @@ public class UniqueCustomerListTest {
 
     @Test
     public void observableList_isUnmodifiable() {
-        assertThrows(UnsupportedOperationException.class,
-                () -> customers.asUnmodifiableObservableList().add(ALICE));
+        assertThrows(UnsupportedOperationException.class, () -> customers.asUnmodifiableObservableList().add(ALICE));
     }
 
     private static Customer customer(int id, String name) {

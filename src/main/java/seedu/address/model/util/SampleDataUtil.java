@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
-import seedu.address.model.customer.BackupContact;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
@@ -44,8 +43,8 @@ public class SampleDataUtil {
 
     public static Customer[] getSampleCustomers() {
         return new Customer[] {
-            new Customer(1, new seedu.address.model.customer.Name("Lily Koh"), new seedu.address.model.customer.Phone("91234567"), new seedu.address.model.customer.Email("lily@gmail.com"), new BackupContact("98765432")),
-            new Customer(2, new seedu.address.model.customer.Name("John Doe"), new seedu.address.model.customer.Phone("81234567"), new seedu.address.model.customer.Email("john@gmail.com"), new BackupContact("81234568"))
+            new Customer(1, "Lily Koh", "91234567", "lily@gmail.com", "98765432"),
+            new Customer(2, "John Doe", "81234567", "john@gmail.com", "81234568")
         };
     }
 

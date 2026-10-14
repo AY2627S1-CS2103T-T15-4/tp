@@ -15,8 +15,7 @@ public class CustomerTest {
 
     @Test
     public void constructor_invalidArguments_throwsIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new Customer(-1, NAME, PHONE, EMAIL, BACKUP_CONTACT));
+        assertThrows(IllegalArgumentException.class, () -> new Customer(-1, NAME, PHONE, EMAIL, BACKUP_CONTACT));
     }
 
     @Test

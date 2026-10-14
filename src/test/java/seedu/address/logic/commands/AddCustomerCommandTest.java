@@ -46,8 +46,8 @@ public class AddCustomerCommandTest {
 
     @Test
     public void execute_duplicateCustomer_throwsCommandException() {
-        assertThrows(CommandException.class, AddCustomerCommand.MESSAGE_DUPLICATE_CUSTOMER,
-                () -> new AddCustomerCommand(ALICE).execute(new ModelStubWithCustomer(ALICE)));
+        assertThrows(CommandException.class, AddCustomerCommand.MESSAGE_DUPLICATE_CUSTOMER, () ->
+                new AddCustomerCommand(ALICE).execute(new ModelStubWithCustomer(ALICE)));
     }
 
     @Test
@@ -63,23 +63,57 @@ public class AddCustomerCommandTest {
     }
 
     private abstract static class ModelStub implements Model {
-        @Override public ReadOnlyUserPrefs getUserPrefs() { throw unused(); }
-        @Override public GuiSettings getGuiSettings() { throw unused(); }
-        @Override public void setGuiSettings(GuiSettings guiSettings) { throw unused(); }
-        @Override public void setAddressBook(ReadOnlyAddressBook addressBook) { throw unused(); }
-        @Override public ReadOnlyAddressBook getAddressBook() { throw unused(); }
-        @Override public boolean hasPerson(Person person) { throw unused(); }
-        @Override public void deletePerson(Person person) { throw unused(); }
-        @Override public void addPerson(Person person) { throw unused(); }
-        @Override public void setPerson(Person target, Person editedPerson) { throw unused(); }
-        @Override public void deleteCustomer(Customer customer) { throw unused(); }
-        @Override public void setCustomer(Customer target, Customer editedCustomer) { throw unused(); }
-        @Override public ObservableList<Person> getFilteredPersonList() { throw unused(); }
-        @Override public ObservableList<Customer> getFilteredCustomerList() { throw unused(); }
-        @Override public void updateFilteredCustomerList(Predicate<Customer> predicate) { throw unused(); }
-        @Override public void updateFilteredPersonList(Predicate<Person> predicate) { throw unused(); }
-        @Override public Dog addDog(Dog dog) { throw unused(); }
-        @Override public boolean hasDog(Dog dog) { throw unused(); }
+        @Override public ReadOnlyUserPrefs getUserPrefs() {
+            throw unused();
+        }
+        @Override public GuiSettings getGuiSettings() {
+            throw unused();
+        }
+        @Override public void setGuiSettings(GuiSettings guiSettings) {
+            throw unused();
+        }
+        @Override public void setAddressBook(ReadOnlyAddressBook addressBook) {
+            throw unused();
+        }
+        @Override public ReadOnlyAddressBook getAddressBook() {
+            throw unused();
+        }
+        @Override public boolean hasPerson(Person person) {
+            throw unused();
+        }
+        @Override public void deletePerson(Person person) {
+            throw unused();
+        }
+        @Override public void addPerson(Person person) {
+            throw unused();
+        }
+        @Override public void setPerson(Person target, Person editedPerson) {
+            throw unused();
+        }
+        @Override public void deleteCustomer(Customer customer) {
+            throw unused();
+        }
+        @Override public void setCustomer(Customer target, Customer editedCustomer) {
+            throw unused();
+        }
+        @Override public ObservableList<Person> getFilteredPersonList() {
+            throw unused();
+        }
+        @Override public ObservableList<Customer> getFilteredCustomerList() {
+            throw unused();
+        }
+        @Override public void updateFilteredCustomerList(Predicate<Customer> predicate) {
+            throw unused();
+        }
+        @Override public void updateFilteredPersonList(Predicate<Person> predicate) {
+            throw unused();
+        }
+        @Override public Dog addDog(Dog dog) {
+            throw unused();
+        }
+        @Override public boolean hasDog(Dog dog) {
+            throw unused();
+        }
 
         protected final AssertionError unused() {
             return new AssertionError("This method should not be called.");
@@ -93,21 +127,27 @@ public class AddCustomerCommandTest {
             this.customer = requireNonNull(customer);
         }
 
-        @Override public boolean hasCustomer(Customer customer) {
+        @Override
+        public boolean hasCustomer(Customer customer) {
             return this.customer.isSameCustomer(requireNonNull(customer));
         }
 
-        @Override public void addCustomer(Customer customer) { throw unused(); }
+        @Override
+        public void addCustomer(Customer customer) {
+            throw unused();
+        }
     }
 
     private static class ModelStubAcceptingCustomerAdded extends ModelStub {
         private final List<Customer> customersAdded = new ArrayList<>();
 
-        @Override public boolean hasCustomer(Customer customer) {
+        @Override
+        public boolean hasCustomer(Customer customer) {
             return customersAdded.stream().anyMatch(customer::isSameCustomer);
         }
 
-        @Override public void addCustomer(Customer customer) {
+        @Override
+        public void addCustomer(Customer customer) {
             customersAdded.add(requireNonNull(customer));
         }
     }
