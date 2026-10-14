@@ -19,12 +19,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
+import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ListDogCommand;
+import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.customer.Customer;
+import seedu.address.model.customer.CustomerSearchPredicate;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
@@ -135,6 +138,34 @@ public class RecordListPanelTest {
             new SearchDogCommand(new DogSearchPredicate(43)).execute(model);
             assertEquals(1, list.getItems().size());
             assertEquals("Max", label(list.getItems().get(0).get(), "name"));
+            assertEquals(book, model.getAddressBook());
+        });
+    }
+
+    @Test
+    public void panel_customerSearch_switchesBetweenCategoriesAndRestoresCustomers() throws Exception {
+        runOnFxThread(() -> {
+            AddressBook book = new AddressBook();
+            book.addCustomer(ALEX);
+            book.addCustomer(new Customer(42, "Beth", "92345678", "beth@example.com", "97654321"));
+            book.addDogFromStorage(BUDDY);
+            ModelManager model = new ModelManager(book, new UserPrefs());
+            var list = listView(new RecordListPanel(model.getFilteredCustomerList(), model.getFilteredDogList()));
+
+            new SearchDogCommand(new DogSearchPredicate("bud")).execute(model);
+            new SearchCustomerCommand(new CustomerSearchPredicate("alex")).execute(model);
+            assertEquals(1, list.getItems().size());
+            assertEquals("Alex", label(list.getItems().get(0).get(), "name"));
+            new SearchCustomerCommand(new CustomerSearchPredicate(42)).execute(model);
+            assertEquals(1, list.getItems().size());
+            assertEquals("Beth", label(list.getItems().get(0).get(), "name"));
+            new SearchCustomerCommand(new CustomerSearchPredicate("missing")).execute(model);
+            assertTrue(list.getItems().isEmpty());
+            new ListCommand().execute(model);
+            assertEquals(2, list.getItems().size());
+            new ListDogCommand().execute(model);
+            assertEquals(1, list.getItems().size());
+            assertEquals("Buddy", label(list.getItems().get(0).get(), "name"));
             assertEquals(book, model.getAddressBook());
         });
     }

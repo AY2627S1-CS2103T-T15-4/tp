@@ -26,7 +26,7 @@ public class SearchDogCommandParserTest {
 
     @Test
     public void parse_invalidInput_throwsParseException() {
-        String[] invalidInputs = {"search", "search dog", "search customer n/Buddy", "search dog Buddy",
+        String[] invalidInputs = {"search", "search dog", "search dog Buddy",
             "search dog n/", "search dog n/   ", "search dog id/", "search dog id/-1", "search dog id/+1",
             "search dog id/1.5", "search dog id/2147483648", "search dog id/one", "search dog id/1 2",
             "search dog n/Buddy id/0", "search dog id/0 n/Buddy", "search dog n/Buddy n/Max",

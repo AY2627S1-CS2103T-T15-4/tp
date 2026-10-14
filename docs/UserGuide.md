@@ -147,13 +147,30 @@ Format: `search dog n/NAME_QUERY` or `search dog id/ID`
   `0` to `2147483647`, without a sign. Leading zeros are accepted.
 * A valid search with no matches reports `0 dogs found.` and clears the card panel.
 * Each search examines all stored dogs and displays only matching dog cards. Stored records are unchanged.
-* Use `list dog` to show all dogs again. Customer search is not available yet.
+* Use `list dog` to show all dogs again.
 
 Examples:
 
 * `search dog n/bud`
 * `search dog n/Little Buddy`
 * `search dog id/0`
+
+### Searching customers: `search customer`
+
+Shows matching customers as cards in the main panel. The result bar shows the match count.
+
+Format: `search customer n/NAME_QUERY` or `search customer id/ID`
+
+* Use exactly one field. Blank values, repeated fields, unknown prefixes and combined fields are rejected.
+* Names match a case-insensitive substring. Multiple words form one phrase, with internal spaces matched literally.
+  For example, `search customer n/alex` matches both `Alex Tan` and `Alexandra Lim`.
+* All customers with matching names are shown, even when they share a name.
+* IDs are persistent customer IDs, not card positions. Use an integer from `0` to `2147483647`.
+* Each search considers all stored customers. No matches clears the panel and reports `0 customers found.`.
+* Search hides dog cards without deleting records. Use `list customer` to restore all customer cards,
+  or `search dog` / `list dog` to display dogs again.
+
+Examples: `search customer n/Alex Tan`, `search customer id/42`.
 
 ### Deleting a person: `delete`
 
@@ -232,6 +249,7 @@ Action     | Format, Examples
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Search customers** | `search customer n/NAME_QUERY` or `search customer id/ID`<br> e.g., `search customer n/alex`
 **Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
 **List**   | `list`
 **Help**   | `help`

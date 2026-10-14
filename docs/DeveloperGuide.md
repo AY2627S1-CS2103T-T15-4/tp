@@ -163,7 +163,7 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 ## **Implementation**
 
-### Dog search
+### Dog and customer search
 
 `AddressBookParser` routes `search` to `SearchDogCommandParser`, which accepts
 `dog n/NAME_QUERY` or `dog id/ID`. It rejects empty values, additional prefixes, unsupported
@@ -182,6 +182,14 @@ match count. Each new predicate applies to all stored dogs, without changing sto
 `DogSearchPredicateTest` covers field selection and matching. `SearchDogCommandTest` exercises
 the real model, including duplicate names, consecutive searches and unchanged stored records.
 `RecordListPanelTest` checks that search and list commands update the displayed cards.
+
+Customer search follows the same command/parser/predicate structure through
+`SearchCustomerCommandParser`, `SearchCustomerCommand` and `CustomerSearchPredicate`.
+`AddressBookParser` dispatches the `customer` category to its parser and retains dog parsing.
+The command updates the existing customer filter and hides dogs using the dog filter.
+Customer names use `StringUtil.containsSubstringIgnoreCase`; IDs use `Customer.getId()`.
+Search does not depend on an add-customer command: any customers loaded into the model can be searched.
+Tests populate the model directly and verify filtering, persistent IDs, unchanged records and card updates.
 
 This section describes some noteworthy details on how certain features are implemented.
 
