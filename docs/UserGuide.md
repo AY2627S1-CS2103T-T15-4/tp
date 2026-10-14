@@ -130,6 +130,29 @@ Examples:
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
 
+### Searching dogs: `search dog`
+
+Shows matching dogs, including their persistent IDs, in the command result area.
+
+Format: `search dog n/NAME_QUERY` or `search dog id/ID`
+
+* Use exactly one field: `n/` for a name or `id/` for an ID. Blank values, repeated fields,
+  unknown prefixes, and combining both fields are rejected with usage instructions.
+* Name matching ignores case and accepts partial names. For example, `search dog n/bud`
+  matches both `Buddy` and `Little Bud`. Dogs with the same name are all returned.
+* Multiple words form one substring, not separate keywords: `n/little bud` matches
+  `Little Buddy`. Spaces inside the query are matched literally; surrounding whitespace is ignored.
+* IDs are persistent record IDs, not positions in a displayed list. Use a whole number from
+  `0` to `2147483647`, without a sign. Leading zeros are accepted.
+* A valid search with no matches reports `0 dogs found.`. Each search examines all stored dogs
+  and leaves records and existing list filters unchanged. Customer search is not available yet.
+
+Examples:
+
+* `search dog n/bud`
+* `search dog n/Little Buddy`
+* `search dog id/0`
+
 ### Deleting a person: `delete`
 
 Deletes the specified person from the address book.
@@ -200,5 +223,6 @@ Action     | Format, Examples
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
 **List**   | `list`
 **Help**   | `help`

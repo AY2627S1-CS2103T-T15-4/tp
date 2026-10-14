@@ -157,6 +157,24 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 ## **Implementation**
 
+### Dog search
+
+`AddressBookParser` routes `search` to `SearchDogCommandParser`, which accepts
+`dog n/NAME_QUERY` or `dog id/ID`. It rejects empty values, additional prefixes, unsupported
+categories and invalid IDs before command execution. IDs are nonnegative Java integers;
+they are not AB3's one-based list indices.
+
+`DogSearchPredicate` delegates name matching to `StringUtil.containsSubstringIgnoreCase`
+and compares IDs directly with `Dog.getId()`. A name query is one literal substring,
+including internal spaces. `SearchDogCommand` examines `Model.getDogList()` and returns
+the match count and dog details through `CommandResult`, following the existing `ListDogCommand`
+result-area presentation. It does not update list filters or stored records. This avoids
+requiring a dog list panel or customer-model changes for this contribution.
+
+`SearchDogCommandParserTest` covers command routing, whitespace, prefix misuse and ID boundaries.
+`DogSearchPredicateTest` covers field selection and matching. `SearchDogCommandTest` exercises
+the real model, including duplicate names, consecutive searches and unchanged records/filters.
+
 This section describes some noteworthy details on how certain features are implemented.
 
 ### \[Proposed\] Undo/redo feature
