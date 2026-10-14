@@ -8,6 +8,7 @@ import java.util.List;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import seedu.address.model.customer.exceptions.CustomerNotFoundException;
 import seedu.address.model.customer.exceptions.DuplicateCustomerException;
 
 /**
@@ -43,6 +44,37 @@ public class UniqueCustomerList implements Iterable<Customer> {
     }
 
     /**
+     * Replaces the customer {@code target} in the list with {@code editedCustomer}.
+     * {@code target} must exist in the list.
+     * The customer identity of {@code editedCustomer} must not be the same as another existing customer in the list.
+     */
+    public void setCustomer(Customer target, Customer editedCustomer) {
+        requireAllNonNull(target, editedCustomer);
+
+        int index = internalList.indexOf(target);
+        if (index == -1) {
+            throw new CustomerNotFoundException();
+        }
+
+        if (!target.isSameCustomer(editedCustomer) && contains(editedCustomer)) {
+            throw new DuplicateCustomerException();
+        }
+
+        internalList.set(index, editedCustomer);
+    }
+
+    /**
+     * Removes the equivalent customer from the list.
+     * The customer must exist in the list.
+     */
+    public void remove(Customer toRemove) {
+        requireNonNull(toRemove);
+        if (!internalList.remove(toRemove)) {
+            throw new CustomerNotFoundException();
+        }
+    }
+
+    /**
      * Replaces the contents of this list with {@code customers}.
      * {@code customers} must not contain duplicate customers.
      */
@@ -53,6 +85,12 @@ public class UniqueCustomerList implements Iterable<Customer> {
         }
 
         internalList.setAll(customers);
+    }
+
+    /** Replaces the contents of this list with those from {@code replacement}. */
+    public void setCustomers(UniqueCustomerList replacement) {
+        requireNonNull(replacement);
+        internalList.setAll(replacement.internalList);
     }
 
     /**

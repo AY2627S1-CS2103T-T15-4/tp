@@ -135,6 +135,26 @@ public class AddCommandTest {
         }
 
         @Override
+        public boolean hasCustomer(Customer customer) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void deleteCustomer(Customer customer) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void addCustomer(Customer customer) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void setCustomer(Customer target, Customer editedCustomer) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
         public ObservableList<Person> getFilteredPersonList() {
             throw new AssertionError("This method should not be called.");
         }

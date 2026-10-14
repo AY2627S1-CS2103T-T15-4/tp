@@ -108,6 +108,31 @@ public class ModelManager implements Model {
         return addressBook.addDog(dog);
     }
 
+    //===========Customer related methods==================================
+    @Override
+    public boolean hasCustomer(Customer customer) {
+        requireNonNull(customer);
+        return addressBook.hasCustomer(customer);
+    }
+
+    @Override
+    public void deleteCustomer(Customer target) {
+        addressBook.removeCustomer(target);
+    }
+
+    @Override
+    public void addCustomer(Customer customer) {
+        addressBook.addCustomer(customer);
+        updateFilteredCustomerList(PREDICATE_SHOW_ALL_CUSTOMERS);
+    }
+
+    @Override
+    public void setCustomer(Customer target, Customer editedCustomer) {
+        requireAllNonNull(target, editedCustomer);
+
+        addressBook.setCustomer(target, editedCustomer);
+    }
+
     //=========== Filtered Person List Accessors =============================================================
 
     /**
