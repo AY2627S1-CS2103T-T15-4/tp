@@ -33,7 +33,7 @@ public class MainWindow extends UiPart<Stage> {
     private Path dataFilePath;
 
     // Independent Ui parts residing in this Ui container
-    private CustomerListPanel customerListPanel;
+    private RecordListPanel recordListPanel;
     private ResultDisplay resultDisplay;
     private HelpWindow helpWindow;
 
@@ -114,8 +114,8 @@ public class MainWindow extends UiPart<Stage> {
      * Fills up all the placeholders of this window.
      */
     void fillInnerParts() {
-        customerListPanel = new CustomerListPanel(logic.getFilteredCustomerList());
-        personListPanelPlaceholder.getChildren().add(customerListPanel.getRoot());
+        recordListPanel = new RecordListPanel(logic.getFilteredCustomerList(), logic.getDogList());
+        personListPanelPlaceholder.getChildren().add(recordListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
         resultDisplayPlaceholder.getChildren().add(resultDisplay.getRoot());
@@ -167,8 +167,8 @@ public class MainWindow extends UiPart<Stage> {
         primaryStage.hide();
     }
 
-    public CustomerListPanel getCustomerListPanel() {
-        return customerListPanel;
+    public RecordListPanel getRecordListPanel() {
+        return recordListPanel;
     }
 
     /**

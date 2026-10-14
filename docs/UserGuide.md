@@ -167,6 +167,13 @@ Examples:
 * `list` followed by `delete 2` deletes the 2nd person in the address book.
 * `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
 
+### Customer and dog cards
+
+The main list shows customer cards followed by dog cards in the same scrollable area.
+Dog cards show the persistent dog ID and name, followed by breed and size. Newly added dogs
+appear automatically. The panel displays all dogs alongside the currently listed customers.
+Dog and customer IDs belong to separate categories and may overlap.
+
 ### Clearing all entries: `clear`
 
 Clears all entries from the address book.
