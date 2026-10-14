@@ -32,12 +32,16 @@ public class ListCommandTest {
 
     @Test
     public void execute_listIsNotFiltered_showsSameList() {
-        assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandSuccess(new ListCommand(), model, customersOnlyResult(), expectedModel);
     }
 
     @Test
     public void execute_listIsFiltered_showsEverything() {
         model.updateFilteredCustomerList(unused -> false);
-        assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandSuccess(new ListCommand(), model, customersOnlyResult(), expectedModel);
+    }
+
+    private CommandResult customersOnlyResult() {
+        return new CommandResult(ListCommand.MESSAGE_SUCCESS, CommandResult.DisplayedRecords.CUSTOMERS);
     }
 }

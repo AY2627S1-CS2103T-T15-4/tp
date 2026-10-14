@@ -22,21 +22,50 @@ public class RecordListPanel extends UiPart<Region> {
     @FXML
     private ListView<Supplier<Region>> recordListView;
 
+    private final ObservableList<Customer> customers;
+    private final ObservableList<Dog> dogs;
+    private boolean showCustomers = true;
+    private boolean showDogs = true;
+
     /**
      * Creates a panel that observes both lists. Cards are created only for visible cells.
      */
     public RecordListPanel(ObservableList<Customer> customers, ObservableList<Dog> dogs) {
         super(FXML);
+        this.customers = customers;
+        this.dogs = dogs;
         recordListView.setCellFactory(listView -> new RecordListViewCell());
-        customers.addListener((ListChangeListener<Customer>) change -> updateRecords(customers, dogs));
-        dogs.addListener((ListChangeListener<Dog>) change -> updateRecords(customers, dogs));
-        updateRecords(customers, dogs);
+        customers.addListener((ListChangeListener<Customer>) change -> updateRecords());
+        dogs.addListener((ListChangeListener<Dog>) change -> updateRecords());
+        updateRecords();
     }
 
-    private void updateRecords(ObservableList<Customer> customers, ObservableList<Dog> dogs) {
+    /**
+     * Shows customer cards and hides dog cards.
+     */
+    public void showCustomersOnly() {
+        showCustomers = true;
+        showDogs = false;
+        updateRecords();
+    }
+
+    /**
+     * Shows customer cards followed by dog cards.
+     */
+    public void showAll() {
+        showCustomers = true;
+        showDogs = true;
+        updateRecords();
+    }
+
+    private void updateRecords() {
         List<Supplier<Region>> cards = new ArrayList<>();
-        customers.forEach(customer -> cards.add(() -> new CustomerCard(customer).getRoot()));
-        dogs.forEach(dog -> cards.add(() -> new DogCard(dog).getRoot()));
+        if (showCustomers) {
+            customers.forEach(customer -> cards.add(() -> new CustomerCard(customer).getRoot()));
+        }
+        if (showDogs) {
+            dogs.forEach(dog -> cards.add(() -> new DogCard(dog).getRoot()));
+        }
         recordListView.getItems().setAll(cards);
     }
 

@@ -14,8 +14,8 @@ public class ListDogCommand extends Command {
     public CommandResult execute(Model model) {
         requireNonNull(model);
         if (model.getDogList().isEmpty()) {
-            return new CommandResult(MESSAGE_EMPTY);
+            return new CommandResult(MESSAGE_EMPTY, CommandResult.DisplayedRecords.ALL);
         }
-        return new CommandResult(MESSAGE_SUCCESS);
+        return new CommandResult(MESSAGE_SUCCESS, CommandResult.DisplayedRecords.ALL);
     }
 }
