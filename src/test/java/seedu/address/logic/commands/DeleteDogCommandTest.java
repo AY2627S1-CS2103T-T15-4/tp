@@ -1,6 +1,8 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
@@ -36,5 +38,21 @@ public class DeleteDogCommandTest {
 
         assertThrows(CommandException.class, DeleteDogCommand.MESSAGE_INVALID_ID, () ->
                 new DeleteDogCommand(99).execute(model));
+    }
+
+    @Test
+    public void equals_sameId_returnsTrue() {
+        assertTrue(new DeleteDogCommand(12).equals(new DeleteDogCommand(12)));
+    }
+
+    @Test
+    public void equals_differentId_returnsFalse() {
+        assertFalse(new DeleteDogCommand(12).equals(new DeleteDogCommand(13)));
+    }
+
+    @Test
+    public void toString_containsDogId() {
+        assertEquals("seedu.address.logic.commands.DeleteDogCommand{dogId=12}",
+                new DeleteDogCommand(12).toString());
     }
 }
