@@ -16,8 +16,6 @@ public class ListDogCommand extends Command {
         if (model.getDogList().isEmpty()) {
             return new CommandResult(MESSAGE_EMPTY);
         }
-        StringBuilder result = new StringBuilder(MESSAGE_SUCCESS);
-        model.getDogList().forEach(dog -> result.append("\n").append(dog));
-        return new CommandResult(result.toString());
+        return new CommandResult(MESSAGE_SUCCESS);
     }
 }
