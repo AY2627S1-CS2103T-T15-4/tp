@@ -1,8 +1,8 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_BREED;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_SIZE;
 
 import seedu.address.commons.util.ToStringBuilder;
@@ -10,14 +10,11 @@ import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.dog.Dog;
-import seedu.address.model.person.Person;
 
-/**
- * Adds a person to the address book.
- */
+/** Adds a dog to the address book. */
 public class AddDogCommand extends Command {
 
-    public static final String COMMAND_WORD = "add";
+    public static final String COMMAND_WORD = "adddog";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a dog to WatchDog! "
             + "Parameters: "
@@ -27,16 +24,14 @@ public class AddDogCommand extends Command {
             + "Example: " + COMMAND_WORD + " "
             + PREFIX_NAME + "Cookie "
             + PREFIX_BREED + "Golden Retriever "
-            + PREFIX_SIZE+ "Large";
+            + PREFIX_SIZE + "Large";
 
     public static final String MESSAGE_SUCCESS = "New dog added: %1$s";
-    public static final String MESSAGE_DUPLICATE_PERSON = "This dog already exists.";
+    public static final String MESSAGE_DUPLICATE_DOG = "This dog already exists.";
 
     private final Dog toAdd;
 
-    /**
-     * Creates an AddCommand to add the specified {@code Person}
-     */
+    /** Creates an {@code AddDogCommand} to add the specified {@code Dog}. */
     public AddDogCommand(Dog dog) {
         requireNonNull(dog);
         toAdd = dog;
@@ -44,7 +39,13 @@ public class AddDogCommand extends Command {
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
-        return new CommandResult("Hello from dog");
+        requireNonNull(model);
+
+        if (model.hasDog(toAdd)) {
+            throw new CommandException(MESSAGE_DUPLICATE_DOG);
+        }
+        Dog addedDog = model.addDog(toAdd);
+        return new CommandResult(String.format(MESSAGE_SUCCESS, Messages.format(addedDog)));
     }
 
     @Override
@@ -53,7 +54,6 @@ public class AddDogCommand extends Command {
             return true;
         }
 
-        // instanceof handles nulls
         if (!(other instanceof AddDogCommand otherAddCommand)) {
             return false;
         }

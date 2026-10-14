@@ -13,11 +13,14 @@ import static seedu.address.testutil.TypicalPersons.AMY;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.ListCommand;
@@ -27,6 +30,10 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.dog.Breed;
+import seedu.address.model.dog.Dog;
+import seedu.address.model.dog.DogName;
+import seedu.address.model.dog.Size;
 import seedu.address.model.person.Person;
 import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
@@ -85,6 +92,19 @@ public class LogicManagerTest {
     @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void getDogList_executeAddDog_updatesExistingObservableView() throws Exception {
+        ObservableList<Dog> dogs = logic.getDogList();
+        int[] notifications = {0};
+        dogs.addListener((ListChangeListener<Dog>) change -> notifications[0]++);
+
+        logic.execute("adddog n/Buddy b/Poodle s/small");
+
+        assertEquals(List.of(new Dog(0, new DogName("Buddy"), new Breed("Poodle"), new Size("small"))), dogs);
+        assertEquals(1, notifications[0]);
+        assertThrows(UnsupportedOperationException.class, () -> dogs.remove(0));
     }
 
     /**

@@ -1,0 +1,121 @@
+package seedu.address.ui;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.transformation.FilteredList;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.Region;
+import seedu.address.model.customer.Customer;
+import seedu.address.model.dog.Breed;
+import seedu.address.model.dog.Dog;
+import seedu.address.model.dog.DogName;
+import seedu.address.model.dog.Size;
+
+public class RecordListPanelTest {
+    private static final Dog BUDDY = new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small"));
+    private static final Customer ALEX = new Customer(7, "Alex", "91234567", "alex@example.com", "98765432");
+
+    @BeforeAll
+    public static void startJavaFx() throws Exception {
+        // JavaFX controls need a display. Linux CI can run these tests under xvfb-run.
+        assumeTrue(!System.getProperty("os.name").startsWith("Linux") || System.getenv("DISPLAY") != null,
+                "JavaFX UI tests require a display (use xvfb-run on headless Linux)");
+        CountDownLatch started = new CountDownLatch(1);
+        Platform.startup(() -> {
+            Platform.setImplicitExit(false);
+            started.countDown();
+        });
+        assertTrue(started.await(10, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void dogCard_displaysPersistentIdAndAllFields() throws Exception {
+        runOnFxThread(() -> {
+            Region card = new DogCard(BUDDY).getRoot();
+            assertEquals("42. ", label(card, "id"));
+            assertEquals("Buddy", label(card, "name"));
+            assertEquals("Breed: Poodle", label(card, "breed"));
+            assertEquals("Size: small", label(card, "size"));
+        });
+    }
+
+    @Test
+    public void panel_mixedRecords_rendersCustomersBeforeDogs() throws Exception {
+        runOnFxThread(() -> {
+            RecordListPanel panel = new RecordListPanel(FXCollections.observableArrayList(ALEX),
+                    FXCollections.observableArrayList(BUDDY));
+            ListView<Supplier<Region>> list = listView(panel);
+            assertEquals(2, list.getItems().size());
+            Region customer = list.getItems().get(0).get();
+            assertEquals("Alex", label(customer, "name"));
+            assertEquals("91234567", label(customer, "phone"));
+            assertEquals("alex@example.com", label(customer, "email"));
+            assertEquals("98765432", label(customer, "backupContact"));
+            assertEquals("Buddy", label(list.getItems().get(1).get(), "name"));
+
+            new Scene(panel.getRoot(), 450, 600);
+            panel.getRoot().applyCss();
+            panel.getRoot().layout();
+            assertTrue(panel.getRoot().lookupAll("#name").stream()
+                    .anyMatch(node -> ((Label) node).getText().equals("Buddy")));
+        });
+    }
+
+    @Test
+    public void panel_sourceChangesAndCustomerFilter_updateCards() throws Exception {
+        runOnFxThread(() -> {
+            var customers = FXCollections.<Customer>observableArrayList();
+            var filteredCustomers = new FilteredList<>(customers);
+            var dogs = FXCollections.<Dog>observableArrayList();
+            var list = listView(new RecordListPanel(filteredCustomers, dogs));
+            assertTrue(list.getItems().isEmpty());
+
+            customers.add(ALEX);
+            dogs.add(BUDDY);
+            assertEquals(2, list.getItems().size());
+            filteredCustomers.setPredicate(customer -> false);
+            assertEquals(1, list.getItems().size());
+            assertEquals("Buddy", label(list.getItems().get(0).get(), "name"));
+
+            dogs.set(0, new Dog(42, new DogName("Buddy Updated"), new Breed("Poodle"), new Size("large")));
+            assertEquals("Buddy Updated", label(list.getItems().get(0).get(), "name"));
+            assertEquals("Size: large", label(list.getItems().get(0).get(), "size"));
+            filteredCustomers.setPredicate(customer -> true);
+            assertEquals(2, list.getItems().size());
+            dogs.clear();
+            assertEquals(1, list.getItems().size());
+            assertEquals("Alex", label(list.getItems().get(0).get(), "name"));
+            customers.clear();
+            assertTrue(list.getItems().isEmpty());
+        });
+    }
+
+    private static String label(Region card, String id) {
+        return ((Label) card.lookup("#" + id)).getText();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ListView<Supplier<Region>> listView(RecordListPanel panel) {
+        return (ListView<Supplier<Region>>) panel.getRoot().lookup("#recordListView");
+    }
+
+    private static void runOnFxThread(Runnable assertions) throws Exception {
+        FutureTask<Void> task = new FutureTask<>(assertions, null);
+        Platform.runLater(task);
+        task.get(10, TimeUnit.SECONDS);
+    }
+}

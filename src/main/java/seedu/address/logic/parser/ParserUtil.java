@@ -9,6 +9,9 @@ import java.util.Set;
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.dog.Breed;
+import seedu.address.model.dog.DogName;
+import seedu.address.model.dog.Size;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
@@ -121,4 +124,50 @@ public class ParserUtil {
         }
         return tagSet;
     }
+
+    /**
+     * Parses a string into a {@code DogName}.
+     * Leading and trailing whitespace is trimmed.
+     *
+     * @throws ParseException if the given name is invalid
+     */
+    public static DogName parseDogName(String name) throws ParseException {
+        requireNonNull(name);
+        String trimmedName = name.trim();
+        if (!DogName.isValidName(trimmedName)) {
+            throw new ParseException(Name.MESSAGE_CONSTRAINTS);
+        }
+        return new DogName(trimmedName);
+    }
+
+    /**
+     * Parses a string into a {@code Breed}.
+     * Leading and trailing whitespace is trimmed.
+     *
+     * @throws ParseException if the given breed is invalid
+     */
+    public static Breed parseBreed(String breed) throws ParseException {
+        requireNonNull(breed);
+        String trimmedBreed = breed.trim();
+        if (!Breed.isValidBreed(trimmedBreed)) {
+            throw new ParseException(Name.MESSAGE_CONSTRAINTS);
+        }
+        return new Breed(trimmedBreed);
+    }
+
+    /**
+     * Parses a string into a {@code Size}.
+     * Leading and trailing whitespace is trimmed.
+     *
+     * @throws ParseException if the given size is invalid
+     */
+    public static Size parseSize(String size) throws ParseException {
+        requireNonNull(size);
+        String trimmedSize = size.trim();
+        if (!Size.isValidSize(trimmedSize)) {
+            throw new ParseException(Name.MESSAGE_CONSTRAINTS);
+        }
+        return new Size(trimmedSize);
+    }
+
 }

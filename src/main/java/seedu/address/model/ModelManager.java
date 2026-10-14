@@ -97,6 +97,17 @@ public class ModelManager implements Model {
         addressBook.setPerson(target, editedPerson);
     }
 
+    //=========== Dog Operations ============================================================================
+    @Override
+    public boolean hasDog(Dog dog) {
+        return addressBook.hasDog(dog);
+    }
+
+    @Override
+    public Dog addDog(Dog dog) {
+        return addressBook.addDog(dog);
+    }
+
     //===========Customer related methods==================================
     @Override
     public boolean hasCustomer(Customer customer) {
