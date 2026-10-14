@@ -1,8 +1,7 @@
 package seedu.address.logic.commands;
 
-import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
-import seedu.address.logic.commands.exceptions.CommandException;
+import static java.util.Objects.requireNonNull;
+
 import seedu.address.model.Model;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.person.Person;
@@ -20,6 +19,9 @@ public class AddCustomerCommand extends Command{
      */
     private final Customer toAdd;
 
+    /**
+     * Creates an AddCustomerCommand for the specified {@code Customer}.
+     */
     public AddCustomerCommand(Customer customer) {
         requireNonNull(customer);
         toAdd = customer;
