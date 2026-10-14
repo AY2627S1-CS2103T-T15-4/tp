@@ -95,6 +95,23 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void getFilteredDogList_searchAndList_updateExistingObservableView() throws Exception {
+        Dog buddy = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        Dog max = model.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("small")));
+        ObservableList<Dog> displayedDogs = logic.getFilteredDogList();
+
+        assertEquals("1 dogs found.", logic.execute("search dog n/bud").getFeedbackToUser());
+        assertEquals(List.of(buddy), displayedDogs);
+        assertThrows(UnsupportedOperationException.class, () -> displayedDogs.remove(0));
+        assertThrows(ParseException.class, () -> logic.execute("search dog id/-1"));
+        assertEquals(List.of(buddy), displayedDogs);
+
+        logic.execute("list dog");
+        assertEquals(List.of(buddy, max), displayedDogs);
+        assertEquals(List.of(buddy, max), logic.getDogList());
+    }
+
+    @Test
     public void getDogList_executeAddDog_updatesExistingObservableView() throws Exception {
         ObservableList<Dog> dogs = logic.getDogList();
         int[] notifications = {0};

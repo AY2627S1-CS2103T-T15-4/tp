@@ -72,6 +72,11 @@ public class LogicManager implements Logic {
     }
 
     @Override
+    public ObservableList<Dog> getFilteredDogList() {
+        return model.getFilteredDogList();
+    }
+
+    @Override
     public ObservableList<Dog> getDogList() {
         return model.getDogList();
     }
