@@ -25,4 +25,13 @@ public class ListDogCommandTest {
 
         assertEquals(ListDogCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
     }
+
+    @Test
+    public void execute_emptyDogList_returnsEmptyMessage() {
+        Model model = new ModelManager(new AddressBook(), new UserPrefs());
+
+        CommandResult result = new ListDogCommand().execute(model);
+
+        assertEquals(ListDogCommand.MESSAGE_EMPTY, result.getFeedbackToUser());
+    }
 }

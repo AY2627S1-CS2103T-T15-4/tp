@@ -8,10 +8,14 @@ import seedu.address.model.Model;
 public class ListDogCommand extends Command {
     public static final String COMMAND_WORD = "list dog";
     public static final String MESSAGE_SUCCESS = "Listed all dogs.";
+    public static final String MESSAGE_EMPTY = "There are no dogs to display.";
 
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
+        if (model.getDogList().isEmpty()) {
+            return new CommandResult(MESSAGE_EMPTY);
+        }
         return new CommandResult(MESSAGE_SUCCESS);
     }
 }
