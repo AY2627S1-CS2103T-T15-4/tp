@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
@@ -67,6 +68,19 @@ public class SearchCommandTest {
         assertThrows(IllegalArgumentException.class, () -> new SearchCommand(" "));
         assertThrows(IllegalArgumentException.class, () -> new SearchCommand(-1));
         assertThrows(NullPointerException.class, () -> new SearchCommand(42).execute(null));
+    }
+
+    @Test
+    public void equals_sameFieldAndValueOnly() {
+        SearchCommand nameSearch = new SearchCommand("Alex");
+        assertEquals(nameSearch, nameSearch);
+        assertEquals(nameSearch, new SearchCommand("Alex"));
+        assertNotEquals(nameSearch, new SearchCommand("Beth"));
+        assertNotEquals(nameSearch, new SearchCommand(42));
+        assertNotEquals(nameSearch, null);
+        assertNotEquals(nameSearch, new Object());
+        assertEquals(new SearchCommand(42), new SearchCommand(42));
+        assertNotEquals(new SearchCommand(42), new SearchCommand(43));
     }
 
     private String execute(ModelManager model, String input) throws Exception {

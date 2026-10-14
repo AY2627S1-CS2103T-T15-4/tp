@@ -40,4 +40,12 @@ public class SearchCustomerCommandParserTest {
                     SearchCustomerCommand.MESSAGE_USAGE), exception.getMessage());
         }
     }
+
+    @Test
+    public void parse_blankNameValue_rejectedByCustomerParser() {
+        ParseException exception = assertThrows(ParseException.class, () ->
+                new SearchCustomerCommandParser().parse("customer n/   "));
+        assertEquals(String.format(seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT,
+                SearchCustomerCommand.MESSAGE_USAGE), exception.getMessage());
+    }
 }

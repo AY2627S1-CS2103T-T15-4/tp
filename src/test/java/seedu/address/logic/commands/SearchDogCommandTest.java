@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
@@ -17,6 +18,7 @@ import seedu.address.model.UserPrefs;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
+import seedu.address.model.dog.DogSearchPredicate;
 import seedu.address.model.dog.Size;
 
 /** Exercises search parsing and execution against the real model. */
@@ -79,6 +81,17 @@ public class SearchDogCommandTest {
         AddressBook before = new AddressBook(model.getAddressBook());
         assertThrows(ParseException.class, () -> parser.parseCommand("search dog id/-1"));
         assertEquals(before, model.getAddressBook());
+    }
+
+    @Test
+    public void equals_sameSearchPredicateOnly() {
+        SearchDogCommand command = new SearchDogCommand(new DogSearchPredicate("Buddy"));
+        assertEquals(command, command);
+        assertEquals(command, new SearchDogCommand(new DogSearchPredicate("Buddy")));
+        assertNotEquals(command, new SearchDogCommand(new DogSearchPredicate("Max")));
+        assertNotEquals(command, new SearchDogCommand(new DogSearchPredicate(42)));
+        assertNotEquals(command, null);
+        assertNotEquals(command, new Object());
     }
 
     private String execute(String input) throws Exception {

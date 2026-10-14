@@ -38,4 +38,12 @@ public class SearchDogCommandParserTest {
                     SearchDogCommand.MESSAGE_USAGE), exception.getMessage());
         }
     }
+
+    @Test
+    public void parse_blankNameValue_rejectedByDogParser() {
+        ParseException exception = assertThrows(ParseException.class, () ->
+                new SearchDogCommandParser().parse("dog n/   "));
+        assertEquals(String.format(seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT,
+                SearchDogCommand.MESSAGE_USAGE), exception.getMessage());
+    }
 }

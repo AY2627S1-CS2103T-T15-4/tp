@@ -39,4 +39,12 @@ public class SearchCommandParserTest {
                     SearchCommand.MESSAGE_USAGE), exception.getMessage());
         }
     }
+
+    @Test
+    public void parse_blankNameValue_rejectedBySearchParser() {
+        ParseException exception = assertThrows(ParseException.class, () ->
+                new SearchCommandParser().parse("n/   "));
+        assertEquals(String.format(seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT,
+                SearchCommand.MESSAGE_USAGE), exception.getMessage());
+    }
 }

@@ -2,6 +2,7 @@ package seedu.address.model.dog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -28,11 +29,22 @@ public class DogSearchPredicateTest {
     }
 
     @Test
+    public void test_nullDog_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new DogSearchPredicate("Buddy").test(null));
+    }
+
+    @Test
     public void equals_comparesSearchFieldAndValue() {
-        assertEquals(new DogSearchPredicate("Buddy"), new DogSearchPredicate("Buddy"));
+        DogSearchPredicate predicate = new DogSearchPredicate("Buddy");
+        assertEquals(predicate, predicate);
+        assertEquals(predicate, new DogSearchPredicate("Buddy"));
+        assertEquals(predicate.hashCode(), new DogSearchPredicate("Buddy").hashCode());
         assertEquals(new DogSearchPredicate(42), new DogSearchPredicate(42));
+        assertEquals(new DogSearchPredicate(42).hashCode(), new DogSearchPredicate(42).hashCode());
+        assertNotEquals(predicate, new DogSearchPredicate("Max"));
         assertFalse(new DogSearchPredicate("42").equals(new DogSearchPredicate(42)));
         assertFalse(new DogSearchPredicate(42).equals(new DogSearchPredicate(4)));
         assertFalse(new DogSearchPredicate(42).equals(null));
+        assertNotEquals(predicate, new Object());
     }
 }

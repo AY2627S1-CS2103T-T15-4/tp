@@ -17,7 +17,7 @@ public class SearchDogCommandParser implements Parser<SearchDogCommand> {
     @Override
     public SearchDogCommand parse(String args) throws ParseException {
         Matcher matcher = SEARCH_FORMAT.matcher(args.strip());
-        if (!matcher.matches() || matcher.group("value").isBlank()) {
+        if (!matcher.matches()) {
             throw invalidFormat();
         }
         String value = matcher.group("value").strip();

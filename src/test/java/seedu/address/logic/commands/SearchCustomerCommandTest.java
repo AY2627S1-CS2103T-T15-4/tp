@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.file.Path;
@@ -94,6 +95,17 @@ public class SearchCustomerCommandTest {
         assertThrows(NullPointerException.class, () -> new SearchCustomerCommand(null));
         SearchCustomerCommand command = new SearchCustomerCommand(new CustomerSearchPredicate("Alex"));
         assertThrows(NullPointerException.class, () -> command.execute(null));
+    }
+
+    @Test
+    public void equals_sameSearchPredicateOnly() {
+        SearchCustomerCommand command = new SearchCustomerCommand(new CustomerSearchPredicate("Alex"));
+        assertEquals(command, command);
+        assertEquals(command, new SearchCustomerCommand(new CustomerSearchPredicate("Alex")));
+        assertNotEquals(command, new SearchCustomerCommand(new CustomerSearchPredicate("Beth")));
+        assertNotEquals(command, new SearchCustomerCommand(new CustomerSearchPredicate(42)));
+        assertNotEquals(command, null);
+        assertNotEquals(command, new Object());
     }
 
     private String execute(String input) throws Exception {

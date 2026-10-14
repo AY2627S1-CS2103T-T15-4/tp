@@ -44,7 +44,6 @@ public class SearchCommand extends Command {
     @Override
     public boolean equals(Object other) {
         return other == this || other instanceof SearchCommand otherCommand
-                && customerPredicate.equals(otherCommand.customerPredicate)
-                && dogPredicate.equals(otherCommand.dogPredicate);
+                && customerPredicate.equals(otherCommand.customerPredicate);
     }
 }

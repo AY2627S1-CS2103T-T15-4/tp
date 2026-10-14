@@ -13,6 +13,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.customer.Customer;
+import seedu.address.model.dog.Breed;
+import seedu.address.model.dog.Dog;
+import seedu.address.model.dog.DogName;
+import seedu.address.model.dog.Size;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.testutil.AddressBookBuilder;
 
@@ -108,5 +113,23 @@ public class ModelManagerTest {
         UserPrefs differentUserPrefs = new UserPrefs();
         differentUserPrefs.setGuiSettings(new GuiSettings(1, 2, 3, 4));
         assertFalse(modelManager.equals(new ModelManager(addressBook, differentUserPrefs)));
+    }
+
+    @Test
+    public void equals_differentSearchResults_returnsFalse() {
+        AddressBook addressBook = new AddressBook();
+        addressBook.addCustomer(new Customer(42, "Alex", "91234567", "alex@example.com", "98765432"));
+        addressBook.addDogFromStorage(new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        ModelManager first = new ModelManager(addressBook, new UserPrefs());
+        ModelManager second = new ModelManager(addressBook, new UserPrefs());
+
+        assertEquals(first, second);
+        first.updateFilteredCustomerList(customer -> false);
+        assertFalse(first.equals(second));
+        first.updateFilteredCustomerList(customer -> true);
+        first.updateFilteredDogList(dog -> false);
+        assertFalse(first.equals(second));
+        first.updateFilteredDogList(dog -> true);
+        assertEquals(first, second);
     }
 }
