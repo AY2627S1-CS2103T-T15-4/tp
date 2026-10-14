@@ -22,6 +22,7 @@ import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.customer.Customer;
+import seedu.address.model.dog.Dog;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.PersonBuilder;
 
@@ -150,6 +151,16 @@ public class AddCommandTest {
 
         @Override
         public void updateFilteredCustomerList(Predicate<Customer> predicate) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public Dog addDog(Dog dog) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public boolean hasDog(Dog dog) {
             throw new AssertionError("This method should not be called.");
         }
     }

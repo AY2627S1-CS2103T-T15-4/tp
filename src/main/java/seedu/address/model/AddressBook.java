@@ -5,26 +5,29 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 import java.util.Objects;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.UniqueCustomerList;
 import seedu.address.model.dog.Dog;
+import seedu.address.model.dog.UniqueDogList;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
 
 /**
  * Wraps all data at the address-book level.
- * Duplicates are not allowed (by .isSamePerson comparison).
+ * Duplicates are not allowed for entities with defined identity rules.
  */
 public class AddressBook implements ReadOnlyAddressBook {
 
     private final UniquePersonList persons = new UniquePersonList();
-    private final ObservableList<Dog> dogs = FXCollections.observableArrayList();
+    private final UniqueDogList dogs = new UniqueDogList();
     private final UniqueCustomerList customers = new UniqueCustomerList();
+    private int nextDogId;
 
-    public AddressBook() {}
+    public AddressBook() {
+        this.nextDogId = 0;
+    }
 
     /**
      * Creates an AddressBook using the Persons in the {@code toBeCopied}
@@ -51,8 +54,14 @@ public class AddressBook implements ReadOnlyAddressBook {
         requireNonNull(newData);
 
         setPersons(newData.getPersonList());
-        dogs.setAll(newData.getDogList());
+        dogs.setDogs(newData.getDogList());
         setCustomers(newData.getCustomerList());
+
+        int restoredNextDogId = newData.getNextDogId();
+        this.nextDogId = restoredNextDogId >= 0
+                ? restoredNextDogId
+                : dogs.asUnmodifiableObservableList().stream()
+                        .mapToInt(Dog::getId).max().orElse(-1) + 1;
     }
 
     public void setCustomers(List<Customer> customers) {
@@ -107,6 +116,58 @@ public class AddressBook implements ReadOnlyAddressBook {
         customers.add(customer);
     }
 
+    /**
+     * Adds a new dog and assigns it the next available persistent ID.
+     *
+     * @param dog dog details without an assigned ID
+     * @return the identified dog that was stored
+     */
+    public Dog addDog(Dog dog) {
+        requireNonNull(dog);
+        Dog newDog = new Dog(nextDogId, dog.getName(), dog.getBreed(), dog.getSize());
+        dogs.add(newDog);
+        nextDogId++;
+        return newDog;
+    }
+
+    /**
+     * Adds a dog loaded from storage without assigning it a new ID.
+     *
+     * @param identified dog with its persisted ID
+     * @return the stored dog
+     */
+    public Dog addDogFromStorage(Dog identified) {
+        requireNonNull(identified);
+        dogs.add(identified);
+        nextDogId = Math.max(nextDogId, identified.getId() + 1);
+        return identified;
+    }
+
+    @Override
+    public int getNextDogId() {
+        return nextDogId;
+    }
+
+    /** Restores the next unused dog ID from persistent storage. */
+    public void setNextDogId(int nextDogId) {
+        if (nextDogId < 0) {
+            throw new IllegalArgumentException("Next dog ID must be nonnegative.");
+        }
+        this.nextDogId = nextDogId;
+    }
+
+    /**
+     * Returns true if a stored dog has the same persistent ID as {@code dog}.
+     * Unassigned dogs do not have an identity and therefore never match.
+     *
+     * @param dog dog to check
+     * @return whether a dog with the same ID exists
+     */
+    public boolean hasDog(Dog dog) {
+        requireNonNull(dog);
+        return dogs.contains(dog);
+    }
+
     //// util methods
 
     @Override
@@ -124,7 +185,7 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     @Override
     public ObservableList<Dog> getDogList() {
-        return FXCollections.unmodifiableObservableList(dogs);
+        return dogs.asUnmodifiableObservableList();
     }
 
     @Override
