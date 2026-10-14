@@ -2,13 +2,10 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.List;
-
 import seedu.address.model.Model;
-import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogSearchPredicate;
 
-/** Shows matching dogs in the result area without changing records or list filters. */
+/** Shows matching dog cards without changing stored records. */
 public class SearchDogCommand extends Command {
     public static final String COMMAND_WORD = "search";
     public static final String MESSAGE_USAGE = "search dog: Searches dogs by name substring or persistent ID.\n"
@@ -27,10 +24,9 @@ public class SearchDogCommand extends Command {
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
-        List<Dog> matches = model.getDogList().stream().filter(predicate).toList();
-        StringBuilder result = new StringBuilder(String.format(MESSAGE_RESULT, matches.size()));
-        matches.forEach(dog -> result.append("\n").append(dog));
-        return new CommandResult(result.toString());
+        model.updateFilteredCustomerList(customer -> false);
+        model.updateFilteredDogList(predicate);
+        return new CommandResult(String.format(MESSAGE_RESULT, model.getFilteredDogList().size()));
     }
 
     @Override

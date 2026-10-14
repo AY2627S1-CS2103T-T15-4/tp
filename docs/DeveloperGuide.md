@@ -172,14 +172,16 @@ they are not AB3's one-based list indices.
 
 `DogSearchPredicate` delegates name matching to `StringUtil.containsSubstringIgnoreCase`
 and compares IDs directly with `Dog.getId()`. A name query is one literal substring,
-including internal spaces. `SearchDogCommand` examines `Model.getDogList()` and returns
-the match count and dog details through `CommandResult`, following the existing `ListDogCommand`
-result-area presentation. It does not update list filters or stored records. This avoids
-requiring a dog list panel or customer-model changes for this contribution.
+including internal spaces. `SearchDogCommand` updates the model's filtered dog list and hides
+customer cards using the customer filter. `Logic.getFilteredDogList()` supplies the observable
+list to `RecordListPanel`, so matching dogs appear as cards. `CommandResult` contains only the
+match count. Each new predicate applies to all stored dogs, without changing stored records.
+`list dog` resets the dog filter so all dogs can be displayed again after a search.
 
 `SearchDogCommandParserTest` covers command routing, whitespace, prefix misuse and ID boundaries.
 `DogSearchPredicateTest` covers field selection and matching. `SearchDogCommandTest` exercises
-the real model, including duplicate names, consecutive searches and unchanged records/filters.
+the real model, including duplicate names, consecutive searches and unchanged stored records.
+`RecordListPanelTest` checks that search and list commands update the displayed cards.
 
 This section describes some noteworthy details on how certain features are implemented.
 

@@ -63,6 +63,16 @@ public class AddCustomerCommandTest {
     }
 
     private abstract static class ModelStub implements Model {
+        @Override
+        public ObservableList<Dog> getFilteredDogList() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void updateFilteredDogList(Predicate<Dog> predicate) {
+            throw new AssertionError("This method should not be called.");
+        }
+
         @Override public ReadOnlyUserPrefs getUserPrefs() {
             throw unused();
         }

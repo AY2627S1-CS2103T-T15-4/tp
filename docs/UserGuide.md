@@ -132,7 +132,8 @@ Examples:
 
 ### Searching dogs: `search dog`
 
-Shows matching dogs, including their persistent IDs, in the command result area.
+Shows matching dogs as cards in the main panel, including their persistent IDs.
+The result bar shows the number of matches.
 
 Format: `search dog n/NAME_QUERY` or `search dog id/ID`
 
@@ -144,8 +145,9 @@ Format: `search dog n/NAME_QUERY` or `search dog id/ID`
   `Little Buddy`. Spaces inside the query are matched literally; surrounding whitespace is ignored.
 * IDs are persistent record IDs, not positions in a displayed list. Use a whole number from
   `0` to `2147483647`, without a sign. Leading zeros are accepted.
-* A valid search with no matches reports `0 dogs found.`. Each search examines all stored dogs
-  and leaves records and existing list filters unchanged. Customer search is not available yet.
+* A valid search with no matches reports `0 dogs found.` and clears the card panel.
+* Each search examines all stored dogs and displays only matching dog cards. Stored records are unchanged.
+* Use `list dog` to show all dogs again. Customer search is not available yet.
 
 Examples:
 

@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.parser.AddressBookParser;
@@ -23,7 +25,7 @@ public class SearchDogCommandTest {
     private final Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
     @Test
-    public void execute_nameSearch_returnsAllMatchingDogsWithoutChangingModel() throws Exception {
+    public void execute_nameSearch_filtersMatchingDogsWithoutChangingRecords() throws Exception {
         Dog first = model.addDog(dog("Buddy"));
         Dog second = model.addDog(dog("Buddy"));
         Dog third = model.addDog(dog("Little Bud"));
@@ -31,10 +33,13 @@ public class SearchDogCommandTest {
         model.updateFilteredPersonList(person -> false);
         AddressBook before = new AddressBook(model.getAddressBook());
 
-        assertEquals("3 dogs found.\n" + first + "\n" + second + "\n" + third,
+        assertEquals("3 dogs found.",
                 execute("search dog n/bUd"));
-        assertEquals("1 dogs found.\n" + third, execute("search dog n/little bud"));
+        assertEquals(List.of(first, second, third), model.getFilteredDogList());
+        assertEquals("1 dogs found.", execute("search dog n/little bud"));
+        assertEquals(List.of(third), model.getFilteredDogList());
         assertEquals("0 dogs found.", execute("search dog n/little  bud"));
+        assertEquals(List.of(), model.getFilteredDogList());
         assertEquals(before, model.getAddressBook());
         assertEquals(0, model.getFilteredPersonList().size());
     }
@@ -43,9 +48,11 @@ public class SearchDogCommandTest {
     public void execute_idSearch_usesPersistentIdAndDoesNotRetainPreviousSearch() throws Exception {
         Dog first = model.addDog(dog("Buddy"));
         Dog second = model.addDog(dog("Max"));
-        assertEquals("1 dogs found.\n" + second, execute("search dog n/Max"));
-        assertEquals("1 dogs found.\n" + first, execute("search dog id/" + first.getId()));
-        assertEquals("1 dogs found.\n" + second, execute("search dog id/" + second.getId()));
+        assertEquals("1 dogs found.", execute("search dog n/Max"));
+        assertEquals("1 dogs found.", execute("search dog id/" + first.getId()));
+        assertEquals(List.of(first), model.getFilteredDogList());
+        assertEquals("1 dogs found.", execute("search dog id/" + second.getId()));
+        assertEquals(List.of(second), model.getFilteredDogList());
         assertEquals("0 dogs found.", execute("search dog id/2147483647"));
     }
 
@@ -55,7 +62,7 @@ public class SearchDogCommandTest {
         Dog storedDog = new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small"));
         storedBook.addDogFromStorage(storedDog);
         model.setAddressBook(storedBook);
-        assertEquals("1 dogs found.\n" + storedDog, execute("search dog id/42"));
+        assertEquals("1 dogs found.", execute("search dog id/42"));
         assertEquals("0 dogs found.", execute("search dog id/0"));
         assertEquals("0 dogs found.", execute("search dog id/1"));
     }
