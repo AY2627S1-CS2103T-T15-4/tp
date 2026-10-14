@@ -33,6 +33,18 @@ public class DeleteDogCommandTest {
     }
 
     @Test
+    public void execute_secondDog_deletesMatchingDog() throws Exception {
+        Model model = new ModelManager(new AddressBook(), new UserPrefs());
+        model.addDog(new Dog(new DogName("Leo"), new Breed("Poodle"), new Size("Large")));
+        Dog secondDog = model.addDog(new Dog(new DogName("Milo"), new Breed("Beagle"), new Size("Small")));
+
+        new DeleteDogCommand(secondDog.getId()).execute(model);
+
+        assertEquals(1, model.getDogList().size());
+        assertEquals("Leo", model.getDogList().get(0).getName().fullName);
+    }
+
+    @Test
     public void execute_missingDog_throwsCommandException() {
         Model model = new ModelManager(new AddressBook(), new UserPrefs());
 
