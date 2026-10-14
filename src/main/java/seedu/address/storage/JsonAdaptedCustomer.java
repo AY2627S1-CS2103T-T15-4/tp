@@ -14,18 +14,18 @@ class JsonAdaptedCustomer {
     public static final String MISSING_FIELD_MESSAGE_FORMAT = "Customer's %s field is missing!";
 
     private final Integer id;
-    private final Name name;
-    private final Phone phone;
-    private final Email email;
-    private final BackupContact backupContact;
+    private final String name;
+    private final String phone;
+    private final String email;
+    private final String backupContact;
 
     /**
      * Constructs a {@code JsonAdaptedCustomer} with the given customer details.
      */
     @JsonCreator
-    public JsonAdaptedCustomer(@JsonProperty("id") Integer id, @JsonProperty("name") Name name,
-            @JsonProperty("phone") Phone phone, @JsonProperty("email") Email email,
-            @JsonProperty("backupContact") BackupContact backupContact) {
+    public JsonAdaptedCustomer(@JsonProperty("id") Integer id, @JsonProperty("name") String name,
+            @JsonProperty("phone") String phone, @JsonProperty("email") String email,
+            @JsonProperty("backupContact") String backupContact) {
         this.id = id;
         this.name = name;
         this.phone = phone;
@@ -38,10 +38,10 @@ class JsonAdaptedCustomer {
      */
     public JsonAdaptedCustomer(Customer source) {
         id = source.getId();
-        name = source.getName();
-        phone = source.getPhone();
-        email = source.getEmail();
-        backupContact = source.getBackupContact();
+        name = source.getName().fullName;
+        phone = source.getPhone().value;
+        email = source.getEmail().value;
+        backupContact = source.getBackupContact().value;
     }
 
     /**
@@ -68,7 +68,7 @@ class JsonAdaptedCustomer {
         if (id < 0) {
             throw new IllegalValueException("Customer id must be nonnegative.");
         }
-        return new Customer(id, name, phone, email, backupContact);
+        return new Customer(id, new Name(name), new Phone(phone), new Email(email), new BackupContact(backupContact));
     }
 
 }
