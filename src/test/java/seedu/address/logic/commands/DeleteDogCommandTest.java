@@ -41,13 +41,34 @@ public class DeleteDogCommandTest {
     }
 
     @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new DeleteDogCommand(12).execute(null));
+    }
+
+    @Test
     public void equals_sameId_returnsTrue() {
         assertTrue(new DeleteDogCommand(12).equals(new DeleteDogCommand(12)));
     }
 
     @Test
+    public void equals_sameObject_returnsTrue() {
+        DeleteDogCommand command = new DeleteDogCommand(12);
+        assertTrue(command.equals(command));
+    }
+
+    @Test
     public void equals_differentId_returnsFalse() {
         assertFalse(new DeleteDogCommand(12).equals(new DeleteDogCommand(13)));
+    }
+
+    @Test
+    public void equals_null_returnsFalse() {
+        assertFalse(new DeleteDogCommand(12).equals(null));
+    }
+
+    @Test
+    public void equals_differentType_returnsFalse() {
+        assertFalse(new DeleteDogCommand(12).equals(new Object()));
     }
 
     @Test

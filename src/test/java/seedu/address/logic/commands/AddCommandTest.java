@@ -183,6 +183,11 @@ public class AddCommandTest {
         public boolean hasDog(Dog dog) {
             throw new AssertionError("This method should not be called.");
         }
+
+        @Override
+        public void deleteDog(Dog dog) {
+            throw new AssertionError("This method should not be called.");
+        }
     }
 
     /**
