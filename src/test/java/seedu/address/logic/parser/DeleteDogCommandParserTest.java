@@ -28,4 +28,10 @@ public class DeleteDogCommandParserTest {
         assertParseFailure(parser, "abc", "Error in deleting dog:\nInvalid format. "
                 + "Please use the following format: delete <category> <id>\nExample: delete dog 12");
     }
+
+    @Test
+    public void parse_missingId_throwsParseException() {
+        assertParseFailure(parser, "   ", "Error in deleting dog:\nInvalid format. "
+                + "Please use the following format: delete <category> <id>\nExample: delete dog 12");
+    }
 }

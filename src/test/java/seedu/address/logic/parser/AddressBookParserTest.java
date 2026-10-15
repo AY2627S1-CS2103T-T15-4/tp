@@ -74,6 +74,12 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_deleteDogWithMultipleSpaces() throws Exception {
+        DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("delete  dog   12");
+        assertEquals(new DeleteDogCommand(12), command);
+    }
+
+    @Test
     public void parseCommand_edit() throws Exception {
         Person person = new PersonBuilder().build();
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder(person).build();
