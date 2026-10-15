@@ -15,16 +15,17 @@ import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.DeleteCustomerCommand;
-import seedu.address.logic.commands.DeleteDogCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCustomerCommand;
 import seedu.address.logic.commands.EditDogCommand;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
+import seedu.address.logic.commands.LinkCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ListDogCommand;
 import seedu.address.logic.commands.SearchCommand;
+import seedu.address.logic.commands.UnlinkCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
 /**
@@ -40,7 +41,6 @@ public class AddressBookParser {
     private static final Pattern DELETE_DOG_COMMAND_FORMAT = Pattern.compile(
             "delete\\s+dog(?=\\s|$)(?<arguments>.*)");
     private static final Pattern DELETE_CUSTOMER_COMMAND_FORMAT = Pattern.compile("delete\\s+customer(?:\\s+.*)?");
-    private static final Pattern DELETE_DOG_COMMAND_FORMAT = Pattern.compile("delete\\s+dog(?:\\s+.*)?");
     private static final Logger logger = LogsCenter.getLogger(AddressBookParser.class);
 
     /**
@@ -61,10 +61,6 @@ public class AddressBookParser {
         if (DELETE_CUSTOMER_COMMAND_FORMAT.matcher(userInput.trim()).matches()) {
             String arguments = userInput.trim().substring(DeleteCustomerCommand.COMMAND_WORD.length());
             return new DeleteCustomerCommandParser().parse(arguments);
-        }
-        if (DELETE_DOG_COMMAND_FORMAT.matcher(userInput.trim()).matches()) {
-            String arguments = userInput.trim().substring(DeleteDogCommand.COMMAND_WORD.length());
-            return new DeleteDogCommandParser().parse(arguments);
         }
         final Matcher matcher = BASIC_COMMAND_FORMAT.matcher(userInput.trim());
         if (!matcher.matches()) {
@@ -90,6 +86,8 @@ public class AddressBookParser {
             case ClearCommand.COMMAND_WORD -> new ClearCommand();
             case FindCommand.COMMAND_WORD -> new FindCommandParser().parse(arguments);
             case SearchCommand.COMMAND_WORD -> new SearchCommandParser().parse(arguments);
+            case LinkCommand.COMMAND_WORD -> new LinkCommandParser().parse(arguments);
+            case UnlinkCommand.COMMAND_WORD -> new UnlinkCommandParser().parse(arguments);
             case ListCommand.COMMAND_WORD -> new ListCommandParser().parse(arguments);
             case ExitCommand.COMMAND_WORD -> new ExitCommand();
             case HelpCommand.COMMAND_WORD -> new HelpCommand();

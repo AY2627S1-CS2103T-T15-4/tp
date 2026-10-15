@@ -2,7 +2,10 @@ package seedu.address.model;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javafx.collections.ObservableList;
@@ -11,6 +14,8 @@ import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.UniqueCustomerList;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.UniqueDogList;
+import seedu.address.model.dog.exceptions.LinkException;
+import seedu.address.model.dog.exceptions.UnlinkException;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
 
@@ -135,18 +140,96 @@ public class AddressBook implements ReadOnlyAddressBook {
         return identifiedCustomer;
     }
 
+    /** Replaces customer details while preserving the persistent ID used by dog ownership links. */
     public void setCustomer(Customer target, Customer editedCustomer) {
         requireNonNull(editedCustomer);
+        if (target.getId() != editedCustomer.getId()) {
+            throw new IllegalArgumentException("Editing a customer must preserve its persistent ID.");
+        }
 
         customers.setCustomer(target, editedCustomer);
     }
 
     /**
-     * Removes {@code key} from this {@code AddressBook}.
-     * {@code key} must exist in the address book.
+     * Removes {@code key} and clears ownership of that customer's dogs without deleting them.
+     * {@code key} must exist in the address book. Other customers and dogs are unaffected.
      */
     public void removeCustomer(Customer key) {
         customers.remove(key);
+        dogs.setDogs(getDogList().stream()
+                .map(dog -> dog.getOwnerId().filter(id -> id == key.getId()).isPresent()
+                        ? dog.withoutOwner() : dog)
+                .toList());
+    }
+
+    /**
+     * Links all requested dogs to an existing customer, regardless of display filters.
+     * Validates the entire batch before replacing the dog list. Rejected batches change nothing.
+     *
+     * @throws LinkException if IDs repeat, endpoints are missing, or any dog already has an owner.
+     */
+    public void linkDogs(int customerId, List<Integer> dogIds) throws LinkException {
+        requireNonNull(dogIds);
+        if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
+                || new HashSet<>(dogIds).size() != dogIds.size()) {
+            throw new LinkException("Specify at least one dog ID, with no repeated IDs.");
+        }
+        if (getCustomerList().stream().noneMatch(customer -> customer.getId() == customerId)) {
+            throw new LinkException("Customer ID " + customerId + " does not exist.");
+        }
+        Map<Integer, Dog> replacements = new HashMap<>();
+        for (int dogId : dogIds) {
+            Dog dog = getDogList().stream().filter(candidate -> candidate.getId() == dogId).findFirst()
+                    .orElseThrow(() -> new LinkException("Dog ID " + dogId + " does not exist."));
+            if (dog.getOwnerId().isPresent()) {
+                throw new LinkException("Dog ID " + dogId + " is already linked to customer ID "
+                        + dog.getOwnerId().get() + ".");
+            }
+            replacements.put(dogId, dog.withOwner(customerId));
+        }
+        dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
+    }
+
+    /**
+     * Unlinks a batch from their current owners without deleting records or changing filters.
+     * Validates every endpoint and ownership before publishing the updated dog list.
+     *
+     * @throws UnlinkException if the batch is empty, IDs repeat, dogs are missing,
+     *     or any dog has no owner.
+     */
+    public void unlinkDogs(List<Integer> dogIds) throws UnlinkException {
+        requireNonNull(dogIds);
+        if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
+                || new HashSet<>(dogIds).size() != dogIds.size()) {
+            throw new UnlinkException("Specify at least one dog ID, with no repeated IDs.");
+        }
+        Map<Integer, Dog> replacements = new HashMap<>();
+        for (int dogId : dogIds) {
+            Dog dog = getDogList().stream().filter(candidate -> candidate.getId() == dogId).findFirst()
+                    .orElseThrow(() -> new UnlinkException("Dog ID " + dogId + " does not exist."));
+            if (dog.getOwnerId().isEmpty()) {
+                throw new UnlinkException("Dog ID " + dogId + " has no owner.");
+            }
+            replacements.put(dogId, dog.withoutOwner());
+        }
+        dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
+    }
+
+    /**
+     * Unlinks all dogs owned by a customer, including dogs hidden by filters.
+     * @throws UnlinkException if the customer is missing or has no linked dogs.
+     */
+    public void unlinkCustomerDogs(int customerId) throws UnlinkException {
+        if (getCustomerList().stream().noneMatch(customer -> customer.getId() == customerId)) {
+            throw new UnlinkException("Customer ID " + customerId + " does not exist.");
+        }
+        List<Integer> dogIds = getDogList().stream()
+                .filter(dog -> dog.getOwnerId().filter(ownerId -> ownerId == customerId).isPresent())
+                .map(Dog::getId).toList();
+        if (dogIds.isEmpty()) {
+            throw new UnlinkException("Customer ID " + customerId + " has no linked dogs.");
+        }
+        unlinkDogs(dogIds);
     }
 
     /**
@@ -171,6 +254,10 @@ public class AddressBook implements ReadOnlyAddressBook {
      */
     public Dog addDogFromStorage(Dog identified) {
         requireNonNull(identified);
+        if (identified.getOwnerId().isPresent() && getCustomerList().stream()
+                .noneMatch(customer -> customer.getId() == identified.getOwnerId().get())) {
+            throw new IllegalArgumentException("Dog owner must refer to an existing customer.");
+        }
         dogs.add(identified);
         nextDogId = Math.max(nextDogId, identified.getId() + 1);
         return identified;

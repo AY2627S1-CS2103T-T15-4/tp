@@ -92,7 +92,11 @@ class JsonSerializableAddressBook {
             if (addressBook.hasDog(dog)) {
                 throw new IllegalValueException(MESSAGE_DUPLICATE_DOG);
             }
-            addressBook.addDogFromStorage(dog);
+            try {
+                addressBook.addDogFromStorage(dog);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalValueException(e.getMessage(), e);
+            }
         }
 
         if (nextDogId != null && nextDogId >= 0) {

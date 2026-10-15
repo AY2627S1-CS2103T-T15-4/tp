@@ -7,12 +7,12 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.customer.Customer;
 
-/** Deletes a customer identified by its persistent ID. */
+/** Deletes a customer identified by its persistent ID and unlinks their dogs. */
 public class DeleteCustomerCommand extends Command {
 
     public static final String COMMAND_WORD = "delete customer";
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + " <id>: Deletes the customer with the specified ID.\n"
+            + " <id>: Deletes the customer with the specified ID and unlinks their dogs without deleting them.\n"
             + "Example: delete customer 21";
     public static final String MESSAGE_SUCCESS = "Successfully deleted customer: %1$s; id: %2$d; "
             + "Contact: %3$s; Email: %4$s; Backup contact: %5$s";

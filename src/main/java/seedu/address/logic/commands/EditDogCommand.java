@@ -64,7 +64,8 @@ public class EditDogCommand extends Command {
         DogName updatedName = descriptor.getName().orElse(dogToEdit.getName());
         Breed updatedBreed = descriptor.getBreed().orElse(dogToEdit.getBreed());
         Size updatedSize = descriptor.getSize().orElse(dogToEdit.getSize());
-        return new Dog(dogToEdit.getId(), updatedName, updatedBreed, updatedSize);
+        return new Dog(dogToEdit.getId(), updatedName, updatedBreed, updatedSize,
+                dogToEdit.getOwnerId().orElse(null));
     }
 
     @Override

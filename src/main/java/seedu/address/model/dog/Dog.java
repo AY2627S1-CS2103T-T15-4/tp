@@ -3,6 +3,7 @@ package seedu.address.model.dog;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import seedu.address.commons.util.ToStringBuilder;
 
@@ -16,6 +17,7 @@ public class Dog {
     private final DogName name;
     private final Breed breed;
     private final Size size;
+    private final Integer ownerId;
 
     /**
      * Creates a dog with the given details.
@@ -25,6 +27,11 @@ public class Dog {
      * @param size size of the dog
      */
     public Dog(int id, DogName name, Breed breed, Size size) {
+        this(id, name, breed, size, null);
+    }
+
+    /** Creates a stored dog with an optional nonnegative owner ID. */
+    public Dog(int id, DogName name, Breed breed, Size size, Integer ownerId) {
         requireAllNonNull(name, breed, size);
         if (id < 0) {
             throw new IllegalArgumentException("Dog id must be nonnegative.");
@@ -33,6 +40,10 @@ public class Dog {
         this.name = name;
         this.breed = breed;
         this.size = size;
+        if (ownerId != null && ownerId < 0) {
+            throw new IllegalArgumentException("Owner ID must be nonnegative.");
+        }
+        this.ownerId = ownerId;
     }
 
 
@@ -44,6 +55,7 @@ public class Dog {
     public Dog(DogName name, Breed breed, Size size) {
         requireAllNonNull(name, breed, size);
         this.id = -1; //unassigned id
+        this.ownerId = null;
         this.name = name;
         this.breed = breed;
         this.size = size;
@@ -63,6 +75,20 @@ public class Dog {
 
     public Size getSize() {
         return size;
+    }
+
+    public Optional<Integer> getOwnerId() {
+        return Optional.ofNullable(ownerId);
+    }
+
+    /** Returns a copy with the same identity and details and the specified owner. */
+    public Dog withOwner(int customerId) {
+        return new Dog(id, name, breed, size, customerId);
+    }
+
+    /** Returns an unowned copy with the same persistent ID and details. */
+    public Dog withoutOwner() {
+        return new Dog(id, name, breed, size);
     }
 
     /**
@@ -91,12 +117,13 @@ public class Dog {
         return id == otherDog.id
                 && name.equals(otherDog.name)
                 && breed.equals(otherDog.breed)
-                && size.equals(otherDog.size);
+                && size.equals(otherDog.size)
+                && Objects.equals(ownerId, otherDog.ownerId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, breed, size);
+        return Objects.hash(id, name, breed, size, ownerId);
     }
 
     @Override
@@ -106,6 +133,7 @@ public class Dog {
                 .add("name", name)
                 .add("breed", breed)
                 .add("size", size)
+                .add("ownerId", ownerId)
                 .toString();
     }
 }

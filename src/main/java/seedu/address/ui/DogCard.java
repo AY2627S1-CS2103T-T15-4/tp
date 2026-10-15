@@ -19,6 +19,8 @@ public class DogCard extends UiPart<Region> {
     private Label breed;
     @FXML
     private Label size;
+    @FXML
+    private Label owner;
 
     /**
      * Creates a card with the given dog to display.
@@ -29,5 +31,6 @@ public class DogCard extends UiPart<Region> {
         name.setText(dog.getName().fullName);
         breed.setText("Breed: " + dog.getBreed());
         size.setText("Size: " + dog.getSize());
+        owner.setText(dog.getOwnerId().map(id -> "Owner ID: " + id).orElse("Owner ID: None"));
     }
 }
