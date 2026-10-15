@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.util.ArrayList;
@@ -52,7 +53,13 @@ public class AddCustomerCommandTest {
     @Test
     public void equalsAndToString() {
         AddCustomerCommand command = new AddCustomerCommand(ALICE);
+
+        assertEquals(command, command);
         assertEquals(command, new AddCustomerCommand(ALICE));
+        assertFalse(command.equals(new AddCustomerCommand(new Customer(2, new Name("Bob Lim"), new Phone("92345678"),
+                new Email("bob@example.com"), new BackupContact("93456789")))));
+        assertFalse(command.equals(null));
+        assertFalse(command.equals(1));
         assertEquals(AddCustomerCommand.class.getCanonicalName() + "{toAdd=" + ALICE + "}", command.toString());
     }
 

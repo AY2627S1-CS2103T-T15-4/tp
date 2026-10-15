@@ -60,6 +60,20 @@ public class UniqueCustomerListTest {
         assertThrows(UnsupportedOperationException.class, () -> customers.asUnmodifiableObservableList().add(ALICE));
     }
 
+    @Test
+    public void iteratorEqualsAndHashCode() {
+        customers.add(ALICE);
+        UniqueCustomerList sameCustomers = new UniqueCustomerList();
+        sameCustomers.add(ALICE);
+
+        assertEquals(ALICE, customers.iterator().next());
+        assertEquals(customers, customers);
+        assertEquals(customers, sameCustomers);
+        assertEquals(customers.hashCode(), sameCustomers.hashCode());
+        assertFalse(customers.equals(null));
+        assertFalse(customers.equals("customers"));
+    }
+
     private static Customer customer(int id, String name) {
         return new Customer(id, new Name(name), new Phone("91234567"), new Email("test@example.com"),
                 new BackupContact("98765432"));

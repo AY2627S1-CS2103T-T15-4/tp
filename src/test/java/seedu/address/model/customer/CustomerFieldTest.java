@@ -14,7 +14,6 @@ public class CustomerFieldTest {
         assertTrue(Phone.isValidPhone("91234567"));
         assertTrue(BackupContact.isValidBackupContact("98765432"));
         assertTrue(Email.isValidEmail("alice.tan@example.com"));
-        assertTrue(Address.isValidAddress("123 Clementi Ave 2"));
     }
 
     @Test
@@ -23,7 +22,6 @@ public class CustomerFieldTest {
         assertFalse(Phone.isValidPhone("12a"));
         assertFalse(BackupContact.isValidBackupContact("12"));
         assertFalse(Email.isValidEmail("alice@example.c"));
-        assertFalse(Address.isValidAddress(" "));
     }
 
     @Test
@@ -32,7 +30,6 @@ public class CustomerFieldTest {
         assertThrows(IllegalArgumentException.class, () -> new Phone("abc"));
         assertThrows(IllegalArgumentException.class, () -> new BackupContact("12"));
         assertThrows(IllegalArgumentException.class, () -> new Email("invalid"));
-        assertThrows(IllegalArgumentException.class, () -> new Address(" "));
     }
 
     @Test
