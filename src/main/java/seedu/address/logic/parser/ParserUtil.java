@@ -9,6 +9,7 @@ import java.util.Set;
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.customer.BackupContact;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
@@ -170,4 +171,63 @@ public class ParserUtil {
         return new Size(trimmedSize);
     }
 
+    //==========================CUSTOMER RELATED====================================
+    /**
+     * Parses a {@code String name} into a {@code Name}.
+     * Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ParseException if the given {@code name} is invalid.
+     */
+    public static seedu.address.model.customer.Name parseCustomerName(String name) throws ParseException {
+        requireNonNull(name);
+        String trimmedName = name.trim();
+        if (!seedu.address.model.customer.Name.isValidName(trimmedName)) {
+            throw new ParseException(seedu.address.model.customer.Name.MESSAGE_CONSTRAINTS);
+        }
+        return new seedu.address.model.customer.Name(trimmedName);
+    }
+
+    /**
+     * Parses a {@code String phone} into a {@code Phone}.
+     * Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ParseException if the given {@code phone} is invalid.
+     */
+    public static seedu.address.model.customer.Phone parseCustomerPhone(String phone) throws ParseException {
+        requireNonNull(phone);
+        String trimmedPhone = phone.trim();
+        if (!seedu.address.model.customer.Phone.isValidPhone(trimmedPhone)) {
+            throw new ParseException(seedu.address.model.customer.Phone.MESSAGE_CONSTRAINTS);
+        }
+        return new seedu.address.model.customer.Phone(trimmedPhone);
+    }
+    /**
+     * Parses a {@code String email} into an {@code Email}.
+     * Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ParseException if the given {@code email} is invalid.
+     */
+    public static seedu.address.model.customer.Email parseCustomerEmail(String email) throws ParseException {
+        requireNonNull(email);
+        String trimmedEmail = email.trim();
+        if (!seedu.address.model.customer.Email.isValidEmail(trimmedEmail)) {
+            throw new ParseException(seedu.address.model.customer.Email.MESSAGE_CONSTRAINTS);
+        }
+        return new seedu.address.model.customer.Email(trimmedEmail);
+    }
+
+    /**
+     * Parses a {@code String backupcontact} into a {@code BackupContact}.
+     * Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ParseException if the given {@code phone} is invalid.
+     */
+    public static BackupContact parseCustomerBackupContact(String backupContact) throws ParseException {
+        requireNonNull(backupContact);
+        String trimmedPhone = backupContact.trim();
+        if (!BackupContact.isValidBackupContact(trimmedPhone)) {
+            throw new ParseException(BackupContact.MESSAGE_CONSTRAINTS);
+        }
+        return new BackupContact(trimmedPhone);
+    }
 }

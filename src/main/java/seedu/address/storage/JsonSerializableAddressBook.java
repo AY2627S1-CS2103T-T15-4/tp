@@ -29,12 +29,14 @@ class JsonSerializableAddressBook {
     private final List<JsonAdaptedCustomer> customers = new ArrayList<>();
     private final List<JsonAdaptedDog> dogs = new ArrayList<>();
     private final Integer nextDogId;
+    private final Integer nextCustomerId;
     /** Constructs a serializable address book from JSON fields. */
     @JsonCreator
     public JsonSerializableAddressBook(@JsonProperty("persons") List<JsonAdaptedPerson> persons,
             @JsonProperty("customers") List<JsonAdaptedCustomer> customers,
             @JsonProperty("dogs") List<JsonAdaptedDog> dogs,
-            @JsonProperty("nextDogId") Integer nextDogId) {
+            @JsonProperty("nextDogId") Integer nextDogId,
+            @JsonProperty("nextCustomerId") Integer nextCustomerId) {
         if (persons != null) {
             this.persons.addAll(persons);
         }
@@ -45,6 +47,7 @@ class JsonSerializableAddressBook {
             this.dogs.addAll(dogs);
         }
         this.nextDogId = nextDogId;
+        this.nextCustomerId = nextCustomerId;
     }
 
     /**
@@ -59,6 +62,7 @@ class JsonSerializableAddressBook {
                 .collect(Collectors.toList()));
         dogs.addAll(source.getDogList().stream().map(JsonAdaptedDog::new).collect(Collectors.toList()));
         nextDogId = source.getNextDogId();
+        nextCustomerId = source.getNextCustomerId();
     }
 
     /**
@@ -93,6 +97,9 @@ class JsonSerializableAddressBook {
 
         if (nextDogId != null && nextDogId >= 0) {
             addressBook.setNextDogId(nextDogId);
+        }
+        if (nextCustomerId != null && nextCustomerId >= 1) {
+            addressBook.setNextCustomerId(nextCustomerId);
         }
 
         return addressBook;
