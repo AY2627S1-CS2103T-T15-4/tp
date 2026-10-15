@@ -24,9 +24,12 @@ public class AddressBook implements ReadOnlyAddressBook {
     private final UniqueDogList dogs = new UniqueDogList();
     private final UniqueCustomerList customers = new UniqueCustomerList();
     private int nextDogId;
+    private int nextCustomerId;
 
+    /** Creates an empty address book. */
     public AddressBook() {
         this.nextDogId = 0;
+        this.nextCustomerId = 1;
     }
 
     /**
@@ -62,6 +65,12 @@ public class AddressBook implements ReadOnlyAddressBook {
                 ? restoredNextDogId
                 : dogs.asUnmodifiableObservableList().stream()
                         .mapToInt(Dog::getId).max().orElse(-1) + 1;
+
+        int restoredNextCustomerId = newData.getNextCustomerId();
+        this.nextCustomerId = restoredNextCustomerId >= 0
+                ? restoredNextCustomerId
+                : customers.asUnmodifiableObservableList().stream()
+                        .mapToInt(Customer::getId).max().orElse(0) + 1;
     }
 
     public void setCustomers(List<Customer> customers) {
@@ -111,9 +120,19 @@ public class AddressBook implements ReadOnlyAddressBook {
         return customers.contains(customer);
     }
 
-    /** Adds the given customer to the address book. */
-    public void addCustomer(Customer customer) {
-        customers.add(customer);
+    /**
+     * Adds a customer, assigning a new ID when the customer is unassigned.
+     * IDs increase monotonically and are never reused after deletion.
+     */
+    public Customer addCustomer(Customer customer) {
+        requireNonNull(customer);
+        Customer identifiedCustomer = customer.getId() < 0
+                ? new Customer(nextCustomerId, customer.getName(), customer.getPhone(), customer.getEmail(),
+                        customer.getBackupContact())
+                : customer;
+        customers.add(identifiedCustomer);
+        nextCustomerId = Math.max(nextCustomerId, identifiedCustomer.getId() + 1);
+        return identifiedCustomer;
     }
 
     public void setCustomer(Customer target, Customer editedCustomer) {
@@ -162,12 +181,25 @@ public class AddressBook implements ReadOnlyAddressBook {
         return nextDogId;
     }
 
+    @Override
+    public int getNextCustomerId() {
+        return nextCustomerId;
+    }
+
     /** Restores the next unused dog ID from persistent storage. */
     public void setNextDogId(int nextDogId) {
         if (nextDogId < 0) {
             throw new IllegalArgumentException("Next dog ID must be nonnegative.");
         }
         this.nextDogId = nextDogId;
+    }
+
+    /** Restores the next unused customer ID from persistent storage. */
+    public void setNextCustomerId(int nextCustomerId) {
+        if (nextCustomerId < 1) {
+            throw new IllegalArgumentException("Next customer ID must be positive.");
+        }
+        this.nextCustomerId = nextCustomerId;
     }
 
     /**
