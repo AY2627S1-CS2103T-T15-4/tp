@@ -44,6 +44,8 @@ public class SearchCommandParserTest {
     public void parse_blankNameValue_rejectedBySearchParser() {
         ParseException exception = assertThrows(ParseException.class, () ->
                 new SearchCommandParser().parse("n/   "));
+        assertThrows(ParseException.class, () ->
+                new SearchCommandParser().parse("n/\u2003"));
         assertEquals(String.format(seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT,
                 SearchCommand.MESSAGE_USAGE), exception.getMessage());
     }

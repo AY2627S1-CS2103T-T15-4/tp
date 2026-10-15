@@ -43,9 +43,9 @@ public class CustomerCardTest {
 
             assertEquals("7. ", label(card, "id"));
             assertEquals("Alex Tan", label(card, "name"));
-            assertEquals("91234567", label(card, "phone"));
-            assertEquals("alex@example.com", label(card, "email"));
-            assertEquals("98765432", label(card, "backupContact"));
+            assertEquals("Phone Number: 91234567", label(card, "phone"));
+            assertEquals("Email: alex@example.com", label(card, "email"));
+            assertEquals("Backup Contact: 98765432", label(card, "backupContact"));
         });
     }
 

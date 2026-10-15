@@ -206,6 +206,8 @@ Customer and dog IDs are independent, so an ID search can match both categories.
 The existing `RecordListPanel` renders customers first, then dogs; feedback reports both counts.
 
 `AddressBookParser` routes `search` to `SearchCommandParser`, which dispatches explicit categories.
+The three search parsers delegate shared name/ID validation to `SearchFieldParser` while retaining
+their own category grammar, command creation and usage messages.
 For dog searches, `SearchDogCommandParser` accepts
 `dog n/NAME_QUERY` or `dog id/ID`. It rejects empty values, additional prefixes, unsupported
 categories and invalid IDs before command execution. IDs are nonnegative Java integers;
