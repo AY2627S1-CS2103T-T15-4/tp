@@ -155,9 +155,9 @@ public class RecordListPanelTest {
             assertEquals(2, list.getItems().size());
             Region customer = list.getItems().get(0).get();
             assertEquals("Alex", label(customer, "name"));
-            assertEquals("91234567", label(customer, "phone"));
-            assertEquals("alex@example.com", label(customer, "email"));
-            assertEquals("98765432", label(customer, "backupContact"));
+            assertEquals("Phone Number: 91234567", label(customer, "phone"));
+            assertEquals("Email: alex@example.com", label(customer, "email"));
+            assertEquals("Backup Contact: 98765432", label(customer, "backupContact"));
             assertEquals("Buddy", label(list.getItems().get(1).get(), "name"));
 
             new Scene(panel.getRoot(), 450, 600);

@@ -46,9 +46,9 @@ public class CustomerCard extends UiPart<Region> {
         this.customer = customer;
         id.setText(customer.getId() + ". ");
         name.setText(customer.getName().fullName);
-        phone.setText(customer.getPhone().value);
-        email.setText(customer.getEmail().value);
-        backupContact.setText(customer.getBackupContact().value);
+        phone.setText("Phone Number: " + customer.getPhone().value);
+        email.setText("Email: " + customer.getEmail().value);
+        backupContact.setText("Backup Contact: " + customer.getBackupContact().value);
         String ids = ownedDogIds.stream().sorted().map(String::valueOf).collect(Collectors.joining(", "));
         dogIds.setText("Dog IDs: " + (ids.isEmpty() ? "None" : ids));
     }
