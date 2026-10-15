@@ -123,4 +123,7 @@ public interface Model {
 
     /** Deletes the given dog. The dog must exist in the address book. */
     void deleteDog(Dog dog);
+
+    /** Replaces an existing dog with its edited version. */
+    void setDog(Dog target, Dog editedDog);
 }

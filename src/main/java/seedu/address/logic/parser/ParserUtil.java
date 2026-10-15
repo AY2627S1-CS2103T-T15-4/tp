@@ -142,6 +142,7 @@ public class ParserUtil {
      *
      * @throws ParseException if the given name is invalid
      */
+
     public static DogName parseDogName(String name) throws ParseException {
         requireNonNull(name);
         String trimmedName = name.trim();
