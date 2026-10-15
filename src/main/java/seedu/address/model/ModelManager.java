@@ -106,6 +106,11 @@ public class ModelManager implements Model {
     }
 
     @Override
+    public void deleteDog(Dog dog) {
+        addressBook.removeDog(dog);
+    }
+
+    @Override
     public Dog addDog(Dog dog) {
         return addressBook.addDog(dog);
     }

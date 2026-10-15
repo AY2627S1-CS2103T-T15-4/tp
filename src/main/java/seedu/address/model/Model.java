@@ -115,4 +115,7 @@ public interface Model {
 
     /** Returns whether a dog with the same persistent ID exists. */
     boolean hasDog(Dog dog);
+
+    /** Deletes the given dog. The dog must exist in the address book. */
+    void deleteDog(Dog dog);
 }
