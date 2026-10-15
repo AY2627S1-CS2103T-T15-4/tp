@@ -4,9 +4,9 @@
   pageNav: 3
 ---
 
-# WatchDog User Guide
+# AB-3 User Guide
 
-WatchDog is a **desktop application for managing contacts, optimized for use through a Command Line Interface (CLI)** while retaining the benefits of a Graphical User Interface (GUI). If you type quickly, WatchDog can help you manage contacts faster than traditional GUI applications.
+AddressBook Level 3 (AB3) is a **desktop application for managing contacts, optimized for use through a Command Line Interface (CLI)** while retaining the benefits of a Graphical User Interface (GUI). If you type quickly, AB3 can help you manage contacts faster than traditional GUI applications.
 
 <!-- * Table of Contents -->
 <page-nav-print />
@@ -20,7 +20,7 @@ WatchDog is a **desktop application for managing contacts, optimized for use thr
 
 1. Download the latest `.jar` file from [here](https://github.com/se-edu/addressbook-level3/releases).
 
-1. Copy the file to the folder you want to use as the _home folder_ for WatchDog.
+1. Copy the file to the folder you want to use as the _home folder_ for your AddressBook.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar addressbook.jar`.<br>
    A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
@@ -32,6 +32,10 @@ WatchDog is a **desktop application for managing contacts, optimized for use thr
    * `list customer` : Lists all customers.
 
    * `list dog` : Lists all dogs.
+
+   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the Address Book.
+
+   * `delete 3` : Deletes the 3rd contact shown in the current list.
 
    * `clear` : Deletes all persons, customers, and dogs.
 
@@ -73,69 +77,63 @@ Shows a message explaining how to access the help page.
 
 Format: `help`
 
+
+### Adding a person: `add`
+
+Adds a person to the address book.
+
+Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... `
+
+<box type="tip" seamless>
+
+**Tip:** A person can have any number of tags, including zero.
+</box>
+
+Examples:
+* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
+* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+
 ### Adding a dog: `adddog`
 
-Adds a dog to WatchDog.
+Adds a dog and assigns it a unique persistent ID.
 
 Format: `adddog n/NAME b/BREED s/SIZE`
 
-Example: `adddog n/Cookie b/Golden Retriever s/Large`
+Example:
 
-* `NAME`, `BREED`, and `SIZE` are required.
-* `SIZE` is case-insensitive and must be a valid dog size such as `Small`, `Medium`, `Large`, or `Giant`.
-* The command reports an error when a required field is missing or a field is invalid.
+* `adddog n/Cookie b/Chihuahua s/Small`
+
+Valid sizes are `small`, `medium`, `large`, and `giant`. Size input is case-insensitive.
+Dog names and breeds may contain letters, numbers, spaces, and must not be blank. Leading and trailing
+spaces in field values are ignored.
 
 ### Adding a customer: `addcustomer`
 
-Adds a customer to WatchDog.
+Adds a customer and assigns it a unique persistent ID.
 
-Format: `addcustomer n/NAME p/PHONE e/EMAIL bc/BACKUP_CONTACT`
+Format: `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`
 
-Example: `addcustomer n/Alice Tan p/91234567 e/alice@example.com bc/98765432`
+Example:
 
-* All four fields are required.
-* Phone numbers and backup contact numbers must be valid 8-digit numbers.
-* Email addresses must be in a valid email format.
+* `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 
-### Listing customers: `list customer`
+The contact number and backup contact number must be eight-digit numbers.
 
-Displays all customers in the main panel.
+### Listing all customers: `list customer`
+
+Shows a list of all customers in the address book.
 
 Format: `list customer`
 
-If there are no customers, WatchDog displays `There are no customers to display.`
+If there are no customers, Watchdog displays `There are no customers to display.`
 
-### Listing dogs: `list dog`
+### Listing all dogs: `list dog`
 
-Displays all dogs in the main panel.
+Shows a list of all dogs in the address book.
 
 Format: `list dog`
 
-If there are no dogs, WatchDog displays `There are no dogs to display.`
-
-### Editing a dog: `editdog`
-
-Edits one or more details of an existing dog using its persistent ID.
-
-Format: `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`
-
-Example: `editdog 1 s/Large`
-
-* `DOG_ID` must identify an existing dog.
-* At least one dog field must be provided.
-* Any omitted field keeps its existing value.
-
-### Editing a customer: `editcustomer`
-
-Edits one or more details of an existing customer using its persistent ID.
-
-Format: `editcustomer CUSTOMER_ID [n/NAME] [p/PHONE] [e/EMAIL] [bc/BACKUP_CONTACT]`
-
-Example: `editcustomer 1 p/91234567 e/johndoe@example.com`
-
-* `CUSTOMER_ID` must identify an existing customer.
-* Any supplied field replaces its existing value.
-
+If there are no dogs, Watchdog displays `There are no dogs to display.`
 
 ### Editing a person: `edit`
 
@@ -152,6 +150,23 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]... `
 Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+
+### Locating persons by name: `find`
+
+Finds persons whose names contain any of the given keywords.
+
+Format: `find KEYWORD [MORE_KEYWORDS]`
+
+* The search is case-insensitive; for example, `hans` matches `Hans`.
+* Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
+* The search considers only names.
+* Only full words match; for example, `Han` does not match `Hans`.
+* Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
+
+Examples:
+* `find John` returns `john` and `John Doe`
+* `find alex david` returns `Alex Yeoh`, `David Li`<br>
+  ![result for 'find alex david'](images/findAlexDavidResult.png)
 
 ### Linking dogs to a customer: `link`
 
@@ -253,6 +268,20 @@ Format: `search customer n/NAME_QUERY` or `search customer id/ID`
 
 Examples: `search customer n/Alex Tan`, `search customer id/42`.
 
+### Deleting a person: `delete`
+
+Deletes the specified person from the address book.
+
+Format: `delete INDEX`
+
+* Deletes the person at the specified `INDEX`.
+* The index refers to the index number shown in the displayed person list.
+* The index **must be a positive integer** 1, 2, 3, ...
+
+Examples:
+* `list` followed by `delete 2` deletes the 2nd person in the address book.
+* `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
+
 ### Deleting a dog: `delete dog`
 
 Deletes a dog using its persistent dog ID.
@@ -305,17 +334,17 @@ Format: `exit`
 
 ### Saving the data
 
-WatchDog automatically saves data after every command. You do not need to save manually.
+AddressBook automatically saves data after every command. You do not need to save manually.
 
 ### Editing the data file
 
-WatchDog data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+AddressBook data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
 
 <box type="warning" seamless>
 
 **Caution:**
-If your changes make the data file invalid, WatchDog starts with an empty address book at the next run. The invalid file remains on disk until you run a command (WatchDog saves after every command). Still, we recommend backing up the file before editing it.<br>
-Furthermore, certain edits can cause WatchDog to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+If your changes make the data file invalid, AddressBook starts with an empty address book at the next run. The invalid file remains on disk until you run a command (AddressBook saves after every command). Still, we recommend backing up the file before editing it.<br>
+Furthermore, certain edits can cause the AddressBook to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
 
 ### Archiving data files `[coming in v2.0]`
@@ -327,7 +356,7 @@ _Details coming soon ..._
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous WatchDog home folder.
+**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous AddressBook home folder.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -342,13 +371,20 @@ _Details coming soon ..._
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... ` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
 **Clear**  | `clear`
+**Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Search all** | `search n/NAME_QUERY` or `search id/ID`<br> e.g., `search n/alex`
 **Link dogs** | `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`<br> e.g., `link c/1 d/2 d/3`
 **Unlink dogs** | `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`<br> e.g., `unlink d/2 d/3` or `unlink c/1`
 **Search customers** | `search customer n/NAME_QUERY` or `search customer id/ID`<br> e.g., `search customer n/alex`
 **Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
+**Add dog** | `adddog n/NAME b/BREED s/SIZE`<br>e.g., `adddog n/Cookie b/Chihuahua s/Small`
+**Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
+**List customers** | `list customer`
+**List dogs** | `list dog`
 **Delete dog** | `delete dog ID`<br>e.g., `delete dog 0`
 **Delete customer** | `delete customer ID`<br>e.g., `delete customer 21`
 **Help**   | `help`
