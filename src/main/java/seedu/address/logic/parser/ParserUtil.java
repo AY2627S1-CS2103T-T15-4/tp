@@ -39,6 +39,16 @@ public class ParserUtil {
         return Index.fromOneBased(Integer.parseInt(trimmedIndex));
     }
 
+    /** Parses a positive persistent customer ID. */
+    public static int parseCustomerId(String customerId) throws ParseException {
+        requireNonNull(customerId);
+        String trimmedId = customerId.trim();
+        if (!StringUtil.isNonZeroUnsignedInteger(trimmedId)) {
+            throw new ParseException("Customer ID must be a positive integer.");
+        }
+        return Integer.parseInt(trimmedId);
+    }
+
     /**
      * Parses a {@code String name} into a {@code Name}.
      * Leading and trailing whitespaces will be trimmed.
@@ -132,6 +142,7 @@ public class ParserUtil {
      *
      * @throws ParseException if the given name is invalid
      */
+
     public static DogName parseDogName(String name) throws ParseException {
         requireNonNull(name);
         String trimmedName = name.trim();

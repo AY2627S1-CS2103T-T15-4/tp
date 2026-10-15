@@ -20,6 +20,8 @@ import seedu.address.logic.commands.DeleteCustomerCommand;
 import seedu.address.logic.commands.DeleteDogCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
+import seedu.address.logic.commands.EditDogCommand;
+import seedu.address.logic.commands.EditDogCommand.EditDogDescriptor;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
@@ -75,9 +77,24 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_deleteDogWithMultipleSpaces() throws Exception {
+        DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("delete  dog   12");
+        assertEquals(new DeleteDogCommand(12), command);
+    }
+
+    @Test
     public void parseCommand_deleteCustomer() throws Exception {
         DeleteCustomerCommand command = (DeleteCustomerCommand) parser.parseCommand("delete customer 21");
         assertEquals(new DeleteCustomerCommand(21), command);
+    }
+
+    @Test
+    public void parseCommand_editDog() throws Exception {
+        EditDogDescriptor descriptor = new EditDogDescriptor();
+        descriptor.setSize(new Size("Medium"));
+
+        EditDogCommand command = (EditDogCommand) parser.parseCommand("editdog 1 s/Medium");
+        assertEquals(new EditDogCommand(1, descriptor), command);
     }
 
     @Test

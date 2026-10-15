@@ -129,6 +129,11 @@ public class ModelManager implements Model {
     }
 
     @Override
+    public void setDog(Dog target, Dog editedDog) {
+        addressBook.setDog(target, editedDog);
+    }
+
+    @Override
     public Dog addDog(Dog dog) {
         return addressBook.addDog(dog);
     }

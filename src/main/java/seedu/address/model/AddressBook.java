@@ -33,7 +33,7 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     /** Creates an empty address book. */
     public AddressBook() {
-        this.nextDogId = 0;
+        this.nextDogId = 1;
         this.nextCustomerId = 1;
     }
 
@@ -305,6 +305,11 @@ public class AddressBook implements ReadOnlyAddressBook {
     public void removeDog(Dog dog) {
         requireNonNull(dog);
         dogs.remove(dog);
+    }
+
+    /** Replaces an existing dog with its edited version. */
+    public void setDog(Dog target, Dog editedDog) {
+        dogs.setDog(target, editedDog);
     }
 
     //// util methods
