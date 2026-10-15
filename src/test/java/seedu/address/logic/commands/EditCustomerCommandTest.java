@@ -1,6 +1,8 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
@@ -43,8 +45,57 @@ public class EditCustomerCommandTest {
     }
 
     @Test
+    public void execute_allFieldsEdited_restoresCustomerFilterAndPreservesId() throws Exception {
+        Model model = new ModelManager();
+        model.addCustomer(customer(1, "Alice Tan", "91234567"));
+        model.updateFilteredCustomerList(customer -> false);
+        EditCustomerDescriptor descriptor = new EditCustomerDescriptor();
+        descriptor.setName(new Name("Alice Lee"));
+        descriptor.setPhone(new Phone("98765432"));
+        descriptor.setEmail(new Email("alice.lee@example.com"));
+        descriptor.setBackupContact(new BackupContact("92345678"));
+
+        new EditCustomerCommand(1, descriptor).execute(model);
+
+        Customer expected = new Customer(1, new Name("Alice Lee"), new Phone("98765432"),
+                new Email("alice.lee@example.com"), new BackupContact("92345678"));
+        assertEquals(expected, model.getFilteredCustomerList().get(0));
+    }
+
+    @Test
     public void constructor_invalidCustomerId_throwsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> new EditCustomerCommand(0, new EditCustomerDescriptor()));
+        assertThrows(NullPointerException.class, () -> new EditCustomerCommand(1, null));
+    }
+
+    @Test
+    public void descriptor_accessorsEqualityAndToString() {
+        EditCustomerDescriptor descriptor = new EditCustomerDescriptor();
+        assertFalse(descriptor.isAnyFieldEdited());
+        assertTrue(descriptor.getName().isEmpty());
+
+        descriptor.setName(new Name("Alice Tan"));
+        assertTrue(descriptor.isAnyFieldEdited());
+        EditCustomerDescriptor copy = new EditCustomerDescriptor(descriptor);
+
+        assertEquals(descriptor, copy);
+        assertEquals(descriptor.hashCode(), copy.hashCode());
+        assertFalse(descriptor.equals(null));
+        assertFalse(descriptor.equals("descriptor"));
+        assertTrue(descriptor.toString().contains("Alice Tan"));
+    }
+
+    @Test
+    public void equalsAndToString() {
+        EditCustomerDescriptor descriptor = new EditCustomerDescriptor();
+        descriptor.setName(new Name("Alice Tan"));
+        EditCustomerCommand command = new EditCustomerCommand(1, descriptor);
+
+        assertEquals(command, new EditCustomerCommand(1, descriptor));
+        assertFalse(command.equals(new EditCustomerCommand(2, descriptor)));
+        assertFalse(command.equals(null));
+        assertFalse(command.equals(1));
+        assertTrue(command.toString().contains("customerId=1"));
     }
 
     private static Customer customer(int id, String name, String phone) {
