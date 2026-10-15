@@ -10,9 +10,9 @@ import java.util.regex.Pattern;
 import seedu.address.logic.commands.UnlinkCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
-/** Parses one customer prefix followed by one or more dog prefixes. */
+/** Parses either one customer prefix or one or more dog prefixes. */
 public class UnlinkCommandParser implements Parser<UnlinkCommand> {
-    private static final Pattern UNLINK_FORMAT = Pattern.compile("c/[0-9]+(?:\\s+d/[0-9]+)+");
+    private static final Pattern UNLINK_FORMAT = Pattern.compile("(?:c/[0-9]+|d/[0-9]+(?:\\s+d/[0-9]+)*)");
 
     @Override
     public UnlinkCommand parse(String args) throws ParseException {
@@ -22,15 +22,17 @@ public class UnlinkCommandParser implements Parser<UnlinkCommand> {
         }
         String[] fields = input.split("\\s+");
         try {
-            int customerId = Integer.parseInt(fields[0].substring(2));
+            if (input.startsWith("c/")) {
+                return new UnlinkCommand(Integer.parseInt(fields[0].substring(2)));
+            }
             List<Integer> dogIds = new ArrayList<>();
-            for (int i = 1; i < fields.length; i++) {
+            for (int i = 0; i < fields.length; i++) {
                 dogIds.add(Integer.parseInt(fields[i].substring(2)));
             }
             if (new HashSet<>(dogIds).size() != dogIds.size()) {
                 throw invalidFormat();
             }
-            return new UnlinkCommand(customerId, dogIds);
+            return new UnlinkCommand(dogIds);
         } catch (NumberFormatException e) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, UnlinkCommand.MESSAGE_USAGE), e);
         }

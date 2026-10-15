@@ -24,7 +24,10 @@ public interface Model {
     void linkDogs(int customerId, List<Integer> dogIds) throws LinkException;
 
     /** Unlinks an entire batch or throws without changing records or filters. Records are never deleted. */
-    void unlinkDogs(int customerId, List<Integer> dogIds) throws UnlinkException;
+    void unlinkDogs(List<Integer> dogIds) throws UnlinkException;
+
+    /** Unlinks all owned dogs; throws if the customer is missing or has no dogs. Preserves records and filters. */
+    void unlinkCustomerDogs(int customerId) throws UnlinkException;
 
     /**
      * Returns the user prefs.

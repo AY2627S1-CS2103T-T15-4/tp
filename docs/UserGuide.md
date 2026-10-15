@@ -154,13 +154,19 @@ Example: `link c/1 d/2 d/3` links dogs 2 and 3 to customer 1.
 
 ### Unlinking dogs from a customer: `unlink`
 
-Format: `unlink c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`
+Formats: `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`
 
-Example: `unlink c/1 d/2 d/3` removes customer 1's ownership of dogs 2 and 3.
+Examples:
 
-* Uses the same persistent-ID, prefix order, whitespace, and duplicate-ID rules as `link`.
-* The customer and every dog must exist, and every dog must belong to the specified customer.
-  If any dog is unowned or belongs to someone else, the whole batch fails without changing anything.
+* `unlink d/1 d/2 d/3` removes ownership from dogs 1, 2 and 3, even if they have different owners.
+* `unlink c/1` removes ownership from every dog belonging to customer 1, including hidden dogs.
+
+* Use persistent IDs from `0` to `2147483647`, lowercase prefixes, and whitespace between fields.
+  Do not put whitespace after the slash. Repeated dog IDs (including `d/2 d/02`) are rejected.
+* Do not mix customer and dog prefixes. The customer form accepts exactly one customer ID.
+* For the dog form, every dog must exist and have an owner. If any dog is missing or unowned,
+  the whole batch fails without changing anything.
+* For the customer form, the customer must exist and have at least one linked dog; otherwise an error is shown.
 * Unlinking never deletes customers or dogs, even when unlinking a customer's last dog.
   All other details stay unchanged. You can then use `link` to assign the dogs to another customer.
 * Dog cards show `Owner ID: None`; the customer's Dog IDs field removes the unlinked IDs,
@@ -302,7 +308,7 @@ Action     | Format, Examples
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Search all** | `search n/NAME_QUERY` or `search id/ID`<br> e.g., `search n/alex`
 **Link dogs** | `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`<br> e.g., `link c/1 d/2 d/3`
-**Unlink dogs** | `unlink c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`<br> e.g., `unlink c/1 d/2 d/3`
+**Unlink dogs** | `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`<br> e.g., `unlink d/2 d/3` or `unlink c/1`
 **Search customers** | `search customer n/NAME_QUERY` or `search customer id/ID`<br> e.g., `search customer n/alex`
 **Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
 **List**   | `list`

@@ -47,7 +47,7 @@ public class UnlinkCommandTest {
         var beforeCustomers = List.copyOf(model.getCustomerList());
         model.updateFilteredCustomerList(customer -> false);
         model.updateFilteredDogList(dog -> dog.getId() == 43);
-        assertEquals("Unlinked dog IDs [42, 43] from customer ID 7.", execute("unlink c/7 d/42 d/43"));
+        assertEquals("Unlinked dog IDs [42, 43] from their owners.", execute("unlink d/42 d/43"));
         assertEquals(List.of(beforeDogs.get(0).withoutOwner(), beforeDogs.get(1).withoutOwner(),
                 beforeDogs.get(2), beforeDogs.get(3)), model.getDogList());
         assertEquals(beforeCustomers, model.getCustomerList());
@@ -60,42 +60,71 @@ public class UnlinkCommandTest {
 
     @Test
     public void execute_singleDog_leavesOtherOwnedDogLinked() throws Exception {
-        execute("unlink c/7 d/42");
+        execute("unlink d/42");
         assertTrue(model.getDogList().get(0).getOwnerId().isEmpty());
         assertEquals(Optional.of(7), model.getDogList().get(1).getOwnerId());
-        assertRejected("unlink c/7 d/42", "Dog ID 42 is not linked to customer ID 7.");
+        assertRejected("unlink d/42", "Dog ID 42 has no owner.");
     }
 
     @Test
-    public void execute_missingOrWronglyOwnedEndpoint_rejectsEntireBatch() {
-        assertRejected("unlink c/99 d/42", "Customer ID 99 does not exist.");
-        assertRejected("unlink c/7 d/42 d/99", "Dog ID 99 does not exist.");
-        assertRejected("unlink c/7 d/99 d/42", "Dog ID 99 does not exist.");
-        assertRejected("unlink c/7 d/42 d/44", "Dog ID 44 is not linked to customer ID 7.");
-        assertRejected("unlink c/7 d/42 d/45", "Dog ID 45 is not linked to customer ID 7.");
+    public void execute_missingOrUnownedDog_rejectsEntireBatch() {
+        assertRejected("unlink c/99", "Customer ID 99 does not exist.");
+        assertRejected("unlink d/42 d/99", "Dog ID 99 does not exist.");
+        assertRejected("unlink d/99 d/42", "Dog ID 99 does not exist.");
+        assertRejected("unlink d/42 d/45", "Dog ID 45 has no owner.");
     }
 
     @Test
     public void unlinkDogs_emptyOrRepeatedIds_rejectsWithoutMutation() {
         AddressBook before = new AddressBook(model.getAddressBook());
-        assertThrows(UnlinkException.class, () -> model.unlinkDogs(7, List.of()));
-        assertThrows(UnlinkException.class, () -> model.unlinkDogs(7, List.of(42, 42)));
+        assertThrows(UnlinkException.class, () -> model.unlinkDogs(List.of()));
+        assertThrows(UnlinkException.class, () -> model.unlinkDogs(List.of(42, 42)));
         assertEquals(before, model.getAddressBook());
     }
 
     @Test
     public void constructorAndEquals_validateAndCompareIds() {
-        UnlinkCommand command = new UnlinkCommand(7, List.of(42, 43));
+        UnlinkCommand command = new UnlinkCommand(List.of(42, 43));
         assertEquals(command, command);
-        assertEquals(command, new UnlinkCommand(7, List.of(42, 43)));
-        assertNotEquals(command, new UnlinkCommand(8, List.of(42, 43)));
-        assertNotEquals(command, new UnlinkCommand(7, List.of(42)));
+        assertEquals(command, new UnlinkCommand(List.of(42, 43)));
+        assertNotEquals(command, new UnlinkCommand(8));
+        assertNotEquals(command, new UnlinkCommand(List.of(42)));
         assertNotEquals(command, null);
         assertNotEquals(command, new Object());
-        assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(-1, List.of(42)));
-        assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(7, List.of()));
-        assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(7, List.of(-1)));
-        assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(7, List.of(42, 42)));
+        assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(-1));
+        assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(List.of()));
+        assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(List.of(-1)));
+        assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(List.of(42, 42)));
+    }
+
+    @Test
+    public void execute_dogsWithDifferentOwners_unlinksBoth() throws Exception {
+        execute("unlink d/42 d/44");
+        assertTrue(model.getDogList().get(0).getOwnerId().isEmpty());
+        assertTrue(model.getDogList().get(2).getOwnerId().isEmpty());
+        assertEquals(Optional.of(7), model.getDogList().get(1).getOwnerId());
+    }
+
+    @Test
+    public void execute_customer_unlinksAllOwnedDogsIncludingHiddenDogs() throws Exception {
+        var beforeDogs = List.copyOf(model.getDogList());
+        var beforeCustomers = List.copyOf(model.getCustomerList());
+        model.updateFilteredDogList(dog -> dog.getId() == 42);
+        model.updateFilteredCustomerList(customer -> false);
+        assertEquals("Unlinked all dogs from customer ID 7.", execute("unlink c/7"));
+        assertEquals(List.of(beforeDogs.get(0).withoutOwner(), beforeDogs.get(1).withoutOwner(),
+                beforeDogs.get(2), beforeDogs.get(3)), model.getDogList());
+        assertEquals(beforeCustomers, model.getCustomerList());
+        assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+        assertRejected("unlink c/7", "Customer ID 7 has no linked dogs.");
+    }
+
+    @Test
+    public void equals_customerRequests_comparesCustomerIdsAndMode() {
+        assertEquals(new UnlinkCommand(7), new UnlinkCommand(7));
+        assertNotEquals(new UnlinkCommand(7), new UnlinkCommand(8));
+        assertNotEquals(new UnlinkCommand(7), new UnlinkCommand(List.of(7)));
     }
 
     private void assertRejected(String input, String message) {

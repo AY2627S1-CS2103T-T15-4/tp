@@ -57,12 +57,17 @@ public class DogOwnershipStorageTest {
         book.addDogFromStorage(dog(42));
         book.addDogFromStorage(dog(43));
         book.linkDogs(7, List.of(42, 43));
-        book.unlinkDogs(7, List.of(42));
+        book.unlinkDogs(List.of(42));
         JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("unlink.json"));
         storage.saveAddressBook(book);
         var restored = storage.readAddressBook().orElseThrow();
         assertEquals(List.of(dog(42), dog(43).withOwner(7)), restored.getDogList());
         assertEquals(List.of(owner), restored.getCustomerList());
+        book.unlinkCustomerDogs(7);
+        storage.saveAddressBook(book);
+        var allUnlinked = storage.readAddressBook().orElseThrow();
+        assertEquals(List.of(dog(42), dog(43)), allUnlinked.getDogList());
+        assertEquals(List.of(owner), allUnlinked.getCustomerList());
     }
 
     @Test

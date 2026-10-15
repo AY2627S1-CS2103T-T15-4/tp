@@ -38,12 +38,14 @@ customers do not store a duplicate dog-ID list. A dog may be unlinked or have on
 may own any number of dogs. Linking an already-owned dog is rejected, including links to the same owner.
 Dog equality includes ownership, while identity remains the persistent dog ID.
 
-`UnlinkCommandParser` accepts the same ID grammar as `LinkCommandParser`. `UnlinkCommand` delegates
-to `Model.unlinkDogs` and translates `UnlinkException` into command feedback. `AddressBook` validates
-the entire batch, requiring every dog to belong to the specified customer, before replacing the dog
-list with unowned copies of the selected dogs. Unowned dogs and dogs belonging to another customer
-cause rejection without mutation. Unlinking preserves every record, including a customer's last dog,
-and uses the existing nullable `ownerId` storage field without a schema change.
+`UnlinkCommandParser` accepts either one customer ID or one or more distinct dog IDs; mixed prefixes
+are rejected. `UnlinkCommand` delegates to `Model.unlinkCustomerDogs` or `Model.unlinkDogs` and translates
+`UnlinkException` into command feedback. `AddressBook` validates every selected dog exists and has an owner
+before publishing one replacement list of unowned copies. Dogs may belong to different customers.
+The customer form validates the customer, selects all their dogs from the complete list, and uses the
+same atomic batch operation. Missing customers and customers with no linked dogs are rejected.
+Unlinking preserves records and filters, including a customer's last dog, and uses the existing nullable
+`ownerId` storage field without a schema change.
 
 `AddressBook.removeCustomer` clears ownership of that customer's dogs, regardless of filters,
 preserving their persistent IDs and details. Unowned dog cards show `Owner ID: None`.

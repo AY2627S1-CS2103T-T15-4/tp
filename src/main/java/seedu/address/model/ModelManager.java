@@ -109,8 +109,13 @@ public class ModelManager implements Model {
     }
 
     @Override
-    public void unlinkDogs(int customerId, List<Integer> dogIds) throws UnlinkException {
-        addressBook.unlinkDogs(customerId, dogIds);
+    public void unlinkDogs(List<Integer> dogIds) throws UnlinkException {
+        addressBook.unlinkDogs(dogIds);
+    }
+
+    @Override
+    public void unlinkCustomerDogs(int customerId) throws UnlinkException {
+        addressBook.unlinkCustomerDogs(customerId);
     }
 
     @Override
