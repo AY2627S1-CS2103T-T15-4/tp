@@ -44,12 +44,16 @@ public class RecordListPanelTest {
         // JavaFX controls need a display. Linux CI can run these tests under xvfb-run.
         assumeTrue(!System.getProperty("os.name").startsWith("Linux") || System.getenv("DISPLAY") != null,
                 "JavaFX UI tests require a display (use xvfb-run on headless Linux)");
-        CountDownLatch started = new CountDownLatch(1);
-        Platform.startup(() -> {
+        try {
+            CountDownLatch started = new CountDownLatch(1);
+            Platform.startup(() -> {
+                Platform.setImplicitExit(false);
+                started.countDown();
+            });
+            assertTrue(started.await(10, TimeUnit.SECONDS));
+        } catch (IllegalStateException alreadyStarted) {
             Platform.setImplicitExit(false);
-            started.countDown();
-        });
-        assertTrue(started.await(10, TimeUnit.SECONDS));
+        }
     }
 
     @Test
