@@ -24,11 +24,12 @@ public class ListCommand extends Command {
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
+        model.updateFilteredDogList(dog -> false);
         model.updateFilteredCustomerList(PREDICATE_SHOW_ALL_CUSTOMERS);
         if (model.getFilteredCustomerList().isEmpty()) {
-            return new CommandResult(MESSAGE_EMPTY, CommandResult.DisplayedRecords.CUSTOMERS);
+            return new CommandResult(MESSAGE_EMPTY);
         }
-        return new CommandResult(MESSAGE_SUCCESS, CommandResult.DisplayedRecords.CUSTOMERS);
+        return new CommandResult(MESSAGE_SUCCESS);
     }
 
     @Override

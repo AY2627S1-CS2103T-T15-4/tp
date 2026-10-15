@@ -90,28 +90,6 @@ public class RecordListPanelTest {
     }
 
     @Test
-    public void panel_showCustomersOnly_hidesDogsUntilShowAll() throws Exception {
-        runOnFxThread(() -> {
-            var customers = FXCollections.observableArrayList(ALEX);
-            var dogs = FXCollections.observableArrayList(BUDDY);
-            RecordListPanel panel = new RecordListPanel(customers, dogs);
-            panel.showCustomersOnly();
-            ListView<Supplier<Region>> list = listView(panel);
-            assertEquals(1, list.getItems().size());
-            assertEquals("Alex", label(list.getItems().get(0).get(), "name"));
-
-            dogs.add(new Dog(43, new DogName("Coco"), new Breed("Poodle"), new Size("small")));
-            assertEquals(1, list.getItems().size());
-
-            panel.showAll();
-            assertEquals(3, list.getItems().size());
-            assertEquals("Alex", label(list.getItems().get(0).get(), "name"));
-            assertEquals("Buddy", label(list.getItems().get(1).get(), "name"));
-            assertEquals("Coco", label(list.getItems().get(2).get(), "name"));
-        });
-    }
-
-    @Test
     public void panel_sourceChangesAndCustomerFilter_updateCards() throws Exception {
         runOnFxThread(() -> {
             var customers = FXCollections.<Customer>observableArrayList();

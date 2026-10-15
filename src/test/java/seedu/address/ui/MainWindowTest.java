@@ -71,6 +71,14 @@ public class MainWindowTest {
             assertEquals(1, list.getItems().size());
             assertEquals("Lily Koh", label(list.getItems().get(0).get(), "name"));
 
+            window.executeCommand("search dog n/Cookie");
+            assertEquals(1, list.getItems().size());
+            assertEquals("Cookie", label(list.getItems().get(0).get(), "name"));
+
+            window.executeCommand("search customer n/Lily");
+            assertEquals(1, list.getItems().size());
+            assertEquals("Lily Koh", label(list.getItems().get(0).get(), "name"));
+
             window.executeCommand("list dog");
             assertEquals(1, list.getItems().size());
             assertEquals("Cookie", label(list.getItems().get(0).get(), "name"));

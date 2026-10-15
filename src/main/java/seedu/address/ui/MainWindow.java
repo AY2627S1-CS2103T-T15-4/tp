@@ -182,12 +182,6 @@ public class MainWindow extends UiPart<Stage> {
             logger.info("Result: " + commandResult.getFeedbackToUser());
             resultDisplay.setFeedbackToUser(commandResult.getFeedbackToUser());
 
-            if (commandResult.getDisplayedRecords() == CommandResult.DisplayedRecords.CUSTOMERS) {
-                recordListPanel.showCustomersOnly();
-            } else if (commandResult.getDisplayedRecords() == CommandResult.DisplayedRecords.ALL) {
-                recordListPanel.showAll();
-            }
-
             if (commandResult.isShowHelp()) {
                 handleHelp();
             }

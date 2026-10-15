@@ -16,8 +16,8 @@ public class ListDogCommand extends Command {
         model.updateFilteredCustomerList(customer -> false);
         model.updateFilteredDogList(dog -> true);
         if (model.getDogList().isEmpty()) {
-            return new CommandResult(MESSAGE_EMPTY, CommandResult.DisplayedRecords.ALL);
+            return new CommandResult(MESSAGE_EMPTY);
         }
-        return new CommandResult(MESSAGE_SUCCESS, CommandResult.DisplayedRecords.ALL);
+        return new CommandResult(MESSAGE_SUCCESS);
     }
 }
