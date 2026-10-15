@@ -1,5 +1,6 @@
 package seedu.address.model.customer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
@@ -48,5 +49,12 @@ public class CustomerTest {
         assertFalse(customer.equals(new Customer(1, new Name("Bob Lee"), PHONE, EMAIL, BACKUP_CONTACT)));
         assertFalse(customer.equals(null));
         assertFalse(customer.equals(1));
+    }
+
+    @Test
+    public void hashCode_equalCustomers_haveSameHashCode() {
+        Customer customer = new Customer(1, NAME, PHONE, EMAIL, BACKUP_CONTACT);
+
+        assertEquals(customer.hashCode(), new Customer(1, NAME, PHONE, EMAIL, BACKUP_CONTACT).hashCode());
     }
 }
