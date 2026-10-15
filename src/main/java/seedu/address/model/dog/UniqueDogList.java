@@ -37,6 +37,34 @@ public class UniqueDogList implements Iterable<Dog> {
         internalList.remove(toRemove);
     }
 
+    /** Replaces a dog while preserving uniqueness by persistent ID. */
+    public void setDog(Dog target, Dog editedDog) {
+        requireAllNonNull(target, editedDog);
+        int targetIndex = -1;
+        for (int i = 0; i < internalList.size(); i++) {
+            if (internalList.get(i).isSameDog(target)) {
+                targetIndex = i;
+                break;
+            }
+        }
+
+        if (targetIndex < 0) {
+            throw new IllegalArgumentException("Dog does not exist");
+        }
+
+        if (!target.isSameDog(editedDog)) {
+            throw new IllegalArgumentException("Edited dog must preserve its ID");
+        }
+
+        for (int i = 0; i < internalList.size(); i++) {
+            if (i != targetIndex && internalList.get(i).isSameDog(editedDog)) {
+                throw new DuplicateDogException();
+            }
+        }
+
+        internalList.set(targetIndex, editedDog);
+    }
+
     /** Replaces the contents of this list with the given dogs. */
     public void setDogs(List<Dog> dogs) {
         requireAllNonNull(dogs);
