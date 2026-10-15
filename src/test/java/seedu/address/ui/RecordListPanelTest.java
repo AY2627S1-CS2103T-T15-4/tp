@@ -44,12 +44,16 @@ public class RecordListPanelTest {
         // JavaFX controls need a display. Linux CI can run these tests under xvfb-run.
         assumeTrue(!System.getProperty("os.name").startsWith("Linux") || System.getenv("DISPLAY") != null,
                 "JavaFX UI tests require a display (use xvfb-run on headless Linux)");
-        CountDownLatch started = new CountDownLatch(1);
-        Platform.startup(() -> {
+        try {
+            CountDownLatch started = new CountDownLatch(1);
+            Platform.startup(() -> {
+                Platform.setImplicitExit(false);
+                started.countDown();
+            });
+            assertTrue(started.await(10, TimeUnit.SECONDS));
+        } catch (IllegalStateException alreadyStarted) {
             Platform.setImplicitExit(false);
-            started.countDown();
-        });
-        assertTrue(started.await(10, TimeUnit.SECONDS));
+        }
     }
 
     @Test
@@ -82,28 +86,6 @@ public class RecordListPanelTest {
             panel.getRoot().layout();
             assertTrue(panel.getRoot().lookupAll("#name").stream()
                     .anyMatch(node -> ((Label) node).getText().equals("Buddy")));
-        });
-    }
-
-    @Test
-    public void panel_showCustomersOnly_hidesDogsUntilShowAll() throws Exception {
-        runOnFxThread(() -> {
-            var customers = FXCollections.observableArrayList(ALEX);
-            var dogs = FXCollections.observableArrayList(BUDDY);
-            RecordListPanel panel = new RecordListPanel(customers, dogs);
-            panel.showCustomersOnly();
-            ListView<Supplier<Region>> list = listView(panel);
-            assertEquals(1, list.getItems().size());
-            assertEquals("Alex", label(list.getItems().get(0).get(), "name"));
-
-            dogs.add(new Dog(43, new DogName("Coco"), new Breed("Poodle"), new Size("small")));
-            assertEquals(1, list.getItems().size());
-
-            panel.showAll();
-            assertEquals(3, list.getItems().size());
-            assertEquals("Alex", label(list.getItems().get(0).get(), "name"));
-            assertEquals("Buddy", label(list.getItems().get(1).get(), "name"));
-            assertEquals("Coco", label(list.getItems().get(2).get(), "name"));
         });
     }
 

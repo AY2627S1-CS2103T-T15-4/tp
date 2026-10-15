@@ -11,14 +11,6 @@ import seedu.address.commons.util.ToStringBuilder;
  */
 public class CommandResult {
 
-    /**
-     * Which records the main list should show after this command.
-     * {@code UNCHANGED} leaves the current list as it is.
-     */
-    public enum DisplayedRecords {
-        UNCHANGED, CUSTOMERS, ALL
-    }
-
     private final String feedbackToUser;
 
     /** Help information should be shown to the user. */
@@ -27,25 +19,13 @@ public class CommandResult {
     /** The application should exit. */
     private final boolean exit;
 
-    /** Which records to show in the main list. */
-    private final DisplayedRecords displayedRecords;
-
     /**
      * Constructs a {@code CommandResult} with the specified fields.
      */
-    public CommandResult(String feedbackToUser, boolean showHelp, boolean exit, DisplayedRecords displayedRecords) {
+    public CommandResult(String feedbackToUser, boolean showHelp, boolean exit) {
         this.feedbackToUser = requireNonNull(feedbackToUser);
         this.showHelp = showHelp;
         this.exit = exit;
-        this.displayedRecords = requireNonNull(displayedRecords);
-    }
-
-    /**
-     * Constructs a {@code CommandResult} with the specified fields.
-     * The displayed records are left unchanged.
-     */
-    public CommandResult(String feedbackToUser, boolean showHelp, boolean exit) {
-        this(feedbackToUser, showHelp, exit, DisplayedRecords.UNCHANGED);
     }
 
     /**
@@ -54,13 +34,6 @@ public class CommandResult {
      */
     public CommandResult(String feedbackToUser) {
         this(feedbackToUser, false, false);
-    }
-
-    /**
-     * Constructs a {@code CommandResult} that shows {@code displayedRecords} in the main list.
-     */
-    public CommandResult(String feedbackToUser, DisplayedRecords displayedRecords) {
-        this(feedbackToUser, false, false, displayedRecords);
     }
 
     public String getFeedbackToUser() {
@@ -73,10 +46,6 @@ public class CommandResult {
 
     public boolean isExit() {
         return exit;
-    }
-
-    public DisplayedRecords getDisplayedRecords() {
-        return displayedRecords;
     }
 
     @Override
@@ -92,13 +61,12 @@ public class CommandResult {
 
         return feedbackToUser.equals(otherCommandResult.feedbackToUser)
                 && showHelp == otherCommandResult.showHelp
-                && exit == otherCommandResult.exit
-                && displayedRecords == otherCommandResult.displayedRecords;
+                && exit == otherCommandResult.exit;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(feedbackToUser, showHelp, exit, displayedRecords);
+        return Objects.hash(feedbackToUser, showHelp, exit);
     }
 
     @Override
@@ -107,7 +75,6 @@ public class CommandResult {
                 .add("feedbackToUser", feedbackToUser)
                 .add("showHelp", showHelp)
                 .add("exit", exit)
-                .add("displayedRecords", displayedRecords)
                 .toString();
     }
 

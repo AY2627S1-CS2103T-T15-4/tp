@@ -176,17 +176,11 @@ public class MainWindow extends UiPart<Stage> {
      *
      * @see seedu.address.logic.Logic#execute(String)
      */
-    private CommandResult executeCommand(String commandText) throws CommandException, ParseException {
+    CommandResult executeCommand(String commandText) throws CommandException, ParseException {
         try {
             CommandResult commandResult = logic.execute(commandText);
             logger.info("Result: " + commandResult.getFeedbackToUser());
             resultDisplay.setFeedbackToUser(commandResult.getFeedbackToUser());
-
-            if (commandResult.getDisplayedRecords() == CommandResult.DisplayedRecords.CUSTOMERS) {
-                recordListPanel.showCustomersOnly();
-            } else if (commandResult.getDisplayedRecords() == CommandResult.DisplayedRecords.ALL) {
-                recordListPanel.showAll();
-            }
 
             if (commandResult.isShowHelp()) {
                 handleHelp();
