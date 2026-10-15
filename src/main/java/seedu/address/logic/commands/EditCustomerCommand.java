@@ -5,7 +5,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_BACKUP_CONTACT;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
-import static seedu.address.model.Model.PREDICATE_SHOW_ALL_CUSTOMERS;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -69,7 +68,6 @@ public class EditCustomerCommand extends Command {
         Customer editedCustomer = createEditedCustomer(customerToEdit, editCustomerDescriptor);
 
         model.setCustomer(customerToEdit, editedCustomer);
-        model.updateFilteredCustomerList(PREDICATE_SHOW_ALL_CUSTOMERS);
         return new CommandResult(String.format(MESSAGE_EDIT_CUSTOMER_SUCCESS, editedCustomer));
     }
 
