@@ -182,6 +182,12 @@ public class AddressBook implements ReadOnlyAddressBook {
         return dogs.contains(dog);
     }
 
+    /** Removes the given dog from this address book. */
+    public void removeDog(Dog dog) {
+        requireNonNull(dog);
+        dogs.remove(dog);
+    }
+
     //// util methods
 
     @Override

@@ -31,6 +31,12 @@ public class UniqueDogList implements Iterable<Dog> {
         internalList.add(toAdd);
     }
 
+    /** Removes a dog that exists in this list. */
+    public void remove(Dog toRemove) {
+        requireNonNull(toRemove);
+        internalList.remove(toRemove);
+    }
+
     /** Replaces the contents of this list with the given dogs. */
     public void setDogs(List<Dog> dogs) {
         requireAllNonNull(dogs);

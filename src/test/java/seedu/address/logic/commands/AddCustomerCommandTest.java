@@ -124,6 +124,9 @@ public class AddCustomerCommandTest {
         @Override public boolean hasDog(Dog dog) {
             throw unused();
         }
+        @Override public void deleteDog(Dog dog) {
+            throw unused();
+        }
 
         protected final AssertionError unused() {
             return new AssertionError("This method should not be called.");
