@@ -29,13 +29,15 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
    Some example commands you can try:
 
-   * `list` : Lists all contacts.
+   * `list customer` : Lists all customers.
+
+   * `list dog` : Lists all dogs.
 
    * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the Address Book.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
-   * `clear` : Deletes all contacts.
+   * `clear` : Deletes all persons, customers, and dogs.
 
    * `exit` : Exits the app.
 
@@ -61,7 +63,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
+* Extraneous parameters for commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
@@ -91,11 +93,47 @@ Examples:
 * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
 
-### Listing all persons: `list`
+### Adding a dog: `adddog`
 
-Shows a list of all persons in the address book.
+Adds a dog and assigns it a unique persistent ID.
 
-Format: `list`
+Format: `adddog n/NAME b/BREED s/SIZE`
+
+Example:
+
+* `adddog n/Cookie b/Chihuahua s/Small`
+
+Valid sizes are `small`, `medium`, `large`, and `giant`. Size input is case-insensitive.
+Dog names and breeds may contain letters, numbers, spaces, and must not be blank. Leading and trailing
+spaces in field values are ignored.
+
+### Adding a customer: `addcustomer`
+
+Adds a customer and assigns it a unique persistent ID.
+
+Format: `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`
+
+Example:
+
+* `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
+
+The contact number and backup contact number must be eight-digit numbers.
+
+### Listing all customers: `list customer`
+
+Shows a list of all customers in the address book.
+
+Format: `list customer`
+
+If there are no customers, Watchdog displays `There are no customers to display.`
+
+### Listing all dogs: `list dog`
+
+Shows a list of all dogs in the address book.
+
+Format: `list dog`
+
+If there are no dogs, Watchdog displays `There are no dogs to display.`
 
 ### Editing a person: `edit`
 
@@ -200,11 +238,42 @@ Examples:
 * `list` followed by `delete 2` deletes the 2nd person in the address book.
 * `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
 
+### Deleting a dog: `delete dog`
+
+Deletes a dog using its persistent dog ID.
+
+Format: `delete dog ID`
+
+Examples:
+
+* `delete dog 0`
+* `delete  dog   0`
+
+Multiple spaces between the command components are accepted.
+
+Upon success, Watchdog displays:
+
+`Successfully deleted dog <id>: <Name>; Breed: <breed>; Size: <Size>`
+
+If the ID does not exist, Watchdog displays:
+
+`Error in deleting dog:`<br>`Please enter a valid dog index`
+
+### Deleting a customer: `delete customer`
+
+Deletes a customer using its persistent customer ID.
+
+Format: `delete customer ID`
+
+Example:
+
+* `delete customer 21`
+
 ### Customer and dog cards
 
-The main list shows customer cards followed by dog cards in the same scrollable area.
-Dog cards show the persistent dog ID and name, followed by breed and size. Newly added dogs
-appear automatically. The panel displays all dogs alongside the currently listed customers.
+The main list shows the currently selected category in a scrollable area. Customer cards show
+customer details. Dog cards show the persistent dog ID and name, followed by breed and size.
+Newly added records appear automatically. Customer and dog IDs belong to separate categories and may overlap.
 Dog and customer IDs belong to separate categories and may overlap.
 
 ### Clearing all entries: `clear`
@@ -266,5 +335,10 @@ Action     | Format, Examples
 **Search all** | `search n/NAME_QUERY` or `search id/ID`<br> e.g., `search n/alex`
 **Search customers** | `search customer n/NAME_QUERY` or `search customer id/ID`<br> e.g., `search customer n/alex`
 **Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
-**List**   | `list`
+**Add dog** | `adddog n/NAME b/BREED s/SIZE`<br>e.g., `adddog n/Cookie b/Chihuahua s/Small`
+**Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
+**List customers** | `list customer`
+**List dogs** | `list dog`
+**Delete dog** | `delete dog ID`<br>e.g., `delete dog 0`
+**Delete customer** | `delete customer ID`<br>e.g., `delete customer 21`
 **Help**   | `help`
