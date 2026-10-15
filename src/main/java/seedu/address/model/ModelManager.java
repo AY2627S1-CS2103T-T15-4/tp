@@ -14,6 +14,7 @@ import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.exceptions.LinkException;
+import seedu.address.model.dog.exceptions.UnlinkException;
 import seedu.address.model.person.Person;
 
 /**
@@ -105,6 +106,11 @@ public class ModelManager implements Model {
     @Override
     public void linkDogs(int customerId, List<Integer> dogIds) throws LinkException {
         addressBook.linkDogs(customerId, dogIds);
+    }
+
+    @Override
+    public void unlinkDogs(int customerId, List<Integer> dogIds) throws UnlinkException {
+        addressBook.unlinkDogs(customerId, dogIds);
     }
 
     @Override

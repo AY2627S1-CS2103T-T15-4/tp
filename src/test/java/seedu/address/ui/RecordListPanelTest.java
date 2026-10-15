@@ -25,6 +25,8 @@ import seedu.address.logic.commands.ListDogCommand;
 import seedu.address.logic.commands.SearchCommand;
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.commands.SearchDogCommand;
+import seedu.address.logic.commands.UnlinkCommand;
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -97,6 +99,27 @@ public class RecordListPanelTest {
             assertEquals("Dog IDs: 3", label(list.getItems().get(0).get(), "dogIds"));
             model.deleteDog(model.getDogList().get(0));
             assertEquals("Dog IDs: None", label(list.getItems().get(0).get(), "dogIds"));
+        });
+    }
+
+    @Test
+    public void panel_unlink_updatesBothCardsAndKeepsRecords() throws Exception {
+        runOnFxThread(() -> {
+            AddressBook book = new AddressBook();
+            book.addCustomer(ALEX);
+            book.addDogFromStorage(BUDDY.withOwner(7));
+            ModelManager model = new ModelManager(book, new UserPrefs());
+            var list = listView(new RecordListPanel(model.getFilteredCustomerList(), model.getFilteredDogList(),
+                    model.getDogList()));
+            assertEquals("Dog IDs: 42", label(list.getItems().get(0).get(), "dogIds"));
+            try {
+                new UnlinkCommand(7, List.of(42)).execute(model);
+            } catch (CommandException e) {
+                throw new AssertionError(e);
+            }
+            assertEquals(2, list.getItems().size());
+            assertEquals("Dog IDs: None", label(list.getItems().get(0).get(), "dogIds"));
+            assertEquals("Owner ID: None", label(list.getItems().get(1).get(), "owner"));
         });
     }
 

@@ -50,6 +50,22 @@ public class DogOwnershipStorageTest {
     }
 
     @Test
+    public void saveAndRead_unlinkedDog_preservesCustomerAndRemainingOwnership() throws Exception {
+        AddressBook book = new AddressBook();
+        Customer owner = new Customer(7, "Alex", "91234567", "alex@example.com", "98765432");
+        book.addCustomer(owner);
+        book.addDogFromStorage(dog(42));
+        book.addDogFromStorage(dog(43));
+        book.linkDogs(7, List.of(42, 43));
+        book.unlinkDogs(7, List.of(42));
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("unlink.json"));
+        storage.saveAddressBook(book);
+        var restored = storage.readAddressBook().orElseThrow();
+        assertEquals(List.of(dog(42), dog(43).withOwner(7)), restored.getDogList());
+        assertEquals(List.of(owner), restored.getCustomerList());
+    }
+
+    @Test
     public void read_legacyDogWithoutOwner_loadsUnlinked() throws Exception {
         AddressBook book = readDog("").toModelType();
         assertTrue(book.getDogList().get(0).getOwnerId().isEmpty());

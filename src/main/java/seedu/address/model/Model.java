@@ -8,6 +8,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.exceptions.LinkException;
+import seedu.address.model.dog.exceptions.UnlinkException;
 import seedu.address.model.person.Person;
 
 /**
@@ -21,6 +22,9 @@ public interface Model {
 
     /** Links an entire batch or throws without changing records or filters. */
     void linkDogs(int customerId, List<Integer> dogIds) throws LinkException;
+
+    /** Unlinks an entire batch or throws without changing records or filters. Records are never deleted. */
+    void unlinkDogs(int customerId, List<Integer> dogIds) throws UnlinkException;
 
     /**
      * Returns the user prefs.

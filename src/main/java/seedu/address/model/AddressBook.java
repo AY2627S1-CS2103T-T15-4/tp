@@ -15,6 +15,7 @@ import seedu.address.model.customer.UniqueCustomerList;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.UniqueDogList;
 import seedu.address.model.dog.exceptions.LinkException;
+import seedu.address.model.dog.exceptions.UnlinkException;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
 
@@ -185,6 +186,34 @@ public class AddressBook implements ReadOnlyAddressBook {
                         + dog.getOwnerId().get() + ".");
             }
             replacements.put(dogId, dog.withOwner(customerId));
+        }
+        dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
+    }
+
+    /**
+     * Unlinks a batch from an existing customer without deleting records or changing filters.
+     * Validates every endpoint and ownership before publishing the updated dog list.
+     *
+     * @throws UnlinkException if the batch is empty, IDs repeat, endpoints are missing,
+     *     or any dog is not owned by the specified customer.
+     */
+    public void unlinkDogs(int customerId, List<Integer> dogIds) throws UnlinkException {
+        requireNonNull(dogIds);
+        if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
+                || new HashSet<>(dogIds).size() != dogIds.size()) {
+            throw new UnlinkException("Specify at least one dog ID, with no repeated IDs.");
+        }
+        if (getCustomerList().stream().noneMatch(customer -> customer.getId() == customerId)) {
+            throw new UnlinkException("Customer ID " + customerId + " does not exist.");
+        }
+        Map<Integer, Dog> replacements = new HashMap<>();
+        for (int dogId : dogIds) {
+            Dog dog = getDogList().stream().filter(candidate -> candidate.getId() == dogId).findFirst()
+                    .orElseThrow(() -> new UnlinkException("Dog ID " + dogId + " does not exist."));
+            if (dog.getOwnerId().filter(ownerId -> ownerId == customerId).isEmpty()) {
+                throw new UnlinkException("Dog ID " + dogId + " is not linked to customer ID " + customerId + ".");
+            }
+            replacements.put(dogId, dog.withoutOwner());
         }
         dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
     }

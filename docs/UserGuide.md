@@ -152,6 +152,21 @@ Example: `link c/1 d/2 d/3` links dogs 2 and 3 to customer 1.
   These dogs keep their IDs and details, show `Owner ID: None`, and can be linked to another customer.
   Other customers' dogs and unlinked dogs are unaffected. Deleting a dog does not delete its customer.
 
+### Unlinking dogs from a customer: `unlink`
+
+Format: `unlink c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`
+
+Example: `unlink c/1 d/2 d/3` removes customer 1's ownership of dogs 2 and 3.
+
+* Uses the same persistent-ID, prefix order, whitespace, and duplicate-ID rules as `link`.
+* The customer and every dog must exist, and every dog must belong to the specified customer.
+  If any dog is unowned or belongs to someone else, the whole batch fails without changing anything.
+* Unlinking never deletes customers or dogs, even when unlinking a customer's last dog.
+  All other details stay unchanged. You can then use `link` to assign the dogs to another customer.
+* Dog cards show `Owner ID: None`; the customer's Dog IDs field removes the unlinked IDs,
+  showing `Dog IDs: None` when none remain. Existing search filters stay active.
+* Changes are saved automatically and survive restarting the application.
+
 ### Searching customers and dogs together: `search`
 
 Format: `search n/NAME_QUERY` or `search id/ID`
@@ -287,6 +302,7 @@ Action     | Format, Examples
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Search all** | `search n/NAME_QUERY` or `search id/ID`<br> e.g., `search n/alex`
 **Link dogs** | `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`<br> e.g., `link c/1 d/2 d/3`
+**Unlink dogs** | `unlink c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`<br> e.g., `unlink c/1 d/2 d/3`
 **Search customers** | `search customer n/NAME_QUERY` or `search customer id/ID`<br> e.g., `search customer n/alex`
 **Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
 **List**   | `list`
