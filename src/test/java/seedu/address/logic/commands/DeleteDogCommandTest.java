@@ -27,7 +27,7 @@ public class DeleteDogCommandTest {
 
         CommandResult result = new DeleteDogCommand(addedDog.getId()).execute(model);
 
-        assertEquals("Successfully deleted dog 0: Leo; Breed: Poodle; Size: Large",
+        assertEquals("Successfully deleted dog 1: Leo; Breed: Poodle; Size: Large",
                 result.getFeedbackToUser());
         assertEquals(0, model.getDogList().size());
     }

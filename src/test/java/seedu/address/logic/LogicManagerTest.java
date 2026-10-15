@@ -119,7 +119,7 @@ public class LogicManagerTest {
 
         logic.execute("adddog n/Buddy b/Poodle s/small");
 
-        assertEquals(List.of(new Dog(0, new DogName("Buddy"), new Breed("Poodle"), new Size("small"))), dogs);
+        assertEquals(List.of(new Dog(1, new DogName("Buddy"), new Breed("Poodle"), new Size("small"))), dogs);
         assertEquals(1, notifications[0]);
         assertThrows(UnsupportedOperationException.class, () -> dogs.remove(0));
     }

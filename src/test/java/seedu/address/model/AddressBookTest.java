@@ -88,8 +88,8 @@ public class AddressBookTest {
         Dog secondDog = addressBook.addDog(new Dog(new DogName("Milo"),
                 new Breed("Poodle"), new Size("Small")));
 
-        assertEquals(0, firstDog.getId());
-        assertEquals(1, secondDog.getId());
+        assertEquals(1, firstDog.getId());
+        assertEquals(2, secondDog.getId());
         assertEquals(List.of(firstDog, secondDog), addressBook.getDogList());
     }
 
