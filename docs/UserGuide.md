@@ -168,6 +168,50 @@ Examples:
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
 
+### Linking dogs to a customer: `link`
+
+Format: `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`
+
+Example: `link c/1 d/2 d/3` links dogs 2 and 3 to customer 1.
+
+* Use persistent record IDs, including records hidden by a search. IDs range from 0 to 2147483647.
+* Put exactly one `c/` field first, followed by one or more `d/` fields, separated by whitespace.
+  Prefixes are lowercase, and there must be no space between a prefix and its ID.
+* Each customer can own multiple dogs; each dog can have only one owner. Unlinked records are allowed.
+* Editing a dog's name, breed, or size preserves its owner. Use `unlink` to remove ownership.
+* Dog IDs must not repeat. Unknown fields, missing IDs, negative IDs and non-integer IDs are rejected.
+* If the customer or any dog does not exist, or any dog already has an owner (even the same customer),
+  the entire command fails and no records change. Linking does not reassign dogs.
+* A successful command reports the linked IDs. Dog cards show `Owner ID: CUSTOMER_ID`, or `Owner ID: None`.
+  Customer cards show `Dog IDs: 2, 3` below backup contact, or `Dog IDs: None` if no dogs are linked.
+  This field includes all owned dogs, even when search filters hide their cards.
+  Existing search filters stay active; use `list dog` to see all dogs.
+* Links are saved automatically and survive restarting the application.
+* **Deleting a customer unlinks their dogs without deleting them**, including dogs hidden by a search.
+  These dogs keep their IDs and details, show `Owner ID: None`, and can be linked to another customer.
+  Other customers' dogs and unlinked dogs are unaffected. Deleting a dog does not delete its customer.
+
+### Unlinking dogs from a customer: `unlink`
+
+Formats: `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`
+
+Examples:
+
+* `unlink d/1 d/2 d/3` removes ownership from dogs 1, 2 and 3, even if they have different owners.
+* `unlink c/1` removes ownership from every dog belonging to customer 1, including hidden dogs.
+
+* Use persistent IDs from `0` to `2147483647`, lowercase prefixes, and whitespace between fields.
+  Do not put whitespace after the slash. Repeated dog IDs (including `d/2 d/02`) are rejected.
+* Do not mix customer and dog prefixes. The customer form accepts exactly one customer ID.
+* For the dog form, every dog must exist and have an owner. If any dog is missing or unowned,
+  the whole batch fails without changing anything.
+* For the customer form, the customer must exist and have at least one linked dog; otherwise an error is shown.
+* Unlinking never deletes customers or dogs, even when unlinking a customer's last dog.
+  All other details stay unchanged. You can then use `link` to assign the dogs to another customer.
+* Dog cards show `Owner ID: None`; the customer's Dog IDs field removes the unlinked IDs,
+  showing `Dog IDs: None` when none remain. Existing search filters stay active.
+* Changes are saved automatically and survive restarting the application.
+
 ### Searching customers and dogs together: `search`
 
 Format: `search n/NAME_QUERY` or `search id/ID`
@@ -333,6 +377,8 @@ Action     | Format, Examples
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Search all** | `search n/NAME_QUERY` or `search id/ID`<br> e.g., `search n/alex`
+**Link dogs** | `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`<br> e.g., `link c/1 d/2 d/3`
+**Unlink dogs** | `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`<br> e.g., `unlink d/2 d/3` or `unlink c/1`
 **Search customers** | `search customer n/NAME_QUERY` or `search customer id/ID`<br> e.g., `search customer n/alex`
 **Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
 **Add dog** | `adddog n/NAME b/BREED s/SIZE`<br>e.g., `adddog n/Cookie b/Chihuahua s/Small`

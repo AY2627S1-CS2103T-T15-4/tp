@@ -1,11 +1,14 @@
 package seedu.address.model;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
+import seedu.address.model.dog.exceptions.LinkException;
+import seedu.address.model.dog.exceptions.UnlinkException;
 import seedu.address.model.person.Person;
 
 /**
@@ -16,6 +19,15 @@ public interface Model {
     Predicate<Person> PREDICATE_SHOW_ALL_PERSONS = unused -> true;
 
     Predicate<Customer> PREDICATE_SHOW_ALL_CUSTOMERS = unused -> true;
+
+    /** Links an entire batch or throws without changing records or filters. */
+    void linkDogs(int customerId, List<Integer> dogIds) throws LinkException;
+
+    /** Unlinks an entire batch or throws without changing records or filters. Records are never deleted. */
+    void unlinkDogs(List<Integer> dogIds) throws UnlinkException;
+
+    /** Unlinks all owned dogs; throws if the customer is missing or has no dogs. Preserves records and filters. */
+    void unlinkCustomerDogs(int customerId) throws UnlinkException;
 
     /**
      * Returns the user prefs.
@@ -68,7 +80,7 @@ public interface Model {
     boolean hasCustomer(Customer customer);
 
     /**
-     * Deletes the given customer.
+     * Deletes the given customer and unlinks their dogs, preserving the dog records.
      * The customer must exist in the address book.
      */
     void deleteCustomer(Customer customer);
@@ -82,8 +94,7 @@ public interface Model {
     /**
      * Replaces the given customer {@code target} with {@code editedCustomer}.
      * {@code target} must exist in the address book.
-     * The customer identity of {@code editedCustomer} must not be the same as another existing customer in the
-     * address book.
+     * {@code editedCustomer} must preserve the target's persistent ID so that dog ownership stays valid.
      */
     void setCustomer(Customer target, Customer editedCustomer);
 
@@ -123,4 +134,7 @@ public interface Model {
 
     /** Deletes the given dog. The dog must exist in the address book. */
     void deleteDog(Dog dog);
+
+    /** Replaces an existing dog with its edited version. */
+    void setDog(Dog target, Dog editedDog);
 }

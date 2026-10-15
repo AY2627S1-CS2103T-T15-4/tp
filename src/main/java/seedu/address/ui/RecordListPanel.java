@@ -24,23 +24,36 @@ public class RecordListPanel extends UiPart<Region> {
 
     private final ObservableList<Customer> customers;
     private final ObservableList<Dog> dogs;
+    private final ObservableList<Dog> allDogs;
 
     /**
      * Creates a panel that observes both lists. Cards are created only for visible cells.
      */
     public RecordListPanel(ObservableList<Customer> customers, ObservableList<Dog> dogs) {
+        this(customers, dogs, dogs);
+    }
+
+    /** Observes visible records and all stored dogs so ownership details are independent of filters. */
+    public RecordListPanel(ObservableList<Customer> customers, ObservableList<Dog> dogs,
+            ObservableList<Dog> allDogs) {
         super(FXML);
         this.customers = customers;
         this.dogs = dogs;
+        this.allDogs = allDogs;
         recordListView.setCellFactory(listView -> new RecordListViewCell());
         customers.addListener((ListChangeListener<Customer>) change -> updateRecords());
         dogs.addListener((ListChangeListener<Dog>) change -> updateRecords());
+        if (allDogs != dogs) {
+            allDogs.addListener((ListChangeListener<Dog>) change -> updateRecords());
+        }
         updateRecords();
     }
 
     private void updateRecords() {
         List<Supplier<Region>> cards = new ArrayList<>();
-        customers.forEach(customer -> cards.add(() -> new CustomerCard(customer).getRoot()));
+        customers.forEach(customer -> cards.add(() -> new CustomerCard(customer, allDogs.stream()
+                .filter(dog -> dog.getOwnerId().filter(ownerId -> ownerId == customer.getId()).isPresent())
+                .map(Dog::getId).toList()).getRoot()));
         dogs.forEach(dog -> cards.add(() -> new DogCard(dog).getRoot()));
         recordListView.getItems().setAll(cards);
     }

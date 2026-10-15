@@ -1,5 +1,8 @@
 package seedu.address.ui;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -27,11 +30,18 @@ public class CustomerCard extends UiPart<Region> {
     private Label email;
     @FXML
     private Label backupContact;
+    @FXML
+    private Label dogIds;
 
     /**
      * Creates a {@code CustomerCard} with the given {@code Customer} to display.
      */
     public CustomerCard(Customer customer) {
+        this(customer, List.of());
+    }
+
+    /** Creates a customer card with the persistent IDs of all dogs owned by that customer. */
+    public CustomerCard(Customer customer, List<Integer> ownedDogIds) {
         super(FXML);
         this.customer = customer;
         id.setText(customer.getId() + ". ");
@@ -39,5 +49,7 @@ public class CustomerCard extends UiPart<Region> {
         phone.setText(customer.getPhone().value);
         email.setText(customer.getEmail().value);
         backupContact.setText(customer.getBackupContact().value);
+        String ids = ownedDogIds.stream().sorted().map(String::valueOf).collect(Collectors.joining(", "));
+        dogIds.setText("Dog IDs: " + (ids.isEmpty() ? "None" : ids));
     }
 }

@@ -17,14 +17,17 @@ class JsonAdaptedDog {
     private final String name;
     private final String breed;
     private final String size;
+    private final Integer ownerId;
 
     @JsonCreator
     public JsonAdaptedDog(@JsonProperty("id") Integer id, @JsonProperty("name") String name,
-            @JsonProperty("breed") String breed, @JsonProperty("size") String size) {
+            @JsonProperty("breed") String breed, @JsonProperty("size") String size,
+            @JsonProperty("ownerId") Integer ownerId) {
         this.id = id;
         this.name = name;
         this.breed = breed;
         this.size = size;
+        this.ownerId = ownerId;
     }
 
     public JsonAdaptedDog(Dog source) {
@@ -32,6 +35,7 @@ class JsonAdaptedDog {
         name = source.getName().toString();
         breed = source.getBreed().toString();
         size = source.getSize().toString();
+        ownerId = source.getOwnerId().orElse(null);
     }
 
     public Dog toModelType() throws IllegalValueException {
@@ -60,6 +64,9 @@ class JsonAdaptedDog {
             throw new IllegalValueException(Size.MESSAGE_CONSTRAINTS);
         }
 
-        return new Dog(id, new DogName(name), new Breed(breed), new Size(size));
+        if (ownerId != null && ownerId < 0) {
+            throw new IllegalValueException("Dog owner ID must be nonnegative.");
+        }
+        return new Dog(id, new DogName(name), new Breed(breed), new Size(size), ownerId);
     }
 }

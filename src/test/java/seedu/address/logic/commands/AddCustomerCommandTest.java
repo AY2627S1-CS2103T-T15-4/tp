@@ -58,6 +58,21 @@ public class AddCustomerCommandTest {
 
     private abstract static class ModelStub implements Model {
         @Override
+        public void unlinkDogs(List<Integer> dogIds) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void unlinkCustomerDogs(int customerId) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void linkDogs(int customerId, List<Integer> dogIds) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
         public ObservableList<Dog> getFilteredDogList() {
             throw new AssertionError("This method should not be called.");
         }
@@ -119,6 +134,9 @@ public class AddCustomerCommandTest {
             throw unused();
         }
         @Override public void deleteDog(Dog dog) {
+            throw unused();
+        }
+        @Override public void setDog(Dog target, Dog editedDog) {
             throw unused();
         }
 
