@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +35,7 @@ import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.DogSearchPredicate;
 import seedu.address.model.dog.Size;
+import seedu.address.model.dog.exceptions.LinkException;
 
 public class RecordListPanelTest {
     private static final Dog BUDDY = new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small"));
@@ -64,6 +66,58 @@ public class RecordListPanelTest {
             assertEquals("Buddy", label(card, "name"));
             assertEquals("Breed: Poodle", label(card, "breed"));
             assertEquals("Size: small", label(card, "size"));
+            assertEquals("Owner ID: None", label(card, "owner"));
+        });
+    }
+
+    @Test
+    public void panel_customerDogIds_includeHiddenDogsAndRefreshAfterLinkAndDelete() throws Exception {
+        runOnFxThread(() -> {
+            AddressBook book = new AddressBook();
+            book.addCustomer(ALEX);
+            book.addDogFromStorage(BUDDY);
+            book.addDogFromStorage(new Dog(3, new DogName("Max"), new Breed("Poodle"), new Size("small")));
+            ModelManager model = new ModelManager(book, new UserPrefs());
+            model.updateFilteredDogList(dog -> false);
+            var list = listView(new RecordListPanel(model.getFilteredCustomerList(), model.getFilteredDogList(),
+                    model.getDogList()));
+            Region initialCard = list.getItems().get(0).get();
+            assertEquals("Dog IDs: None", label(initialCard, "dogIds"));
+            var fields = initialCard.lookup("#backupContact").getParent().getChildrenUnmodifiable();
+            assertEquals(fields.indexOf(initialCard.lookup("#backupContact")) + 1,
+                    fields.indexOf(initialCard.lookup("#dogIds")));
+            try {
+                model.linkDogs(7, List.of(42, 3));
+            } catch (LinkException e) {
+                throw new AssertionError(e);
+            }
+            assertEquals(1, list.getItems().size());
+            assertEquals("Dog IDs: 3, 42", label(list.getItems().get(0).get(), "dogIds"));
+            model.deleteDog(model.getDogList().get(0));
+            assertEquals("Dog IDs: 3", label(list.getItems().get(0).get(), "dogIds"));
+            model.deleteDog(model.getDogList().get(0));
+            assertEquals("Dog IDs: None", label(list.getItems().get(0).get(), "dogIds"));
+        });
+    }
+
+    @Test
+    public void panel_linkAndCustomerDeletion_refreshesOwnerAndKeepsDogs() throws Exception {
+        runOnFxThread(() -> {
+            AddressBook book = new AddressBook();
+            book.addCustomer(ALEX);
+            book.addDogFromStorage(BUDDY);
+            ModelManager model = new ModelManager(book, new UserPrefs());
+            var list = listView(new RecordListPanel(model.getFilteredCustomerList(), model.getFilteredDogList()));
+            try {
+                model.linkDogs(7, List.of(42));
+            } catch (LinkException e) {
+                throw new AssertionError(e);
+            }
+            assertEquals("Owner ID: 7", label(list.getItems().get(1).get(), "owner"));
+            model.deleteCustomer(ALEX);
+            assertEquals(1, list.getItems().size());
+            assertEquals("Buddy", label(list.getItems().get(0).get(), "name"));
+            assertEquals("Owner ID: None", label(list.getItems().get(0).get(), "owner"));
         });
     }
 

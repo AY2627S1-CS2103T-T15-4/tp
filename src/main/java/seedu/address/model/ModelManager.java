@@ -3,6 +3,7 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -12,6 +13,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
+import seedu.address.model.dog.exceptions.LinkException;
 import seedu.address.model.person.Person;
 
 /**
@@ -100,6 +102,11 @@ public class ModelManager implements Model {
     }
 
     //=========== Dog Operations ============================================================================
+    @Override
+    public void linkDogs(int customerId, List<Integer> dogIds) throws LinkException {
+        addressBook.linkDogs(customerId, dogIds);
+    }
+
     @Override
     public boolean hasDog(Dog dog) {
         return addressBook.hasDog(dog);

@@ -27,6 +27,7 @@
       </HBox>
       <Label fx:id="breed" styleClass="cell_small_label" text="\$breed" />
       <Label fx:id="size" styleClass="cell_small_label" text="\$size" />
+      <Label fx:id="owner" styleClass="cell_small_label" text="\$owner" />
     </VBox>
   </GridPane>
 </HBox>

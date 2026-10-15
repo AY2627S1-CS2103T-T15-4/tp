@@ -25,6 +25,31 @@ Refer to the guide [_Setting up and getting started_](SettingUp.md).
 
 ## **Design**
 
+### Customer–dog ownership
+
+`LinkCommandParser` accepts one customer ID followed by one or more distinct dog IDs.
+`LinkCommand` delegates the batch to `Model.linkDogs`; `ModelManager` forwards to `AddressBook`.
+The address book looks up persistent IDs in the complete lists and validates every endpoint and ownership
+constraint before publishing one replacement dog list. A rejected batch throws `LinkException` without
+changing records or filters; the command translates it to `CommandException` for user feedback.
+
+Each immutable `Dog` stores an optional owner customer ID. This is the single source of truth;
+customers do not store a duplicate dog-ID list. A dog may be unlinked or have one owner, while a customer
+may own any number of dogs. Linking an already-owned dog is rejected, including links to the same owner.
+Dog equality includes ownership, while identity remains the persistent dog ID.
+
+`AddressBook.removeCustomer` clears ownership of that customer's dogs, regardless of filters,
+preserving their persistent IDs and details. Unowned dog cards show `Owner ID: None`.
+Removing a dog leaves its customer intact. Customer edits must preserve persistent IDs to keep links valid.
+Observable list updates refresh dog cards, which display owner IDs without changing search filters.
+Customer cards display owned dog IDs below backup contact. `RecordListPanel` observes the complete dog list
+as well as visible records, so these IDs remain accurate when dog cards are filtered out.
+
+`JsonAdaptedDog` persists `ownerId`. A missing or null field means unlinked, preserving compatibility
+with older files. Negative owner IDs and references to missing customers are rejected on load;
+customers are restored before dogs. Copies of the address book retain ownership through immutable dogs.
+Future dog-edit implementations must preserve ownership when constructing replacement dogs.
+
 ### Architecture
 
 <puml src="diagrams/ArchitectureDiagram.puml" width="280" />
