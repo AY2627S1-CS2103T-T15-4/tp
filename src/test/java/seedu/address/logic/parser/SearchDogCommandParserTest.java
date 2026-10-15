@@ -43,6 +43,8 @@ public class SearchDogCommandParserTest {
     public void parse_blankNameValue_rejectedByDogParser() {
         ParseException exception = assertThrows(ParseException.class, () ->
                 new SearchDogCommandParser().parse("dog n/   "));
+        assertThrows(ParseException.class, () ->
+                new SearchDogCommandParser().parse("dog n/\u2003"));
         assertEquals(String.format(seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT,
                 SearchDogCommand.MESSAGE_USAGE), exception.getMessage());
     }
