@@ -15,7 +15,9 @@ import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.DeleteCustomerCommand;
+import seedu.address.logic.commands.DeleteDogCommand;
 import seedu.address.logic.commands.EditCommand;
+import seedu.address.logic.commands.EditCustomerCommand;
 import seedu.address.logic.commands.EditDogCommand;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
@@ -38,6 +40,7 @@ public class AddressBookParser {
     private static final Pattern DELETE_DOG_COMMAND_FORMAT = Pattern.compile(
             "delete\\s+dog(?=\\s|$)(?<arguments>.*)");
     private static final Pattern DELETE_CUSTOMER_COMMAND_FORMAT = Pattern.compile("delete\\s+customer(?:\\s+.*)?");
+    private static final Pattern DELETE_DOG_COMMAND_FORMAT = Pattern.compile("delete\\s+dog(?:\\s+.*)?");
     private static final Logger logger = LogsCenter.getLogger(AddressBookParser.class);
 
     /**
@@ -59,6 +62,10 @@ public class AddressBookParser {
             String arguments = userInput.trim().substring(DeleteCustomerCommand.COMMAND_WORD.length());
             return new DeleteCustomerCommandParser().parse(arguments);
         }
+        if (DELETE_DOG_COMMAND_FORMAT.matcher(userInput.trim()).matches()) {
+            String arguments = userInput.trim().substring(DeleteDogCommand.COMMAND_WORD.length());
+            return new DeleteDogCommandParser().parse(arguments);
+        }
         final Matcher matcher = BASIC_COMMAND_FORMAT.matcher(userInput.trim());
         if (!matcher.matches()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, HelpCommand.MESSAGE_USAGE));
@@ -77,6 +84,7 @@ public class AddressBookParser {
             case AddCustomerCommand.COMMAND_WORD -> new AddCustomerCommandParser().parse(arguments);
             case AddDogCommand.COMMAND_WORD -> new AddDogCommandParser().parse(arguments);
             case EditCommand.COMMAND_WORD -> new EditCommandParser().parse(arguments);
+            case EditCustomerCommand.COMMAND_WORD -> new EditCustomerCommandParser().parse(arguments);
             case EditDogCommand.COMMAND_WORD -> new EditDogCommandParser().parse(arguments);
             case DeleteCommand.COMMAND_WORD -> new DeleteCommandParser().parse(arguments);
             case ClearCommand.COMMAND_WORD -> new ClearCommand();
