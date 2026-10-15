@@ -140,6 +140,7 @@ Example: `link c/1 d/2 d/3` links dogs 2 and 3 to customer 1.
 * Put exactly one `c/` field first, followed by one or more `d/` fields, separated by whitespace.
   Prefixes are lowercase, and there must be no space between a prefix and its ID.
 * Each customer can own multiple dogs; each dog can have only one owner. Unlinked records are allowed.
+* Editing a dog's name, breed, or size preserves its owner. Use `unlink` to remove ownership.
 * Dog IDs must not repeat. Unknown fields, missing IDs, negative IDs and non-integer IDs are rejected.
 * If the customer or any dog does not exist, or any dog already has an owner (even the same customer),
   the entire command fails and no records change. Linking does not reassign dogs.

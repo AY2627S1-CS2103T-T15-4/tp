@@ -57,7 +57,8 @@ as well as visible records, so these IDs remain accurate when dog cards are filt
 `JsonAdaptedDog` persists `ownerId`. A missing or null field means unlinked, preserving compatibility
 with older files. Negative owner IDs and references to missing customers are rejected on load;
 customers are restored before dogs. Copies of the address book retain ownership through immutable dogs.
-Future dog-edit implementations must preserve ownership when constructing replacement dogs.
+`EditDogCommand` preserves the current owner ID when constructing a replacement dog, so editing details
+does not unlink the dog. Ownership changes remain explicit through linking, unlinking, or customer deletion.
 
 ### Architecture
 

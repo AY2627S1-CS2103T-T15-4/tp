@@ -59,6 +59,33 @@ public class UnlinkCommandTest {
     }
 
     @Test
+    public void execute_editedLinkedDog_preservesOwnershipUntilExplicitDogUnlink() throws Exception {
+        execute("editdog 42 n/Milo b/Beagle s/Large");
+        Dog edited = model.getDogList().get(0);
+        assertEquals(new Dog(42, new DogName("Milo"), new Breed("Beagle"), new Size("Large"), 7), edited);
+        assertRejected("link c/8 d/42", "Dog ID 42 is already linked to customer ID 7.");
+
+        execute("unlink d/42");
+        assertEquals(edited.withoutOwner(), model.getDogList().get(0));
+        assertEquals(Optional.of(7), model.getDogList().get(1).getOwnerId());
+        execute("link c/8 d/42");
+        assertEquals(edited.withOwner(8), model.getDogList().get(0));
+    }
+
+    @Test
+    public void execute_customerAfterDogEdit_unlinksEditedAndOtherOwnedDogs() throws Exception {
+        execute("editdog 42 n/Milo");
+        assertEquals(Optional.of(7), model.getDogList().get(0).getOwnerId());
+        Dog edited = model.getDogList().get(0);
+        Dog otherOwnersDog = model.getDogList().get(2);
+
+        execute("unlink c/7");
+        assertEquals(edited.withoutOwner(), model.getDogList().get(0));
+        assertTrue(model.getDogList().get(1).getOwnerId().isEmpty());
+        assertEquals(otherOwnersDog, model.getDogList().get(2));
+    }
+
+    @Test
     public void execute_singleDog_leavesOtherOwnedDogLinked() throws Exception {
         execute("unlink d/42");
         assertTrue(model.getDogList().get(0).getOwnerId().isEmpty());
