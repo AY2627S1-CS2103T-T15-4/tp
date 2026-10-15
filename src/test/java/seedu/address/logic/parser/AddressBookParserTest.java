@@ -16,6 +16,7 @@ import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.AddDogCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.DeleteCommand;
+import seedu.address.logic.commands.DeleteCustomerCommand;
 import seedu.address.logic.commands.DeleteDogCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
@@ -71,6 +72,12 @@ public class AddressBookParserTest {
     public void parseCommand_deleteDog() throws Exception {
         DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("delete dog 12");
         assertEquals(new DeleteDogCommand(12), command);
+    }
+
+    @Test
+    public void parseCommand_deleteCustomer() throws Exception {
+        DeleteCustomerCommand command = (DeleteCustomerCommand) parser.parseCommand("delete customer 21");
+        assertEquals(new DeleteCustomerCommand(21), command);
     }
 
     @Test

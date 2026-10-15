@@ -102,6 +102,11 @@ public interface Model {
 
     ObservableList<Customer> getFilteredCustomerList();
 
+    /** Returns an unmodifiable view of every stored customer. */
+    default ObservableList<Customer> getCustomerList() {
+        return getAddressBook().getCustomerList();
+    }
+
     void updateFilteredCustomerList(Predicate<Customer> predicate);
 
     /**
