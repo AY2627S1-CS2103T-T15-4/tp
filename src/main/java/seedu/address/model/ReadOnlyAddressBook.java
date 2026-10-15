@@ -26,6 +26,11 @@ public interface ReadOnlyAddressBook {
         return -1;
     }
 
+    /** Returns the next unused customer ID, or {@code -1} when unavailable. */
+    default int getNextCustomerId() {
+        return -1;
+    }
+
     ObservableList<Customer> getCustomerList();
 
 }

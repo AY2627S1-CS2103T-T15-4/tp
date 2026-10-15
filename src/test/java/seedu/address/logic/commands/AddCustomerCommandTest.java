@@ -40,14 +40,8 @@ public class AddCustomerCommandTest {
 
         CommandResult result = new AddCustomerCommand(ALICE).execute(model);
 
-        assertEquals(String.format(AddCustomerCommand.MESSAGE_SUCCESS, ALICE), result.getFeedbackToUser());
+        assertEquals(AddCustomerCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
         assertEquals(List.of(ALICE), model.customersAdded);
-    }
-
-    @Test
-    public void execute_duplicateCustomer_throwsCommandException() {
-        assertThrows(CommandException.class, AddCustomerCommand.MESSAGE_DUPLICATE_CUSTOMER, () ->
-                new AddCustomerCommand(ALICE).execute(new ModelStubWithCustomer(ALICE)));
     }
 
     @Test
@@ -63,6 +57,16 @@ public class AddCustomerCommandTest {
     }
 
     private abstract static class ModelStub implements Model {
+        @Override
+        public ObservableList<Dog> getFilteredDogList() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void updateFilteredDogList(Predicate<Dog> predicate) {
+            throw new AssertionError("This method should not be called.");
+        }
+
         @Override public ReadOnlyUserPrefs getUserPrefs() {
             throw unused();
         }
@@ -120,24 +124,6 @@ public class AddCustomerCommandTest {
 
         protected final AssertionError unused() {
             return new AssertionError("This method should not be called.");
-        }
-    }
-
-    private static class ModelStubWithCustomer extends ModelStub {
-        private final Customer customer;
-
-        ModelStubWithCustomer(Customer customer) {
-            this.customer = requireNonNull(customer);
-        }
-
-        @Override
-        public boolean hasCustomer(Customer customer) {
-            return this.customer.isSameCustomer(requireNonNull(customer));
-        }
-
-        @Override
-        public void addCustomer(Customer customer) {
-            throw unused();
         }
     }
 

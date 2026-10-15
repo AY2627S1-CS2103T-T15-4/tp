@@ -24,6 +24,7 @@ public class ModelManager implements Model {
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
     private final FilteredList<Customer> filteredCustomers;
+    private final FilteredList<Dog> filteredDogs;
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
@@ -37,6 +38,7 @@ public class ModelManager implements Model {
         this.userPrefs = new UserPrefs(userPrefs);
         filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
         filteredCustomers = new FilteredList<>(this.addressBook.getCustomerList());
+        filteredDogs = new FilteredList<>(this.addressBook.getDogList());
     }
 
     public ModelManager() {
@@ -155,6 +157,17 @@ public class ModelManager implements Model {
     }
 
     @Override
+    public ObservableList<Dog> getFilteredDogList() {
+        return filteredDogs;
+    }
+
+    @Override
+    public void updateFilteredDogList(Predicate<Dog> predicate) {
+        requireNonNull(predicate);
+        filteredDogs.setPredicate(predicate);
+    }
+
+    @Override
     public ObservableList<Customer> getFilteredCustomerList() {
         return filteredCustomers;
     }
@@ -185,7 +198,8 @@ public class ModelManager implements Model {
         return addressBook.equals(otherModelManager.addressBook)
                 && userPrefs.equals(otherModelManager.userPrefs)
                 && filteredPersons.equals(otherModelManager.filteredPersons)
-                && filteredCustomers.equals(otherModelManager.filteredCustomers);
+                && filteredCustomers.equals(otherModelManager.filteredCustomers)
+                && filteredDogs.equals(otherModelManager.filteredDogs);
     }
 
 }

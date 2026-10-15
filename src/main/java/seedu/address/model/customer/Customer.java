@@ -9,7 +9,7 @@ import seedu.address.commons.util.ToStringBuilder;
 
 /**
  * Represents a customer in the daycare database.
- * Guarantees: details are present and not null, id is nonnegative, immutable.
+ * Guarantees: details are present and not null, and immutable. Stored customers have nonnegative IDs.
  */
 public class Customer {
 
@@ -27,6 +27,19 @@ public class Customer {
         requireAllNonNull(name, phone, email, backupContact);
         checkArgument(id >= 0, "Customer id must be nonnegative.");
         this.id = id;
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.backupContact = backupContact;
+    }
+
+    /**
+     * Creates a customer without an assigned persistent ID.
+     * The address book assigns an ID before storing the customer.
+     */
+    public Customer(Name name, Phone phone, Email email, BackupContact backupContact) {
+        requireAllNonNull(name, phone, email, backupContact);
+        this.id = -1;
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -75,7 +88,7 @@ public class Customer {
             return true;
         }
 
-        return otherCustomer != null && otherCustomer.getId() == getId();
+        return otherCustomer != null && id >= 0 && otherCustomer.getId() == id;
     }
 
     /**

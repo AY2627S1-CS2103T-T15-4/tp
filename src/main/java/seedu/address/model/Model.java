@@ -94,7 +94,18 @@ public interface Model {
         return getAddressBook().getDogList();
     }
 
+    /** Returns an unmodifiable observable view of filtered dogs. */
+    ObservableList<Dog> getFilteredDogList();
+
+    /** Updates the dog filter; the predicate must not be null. */
+    void updateFilteredDogList(Predicate<Dog> predicate);
+
     ObservableList<Customer> getFilteredCustomerList();
+
+    /** Returns an unmodifiable view of every stored customer. */
+    default ObservableList<Customer> getCustomerList() {
+        return getAddressBook().getCustomerList();
+    }
 
     void updateFilteredCustomerList(Predicate<Customer> predicate);
 

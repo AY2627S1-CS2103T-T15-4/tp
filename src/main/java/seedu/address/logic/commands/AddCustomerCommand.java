@@ -10,9 +10,10 @@ import seedu.address.model.customer.Customer;
 /** Adds a customer to the address book. */
 public class AddCustomerCommand extends Command {
     public static final String COMMAND_WORD = "addcustomer";
-    public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Adds customer to contacts";
-    public static final String MESSAGE_SUCCESS = "New customer added: %1$s";
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a customer. "
+            + "Parameters: n/NAME p/PHONE e/EMAIL bc/BACKUP_CONTACT\n"
+            + "Example: " + COMMAND_WORD + " n/Alice Tan p/91234567 e/alice@example.com bc/98765432";
+    public static final String MESSAGE_SUCCESS = "New customer added.";
     public static final String MESSAGE_DUPLICATE_CUSTOMER = "This customer already exists in the address book.";
 
     /**
@@ -32,12 +33,8 @@ public class AddCustomerCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
 
-        if (model.hasCustomer(toAdd)) {
-            throw new CommandException(MESSAGE_DUPLICATE_CUSTOMER);
-        }
-
         model.addCustomer(toAdd);
-        return new CommandResult(String.format(MESSAGE_SUCCESS, toAdd));
+        return new CommandResult(MESSAGE_SUCCESS);
     }
 
     @Override

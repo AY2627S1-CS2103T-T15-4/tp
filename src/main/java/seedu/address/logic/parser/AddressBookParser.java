@@ -9,16 +9,19 @@ import java.util.regex.Pattern;
 
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.AddCommand;
+import seedu.address.logic.commands.AddCustomerCommand;
 import seedu.address.logic.commands.AddDogCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.DeleteCommand;
+import seedu.address.logic.commands.DeleteCustomerCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ListDogCommand;
+import seedu.address.logic.commands.SearchCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
 /**
@@ -33,6 +36,7 @@ public class AddressBookParser {
     private static final Pattern LIST_DOG_COMMAND_FORMAT = Pattern.compile("list\\s+dog");
     private static final Pattern DELETE_DOG_COMMAND_FORMAT = Pattern.compile(
             "delete\\s+dog(?=\\s|$)(?<arguments>.*)");
+    private static final Pattern DELETE_CUSTOMER_COMMAND_FORMAT = Pattern.compile("delete\\s+customer(?:\\s+.*)?");
     private static final Logger logger = LogsCenter.getLogger(AddressBookParser.class);
 
     /**
@@ -50,6 +54,10 @@ public class AddressBookParser {
         if (deleteDogMatcher.matches()) {
             return new DeleteDogCommandParser().parse(deleteDogMatcher.group("arguments"));
         }
+        if (DELETE_CUSTOMER_COMMAND_FORMAT.matcher(userInput.trim()).matches()) {
+            String arguments = userInput.trim().substring(DeleteCustomerCommand.COMMAND_WORD.length());
+            return new DeleteCustomerCommandParser().parse(arguments);
+        }
         final Matcher matcher = BASIC_COMMAND_FORMAT.matcher(userInput.trim());
         if (!matcher.matches()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, HelpCommand.MESSAGE_USAGE));
@@ -65,11 +73,13 @@ public class AddressBookParser {
 
         return switch (commandWord) {
             case AddCommand.COMMAND_WORD -> new AddCommandParser().parse(arguments);
+            case AddCustomerCommand.COMMAND_WORD -> new AddCustomerCommandParser().parse(arguments);
             case AddDogCommand.COMMAND_WORD -> new AddDogCommandParser().parse(arguments);
             case EditCommand.COMMAND_WORD -> new EditCommandParser().parse(arguments);
             case DeleteCommand.COMMAND_WORD -> new DeleteCommandParser().parse(arguments);
             case ClearCommand.COMMAND_WORD -> new ClearCommand();
             case FindCommand.COMMAND_WORD -> new FindCommandParser().parse(arguments);
+            case SearchCommand.COMMAND_WORD -> new SearchCommandParser().parse(arguments);
             case ListCommand.COMMAND_WORD -> new ListCommandParser().parse(arguments);
             case ExitCommand.COMMAND_WORD -> new ExitCommand();
             case HelpCommand.COMMAND_WORD -> new HelpCommand();

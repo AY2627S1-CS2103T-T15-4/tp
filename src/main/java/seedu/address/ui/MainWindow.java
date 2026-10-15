@@ -114,7 +114,7 @@ public class MainWindow extends UiPart<Stage> {
      * Fills up all the placeholders of this window.
      */
     void fillInnerParts() {
-        recordListPanel = new RecordListPanel(logic.getFilteredCustomerList(), logic.getDogList());
+        recordListPanel = new RecordListPanel(logic.getFilteredCustomerList(), logic.getFilteredDogList());
         personListPanelPlaceholder.getChildren().add(recordListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
@@ -176,7 +176,7 @@ public class MainWindow extends UiPart<Stage> {
      *
      * @see seedu.address.logic.Logic#execute(String)
      */
-    private CommandResult executeCommand(String commandText) throws CommandException, ParseException {
+    CommandResult executeCommand(String commandText) throws CommandException, ParseException {
         try {
             CommandResult commandResult = logic.execute(commandText);
             logger.info("Result: " + commandResult.getFeedbackToUser());
