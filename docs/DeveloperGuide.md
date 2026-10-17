@@ -200,6 +200,11 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 ### Activity creation and storage
 
+The following partial class diagram shows the activity schedules and their integration with the model.
+An activity represents a reusable schedule; its occurrence dates are calculated from its recurrence rule.
+
+<puml src="diagrams/ActivityClassDiagram.puml" alt="Activity schedule classes and model integration" />
+
 `AddressBookParser` routes `addactivity` to `AddActivityCommandParser`. The parser requires
 `n/`, `date/`, `start/`, `end/`, and `r/` exactly once, rejects unknown alphabetic prefixes,
 and validates strict calendar dates, minute-resolution 24-hour times and lowercase recurrence.
@@ -223,6 +228,13 @@ Activity IDs and the counter must be integer JSON numbers; fractions, numeric st
 out-of-range numbers are rejected before conversion. Reset updates the activity counter before
 notifying activity-list listeners, so listeners can copy the model with a consistent identity state.
 `LogicManager` uses its existing save path after successful command execution.
+
+The following sequence diagram shows successful execution of
+`addactivity n/Training date/2026-10-20 start/10:00 end/11:00 r/weekly`.
+The command uses the `Model` interface, implemented by `ModelManager`; saving uses the `Storage`
+interface, implemented by `StorageManager`. Concrete lifelines are shown to make the delegation clear.
+
+<puml src="diagrams/AddActivitySequenceDiagram.puml" alt="Parsing, executing and saving an addactivity command" />
 
 For teammates: use `Model.getActivityList()` for observation and `Activity.getId()` for identity,
 independently of displayed positions. Use `Activity.occursOn(date)` for dated schedule queries.
