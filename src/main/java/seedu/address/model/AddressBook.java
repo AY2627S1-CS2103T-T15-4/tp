@@ -2,14 +2,20 @@ package seedu.address.model;
 
 import static java.util.Objects.requireNonNull;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.UniqueCustomerList;
 import seedu.address.model.dog.Dog;
@@ -28,6 +34,9 @@ public class AddressBook implements ReadOnlyAddressBook {
     private final UniquePersonList persons = new UniquePersonList();
     private final UniqueDogList dogs = new UniqueDogList();
     private final UniqueCustomerList customers = new UniqueCustomerList();
+    private final ObservableList<Activity> activities = FXCollections.observableArrayList();
+    private final ObservableList<Activity> activityView = FXCollections.unmodifiableObservableList(activities);
+    private long nextActivityId = 1;
     private int nextDogId;
     private int nextCustomerId;
 
@@ -61,9 +70,18 @@ public class AddressBook implements ReadOnlyAddressBook {
     public void resetData(ReadOnlyAddressBook newData) {
         requireNonNull(newData);
 
+        List<Activity> restored = List.copyOf(newData.getActivityList());
+        long minimumId = restored.stream().mapToLong(Activity::getId).max().orElse(0) + 1;
+        long nextId = newData.getNextActivityId();
+        if (restored.stream().map(Activity::getId).distinct().count() != restored.size()
+                || nextId < minimumId || nextId > (long) Integer.MAX_VALUE + 1) {
+            throw new IllegalArgumentException("Invalid activity IDs or next activity ID.");
+        }
         setPersons(newData.getPersonList());
         dogs.setDogs(newData.getDogList());
         setCustomers(newData.getCustomerList());
+        nextActivityId = nextId;
+        activities.setAll(restored);
 
         int restoredNextDogId = newData.getNextDogId();
         this.nextDogId = restoredNextDogId >= 0
@@ -80,6 +98,51 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     public void setCustomers(List<Customer> customers) {
         this.customers.setCustomers(customers);
+    }
+
+    /**
+     * Creates an empty schedule with a fresh persistent ID. Identical details are allowed.
+     * Validates before changing records or consuming an ID.
+     * @throws IllegalStateException if all supported IDs have been allocated.
+     */
+    public Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end,
+            Recurrence recurrence) {
+        if (nextActivityId > Integer.MAX_VALUE) {
+            throw new IllegalStateException("No activity IDs remain available.");
+        }
+        Activity activity = new Activity((int) nextActivityId, name, date, start, end, recurrence);
+        nextActivityId++;
+        activities.add(activity);
+        return activity;
+    }
+
+    /** Restores a schedule with its persisted ID; rejects duplicate identities. */
+    public void addActivityFromStorage(Activity activity) {
+        requireNonNull(activity);
+        if (activities.stream().anyMatch(existing -> existing.isSameActivity(activity))) {
+            throw new IllegalArgumentException("Activities list contains duplicate activity IDs.");
+        }
+        nextActivityId = Math.max(nextActivityId, (long) activity.getId() + 1);
+        activities.add(activity);
+    }
+
+    /** Restores a counter above all stored IDs; MAX_VALUE + 1 represents exhausted IDs. */
+    public void setNextActivityId(long nextId) {
+        long minimumId = activities.stream().mapToLong(Activity::getId).max().orElse(0) + 1;
+        if (nextId < minimumId || nextId > (long) Integer.MAX_VALUE + 1) {
+            throw new IllegalArgumentException("Next activity ID must exceed stored IDs and be within range.");
+        }
+        nextActivityId = nextId;
+    }
+
+    @Override
+    public long getNextActivityId() {
+        return nextActivityId;
+    }
+
+    @Override
+    public ObservableList<Activity> getActivityList() {
+        return activityView;
     }
 
     //// person-level operations
@@ -350,11 +413,13 @@ public class AddressBook implements ReadOnlyAddressBook {
 
         return persons.equals(otherAddressBook.persons)
                 && dogs.equals(otherAddressBook.dogs)
-                && customers.equals(otherAddressBook.customers);
+                && customers.equals(otherAddressBook.customers)
+                && activities.equals(otherAddressBook.activities)
+                && nextActivityId == otherAddressBook.nextActivityId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(persons, dogs, customers);
+        return Objects.hash(persons, dogs, customers, activities, nextActivityId);
     }
 }

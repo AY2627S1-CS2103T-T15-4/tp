@@ -3,6 +3,8 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
@@ -11,6 +13,9 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.exceptions.LinkException;
@@ -100,6 +105,12 @@ public class ModelManager implements Model {
         requireAllNonNull(target, editedPerson);
 
         addressBook.setPerson(target, editedPerson);
+    }
+
+    @Override
+    public Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end,
+            Recurrence recurrence) {
+        return addressBook.addActivity(name, date, start, end, recurrence);
     }
 
     //=========== Dog Operations ============================================================================

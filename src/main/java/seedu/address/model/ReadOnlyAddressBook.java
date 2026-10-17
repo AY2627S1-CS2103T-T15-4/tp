@@ -2,6 +2,7 @@ package seedu.address.model;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import seedu.address.model.activity.Activity;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.person.Person;
@@ -29,6 +30,16 @@ public interface ReadOnlyAddressBook {
     /** Returns the next unused customer ID, or {@code -1} when unavailable. */
     default int getNextCustomerId() {
         return -1;
+    }
+
+    /** Returns an unmodifiable observable collection of activity schedules. */
+    default ObservableList<Activity> getActivityList() {
+        return FXCollections.emptyObservableList();
+    }
+
+    /** Returns the next unused activity ID; older address books start at one. */
+    default long getNextActivityId() {
+        return 1;
     }
 
     ObservableList<Customer> getCustomerList();

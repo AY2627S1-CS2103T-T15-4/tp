@@ -1,10 +1,15 @@
 package seedu.address.model;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.exceptions.LinkException;
@@ -125,6 +130,14 @@ public interface Model {
      * @throws NullPointerException if {@code predicate} is null.
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
+
+    /** Adds an empty schedule and returns it with its persistent ID. */
+    Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end, Recurrence recurrence);
+
+    /** Returns all schedules, independently of dog/customer filters. */
+    default ObservableList<Activity> getActivityList() {
+        return getAddressBook().getActivityList();
+    }
 
     /** Adds a dog and returns the dog with its assigned persistent ID. */
     Dog addDog(Dog dog);

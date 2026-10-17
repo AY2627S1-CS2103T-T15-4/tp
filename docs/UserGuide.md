@@ -33,7 +33,7 @@ WatchDog is a **desktop application for managing contacts, optimized for use thr
 
    * `list dog` : Lists all dogs.
 
-   * `clear` : Deletes all persons, customers, and dogs.
+   * `clear` : Deletes all persons, customers, dogs, and activities.
 
    * `exit` : Exits the app.
 
@@ -73,6 +73,34 @@ Shows a message explaining how to access the help page.
 
 Format: `help`
 
+
+### Adding an activity: `addactivity`
+
+Creates an activity schedule with zero dogs and reports its persistent ID. The schedule is saved
+across restarts. Activities with identical names or times are allowed and receive different IDs.
+
+Format: `addactivity n/NAME date/YYYY-MM-DD start/HH:mm end/HH:mm r/RECURRENCE`
+
+All five fields are required exactly once, in any order. Prefixes and recurrence values are lowercase.
+Use a nonblank name, a valid calendar date, and 24-hour times from `00:00` to `23:59`.
+The end must be later than the start on the same day; overnight schedules are unsupported.
+Past start dates are permitted. Leading and trailing spaces in values are ignored.
+Space-separated alphabetic tokens ending in `/` are reserved for prefixes, including within names;
+unknown prefixes and extra text before the fields are rejected without creating an activity.
+
+* `r/once`: occurs only on the supplied date.
+* `r/daily`: occurs every day from that date, with no end date.
+* `r/weekly`: occurs on that date's weekday every week, with no end date.
+
+Examples:
+
+* `addactivity n/Grooming date/2026-10-20 start/14:00 end/15:00 r/once`
+* `addactivity n/Morning walk date/2026-10-20 start/09:00 end/09:30 r/daily`
+* `addactivity n/Training date/2026-10-20 start/10:00 end/11:00 r/weekly`
+
+Invalid dates, times, recurrence values, missing or repeated fields produce an error.
+Creation does not book any dogs, so overlapping empty schedules are allowed. Dog booking commands
+and activity cards are separate features; this contribution reports creation in the command feedback.
 
 ### Adding a dog: `adddog`
 
@@ -334,6 +362,7 @@ Action     | Format, Examples
 **Unlink dogs** | `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`<br> e.g., `unlink d/2 d/3` or `unlink c/1`
 **Search customers** | `search customer n/NAME_QUERY` or `search customer id/ID`<br> e.g., `search customer n/alex`
 **Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
+**Add activity** | `addactivity n/NAME date/YYYY-MM-DD start/HH:mm end/HH:mm r/once`<br>Use `r/daily` or `r/weekly` for recurrence.
 **Add dog** | `adddog n/NAME b/BREED s/SIZE`<br>e.g., `adddog n/Cookie b/Chihuahua s/Small`
 **Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 **Edit dog** | `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`<br>e.g., `editdog 1 s/Large`

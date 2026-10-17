@@ -53,8 +53,12 @@ public class LogicManager implements Logic {
         try {
             storage.saveAddressBook(model.getAddressBook());
         } catch (AccessDeniedException e) {
+            logger.warning("Command executed, but saving was denied by file or folder permissions. "
+                    + "The in-memory changes have not been saved.");
             throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
         } catch (IOException ioe) {
+            logger.warning("Command executed, but saving failed with " + ioe.getClass().getSimpleName()
+                    + ". The in-memory changes have not been saved.");
             throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
         }
 
