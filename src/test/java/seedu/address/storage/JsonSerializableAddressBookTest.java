@@ -61,7 +61,8 @@ public class JsonSerializableAddressBookTest {
     public void toModelType_duplicateCustomers_throwsIllegalValueException() {
         Customer customer = customer(1, "Alice Tan");
         JsonSerializableAddressBook data = new JsonSerializableAddressBook(
-                List.of(new JsonAdaptedCustomer(customer), new JsonAdaptedCustomer(customer)), null, null, null);
+                List.of(new JsonAdaptedCustomer(customer), new JsonAdaptedCustomer(customer)),
+                null, null, null, null, null);
 
         assertThrows(IllegalValueException.class, JsonSerializableAddressBook.MESSAGE_DUPLICATE_CUSTOMER,
                 data::toModelType);
@@ -81,7 +82,7 @@ public class JsonSerializableAddressBookTest {
     @Test
     public void toModelType_missingNextCustomerId_derivesIdFromStoredCustomers() throws Exception {
         JsonSerializableAddressBook data = new JsonSerializableAddressBook(
-                List.of(new JsonAdaptedCustomer(customer(7, "Alice Tan"))), null, null, null);
+                List.of(new JsonAdaptedCustomer(customer(7, "Alice Tan"))), null, null, null, null, null);
 
         AddressBook restored = data.toModelType();
 

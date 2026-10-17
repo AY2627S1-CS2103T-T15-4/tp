@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.testutil.Assert.assertThrows;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -17,6 +19,9 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.BackupContact;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.Email;
@@ -63,6 +68,12 @@ public class AddCustomerCommandTest {
     }
 
     private abstract static class ModelStub implements Model {
+        @Override
+        public Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end,
+                Recurrence recurrence) {
+            throw new AssertionError("This method should not be called.");
+        }
+
         @Override
         public void unlinkDogs(List<Integer> dogIds) {
             throw new AssertionError("This method should not be called.");

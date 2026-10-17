@@ -1,0 +1,69 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 230
+
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":AddActivityCommandParser" as Parser LOGIC_COLOR
+participant "command:AddActivityCommand" as Command LOGIC_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+participant ":AddressBook" as Book MODEL_COLOR
+participant ":StorageManager" as Storage STORAGE_COLOR
+
+[-> Logic : execute("addactivity ...")
+activate Logic
+Logic -> Router : parseCommand(commandText)
+activate Router
+create Parser
+Router -> Parser : new AddActivityCommandParser()
+Router -> Parser : parse(arguments)
+activate Parser
+Parser -> Parser : validate prefixes, date, times and recurrence
+create Command
+Parser -> Command : new AddActivityCommand(name, date, start, end, recurrence)
+note over Command
+  Holds validated details with unused ID 0.
+  No persistent ID is allocated during parsing.
+end note
+Parser --> Router : command
+deactivate Parser
+Router --> Logic : command
+deactivate Router
+
+Logic -> Command : execute(model)
+activate Command
+Command -> Model : addActivity(name, date, start, end, recurrence)
+activate Model
+Model -> Book : addActivity(name, date, start, end, recurrence)
+activate Book
+Book -> Book : validate schedule and construct Activity with nextActivityId
+Book -> Book : advance counter and add to observable list
+Book --> Model : identified Activity
+deactivate Book
+Model --> Command : identified Activity
+deactivate Model
+Command --> Logic : CommandResult with assigned ID and details
+deactivate Command
+
+Logic -> Model : getAddressBook()
+activate Model
+Model --> Logic : addressBook
+deactivate Model
+Logic -> Storage : saveAddressBook(addressBook)
+activate Storage
+note right of Storage
+  Delegates to JsonAddressBookStorage.
+  Saves activities and nextActivityId as JSON.
+end note
+Storage --> Logic
+deactivate Storage
+[<-- Logic : CommandResult
+deactivate Logic
+
+legend bottom
+  Successful creation with zero dogs is shown.
+  Validation, ID exhaustion and storage error paths are omitted.
+endlegend
+@enduml
