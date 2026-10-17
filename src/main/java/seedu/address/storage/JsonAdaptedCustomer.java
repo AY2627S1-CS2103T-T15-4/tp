@@ -72,8 +72,12 @@ class JsonAdaptedCustomer {
         if (id < 0) {
             throw new IllegalValueException("Customer id must be nonnegative.");
         }
-        return new Customer(id, new Name(name), new Phone(phone), new Email(email),
-                new BackupContact(backupContact));
+        try {
+            return new Customer(id, new Name(name), new Phone(phone), new Email(email),
+                    new BackupContact(backupContact));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalValueException(e.getMessage(), e);
+        }
     }
 
 }

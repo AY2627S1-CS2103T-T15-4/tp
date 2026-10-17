@@ -143,7 +143,7 @@ public class ActivityStorageTest {
     }
 
     private JsonSerializableAddressBook data(List<JsonAdaptedActivity> activities, Long nextId) {
-        return new JsonSerializableAddressBook(null, null, null, null, null, activities, nextId);
+        return new JsonSerializableAddressBook(null, null, null, null, activities, nextId);
     }
 
     private Activity activity(int id) {

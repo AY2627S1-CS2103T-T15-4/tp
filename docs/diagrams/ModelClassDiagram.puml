@@ -4,51 +4,45 @@ skinparam arrowThickness 1.1
 skinparam arrowColor MODEL_COLOR
 skinparam classBackgroundColor MODEL_COLOR
 
-Package Model as ModelPackage <<Rectangle>>{
-Class "<<interface>>\nReadOnlyAddressBook" as ReadOnlyAddressBook
-Class "<<interface>>\nReadOnlyUserPrefs" as ReadOnlyUserPrefs
-Class "<<interface>>\nModel" as Model
-Class AddressBook
-Class ModelManager
-Class UserPrefs
-
-Class UniquePersonList
-Class Person
-Class Address
-Class Email
-Class Name
-Class Phone
-Class Tag
-
-Class I #FFFFFF
+package Model {
+interface ReadOnlyAddressBook
+interface ReadOnlyUserPrefs
+interface Model
+class ModelManager
+class AddressBook
+class UserPrefs
+class UniqueCustomerList
+class UniqueDogList
+class Customer
+class Dog
+class "customer.Name" as CustomerName
+class "customer.Phone" as CustomerPhone
+class "customer.Email" as CustomerEmail
+class BackupContact
+class DogName
+class Breed
+class Size
 }
 
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Model
-
-AddressBook .up.|> ReadOnlyAddressBook
-
-ModelManager .up.|> Model
-Model .right.> ReadOnlyUserPrefs
-Model .left.> ReadOnlyAddressBook
-ModelManager -left-> "1" AddressBook
-ModelManager -right-> "1" UserPrefs
-UserPrefs .up.|> ReadOnlyUserPrefs
-
-AddressBook *--> "1" UniquePersonList
-UniquePersonList --> "~* all" Person
-Person *--> Name
-Person *--> Phone
-Person *--> Email
-Person *--> Address
-Person *--> "*" Tag
-
-Person -[hidden]up--> I
-UniquePersonList -[hidden]right-> I
-
-Name -[hidden]right-> Phone
-Phone -[hidden]right-> Address
-Address -[hidden]right-> Email
-
-ModelManager --> "~* filtered" Person
+ModelManager ..|> Model
+ModelManager --> "1" AddressBook
+ModelManager --> "1" UserPrefs
+Model ..> ReadOnlyAddressBook
+Model ..> ReadOnlyUserPrefs
+AddressBook ..|> ReadOnlyAddressBook
+UserPrefs ..|> ReadOnlyUserPrefs
+AddressBook *--> "1" UniqueCustomerList
+AddressBook *--> "1" UniqueDogList
+UniqueCustomerList --> "*" Customer
+UniqueDogList --> "*" Dog
+Customer *--> CustomerName
+Customer *--> CustomerPhone
+Customer *--> CustomerEmail
+Customer *--> BackupContact
+Dog *--> DogName
+Dog *--> Breed
+Dog *--> Size
+Dog --> "0..1" Customer : ownerId
+ModelManager --> "* filtered" Customer
+ModelManager --> "* filtered" Dog
 @enduml

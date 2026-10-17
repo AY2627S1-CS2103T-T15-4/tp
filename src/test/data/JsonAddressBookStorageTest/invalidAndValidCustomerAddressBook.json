@@ -1,0 +1,18 @@
+{
+  "customers": [
+    {
+      "id": 1,
+      "name": "",
+      "phone": "91234567",
+      "email": "alice@example.com",
+      "backupContact": "98765432"
+    },
+    {
+      "id": 2,
+      "name": "Bob Lim",
+      "phone": "92345678",
+      "email": "bob@example.com",
+      "backupContact": "93456789"
+    }
+  ]
+}

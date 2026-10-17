@@ -5,7 +5,7 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 
 
 /**
- * Represents a Person's phone number in the address book.
+ * Represents a customer's backup contact number in the address book.
  * Guarantees: immutable; is valid as declared in {@link #isValidBackupContact(String)}
  */
 public class BackupContact {

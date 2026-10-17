@@ -22,16 +22,13 @@ import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.UniqueDogList;
 import seedu.address.model.dog.exceptions.LinkException;
 import seedu.address.model.dog.exceptions.UnlinkException;
-import seedu.address.model.person.Person;
-import seedu.address.model.person.UniquePersonList;
 
 /**
  * Wraps all data at the address-book level.
- * Duplicates are not allowed (by .isSamePerson comparison).
+ * Stores customers and dogs with unique persistent identities.
  */
 public class AddressBook implements ReadOnlyAddressBook {
 
-    private final UniquePersonList persons = new UniquePersonList();
     private final UniqueDogList dogs = new UniqueDogList();
     private final UniqueCustomerList customers = new UniqueCustomerList();
     private final ObservableList<Activity> activities = FXCollections.observableArrayList();
@@ -47,7 +44,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Creates an AddressBook using the Persons in the {@code toBeCopied}
+     * Creates an AddressBook using the records in the {@code toBeCopied}
      */
     public AddressBook(ReadOnlyAddressBook toBeCopied) {
         this();
@@ -55,14 +52,6 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     //// list overwrite operations
-
-    /**
-     * Replaces the contents of the person list with {@code persons}.
-     * {@code persons} must not contain duplicate persons.
-     */
-    public void setPersons(List<Person> persons) {
-        this.persons.setPersons(persons);
-    }
 
     /**
      * Resets the existing data of this {@code AddressBook} with {@code newData}.
@@ -77,7 +66,6 @@ public class AddressBook implements ReadOnlyAddressBook {
                 || nextId < minimumId || nextId > (long) Integer.MAX_VALUE + 1) {
             throw new IllegalArgumentException("Invalid activity IDs or next activity ID.");
         }
-        setPersons(newData.getPersonList());
         dogs.setDogs(newData.getDogList());
         setCustomers(newData.getCustomerList());
         nextActivityId = nextId;
@@ -143,43 +131,6 @@ public class AddressBook implements ReadOnlyAddressBook {
     @Override
     public ObservableList<Activity> getActivityList() {
         return activityView;
-    }
-
-    //// person-level operations
-
-    /**
-     * Returns true if a person with the same identity as {@code person} exists in the address book.
-     */
-    public boolean hasPerson(Person person) {
-        requireNonNull(person);
-        return persons.contains(person);
-    }
-
-    /**
-     * Adds a person to the address book.
-     * The person must not already exist in the address book.
-     */
-    public void addPerson(Person p) {
-        persons.add(p);
-    }
-
-    /**
-     * Replaces the given person {@code target} in the list with {@code editedPerson}.
-     * {@code target} must exist in the address book.
-     * The person identity of {@code editedPerson} must not be the same as another existing person in the address book.
-     */
-    public void setPerson(Person target, Person editedPerson) {
-        requireNonNull(editedPerson);
-
-        persons.setPerson(target, editedPerson);
-    }
-
-    /**
-     * Removes {@code key} from this {@code AddressBook}.
-     * {@code key} must exist in the address book.
-     */
-    public void removePerson(Person key) {
-        persons.remove(key);
     }
 
     /** Returns true if a customer with the same identity as {@code customer} exists. */
@@ -380,14 +331,9 @@ public class AddressBook implements ReadOnlyAddressBook {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .add("persons", persons)
+                .add("dogs", dogs)
                 .add("customers", customers)
                 .toString();
-    }
-
-    @Override
-    public ObservableList<Person> getPersonList() {
-        return persons.asUnmodifiableObservableList();
     }
 
     @Override
@@ -411,8 +357,7 @@ public class AddressBook implements ReadOnlyAddressBook {
             return false;
         }
 
-        return persons.equals(otherAddressBook.persons)
-                && dogs.equals(otherAddressBook.dogs)
+        return dogs.equals(otherAddressBook.dogs)
                 && customers.equals(otherAddressBook.customers)
                 && activities.equals(otherAddressBook.activities)
                 && nextActivityId == otherAddressBook.nextActivityId;
@@ -420,6 +365,6 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     @Override
     public int hashCode() {
-        return Objects.hash(persons, dogs, customers, activities, nextActivityId);
+        return Objects.hash(dogs, customers, activities, nextActivityId);
     }
 }

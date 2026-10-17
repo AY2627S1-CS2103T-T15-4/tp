@@ -5,8 +5,8 @@ skinparam ArrowFontStyle plain
 box Logic LOGIC_COLOR_T1
 participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
-participant ":DeleteCommandParser" as DeleteCommandParser LOGIC_COLOR
-participant "d:DeleteCommand" as DeleteCommand LOGIC_COLOR
+participant ":DeleteDogCommandParser" as DeleteDogCommandParser LOGIC_COLOR
+participant "d:DeleteDogCommand" as DeleteDogCommand LOGIC_COLOR
 participant "r:CommandResult" as CommandResult LOGIC_COLOR
 end box
 
@@ -14,56 +14,56 @@ box Model MODEL_COLOR_T1
 participant "m:Model" as Model MODEL_COLOR
 end box
 
-[-> LogicManager : execute("delete 1")
+[-> LogicManager : execute("delete dog 1")
 activate LogicManager
 
-LogicManager -> AddressBookParser : parseCommand("delete 1")
+LogicManager -> AddressBookParser : parseCommand("delete dog 1")
 activate AddressBookParser
 
-create DeleteCommandParser
-AddressBookParser -> DeleteCommandParser
-activate DeleteCommandParser
+create DeleteDogCommandParser
+AddressBookParser -> DeleteDogCommandParser
+activate DeleteDogCommandParser
 
-DeleteCommandParser --> AddressBookParser
-deactivate DeleteCommandParser
+DeleteDogCommandParser --> AddressBookParser
+deactivate DeleteDogCommandParser
 
-AddressBookParser -> DeleteCommandParser : parse("1")
-activate DeleteCommandParser
+AddressBookParser -> DeleteDogCommandParser : parse("1")
+activate DeleteDogCommandParser
 
-create DeleteCommand
-DeleteCommandParser -> DeleteCommand
-activate DeleteCommand
+create DeleteDogCommand
+DeleteDogCommandParser -> DeleteDogCommand
+activate DeleteDogCommand
 
-DeleteCommand --> DeleteCommandParser :
-deactivate DeleteCommand
+DeleteDogCommand --> DeleteDogCommandParser :
+deactivate DeleteDogCommand
 
-DeleteCommandParser --> AddressBookParser : d
-deactivate DeleteCommandParser
+DeleteDogCommandParser --> AddressBookParser : d
+deactivate DeleteDogCommandParser
 'Hidden arrow to position the destroy marker below the end of the activation bar.
-DeleteCommandParser -[hidden]-> AddressBookParser
-destroy DeleteCommandParser
+DeleteDogCommandParser -[hidden]-> AddressBookParser
+destroy DeleteDogCommandParser
 
 AddressBookParser --> LogicManager : d
 deactivate AddressBookParser
 
-LogicManager -> DeleteCommand : execute(m)
-activate DeleteCommand
+LogicManager -> DeleteDogCommand : execute(m)
+activate DeleteDogCommand
 
-DeleteCommand -> Model : deletePerson(1)
+DeleteDogCommand -> Model : deleteDog(dog)
 activate Model
 
-Model --> DeleteCommand
+Model --> DeleteDogCommand
 deactivate Model
 
 create CommandResult
-DeleteCommand -> CommandResult
+DeleteDogCommand -> CommandResult
 activate CommandResult
 
-CommandResult --> DeleteCommand
+CommandResult --> DeleteDogCommand
 deactivate CommandResult
 
-DeleteCommand --> LogicManager : r
-deactivate DeleteCommand
+DeleteDogCommand --> LogicManager : r
+deactivate DeleteDogCommand
 
 [<--LogicManager
 deactivate LogicManager

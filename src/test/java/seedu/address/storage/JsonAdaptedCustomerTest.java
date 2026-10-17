@@ -46,6 +46,18 @@ public class JsonAdaptedCustomerTest {
         assertThrows(IllegalValueException.class, "Customer id must be nonnegative.", customer::toModelType);
     }
 
+    @Test
+    public void toModelType_invalidFields_throwIllegalValueException() {
+        assertThrows(IllegalValueException.class, Name.MESSAGE_CONSTRAINTS,
+                new JsonAdaptedCustomer(VALID_ID, "", VALID_PHONE, VALID_EMAIL, VALID_BACKUP_CONTACT)::toModelType);
+        assertThrows(IllegalValueException.class, Phone.MESSAGE_CONSTRAINTS,
+                new JsonAdaptedCustomer(VALID_ID, VALID_NAME, "bad", VALID_EMAIL, VALID_BACKUP_CONTACT)::toModelType);
+        assertThrows(IllegalValueException.class, Email.MESSAGE_CONSTRAINTS,
+                new JsonAdaptedCustomer(VALID_ID, VALID_NAME, VALID_PHONE, "bad", VALID_BACKUP_CONTACT)::toModelType);
+        assertThrows(IllegalValueException.class, BackupContact.MESSAGE_CONSTRAINTS,
+                new JsonAdaptedCustomer(VALID_ID, VALID_NAME, VALID_PHONE, VALID_EMAIL, "invalid")::toModelType);
+    }
+
     private static void assertMissingField(Integer id, String name, String phone, String email, String backupContact,
             String missingField) {
         JsonAdaptedCustomer customer = new JsonAdaptedCustomer(id, name, phone, email, backupContact);

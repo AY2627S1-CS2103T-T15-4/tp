@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -15,19 +16,17 @@ import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
-import seedu.address.model.person.Person;
 
 /**
  * An Immutable AddressBook that is serializable to JSON format.
  */
 @JsonRootName(value = "addressbook")
+@JsonIgnoreProperties("persons")
 class JsonSerializableAddressBook {
 
-    public static final String MESSAGE_DUPLICATE_PERSON = "Persons list contains duplicate person(s).";
     public static final String MESSAGE_DUPLICATE_CUSTOMER = "Customers list contains duplicate customer(s).";
     public static final String MESSAGE_DUPLICATE_DOG = "Dog list contains duplicate dog(s).";
 
-    private final List<JsonAdaptedPerson> persons = new ArrayList<>();
     private final List<JsonAdaptedCustomer> customers = new ArrayList<>();
     private final List<JsonAdaptedDog> dogs = new ArrayList<>();
     private final List<JsonAdaptedActivity> activities = new ArrayList<>();
@@ -36,17 +35,13 @@ class JsonSerializableAddressBook {
     private final Integer nextCustomerId;
     /** Constructs a serializable address book from JSON fields. */
     @JsonCreator
-    public JsonSerializableAddressBook(@JsonProperty("persons") List<JsonAdaptedPerson> persons,
-            @JsonProperty("customers") List<JsonAdaptedCustomer> customers,
+    public JsonSerializableAddressBook(@JsonProperty("customers") List<JsonAdaptedCustomer> customers,
             @JsonProperty("dogs") List<JsonAdaptedDog> dogs,
             @JsonProperty("nextDogId") Integer nextDogId,
             @JsonProperty("nextCustomerId") Integer nextCustomerId,
             @JsonProperty("activities") List<JsonAdaptedActivity> activities,
             @JsonProperty("nextActivityId")
             @JsonDeserialize(using = NextActivityIdDeserializer.class) Long nextActivityId) {
-        if (persons != null) {
-            this.persons.addAll(persons);
-        }
         if (customers != null) {
             this.customers.addAll(customers);
         }
@@ -67,7 +62,6 @@ class JsonSerializableAddressBook {
      * @param source future changes to this will not affect the created {@code JsonSerializableAddressBook}.
      */
     public JsonSerializableAddressBook(ReadOnlyAddressBook source) {
-        persons.addAll(source.getPersonList().stream().map(JsonAdaptedPerson::new).collect(Collectors.toList()));
         customers.addAll(source.getCustomerList().stream()
                 .map(JsonAdaptedCustomer::new)
                 .collect(Collectors.toList()));
@@ -85,13 +79,6 @@ class JsonSerializableAddressBook {
      */
     public AddressBook toModelType() throws IllegalValueException {
         AddressBook addressBook = new AddressBook();
-        for (JsonAdaptedPerson jsonAdaptedPerson : persons) {
-            Person person = jsonAdaptedPerson.toModelType();
-            if (addressBook.hasPerson(person)) {
-                throw new IllegalValueException(MESSAGE_DUPLICATE_PERSON);
-            }
-            addressBook.addPerson(person);
-        }
         for (JsonAdaptedCustomer jsonAdaptedCustomer : customers) {
             Customer customer = jsonAdaptedCustomer.toModelType();
             if (addressBook.hasCustomer(customer)) {
