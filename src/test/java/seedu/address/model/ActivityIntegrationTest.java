@@ -20,6 +20,11 @@ import javafx.collections.ObservableList;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Recurrence;
+import seedu.address.model.customer.BackupContact;
+import seedu.address.model.customer.Customer;
+import seedu.address.model.customer.Email;
+import seedu.address.model.customer.Name;
+import seedu.address.model.customer.Phone;
 
 public class ActivityIntegrationTest {
     private static final ActivityName NAME = new ActivityName("Walk");
@@ -126,5 +131,32 @@ public class ActivityIntegrationTest {
         assertNull(failure.get());
         assertEquals(source, snapshot.get());
         assertEquals(2, snapshot.get().getNextActivityId());
+    }
+
+    @Test
+    public void equals_differentSchedulesWithSameCounter_notEqual() {
+        AddressBook first = new AddressBook();
+        AddressBook second = new AddressBook();
+        first.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
+        second.addActivity(new ActivityName("Training"), DATE, START, END, Recurrence.ONCE);
+
+        assertEquals(first.getNextActivityId(), second.getNextActivityId());
+        assertFalse(first.equals(second));
+        assertFalse(second.equals(first));
+        assertEquals(first, new AddressBook(first));
+    }
+
+    @Test
+    public void equals_differentCustomersWithSameActivities_notEqual() {
+        AddressBook first = new AddressBook();
+        first.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
+        AddressBook second = new AddressBook(first);
+        second.addCustomer(new Customer(new Name("Alice Tan"), new Phone("91234567"),
+                new Email("alice@example.com"), new BackupContact("98765432")));
+
+        assertEquals(first.getActivityList(), second.getActivityList());
+        assertEquals(first.getNextActivityId(), second.getNextActivityId());
+        assertFalse(first.equals(second));
+        assertFalse(second.equals(first));
     }
 }

@@ -84,7 +84,6 @@ public final class Activity {
             case ONCE -> date.equals(startDate);
             case DAILY -> true;
             case WEEKLY -> date.getDayOfWeek() == startDate.getDayOfWeek();
-            default -> throw new AssertionError("Unknown recurrence: " + recurrence);
         };
     }
 
@@ -97,21 +96,18 @@ public final class Activity {
         if (!date.isAfter(startDate)) {
             return Optional.of(startDate);
         }
-        switch (recurrence) {
-            case ONCE:
-                return Optional.empty();
-            case DAILY:
-                return Optional.of(date);
-            case WEEKLY:
+        return switch (recurrence) {
+            case ONCE -> Optional.empty();
+            case DAILY -> Optional.of(date);
+            case WEEKLY -> {
                 int daysUntil = Math.floorMod(startDate.getDayOfWeek().getValue()
                         - date.getDayOfWeek().getValue(), 7);
                 if (LocalDate.MAX.toEpochDay() - date.toEpochDay() < daysUntil) {
-                    return Optional.empty();
+                    yield Optional.empty();
                 }
-                return Optional.of(date.plusDays(daysUntil));
-            default:
-                throw new AssertionError("Unknown recurrence: " + recurrence);
-        }
+                yield Optional.of(date.plusDays(daysUntil));
+            }
+        };
     }
 
     /**
