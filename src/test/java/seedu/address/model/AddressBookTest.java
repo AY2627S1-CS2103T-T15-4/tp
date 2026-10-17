@@ -1,8 +1,12 @@
 package seedu.address.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
+import static seedu.address.testutil.TypicalWatchDog.ALICE;
+import static seedu.address.testutil.TypicalWatchDog.MAX;
 import static seedu.address.testutil.TypicalWatchDog.getTypicalAddressBook;
 
 import java.util.List;
@@ -77,6 +81,53 @@ public class AddressBookTest {
     public void getRecordLists_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> addressBook.getDogList().remove(0));
         assertThrows(UnsupportedOperationException.class, () -> addressBook.getCustomerList().remove(0));
+    }
+
+    @Test
+    public void equals_sameRecords_returnsTrue() {
+        AddressBook original = getTypicalAddressBook();
+        AddressBook copy = new AddressBook(original);
+
+        assertEquals(original, original);
+        assertEquals(original, copy);
+        assertEquals(copy, original);
+        assertEquals(new AddressBook(), new AddressBook());
+    }
+
+    @Test
+    public void equals_differentDogs_returnsFalse() {
+        AddressBook original = getTypicalAddressBook();
+        AddressBook differentDogs = new AddressBook(original);
+        differentDogs.removeDog(MAX);
+
+        assertEquals(original.getCustomerList(), differentDogs.getCustomerList());
+        assertNotEquals(original, differentDogs);
+    }
+
+    @Test
+    public void equals_differentCustomers_returnsFalse() {
+        AddressBook original = getTypicalAddressBook();
+        AddressBook differentCustomers = new AddressBook(original);
+        differentCustomers.setCustomers(List.of(ALICE));
+
+        assertEquals(original.getDogList(), differentCustomers.getDogList());
+        assertNotEquals(original, differentCustomers);
+    }
+
+    @Test
+    public void equals_nullOrDifferentType_returnsFalse() {
+        assertFalse(addressBook.equals(null));
+        assertFalse(addressBook.equals("address book"));
+    }
+
+    @Test
+    public void hashCode_equalBooks_returnsSameHashCode() {
+        AddressBook original = getTypicalAddressBook();
+        AddressBook copy = new AddressBook(original);
+
+        assertEquals(original.hashCode(), original.hashCode());
+        assertEquals(original.hashCode(), copy.hashCode());
+        assertEquals(new AddressBook().hashCode(), new AddressBook().hashCode());
     }
 
     @Test
