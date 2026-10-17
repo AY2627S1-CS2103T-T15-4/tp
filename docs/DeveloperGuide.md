@@ -305,12 +305,12 @@ Tests populate the model directly and verify filtering, persistent IDs, unchange
 
 **Target user profile**:
 
-* Is a dog day care centre manager 
-* Has a need to manage multiple dogs and customers 
-* Has a need to keep track of each dog’s information and schedule 
-* Has a need to keep track of every dog’s owner and their information 
-* Can type fast 
-* Prefers typing to mouse interactions 
+* Is a dog day care centre manager
+* Has a need to manage multiple dogs and customers
+* Has a need to keep track of each dog’s information and schedule
+* Has a need to keep track of every dog’s owner and their information
+* Can type fast
+* Prefers typing to mouse interactions
 * Is reasonably comfortable using CLI apps
 
 **Value proposition**: WatchDog helps dog day care centre managers to manage and keep track of all their clients’ dogs, each of the dog’s needs and client information in a centralised application, faster than with a typical mouse-driven GUI application.
