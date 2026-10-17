@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.AddressBook;
@@ -41,7 +42,8 @@ class JsonSerializableAddressBook {
             @JsonProperty("nextDogId") Integer nextDogId,
             @JsonProperty("nextCustomerId") Integer nextCustomerId,
             @JsonProperty("activities") List<JsonAdaptedActivity> activities,
-            @JsonProperty("nextActivityId") Long nextActivityId) {
+            @JsonProperty("nextActivityId")
+            @JsonDeserialize(using = NextActivityIdDeserializer.class) Long nextActivityId) {
         if (persons != null) {
             this.persons.addAll(persons);
         }

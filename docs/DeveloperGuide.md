@@ -219,6 +219,9 @@ its enum name. `JsonSerializableAddressBook` stores `activities` and `nextActivi
 identities and the counter, and rejects invalid schedules or null entries. Older files with no
 activity fields load an empty collection. A missing counter is derived from the largest stored ID;
 an explicit counter must exceed every stored ID and cannot exceed the exhaustion sentinel.
+Activity IDs and the counter must be integer JSON numbers; fractions, numeric strings and
+out-of-range numbers are rejected before conversion. Reset updates the activity counter before
+notifying activity-list listeners, so listeners can copy the model with a consistent identity state.
 `LogicManager` uses its existing save path after successful command execution.
 
 For teammates: use `Model.getActivityList()` for observation and `Activity.getId()` for identity,

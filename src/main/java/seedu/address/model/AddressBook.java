@@ -80,8 +80,8 @@ public class AddressBook implements ReadOnlyAddressBook {
         setPersons(newData.getPersonList());
         dogs.setDogs(newData.getDogList());
         setCustomers(newData.getCustomerList());
-        activities.setAll(restored);
         nextActivityId = nextId;
+        activities.setAll(restored);
 
         int restoredNextDogId = newData.getNextDogId();
         this.nextDogId = restoredNextDogId >= 0

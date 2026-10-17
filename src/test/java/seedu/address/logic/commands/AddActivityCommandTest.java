@@ -18,6 +18,11 @@ import seedu.address.model.UserPrefs;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Recurrence;
+import seedu.address.model.customer.BackupContact;
+import seedu.address.model.customer.Customer;
+import seedu.address.model.customer.Email;
+import seedu.address.model.customer.Name;
+import seedu.address.model.customer.Phone;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
@@ -33,7 +38,10 @@ public class AddActivityCommandTest {
     public void execute_validSchedule_addsWithIdAndPreservesRecordsAndFilters() throws Exception {
         ModelManager model = new ModelManager();
         model.addDog(new Dog(new DogName("Cookie"), new Breed("Poodle"), new Size("small")));
+        model.addCustomer(new Customer(new Name("Alice Tan"), new Phone("91234567"),
+                new Email("alice@example.com"), new BackupContact("98765432")));
         List<?> dogs = List.copyOf(model.getDogList());
+        List<?> customers = List.copyOf(model.getCustomerList());
         model.updateFilteredDogList(unused -> false);
         model.updateFilteredCustomerList(unused -> false);
         AddActivityCommand command = command(Recurrence.WEEKLY);
@@ -43,6 +51,7 @@ public class AddActivityCommandTest {
         assertEquals("New activity added: ID 1; Training; First date: 2026-10-20; 10:00-11:00; WEEKLY",
                 result.getFeedbackToUser());
         assertEquals(dogs, model.getDogList());
+        assertEquals(customers, model.getCustomerList());
         assertTrue(model.getFilteredDogList().isEmpty());
         assertTrue(model.getFilteredCustomerList().isEmpty());
         command.execute(model);

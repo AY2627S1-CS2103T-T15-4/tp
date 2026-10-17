@@ -5,6 +5,7 @@ import static seedu.address.testutil.Assert.assertThrows;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +25,7 @@ public class AddActivityCommandParserTest {
         for (Recurrence recurrence : Recurrence.values()) {
             AddActivityCommand expected = new AddActivityCommand(new ActivityName("Training"),
                    LocalDate.of(2028, 2, 29), LocalTime.of(9, 0), LocalTime.of(10, 0), recurrence);
-            assertEquals(expected, parser.parse(VALID.replace("weekly", recurrence.name().toLowerCase())));
+            assertEquals(expected, parser.parse(VALID.replace("weekly", recurrence.name().toLowerCase(Locale.ROOT))));
         }
         assertEquals(parser.parse(VALID), parser.parse(
                 " r/weekly end/10:00 n/  Training   start/09:00 date/2028-02-29"));

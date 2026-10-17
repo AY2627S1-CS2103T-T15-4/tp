@@ -2,6 +2,7 @@ package seedu.address.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
@@ -102,5 +104,27 @@ public class ActivityIntegrationTest {
             assertThrows(IllegalArgumentException.class, () -> book.resetData(invalidCounter));
         }
         assertEquals(before, book);
+    }
+
+    @Test
+    public void resetData_listenerCopiesBook_observesRestoredCounter() {
+        AddressBook target = new AddressBook();
+        AddressBook source = new AddressBook();
+        source.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
+        AtomicReference<AddressBook> snapshot = new AtomicReference<>();
+        AtomicReference<RuntimeException> failure = new AtomicReference<>();
+        target.getActivityList().addListener((ListChangeListener<Activity>) change -> {
+            try {
+                snapshot.set(new AddressBook(target));
+            } catch (RuntimeException e) {
+                failure.set(e);
+            }
+        });
+
+        target.resetData(source);
+
+        assertNull(failure.get());
+        assertEquals(source, snapshot.get());
+        assertEquals(2, snapshot.get().getNextActivityId());
     }
 }

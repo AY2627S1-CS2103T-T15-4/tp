@@ -6,6 +6,7 @@ import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.activity.Activity;
@@ -23,7 +24,9 @@ class JsonAdaptedActivity {
 
     /** Constructs an adapter from persisted fields. All fields are required. */
     @JsonCreator
-    public JsonAdaptedActivity(@JsonProperty("id") Integer id, @JsonProperty("name") String name,
+    public JsonAdaptedActivity(
+            @JsonProperty("id") @JsonDeserialize(using = ActivityIdDeserializer.class) Integer id,
+            @JsonProperty("name") String name,
             @JsonProperty("startDate") String startDate, @JsonProperty("startTime") String startTime,
             @JsonProperty("endTime") String endTime, @JsonProperty("recurrence") String recurrence) {
         this.id = id;

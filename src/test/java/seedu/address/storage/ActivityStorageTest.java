@@ -14,6 +14,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.commons.util.JsonUtil;
 import seedu.address.logic.LogicManager;
@@ -115,6 +116,26 @@ public class ActivityStorageTest {
                 JsonSerializableAddressBook.class).toModelType();
         assertEquals(book, restored);
         assertEquals((long) Integer.MAX_VALUE + 1, restored.getNextActivityId());
+    }
+
+    @Test
+    public void readAddressBook_nonIntegerActivityIdOrCounter_rejectedWithoutRewritingFile() throws Exception {
+        Path file = temporaryFolder.resolve("invalid-activity-ids.json");
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(file);
+        String template = """
+                {"activities":[{"id":%s,"name":"Walk","startDate":"2028-02-29",
+                "startTime":"09:00","endTime":"10:00","recurrence":"ONCE"}],"nextActivityId":%s}
+                """;
+        for (String value : List.of("1.9", "-0.9", "1.0", "1e0", "\"1\"", "true", "{}", "[]",
+                "9223372036854775808")) {
+            for (String json : List.of(template.formatted(value, "2"), template.formatted("1", value))) {
+                Files.writeString(file, json);
+                assertThrows(DataLoadingException.class, storage::readAddressBook);
+                assertEquals(json, Files.readString(file));
+            }
+        }
+        Files.writeString(file, template.formatted("2147483648", "2147483649"));
+        assertThrows(DataLoadingException.class, storage::readAddressBook);
     }
 
     private JsonAdaptedActivity adapter(Integer id, String[] fields) {
