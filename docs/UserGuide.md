@@ -6,7 +6,7 @@
 
 # WatchDog User Guide
 
-WatchDog is a **desktop application for managing contacts, optimized for use through a Command Line Interface (CLI)** while retaining the benefits of a Graphical User Interface (GUI). If you type quickly, WatchDog can help you manage contacts faster than traditional GUI applications.
+WatchDog is a **desktop application for managing dog daycare customers and dogs, optimized for use through a Command Line Interface (CLI)** while retaining the benefits of a Graphical User Interface (GUI). If you type quickly, WatchDog can help you manage daycare records faster than traditional GUI applications.
 
 <!-- * Table of Contents -->
 <page-nav-print />
@@ -33,7 +33,7 @@ WatchDog is a **desktop application for managing contacts, optimized for use thr
 
    * `list dog` : Lists all dogs.
 
-   * `clear` : Deletes all persons, customers, and dogs.
+   * `clear` : Deletes all customers and dogs.
 
    * `exit` : Exits the app.
 
@@ -48,13 +48,13 @@ WatchDog is a **desktop application for managing contacts, optimized for use thr
 **Notes about the command format:**<br>
 
 * Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
-  For example, in `add n/NAME`, replace `NAME` with a value such as `John Doe`.
+  For example, in `adddog n/NAME b/BREED s/SIZE`, replace `NAME` with a value such as `John Doe`.
 
 * Items in square brackets are optional.<br>
-  For example, `n/NAME [t/TAG]` can be used as `n/John Doe t/friend` or as `n/John Doe`.
+  For example, `editdog ID [n/NAME] [b/BREED] [s/SIZE]` allows you to specify only the fields to change.
 
 * Items followed by `...` can appear zero or more times.<br>
-  For example, `[t/TAG]... ` may be omitted, or written as `t/friend` or `t/friend t/family`.
+  For example, `link c/7 d/42 d/51` links multiple dogs to one customer.
 
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
@@ -64,6 +64,9 @@ WatchDog is a **desktop application for managing contacts, optimized for use thr
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
+
+The original AB3 person commands `add`, `edit`, `delete INDEX` and `find` are no longer supported.
+Use the customer and dog commands described below.
 
 ### Viewing help: `help`
 

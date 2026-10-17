@@ -3,7 +3,6 @@ package seedu.address.logic.commands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.util.List;
 
@@ -24,7 +23,7 @@ import seedu.address.model.dog.Size;
 /** Exercises search parsing and execution against the real model. */
 public class SearchDogCommandTest {
     private final AddressBookParser parser = new AddressBookParser();
-    private final Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+    private final Model model = new ModelManager(new AddressBook(), new UserPrefs());
 
     @Test
     public void execute_nameSearch_filtersMatchingDogsWithoutChangingRecords() throws Exception {
@@ -32,7 +31,6 @@ public class SearchDogCommandTest {
         Dog second = model.addDog(dog("Buddy"));
         Dog third = model.addDog(dog("Little Bud"));
         model.addDog(dog("Max"));
-        model.updateFilteredPersonList(person -> false);
         AddressBook before = new AddressBook(model.getAddressBook());
 
         assertEquals("3 dogs found.",
@@ -43,7 +41,6 @@ public class SearchDogCommandTest {
         assertEquals("0 dogs found.", execute("search dog n/little  bud"));
         assertEquals(List.of(), model.getFilteredDogList());
         assertEquals(before, model.getAddressBook());
-        assertEquals(0, model.getFilteredPersonList().size());
     }
 
     @Test

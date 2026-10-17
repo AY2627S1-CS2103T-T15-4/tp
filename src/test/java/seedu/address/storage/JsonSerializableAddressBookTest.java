@@ -1,10 +1,10 @@
 package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.testutil.Assert.assertThrows;
+import static seedu.address.testutil.TypicalWatchDog.getTypicalAddressBook;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -17,43 +17,50 @@ import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.Email;
 import seedu.address.model.customer.Name;
 import seedu.address.model.customer.Phone;
-import seedu.address.testutil.TypicalPersons;
 
 public class JsonSerializableAddressBookTest {
 
-    private static final Path TEST_DATA_FOLDER = Paths.get("src", "test", "data", "JsonSerializableAddressBookTest");
-    private static final Path TYPICAL_PERSONS_FILE = TEST_DATA_FOLDER.resolve("typicalPersonsAddressBook.json");
-    private static final Path INVALID_PERSON_FILE = TEST_DATA_FOLDER.resolve("invalidPersonAddressBook.json");
-    private static final Path DUPLICATE_PERSON_FILE = TEST_DATA_FOLDER.resolve("duplicatePersonAddressBook.json");
-
     @Test
-    public void toModelType_typicalPersonsFile_success() throws Exception {
-        JsonSerializableAddressBook dataFromFile = JsonUtil.readJsonFile(TYPICAL_PERSONS_FILE,
-                JsonSerializableAddressBook.class).get();
-        AddressBook addressBookFromFile = dataFromFile.toModelType();
-        AddressBook typicalPersonsAddressBook = TypicalPersons.getTypicalAddressBook();
-        assertEquals(addressBookFromFile, typicalPersonsAddressBook);
+    public void roundTrip_watchDogRecords_preservesLinksAndIdCounters() throws Exception {
+        AddressBook original = getTypicalAddressBook();
+        original.setNextDogId(80);
+        original.setNextCustomerId(30);
+        String json = JsonUtil.toJsonString(new JsonSerializableAddressBook(original));
+
+        AddressBook restored = JsonUtil.fromJsonString(json, JsonSerializableAddressBook.class).toModelType();
+
+        assertEquals(original, restored);
+        assertEquals(80, restored.getNextDogId());
+        assertEquals(30, restored.getNextCustomerId());
+        assertFalse(json.contains("\"persons\""));
     }
 
     @Test
-    public void toModelType_invalidPersonFile_throwsIllegalValueException() throws Exception {
-        JsonSerializableAddressBook dataFromFile = JsonUtil.readJsonFile(INVALID_PERSON_FILE,
-                JsonSerializableAddressBook.class).get();
-        assertThrows(IllegalValueException.class, dataFromFile::toModelType);
+    public void toModelType_legacyPersonsField_preservesWatchDogRecords() throws Exception {
+        AddressBook original = getTypicalAddressBook();
+        String json = JsonUtil.toJsonString(new JsonSerializableAddressBook(original));
+        String legacyJson = "{\"persons\":[{\"name\":\"Legacy Contact\",\"tags\":[\"friend\"]}],"
+                + json.substring(json.indexOf('{') + 1);
+
+        AddressBook restored = JsonUtil.fromJsonString(legacyJson, JsonSerializableAddressBook.class).toModelType();
+
+        assertEquals(original, restored);
+        assertEquals(original.getNextDogId(), restored.getNextDogId());
+        assertEquals(original.getNextCustomerId(), restored.getNextCustomerId());
     }
 
     @Test
-    public void toModelType_duplicatePersons_throwsIllegalValueException() throws Exception {
-        JsonSerializableAddressBook dataFromFile = JsonUtil.readJsonFile(DUPLICATE_PERSON_FILE,
-                JsonSerializableAddressBook.class).get();
-        assertThrows(IllegalValueException.class, JsonSerializableAddressBook.MESSAGE_DUPLICATE_PERSON,
-                dataFromFile::toModelType);
+    public void toModelType_emptyOrLegacyOnlyFile_returnsEmptyBook() throws Exception {
+        assertEquals(new AddressBook(), JsonUtil.fromJsonString("{}",
+                JsonSerializableAddressBook.class).toModelType());
+        assertEquals(new AddressBook(), JsonUtil.fromJsonString("{\"persons\":[{\"name\":\"Legacy Contact\"}]}",
+                JsonSerializableAddressBook.class).toModelType());
     }
 
     @Test
     public void toModelType_duplicateCustomers_throwsIllegalValueException() {
         Customer customer = customer(1, "Alice Tan");
-        JsonSerializableAddressBook data = new JsonSerializableAddressBook(null,
+        JsonSerializableAddressBook data = new JsonSerializableAddressBook(
                 List.of(new JsonAdaptedCustomer(customer), new JsonAdaptedCustomer(customer)), null, null, null);
 
         assertThrows(IllegalValueException.class, JsonSerializableAddressBook.MESSAGE_DUPLICATE_CUSTOMER,
@@ -73,7 +80,7 @@ public class JsonSerializableAddressBookTest {
 
     @Test
     public void toModelType_missingNextCustomerId_derivesIdFromStoredCustomers() throws Exception {
-        JsonSerializableAddressBook data = new JsonSerializableAddressBook(null,
+        JsonSerializableAddressBook data = new JsonSerializableAddressBook(
                 List.of(new JsonAdaptedCustomer(customer(7, "Alice Tan"))), null, null, null);
 
         AddressBook restored = data.toModelType();

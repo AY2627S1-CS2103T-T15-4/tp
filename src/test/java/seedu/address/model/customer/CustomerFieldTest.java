@@ -35,7 +35,7 @@ public class CustomerFieldTest {
     @Test
     public void equality_isBasedOnValueAndType() {
         assertTrue(new Name("Alice").equals(new Name("Alice")));
-        assertFalse(new Name("Alice").equals(new seedu.address.model.person.Name("Alice")));
+        assertFalse(new Name("Alice").equals("Alice"));
         assertTrue(new BackupContact("91234567").equals(new BackupContact("91234567")));
         assertFalse(new BackupContact("91234567").equals(new Phone("91234567")));
     }

@@ -2,7 +2,6 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
-import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class ListCommandTest {
 
     @BeforeEach
     public void setUp() {
-        AddressBook addressBook = getTypicalAddressBook();
+        AddressBook addressBook = new AddressBook();
         addressBook.addCustomer(LILY);
         model = new ModelManager(addressBook, new UserPrefs());
         expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());

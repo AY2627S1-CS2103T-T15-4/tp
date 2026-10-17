@@ -15,7 +15,6 @@ import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.exceptions.LinkException;
 import seedu.address.model.dog.exceptions.UnlinkException;
-import seedu.address.model.person.Person;
 
 /**
  * Represents the in-memory model of the address book data.
@@ -25,7 +24,6 @@ public class ModelManager implements Model {
 
     private final AddressBook addressBook;
     private final UserPrefs userPrefs;
-    private final FilteredList<Person> filteredPersons;
     private final FilteredList<Customer> filteredCustomers;
     private final FilteredList<Dog> filteredDogs;
 
@@ -39,7 +37,6 @@ public class ModelManager implements Model {
 
         this.addressBook = new AddressBook(addressBook);
         this.userPrefs = new UserPrefs(userPrefs);
-        filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
         filteredCustomers = new FilteredList<>(this.addressBook.getCustomerList());
         filteredDogs = new FilteredList<>(this.addressBook.getDogList());
     }
@@ -76,30 +73,6 @@ public class ModelManager implements Model {
     @Override
     public ReadOnlyAddressBook getAddressBook() {
         return addressBook;
-    }
-
-    @Override
-    public boolean hasPerson(Person person) {
-        requireNonNull(person);
-        return addressBook.hasPerson(person);
-    }
-
-    @Override
-    public void deletePerson(Person target) {
-        addressBook.removePerson(target);
-    }
-
-    @Override
-    public void addPerson(Person person) {
-        addressBook.addPerson(person);
-        updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
-    }
-
-    @Override
-    public void setPerson(Person target, Person editedPerson) {
-        requireAllNonNull(target, editedPerson);
-
-        addressBook.setPerson(target, editedPerson);
     }
 
     //=========== Dog Operations ============================================================================
@@ -163,16 +136,7 @@ public class ModelManager implements Model {
         addressBook.setCustomer(target, editedCustomer);
     }
 
-    //=========== Filtered Person List Accessors =============================================================
-
-    /**
-     * Returns an unmodifiable view of the list of {@code Person} backed by the internal list of
-     * {@code addressBook}
-     */
-    @Override
-    public ObservableList<Person> getFilteredPersonList() {
-        return filteredPersons;
-    }
+    //=========== Filtered Record List Accessors =============================================================
 
     @Override
     public ObservableList<Dog> getDogList() {
@@ -202,12 +166,6 @@ public class ModelManager implements Model {
     }
 
     @Override
-    public void updateFilteredPersonList(Predicate<Person> predicate) {
-        requireNonNull(predicate);
-        filteredPersons.setPredicate(predicate);
-    }
-
-    @Override
     public boolean equals(Object other) {
         if (other == this) {
             return true;
@@ -220,7 +178,6 @@ public class ModelManager implements Model {
 
         return addressBook.equals(otherModelManager.addressBook)
                 && userPrefs.equals(otherModelManager.userPrefs)
-                && filteredPersons.equals(otherModelManager.filteredPersons)
                 && filteredCustomers.equals(otherModelManager.filteredCustomers)
                 && filteredDogs.equals(otherModelManager.filteredDogs);
     }

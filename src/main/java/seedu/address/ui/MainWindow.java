@@ -44,7 +44,7 @@ public class MainWindow extends UiPart<Stage> {
     private MenuItem helpMenuItem;
 
     @FXML
-    private StackPane personListPanelPlaceholder;
+    private StackPane recordListPanelPlaceholder;
 
     @FXML
     private StackPane resultDisplayPlaceholder;
@@ -116,7 +116,7 @@ public class MainWindow extends UiPart<Stage> {
     void fillInnerParts() {
         recordListPanel = new RecordListPanel(logic.getFilteredCustomerList(), logic.getFilteredDogList(),
                 logic.getDogList());
-        personListPanelPlaceholder.getChildren().add(recordListPanel.getRoot());
+        recordListPanelPlaceholder.getChildren().add(recordListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
         resultDisplayPlaceholder.getChildren().add(resultDisplay.getRoot());

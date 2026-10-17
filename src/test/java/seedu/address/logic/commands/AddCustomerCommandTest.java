@@ -23,7 +23,6 @@ import seedu.address.model.customer.Email;
 import seedu.address.model.customer.Name;
 import seedu.address.model.customer.Phone;
 import seedu.address.model.dog.Dog;
-import seedu.address.model.person.Person;
 
 public class AddCustomerCommandTest {
 
@@ -104,34 +103,16 @@ public class AddCustomerCommandTest {
         @Override public ReadOnlyAddressBook getAddressBook() {
             throw unused();
         }
-        @Override public boolean hasPerson(Person person) {
-            throw unused();
-        }
-        @Override public void deletePerson(Person person) {
-            throw unused();
-        }
-        @Override public void addPerson(Person person) {
-            throw unused();
-        }
-        @Override public void setPerson(Person target, Person editedPerson) {
-            throw unused();
-        }
         @Override public void deleteCustomer(Customer customer) {
             throw unused();
         }
         @Override public void setCustomer(Customer target, Customer editedCustomer) {
             throw unused();
         }
-        @Override public ObservableList<Person> getFilteredPersonList() {
-            throw unused();
-        }
         @Override public ObservableList<Customer> getFilteredCustomerList() {
             throw unused();
         }
         @Override public void updateFilteredCustomerList(Predicate<Customer> predicate) {
-            throw unused();
-        }
-        @Override public void updateFilteredPersonList(Predicate<Person> predicate) {
             throw unused();
         }
         @Override public Dog addDog(Dog dog) {
