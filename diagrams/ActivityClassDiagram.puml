@@ -1,0 +1,72 @@
+@startuml
+!include style.puml
+skinparam arrowColor MODEL_COLOR_T4
+skinparam classBackgroundColor MODEL_COLOR
+skinparam classAttributeIconSize 0
+skinparam classAttributeFontColor #FFFFFF
+skinparam ArrowFontStyle plain
+show members
+
+interface Model {
+  +addActivity(name, date, start, end, recurrence): Activity
+  +getActivityList(): ObservableList<Activity>
+}
+
+class ModelManager {
+  +addActivity(name, date, start, end, recurrence): Activity
+}
+
+interface ReadOnlyAddressBook {
+  +getActivityList(): ObservableList<Activity>
+  +getNextActivityId(): long
+}
+
+class AddressBook {
+  -nextActivityId: long
+  +addActivity(name, date, start, end, recurrence): Activity
+  +getActivityList(): ObservableList<Activity>
+}
+
+class Activity <<immutable>> {
+  -id: int
+  -startDate: LocalDate
+  -startTime: LocalTime
+  -endTime: LocalTime
+  +occursOn(date: LocalDate): boolean
+  +nextOccurrenceOnOrAfter(date: LocalDate): Optional<LocalDate>
+  +withName(name: ActivityName): Activity
+  +withSchedule(date, start, end, recurrence): Activity
+  +isSameActivity(other: Activity): boolean
+}
+
+class ActivityName <<immutable>> {
+  +fullName: String
+  +{static} isValidName(name: String): boolean
+}
+
+enum Recurrence {
+  ONCE
+  DAILY
+  WEEKLY
+}
+
+ModelManager .up.|> Model
+ModelManager --> "1" AddressBook : addressBook
+Model ..> ReadOnlyAddressBook : exposes
+AddressBook .up.|> ReadOnlyAddressBook
+AddressBook --> "0..*" Activity : activities
+Activity --> "1" ActivityName : name
+Activity --> "1" Recurrence : recurrence
+
+note bottom of AddressBook
+  Assigns IDs and exposes an unmodifiable observable list.
+  Other customer/dog data and unrelated APIs are omitted.
+end note
+
+note bottom of Activity
+  End time must be later than start time on the same day.
+  Replacement methods return new objects with the same ID.
+  Recurrence is calculated; dogs are not stored on schedules.
+  Getters, constructors and equality methods are omitted.
+end note
+@enduml
