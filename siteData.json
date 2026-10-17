@@ -40,7 +40,7 @@
       "src": "DeveloperGuide.md",
       "title": "Developer Guide",
       "headings": {
-        "ab-3-developer-guide": "AB-3 Developer Guide",
+        "watchdog-developer-guide": "WatchDog Developer Guide",
         "acknowledgements": "Acknowledgements",
         "setting-up-getting-started": "Setting up, getting started",
         "design": "Design",
@@ -50,12 +50,11 @@
         "logic-component": "Logic component",
         "model-component": "Model component",
         "storage-component": "Storage component",
+        "removal-of-the-legacy-person-feature": "Removal of the legacy person feature",
         "common-classes": "Common classes",
         "implementation": "Implementation",
         "activity-creation-and-storage": "Activity creation and storage",
         "dog-and-customer-search": "Dog and customer search",
-        "proposed-undo-redo-feature": "[Proposed] Undo/redo feature",
-        "proposed-data-archiving": "[Proposed] Data archiving",
         "documentation-logging-testing-dev-ops": "Documentation, logging, testing, dev-ops",
         "appendix-requirements": "Appendix: Requirements",
         "product-scope": "Product scope",
@@ -65,7 +64,7 @@
         "glossary": "Glossary",
         "appendix-instructions-for-manual-testing": "Appendix: Instructions for manual testing",
         "launch-and-shutdown": "Launch and shutdown",
-        "deleting-a-person": "Deleting a person",
+        "deleting-a-dog": "Deleting a dog",
         "saving-data": "Saving data"
       },
       "headingKeywords": {}
