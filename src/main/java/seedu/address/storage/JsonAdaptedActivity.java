@@ -1,0 +1,60 @@
+package seedu.address.storage;
+
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import seedu.address.commons.exceptions.IllegalValueException;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
+
+/** Jackson-friendly schedule; dog membership is not part of a repeating activity. */
+class JsonAdaptedActivity {
+    private final Integer id;
+    private final String name;
+    private final String startDate;
+    private final String startTime;
+    private final String endTime;
+    private final String recurrence;
+
+    /** Constructs an adapter from persisted fields. All fields are required. */
+    @JsonCreator
+    public JsonAdaptedActivity(@JsonProperty("id") Integer id, @JsonProperty("name") String name,
+            @JsonProperty("startDate") String startDate, @JsonProperty("startTime") String startTime,
+            @JsonProperty("endTime") String endTime, @JsonProperty("recurrence") String recurrence) {
+        this.id = id;
+        this.name = name;
+        this.startDate = startDate;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.recurrence = recurrence;
+    }
+
+    /** Takes a snapshot of a stored schedule. */
+    public JsonAdaptedActivity(Activity source) {
+        id = source.getId();
+        name = source.getName().toString();
+        startDate = source.getStartDate().toString();
+        startTime = source.getStartTime().toString();
+        endTime = source.getEndTime().toString();
+        recurrence = source.getRecurrence().name();
+    }
+
+    /** Restores a schedule, rejecting missing fields or invalid domain values. */
+    public Activity toModelType() throws IllegalValueException {
+        if (id == null || name == null || startDate == null || startTime == null
+                || endTime == null || recurrence == null) {
+            throw new IllegalValueException("Activity fields must all be present.");
+        }
+        try {
+            return new Activity(id, new ActivityName(name), LocalDate.parse(startDate), LocalTime.parse(startTime),
+                    LocalTime.parse(endTime), Recurrence.valueOf(recurrence));
+        } catch (DateTimeException | IllegalArgumentException e) {
+            throw new IllegalValueException("Invalid activity: " + e.getMessage(), e);
+        }
+    }
+}

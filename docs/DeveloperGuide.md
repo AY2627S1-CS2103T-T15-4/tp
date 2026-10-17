@@ -198,6 +198,41 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 ## **Implementation**
 
+### Activity creation and storage
+
+`AddressBookParser` routes `addactivity` to `AddActivityCommandParser`. The parser requires
+`n/`, `date/`, `start/`, `end/`, and `r/` exactly once, rejects unknown alphabetic prefixes,
+and validates strict calendar dates, minute-resolution 24-hour times and lowercase recurrence.
+The immutable command validates a details snapshot with an unused ID of zero. Parsing never allocates
+an ID. `execute` calls `Model.addActivity(ActivityName, LocalDate, LocalTime, LocalTime, Recurrence)`
+and reports the identified schedule returned by the model. No dog/customer filters change.
+
+`ModelManager` delegates to `AddressBook.addActivity`. The address book validates the complete
+schedule before assigning the next ID and publishing it through `getActivityList()`, an unmodifiable
+observable view of all schedules. Creation allows identical details and overlapping empty schedules.
+The first allocated ID is one; the monotonically increasing counter is stored as a long so that
+`Integer.MAX_VALUE + 1` can represent exhaustion without wrapping. ID exhaustion rejects creation.
+Copy/reset and equality include activities and the counter. Existing customer/dog APIs are unchanged.
+
+`JsonAdaptedActivity` stores the six schedule fields; dates/times use ISO strings and recurrence uses
+its enum name. `JsonSerializableAddressBook` stores `activities` and `nextActivityId`, validates
+identities and the counter, and rejects invalid schedules or null entries. Older files with no
+activity fields load an empty collection. A missing counter is derived from the largest stored ID;
+an explicit counter must exceed every stored ID and cannot exceed the exhaustion sentinel.
+`LogicManager` uses its existing save path after successful command execution.
+
+For teammates: use `Model.getActivityList()` for observation and `Activity.getId()` for identity,
+independently of displayed positions. Use `Activity.occursOn(date)` for dated schedule queries.
+Dogs must eventually be stored in separate bookings keyed by activity ID and date. Booking,
+editing, deletion, conflict checking and the activity card UI are outside this creation contribution.
+`addActivityFromStorage` and `setNextActivityId` are restoration APIs, not command entry points.
+A future delete operation must preserve the counter and clean up bookings. A future replacement
+operation must validate existing bookings before changing a schedule.
+
+`AddActivityCommandParserTest`, `AddActivityCommandTest`, `ActivityIntegrationTest` and
+`ActivityStorageTest` cover parser failures, unchanged state, observable access, identity boundaries,
+all recurrence modes, old files and command-to-disk round trips using temporary files.
+
 ### Dog and customer search
 
 Without a category, `SearchCommandParser` accepts one name or ID field and creates a `SearchCommand`.

@@ -12,11 +12,12 @@
  * includes schedule details. Replacement methods preserve identity and leave the original unchanged.
  * Times describe a same-day interval with end later than start. Dates do not depend on today's clock.
  *
- * <p>Integration contract for subsequent contributions: allocate IDs in the address book and store
+ * <p>Integration contract for subsequent contributions: the address book allocates and persists schedule IDs. Store
  * dog participation separately by (activity ID, occurrence date). An absent dated booking means
  * zero dogs; attending one date never enrols a dog in another. The model must validate references,
  * same-dog overlap, and existing bookings before accepting an edited schedule, and remove booking
- * references when a dog or activity is deleted. These operations and JSON storage are not implemented
- * by this package. Commands and the UI should use the model rather than mutate schedules.
+ * references when a dog or activity is deleted. Booking operations are not implemented by this
+ * package; schedule JSON storage is provided by the storage component. Commands and the UI should
+ * use the model rather than mutate schedules.
  */
 package seedu.address.model.activity;
