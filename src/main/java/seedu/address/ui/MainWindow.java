@@ -33,7 +33,9 @@ public class MainWindow extends UiPart<Stage> {
     private Path dataFilePath;
 
     // Independent Ui parts residing in this Ui container
-    private RecordListPanel recordListPanel;
+    private CustomerListPanel customerListPanel;
+    private DogListPanel dogListPanel;
+    private ActivityListPanel activityListPanel;
     private ResultDisplay resultDisplay;
     private HelpWindow helpWindow;
 
@@ -44,7 +46,13 @@ public class MainWindow extends UiPart<Stage> {
     private MenuItem helpMenuItem;
 
     @FXML
-    private StackPane recordListPanelPlaceholder;
+    private StackPane customerListPanelPlaceholder;
+
+    @FXML
+    private StackPane dogListPanelPlaceholder;
+
+    @FXML
+    private StackPane activityListPanelPlaceholder;
 
     @FXML
     private StackPane resultDisplayPlaceholder;
@@ -114,9 +122,14 @@ public class MainWindow extends UiPart<Stage> {
      * Fills up all the placeholders of this window.
      */
     void fillInnerParts() {
-        recordListPanel = new RecordListPanel(logic.getFilteredCustomerList(), logic.getFilteredDogList(),
-                logic.getDogList());
-        recordListPanelPlaceholder.getChildren().add(recordListPanel.getRoot());
+        customerListPanel = new CustomerListPanel(logic.getFilteredCustomerList(), logic.getDogList());
+        customerListPanelPlaceholder.getChildren().add(customerListPanel.getRoot());
+
+        dogListPanel = new DogListPanel(logic.getFilteredDogList());
+        dogListPanelPlaceholder.getChildren().add(dogListPanel.getRoot());
+
+        activityListPanel = new ActivityListPanel(logic.getActivityList());
+        activityListPanelPlaceholder.getChildren().add(activityListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
         resultDisplayPlaceholder.getChildren().add(resultDisplay.getRoot());
@@ -168,8 +181,16 @@ public class MainWindow extends UiPart<Stage> {
         primaryStage.hide();
     }
 
-    public RecordListPanel getRecordListPanel() {
-        return recordListPanel;
+    public CustomerListPanel getCustomerListPanel() {
+        return customerListPanel;
+    }
+
+    public DogListPanel getDogListPanel() {
+        return dogListPanel;
+    }
+
+    public ActivityListPanel getActivityListPanel() {
+        return activityListPanel;
     }
 
     /**

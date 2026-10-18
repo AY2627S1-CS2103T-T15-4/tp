@@ -13,6 +13,7 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
+import seedu.address.model.activity.Activity;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 import seedu.address.storage.Storage;
@@ -77,6 +78,11 @@ public class LogicManager implements Logic {
     @Override
     public ObservableList<Dog> getDogList() {
         return model.getDogList();
+    }
+
+    @Override
+    public ObservableList<Activity> getActivityList() {
+        return model.getActivityList();
     }
 
     @Override

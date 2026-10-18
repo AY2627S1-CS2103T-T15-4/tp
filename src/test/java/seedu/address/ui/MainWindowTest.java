@@ -64,24 +64,26 @@ public class MainWindowTest {
         runOnFxThread(() -> {
             MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
             window.fillInnerParts();
-            ListView<Supplier<Region>> list = listView(window.getRecordListPanel());
-            assertEquals(2, list.getItems().size());
+            ListView<Supplier<Region>> customers = listView(window.getCustomerListPanel());
+            ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
+            assertEquals(1, customers.getItems().size());
+            assertEquals(1, dogs.getItems().size());
 
             window.executeCommand("list customer");
-            assertEquals(1, list.getItems().size());
-            assertEquals("Lily Koh", label(list.getItems().get(0).get(), "name"));
+            assertEquals(1, customers.getItems().size());
+            assertEquals("Lily Koh", label(customers.getItems().get(0).get(), "name"));
 
             window.executeCommand("search dog n/Cookie");
-            assertEquals(1, list.getItems().size());
-            assertEquals("Cookie", label(list.getItems().get(0).get(), "name"));
+            assertEquals(1, dogs.getItems().size());
+            assertEquals("Cookie", label(dogs.getItems().get(0).get(), "name"));
 
             window.executeCommand("search customer n/Lily");
-            assertEquals(1, list.getItems().size());
-            assertEquals("Lily Koh", label(list.getItems().get(0).get(), "name"));
+            assertEquals(1, customers.getItems().size());
+            assertEquals("Lily Koh", label(customers.getItems().get(0).get(), "name"));
 
             window.executeCommand("list dog");
-            assertEquals(1, list.getItems().size());
-            assertEquals("Cookie", label(list.getItems().get(0).get(), "name"));
+            assertEquals(1, dogs.getItems().size());
+            assertEquals("Cookie", label(dogs.getItems().get(0).get(), "name"));
         });
     }
 
@@ -90,7 +92,7 @@ public class MainWindowTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static ListView<Supplier<Region>> listView(RecordListPanel panel) {
+    private static ListView<Supplier<Region>> listView(UiPart<Region> panel) {
         return (ListView<Supplier<Region>>) panel.getRoot().lookup("#recordListView");
     }
 
