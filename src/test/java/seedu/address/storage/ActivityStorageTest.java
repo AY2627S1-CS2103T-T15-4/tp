@@ -75,6 +75,9 @@ public class ActivityStorageTest {
         Activity activity = activity(7);
         AddressBook restored = data(List.of(new JsonAdaptedActivity(activity)), null).toModelType();
         assertEquals(List.of(activity), restored.getActivityList());
+        Activity completed = activity(8).markCompleted();
+        assertEquals(List.of(completed), data(List.of(new JsonAdaptedActivity(completed)), null)
+                .toModelType().getActivityList());
         assertEquals(8, restored.getNextActivityId());
         assertEquals(20, data(List.of(new JsonAdaptedActivity(activity)), 20L).toModelType().getNextActivityId());
     }
