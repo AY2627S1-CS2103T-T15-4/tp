@@ -25,6 +25,13 @@ Refer to the guide [_Setting up and getting started_](SettingUp.md).
 
 ## **Design**
 
+### Persistent identities
+
+Customers, dogs and activities use persistent IDs as their identities. These IDs are assigned by the
+address book and are stored with the records, so they remain stable across application restarts and
+are not affected by filtering, list positions or deletion of other records. This allows commands and
+relationships to refer to a record reliably even when the visible list changes.
+
 ### Customer–dog ownership
 
 `LinkCommandParser` accepts one customer ID followed by one or more distinct dog IDs.
@@ -59,6 +66,13 @@ with older files. Negative owner IDs and references to missing customers are rej
 customers are restored before dogs. Copies of the address book retain ownership through immutable dogs.
 `EditDogCommand` preserves the current owner ID when constructing a replacement dog, so editing details
 does not unlink the dog. Ownership changes remain explicit through linking, unlinking, or customer deletion.
+
+### Dog–activity enrolment
+
+Dog participation in an activity is represented by a separate `Enrolment` record containing an
+activity ID and a dog ID. This separates the reusable activity schedule from the dogs attending it.
+It also allows dogs to be enrolled or unenrolled independently without modifying the activity's
+schedule or storing duplicate dog objects inside `Activity`.
 
 ### Architecture
 
@@ -202,6 +216,36 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 ## **Implementation**
 
+### Adding dogs
+
+`AddDogCommandParser` validates the dog details supplied by the user and creates an
+`AddDogCommand`. The command delegates to `Model`, which forwards the request through
+`ModelManager` to `AddressBook`.
+
+The address book assigns the dog a persistent ID when it is added. The ID is allocated from a
+monotonically increasing counter rather than from the dog's position in the list, so deleting a dog
+does not change the identities of the remaining dogs. The counter and dog IDs are persisted so that
+new dogs continue to receive unique IDs after the application restarts.
+
+The following diagram shows the add-dog command flow. The important part of this flow is that the
+persistent dog ID is assigned by the address book only
+after the command reaches the model layer.
+
+<puml src="diagrams/AddDogSequenceDiagram.puml" alt="Adding a dog through the application layers" />
+
+### Editing dogs
+
+`EditDogCommandParser` parses the persistent dog ID and the fields to be edited. The command uses
+the ID to locate the dog in the complete dog list rather than relying on a filtered-list position.
+`AddressBook` validates the replacement details and publishes the updated dog while preserving its
+persistent ID and current owner relationship.
+
+The following diagram shows the edit-dog command flow. The command locates the dog using its
+persistent ID, so editing remains independent of the current
+filtered-list position. The replacement dog retains both its ID and owner relationship.
+
+<puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog through the application layers" />
+
 ### Activity creation and storage
 
 The following partial class diagram shows the activity schedules and their integration with the model.
@@ -240,13 +284,59 @@ interface, implemented by `StorageManager`. Concrete lifelines are shown to make
 
 <puml src="diagrams/AddActivitySequenceDiagram.puml" alt="Parsing, executing and saving an addactivity command" />
 
-For teammates: use `Model.getActivityList()` for observation and `Activity.getId()` for identity,
+### Activity enrolment and completion
+
+Dogs are linked to activities through separate `Enrolment` records. Each record stores an activity
+ID and a dog ID, allowing an activity to have multiple dogs without storing dog objects directly
+inside the reusable activity schedule.
+
+Users can enrol or unenrol one or more dogs using:
+
+```text
+enrol a/ACTIVITY_ID d/DOG_ID1,DOG_ID2
+unenrol a/ACTIVITY_ID d/DOG_ID1,DOG_ID2
+```
+
+The parser converts the activity ID and comma-separated dog IDs into a command. The command
+delegates through `Model` and `ModelManager` to `AddressBook`, which verifies that the activity
+and dogs exist and that the requested enrolments are valid before updating the enrolment list.
+Enrolment changes are persisted with the address book.
+
+<puml src="diagrams/EnrolDogSequenceDiagram.puml" alt="Enrolling dogs into an activity" />
+
+Unenrolment follows the same parser and model delegation path. After validation, the address book
+removes the matching existing enrolment records instead of changing the activity schedule itself.
+
+<puml src="diagrams/UnenrolDogSequenceDiagram.puml" alt="Unenrolling dogs from an activity" />
+
+Activities can be marked as completed or restored to an incomplete state using:
+
+```text
+mark ACTIVITY_ID
+unmark ACTIVITY_ID
+```
+
+`Activity` remains immutable. Marking or unmarking creates a replacement activity with the same
+identity and schedule but a different completion status. The updated status is included when the
+address book is saved.
+
+<puml src="diagrams/MarkActivitySequenceDiagram.puml" alt="Marking an activity as completed" />
+
+Unmarking follows the same flow as marking, but replaces the activity with a copy whose completion
+status is false.
+
+<puml src="diagrams/UnmarkActivitySequenceDiagram.puml" alt="Marking an activity as incomplete" />
+
+The sequence diagrams focus on interactions between application layers. Low-level list operations
+and exception propagation are omitted where they do not affect the overall design.
+
+### Design considerations
+
+Use `Model.getActivityList()` for observing activities and `Activity.getId()` for identity,
 independently of displayed positions. Use `Activity.occursOn(date)` for dated schedule queries.
-Dogs must eventually be stored in separate bookings keyed by activity ID and date. Booking,
-editing, deletion, conflict checking and the activity card UI are outside this creation contribution.
+Enrolments are stored separately from activity schedules and are keyed by activity ID and dog ID.
+The activity card UI is outside this contribution.
 `addActivityFromStorage` and `setNextActivityId` are restoration APIs, not command entry points.
-A future delete operation must preserve the counter and clean up bookings. A future replacement
-operation must validate existing bookings before changing a schedule.
 
 `AddActivityCommandParserTest`, `AddActivityCommandTest`, `ActivityIntegrationTest` and
 `ActivityStorageTest` cover parser failures, unchanged state, observable access, identity boundaries,

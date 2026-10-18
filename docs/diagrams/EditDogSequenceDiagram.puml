@@ -1,0 +1,30 @@
+@startuml
+!include style.puml
+skinparam arrowColor LOGIC_COLOR_T4
+
+actor User
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":EditDogCommandParser" as Parser LOGIC_COLOR
+participant "command:EditDogCommand" as Command LOGIC_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+participant ":AddressBook" as Book MODEL_COLOR
+
+User -> Logic : execute("editdog 1 s/Small")
+Logic -> Router : parseCommand(...)
+Router -> Parser : parse("1 s/Small")
+Parser -> Parser : validate ID and edited fields
+Parser -> Command : new EditDogCommand(1, descriptor)
+Parser --> Router : command
+Router --> Logic : command
+Logic -> Command : execute(Model)
+Command -> Model : find dog by persistent ID 1
+Model --> Command : target dog
+Command -> Model : setDog(target, editedDog)
+Model -> Book : setDog(target, editedDog)
+Book -> Book : preserve ID and owner, replace dog
+Book --> Model : success or validation failure
+Model --> Command : result
+Command --> Logic : CommandResult
+Logic --> User : display result
+@enduml
