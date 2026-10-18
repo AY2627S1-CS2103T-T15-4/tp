@@ -18,6 +18,7 @@ import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
+import seedu.address.model.dog.exceptions.EnrolException;
 import seedu.address.model.dog.exceptions.LinkException;
 import seedu.address.model.dog.exceptions.UnlinkException;
 
@@ -87,6 +88,26 @@ public class ModelManager implements Model {
     }
 
     //=========== Dog Operations ============================================================================
+    @Override
+    public void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
+        addressBook.enrolDogs(activityId, dogIds);
+    }
+
+    @Override
+    public void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
+        addressBook.unenrolDogs(activityId, dogIds);
+    }
+
+    @Override
+    public void markActivity(int activityId) {
+        addressBook.markActivity(activityId);
+    }
+
+    @Override
+    public void unmarkActivity(int activityId) {
+        addressBook.unmarkActivity(activityId);
+    }
+
     @Override
     public void linkDogs(int customerId, List<Integer> dogIds) throws LinkException {
         addressBook.linkDogs(customerId, dogIds);

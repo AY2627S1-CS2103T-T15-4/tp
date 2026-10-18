@@ -3,6 +3,7 @@ package seedu.address.model;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 
@@ -27,6 +28,10 @@ public interface ReadOnlyAddressBook {
 
     /** Returns an unmodifiable observable collection of activity schedules. */
     default ObservableList<Activity> getActivityList() {
+        return FXCollections.emptyObservableList();
+    }
+
+    default ObservableList<Enrolment> getEnrolmentList() {
         return FXCollections.emptyObservableList();
     }
 
