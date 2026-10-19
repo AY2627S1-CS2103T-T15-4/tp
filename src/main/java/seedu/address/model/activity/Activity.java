@@ -27,6 +27,7 @@ public final class Activity {
     private final LocalTime startTime;
     private final LocalTime endTime;
     private final Recurrence recurrence;
+    private final boolean completed;
 
     /**
      * Creates a schedule with an ID assigned by the caller.
@@ -37,6 +38,12 @@ public final class Activity {
      */
     public Activity(int id, ActivityName name, LocalDate startDate, LocalTime startTime,
             LocalTime endTime, Recurrence recurrence) {
+        this(id, name, startDate, startTime, endTime, recurrence, false);
+    }
+
+    /** Creates a schedule with an explicit completion state. */
+    public Activity(int id, ActivityName name, LocalDate startDate, LocalTime startTime,
+            LocalTime endTime, Recurrence recurrence, boolean completed) {
         requireAllNonNull(name, startDate, startTime, endTime, recurrence);
         checkArgument(id >= 0, "Activity ID must be nonnegative.");
         checkArgument(endTime.isAfter(startTime), MESSAGE_TIME_CONSTRAINTS);
@@ -46,6 +53,7 @@ public final class Activity {
         this.startTime = startTime;
         this.endTime = endTime;
         this.recurrence = recurrence;
+        this.completed = completed;
     }
 
     public int getId() {
@@ -70,6 +78,25 @@ public final class Activity {
 
     public Recurrence getRecurrence() {
         return recurrence;
+    }
+
+    /** Returns whether this activity has been marked as completed. */
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    /** Returns a copy of this activity marked as completed. */
+    public Activity markCompleted() {
+        return withCompletion(true);
+    }
+
+    /** Returns a copy of this activity marked as incomplete. */
+    public Activity markIncomplete() {
+        return withCompletion(false);
+    }
+
+    private Activity withCompletion(boolean newCompleted) {
+        return new Activity(id, name, startDate, startTime, endTime, recurrence, newCompleted);
     }
 
     /**
@@ -114,7 +141,7 @@ public final class Activity {
      * Returns a renamed schedule with the same identity and timing.
      */
     public Activity withName(ActivityName newName) {
-        return new Activity(id, newName, startDate, startTime, endTime, recurrence);
+        return new Activity(id, newName, startDate, startTime, endTime, recurrence, completed);
     }
 
     /**
@@ -123,7 +150,7 @@ public final class Activity {
      */
     public Activity withSchedule(LocalDate newStartDate, LocalTime newStartTime,
             LocalTime newEndTime, Recurrence newRecurrence) {
-        return new Activity(id, name, newStartDate, newStartTime, newEndTime, newRecurrence);
+        return new Activity(id, name, newStartDate, newStartTime, newEndTime, newRecurrence, completed);
     }
 
     /**
@@ -140,17 +167,18 @@ public final class Activity {
         }
         return id == activity.id && name.equals(activity.name) && startDate.equals(activity.startDate)
                 && startTime.equals(activity.startTime) && endTime.equals(activity.endTime)
-                && recurrence == activity.recurrence;
+                && recurrence == activity.recurrence && completed == activity.completed;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, startDate, startTime, endTime, recurrence);
+        return Objects.hash(id, name, startDate, startTime, endTime, recurrence, completed);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this).add("id", id).add("name", name).add("startDate", startDate)
-                .add("startTime", startTime).add("endTime", endTime).add("recurrence", recurrence).toString();
+                .add("startTime", startTime).add("endTime", endTime).add("recurrence", recurrence)
+                .add("completed", completed).toString();
     }
 }

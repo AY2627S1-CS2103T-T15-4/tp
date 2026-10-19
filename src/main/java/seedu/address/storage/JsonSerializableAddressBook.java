@@ -14,6 +14,7 @@ import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 
@@ -30,6 +31,7 @@ class JsonSerializableAddressBook {
     private final List<JsonAdaptedCustomer> customers = new ArrayList<>();
     private final List<JsonAdaptedDog> dogs = new ArrayList<>();
     private final List<JsonAdaptedActivity> activities = new ArrayList<>();
+    private final List<JsonAdaptedEnrolment> enrolments = new ArrayList<>();
     private final Long nextActivityId;
     private final Integer nextDogId;
     private final Integer nextCustomerId;
@@ -40,6 +42,7 @@ class JsonSerializableAddressBook {
             @JsonProperty("nextDogId") Integer nextDogId,
             @JsonProperty("nextCustomerId") Integer nextCustomerId,
             @JsonProperty("activities") List<JsonAdaptedActivity> activities,
+            @JsonProperty("enrolments") List<JsonAdaptedEnrolment> enrolments,
             @JsonProperty("nextActivityId")
             @JsonDeserialize(using = NextActivityIdDeserializer.class) Long nextActivityId) {
         if (customers != null) {
@@ -51,9 +54,18 @@ class JsonSerializableAddressBook {
         if (activities != null) {
             this.activities.addAll(activities);
         }
+        if (enrolments != null) {
+            this.enrolments.addAll(enrolments);
+        }
         this.nextActivityId = nextActivityId;
         this.nextDogId = nextDogId;
         this.nextCustomerId = nextCustomerId;
+    }
+
+    /** Backwards-compatible constructor for data without enrolments. */
+    public JsonSerializableAddressBook(List<JsonAdaptedCustomer> customers, List<JsonAdaptedDog> dogs,
+            Integer nextDogId, Integer nextCustomerId, List<JsonAdaptedActivity> activities, Long nextActivityId) {
+        this(customers, dogs, nextDogId, nextCustomerId, activities, null, nextActivityId);
     }
 
     /**
@@ -67,6 +79,7 @@ class JsonSerializableAddressBook {
                 .collect(Collectors.toList()));
         dogs.addAll(source.getDogList().stream().map(JsonAdaptedDog::new).collect(Collectors.toList()));
         activities.addAll(source.getActivityList().stream().map(JsonAdaptedActivity::new).toList());
+        enrolments.addAll(source.getEnrolmentList().stream().map(JsonAdaptedEnrolment::new).toList());
         nextActivityId = source.getNextActivityId();
         nextDogId = source.getNextDogId();
         nextCustomerId = source.getNextCustomerId();
@@ -123,6 +136,20 @@ class JsonSerializableAddressBook {
             } catch (IllegalArgumentException e) {
                 throw new IllegalValueException(e.getMessage(), e);
             }
+        }
+        for (JsonAdaptedEnrolment adapted : enrolments) {
+            if (adapted == null) {
+                throw new IllegalValueException("Enrolments list must not contain null entries.");
+            }
+            Enrolment enrolment = adapted.toModelType();
+            boolean activityExists = addressBook.getActivityList().stream()
+                    .anyMatch(activity -> activity.getId() == enrolment.getActivityId());
+            boolean dogExists = addressBook.getDogList().stream()
+                    .anyMatch(dog -> dog.getId() == enrolment.getDogId());
+            if (!activityExists || !dogExists || addressBook.getEnrolmentList().contains(enrolment)) {
+                throw new IllegalValueException("Invalid or duplicate enrolment.");
+            }
+            addressBook.addEnrolmentFromStorage(enrolment);
         }
         return addressBook;
     }

@@ -21,20 +21,28 @@ class JsonAdaptedActivity {
     private final String startTime;
     private final String endTime;
     private final String recurrence;
+    private final Boolean completed;
 
     /** Constructs an adapter from persisted fields. All fields are required. */
+    public JsonAdaptedActivity(Integer id, String name, String startDate, String startTime,
+            String endTime, String recurrence) {
+        this(id, name, startDate, startTime, endTime, recurrence, false);
+    }
+
+    /** Constructs an adapter including the completion state. */
     @JsonCreator
     public JsonAdaptedActivity(
             @JsonProperty("id") @JsonDeserialize(using = ActivityIdDeserializer.class) Integer id,
-            @JsonProperty("name") String name,
-            @JsonProperty("startDate") String startDate, @JsonProperty("startTime") String startTime,
-            @JsonProperty("endTime") String endTime, @JsonProperty("recurrence") String recurrence) {
+            @JsonProperty("name") String name, @JsonProperty("startDate") String startDate,
+            @JsonProperty("startTime") String startTime, @JsonProperty("endTime") String endTime,
+            @JsonProperty("recurrence") String recurrence, @JsonProperty("completed") Boolean completed) {
         this.id = id;
         this.name = name;
         this.startDate = startDate;
         this.startTime = startTime;
         this.endTime = endTime;
         this.recurrence = recurrence;
+        this.completed = completed;
     }
 
     /** Takes a snapshot of a stored schedule. */
@@ -45,6 +53,7 @@ class JsonAdaptedActivity {
         startTime = source.getStartTime().toString();
         endTime = source.getEndTime().toString();
         recurrence = source.getRecurrence().name();
+        completed = source.isCompleted();
     }
 
     /** Restores a schedule, rejecting missing fields or invalid domain values. */
@@ -55,7 +64,7 @@ class JsonAdaptedActivity {
         }
         try {
             return new Activity(id, new ActivityName(name), LocalDate.parse(startDate), LocalTime.parse(startTime),
-                    LocalTime.parse(endTime), Recurrence.valueOf(recurrence));
+                    LocalTime.parse(endTime), Recurrence.valueOf(recurrence), completed != null && completed);
         } catch (DateTimeException | IllegalArgumentException e) {
             throw new IllegalValueException("Invalid activity: " + e.getMessage(), e);
         }

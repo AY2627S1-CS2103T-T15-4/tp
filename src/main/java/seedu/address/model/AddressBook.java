@@ -15,11 +15,13 @@ import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.UniqueCustomerList;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.UniqueDogList;
+import seedu.address.model.dog.exceptions.EnrolException;
 import seedu.address.model.dog.exceptions.LinkException;
 import seedu.address.model.dog.exceptions.UnlinkException;
 
@@ -33,14 +35,14 @@ public class AddressBook implements ReadOnlyAddressBook {
     private final UniqueCustomerList customers = new UniqueCustomerList();
     private final ObservableList<Activity> activities = FXCollections.observableArrayList();
     private final ObservableList<Activity> activityView = FXCollections.unmodifiableObservableList(activities);
+    private final ObservableList<Enrolment> enrolments = FXCollections.observableArrayList();
     private long nextActivityId = 1;
-    private int nextDogId;
-    private int nextCustomerId;
+    private int nextDogId = 1;
+    private int nextCustomerId = 1;
+
 
     /** Creates an empty address book. */
     public AddressBook() {
-        this.nextDogId = 1;
-        this.nextCustomerId = 1;
     }
 
     /**
@@ -70,6 +72,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         setCustomers(newData.getCustomerList());
         nextActivityId = nextId;
         activities.setAll(restored);
+        enrolments.setAll(newData.getEnrolmentList());
 
         int restoredNextDogId = newData.getNextDogId();
         this.nextDogId = restoredNextDogId >= 0
@@ -112,6 +115,26 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
         nextActivityId = Math.max(nextActivityId, (long) activity.getId() + 1);
         activities.add(activity);
+    }
+
+    /** Marks the activity with the specified ID as completed. */
+    public void markActivity(int activityId) {
+        replaceActivity(activityId, Activity::markCompleted);
+    }
+
+    /** Marks the activity with the specified ID as incomplete. */
+    public void unmarkActivity(int activityId) {
+        replaceActivity(activityId, Activity::markIncomplete);
+    }
+
+    private void replaceActivity(int activityId, java.util.function.UnaryOperator<Activity> replacement) {
+        for (int i = 0; i < activities.size(); i++) {
+            if (activities.get(i).getId() == activityId) {
+                activities.set(i, replacement.apply(activities.get(i)));
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Activity ID " + activityId + " does not exist.");
     }
 
     /** Restores a counter above all stored IDs; MAX_VALUE + 1 represents exhausted IDs. */
@@ -174,6 +197,59 @@ public class AddressBook implements ReadOnlyAddressBook {
                 .map(dog -> dog.getOwnerId().filter(id -> id == key.getId()).isPresent()
                         ? dog.withoutOwner() : dog)
                 .toList());
+    }
+
+    /**
+     * Enrols a batch of existing dogs into an existing activity atomically.
+     *
+     * @throws EnrolException if the IDs are invalid or an endpoint is missing
+     */
+    public void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
+        requireNonNull(dogIds);
+        if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
+                || new HashSet<>(dogIds).size() != dogIds.size()) {
+            throw new EnrolException("Specify at least one dog ID, with no repeated IDs.");
+        }
+        if (getActivityList().stream().noneMatch(activity -> activity.getId() == activityId)) {
+            throw new EnrolException("Activity ID " + activityId + " does not exist.");
+        }
+        for (int id : dogIds) {
+            getDogList().stream().filter(candidate -> candidate.getId() == id).findFirst()
+                    .orElseThrow(() -> new EnrolException("Dog ID " + id + " does not exist."));
+            if (enrolments.stream().anyMatch(enrolment -> enrolment.equals(new Enrolment(activityId, id)))) {
+                throw new EnrolException("Dog ID " + id + " is already enrolled in activity ID " + activityId + ".");
+            }
+        }
+        for (int id : dogIds) {
+            enrolments.add(new Enrolment(activityId, id));
+        }
+    }
+
+    /**
+     * Removes a batch of existing dogs from an existing activity atomically.
+     *
+     * @throws EnrolException if the IDs are invalid or an enrolment is missing
+     */
+    public void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
+        requireNonNull(dogIds);
+        if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
+                || new HashSet<>(dogIds).size() != dogIds.size()) {
+            throw new EnrolException("Specify at least one dog ID, with no repeated IDs.");
+        }
+        if (getActivityList().stream().noneMatch(activity -> activity.getId() == activityId)) {
+            throw new EnrolException("Activity ID " + activityId + " does not exist.");
+        }
+        for (int dogId : dogIds) {
+            if (getDogList().stream().noneMatch(dog -> dog.getId() == dogId)) {
+                throw new EnrolException("Dog ID " + dogId + " does not exist.");
+            }
+            if (enrolments.stream().noneMatch(enrolment ->
+                    enrolment.equals(new Enrolment(activityId, dogId)))) {
+                throw new EnrolException("Dog ID " + dogId + " is not enrolled in activity ID " + activityId + ".");
+            }
+        }
+        enrolments.removeIf(enrolment -> enrolment.getActivityId() == activityId
+                && dogIds.contains(enrolment.getDogId()));
     }
 
     /**
@@ -347,6 +423,20 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     @Override
+    public ObservableList<Enrolment> getEnrolmentList() {
+        return FXCollections.unmodifiableObservableList(enrolments);
+    }
+
+    /** Adds a validated enrolment restored from storage. */
+    public void addEnrolmentFromStorage(Enrolment enrolment) {
+        requireNonNull(enrolment);
+        if (enrolments.contains(enrolment)) {
+            throw new IllegalArgumentException("Enrolments list contains duplicate enrolments.");
+        }
+        enrolments.add(enrolment);
+    }
+
+    @Override
     public boolean equals(Object other) {
         if (other == this) {
             return true;
@@ -360,11 +450,12 @@ public class AddressBook implements ReadOnlyAddressBook {
         return dogs.equals(otherAddressBook.dogs)
                 && customers.equals(otherAddressBook.customers)
                 && activities.equals(otherAddressBook.activities)
+                && enrolments.equals(otherAddressBook.enrolments)
                 && nextActivityId == otherAddressBook.nextActivityId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dogs, customers, activities, nextActivityId);
+        return Objects.hash(dogs, customers, activities, enrolments, nextActivityId);
     }
 }

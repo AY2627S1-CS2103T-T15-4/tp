@@ -28,6 +28,7 @@ import seedu.address.model.customer.Email;
 import seedu.address.model.customer.Name;
 import seedu.address.model.customer.Phone;
 import seedu.address.model.dog.Dog;
+import seedu.address.model.dog.exceptions.EnrolException;
 
 public class AddCustomerCommandTest {
 
@@ -68,6 +69,26 @@ public class AddCustomerCommandTest {
     }
 
     private abstract static class ModelStub implements Model {
+        @Override
+        public void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
+            throw unused();
+        }
+
+        @Override
+        public void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
+            throw unused();
+        }
+
+        @Override
+        public void markActivity(int activityId) {
+            throw unused();
+        }
+
+        @Override
+        public void unmarkActivity(int activityId) {
+            throw unused();
+        }
+
         @Override
         public Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end,
                 Recurrence recurrence) {
