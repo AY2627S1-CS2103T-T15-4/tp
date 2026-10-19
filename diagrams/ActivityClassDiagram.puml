@@ -10,10 +10,18 @@ show members
 interface Model {
   +addActivity(name, date, start, end, recurrence): Activity
   +getActivityList(): ObservableList<Activity>
+  +enrolDogs(activityId, dogIds)
+  +unenrolDogs(activityId, dogIds)
+  +markActivity(activityId)
+  +unmarkActivity(activityId)
 }
 
 class ModelManager {
   +addActivity(name, date, start, end, recurrence): Activity
+  +enrolDogs(activityId, dogIds)
+  +unenrolDogs(activityId, dogIds)
+  +markActivity(activityId)
+  +unmarkActivity(activityId)
 }
 
 interface ReadOnlyAddressBook {
@@ -25,10 +33,15 @@ class AddressBook {
   -nextActivityId: long
   +addActivity(name, date, start, end, recurrence): Activity
   +getActivityList(): ObservableList<Activity>
+  +enrolDogs(activityId, dogIds)
+  +unenrolDogs(activityId, dogIds)
+  +markActivity(activityId)
+  +unmarkActivity(activityId)
 }
 
 class Activity <<immutable>> {
   -id: int
+  -completed: boolean
   -startDate: LocalDate
   -startTime: LocalTime
   -endTime: LocalTime
@@ -36,7 +49,17 @@ class Activity <<immutable>> {
   +nextOccurrenceOnOrAfter(date: LocalDate): Optional<LocalDate>
   +withName(name: ActivityName): Activity
   +withSchedule(date, start, end, recurrence): Activity
+  +isCompleted(): boolean
+  +markCompleted(): Activity
+  +markIncomplete(): Activity
   +isSameActivity(other: Activity): boolean
+}
+
+class Enrolment <<immutable>> {
+  -activityId: int
+  -dogId: int
+  +getActivityId(): int
+  +getDogId(): int
 }
 
 class ActivityName <<immutable>> {
@@ -55,6 +78,9 @@ ModelManager --> "1" AddressBook : addressBook
 Model ..> ReadOnlyAddressBook : exposes
 AddressBook .up.|> ReadOnlyAddressBook
 AddressBook --> "0..*" Activity : activities
+AddressBook --> "0..*" Enrolment : enrolments
+Enrolment --> "1" Activity
+Enrolment --> "1" Dog
 Activity --> "1" ActivityName : name
 Activity --> "1" Recurrence : recurrence
 

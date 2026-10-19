@@ -11,6 +11,10 @@ package "Parser classes"{
 Class "<<interface>>\nParser" as Parser
 Class AddressBookParser
 Class XYZCommandParser
+Class EnrolDogCommandParser
+Class UnenrolDogCommandParser
+Class MarkActivityCommandParser
+Class UnmarkActivityCommandParser
 Class CliSyntax
 Class ParserUtil
 Class ArgumentMultimap
@@ -24,6 +28,10 @@ HiddenOutside ..> AddressBookParser
 AddressBookParser .down.> XYZCommandParser: <<create>>
 
 XYZCommandParser ..> XYZCommand : <<create>>
+EnrolDogCommandParser ..> EnrolDogCommand : <<create>>
+UnenrolDogCommandParser ..> UnenrolDogCommand : <<create>>
+MarkActivityCommandParser ..> MarkActivityCommand : <<create>>
+UnmarkActivityCommandParser ..> UnmarkActivityCommand : <<create>>
 AddressBookParser ..> Command : <<use>>
 XYZCommandParser .up.|> Parser
 XYZCommandParser ..> ArgumentMultimap
@@ -35,4 +43,12 @@ XYZCommandParser ..> ParserUtil
 ParserUtil .down.> Prefix
 ArgumentTokenizer .down.> Prefix
 XYZCommand -up-|> Command
+EnrolDogCommand -up-|> Command
+UnenrolDogCommand -up-|> Command
+MarkActivityCommand -up-|> Command
+UnmarkActivityCommand -up-|> Command
+note right of EnrolDogCommandParser
+  enrol a/ACTIVITY_ID d/DOG_ID1,DOG_ID2
+  unenrol a/ACTIVITY_ID d/DOG_ID1,DOG_ID2
+end note
 @enduml

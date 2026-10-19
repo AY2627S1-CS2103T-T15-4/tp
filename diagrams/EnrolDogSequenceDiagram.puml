@@ -1,0 +1,28 @@
+@startuml
+!include style.puml
+skinparam arrowColor LOGIC_COLOR_T4
+
+actor User
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":EnrolDogCommandParser" as Parser LOGIC_COLOR
+participant "command:EnrolDogCommand" as Command LOGIC_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+participant ":AddressBook" as Book MODEL_COLOR
+
+User -> Logic : execute("enrol a/1 d/2,3")
+Logic -> Router : parseCommand(...)
+Router -> Parser : parse("a/1 d/2,3")
+Parser -> Parser : parse activity ID and dog IDs
+Parser -> Command : new EnrolDogCommand(1, [2, 3])
+Parser --> Router : command
+Router --> Logic : command
+Logic -> Command : execute(Model)
+Command -> Model : enrolDogs(1, [2, 3])
+Model -> Book : enrolDogs(1, [2, 3])
+Book -> Book : validate activity, dogs and existing enrolments
+Book --> Model : success or EnrolException
+Model --> Command : result
+Command --> Logic : CommandResult
+Logic --> User : display result
+@enduml

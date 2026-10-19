@@ -13,6 +13,7 @@ class AddressBook
 class UserPrefs
 class UniqueCustomerList
 class UniqueDogList
+class Enrolment
 class Customer
 class Dog
 class "customer.Name" as CustomerName
@@ -33,6 +34,7 @@ AddressBook ..|> ReadOnlyAddressBook
 UserPrefs ..|> ReadOnlyUserPrefs
 AddressBook *--> "1" UniqueCustomerList
 AddressBook *--> "1" UniqueDogList
+AddressBook *--> "0..*" Enrolment
 UniqueCustomerList --> "*" Customer
 UniqueDogList --> "*" Dog
 Customer *--> CustomerName
@@ -45,4 +47,8 @@ Dog *--> Size
 Dog --> "0..1" Customer : ownerId
 ModelManager --> "* filtered" Customer
 ModelManager --> "* filtered" Dog
+ModelManager ..> Enrolment : enrols dogs
+Enrolment --> Activity
+Enrolment --> Dog
+Activity --> "0..*" Enrolment
 @enduml
