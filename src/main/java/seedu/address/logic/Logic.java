@@ -5,6 +5,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.activity.Activity;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 
@@ -29,6 +30,9 @@ public interface Logic {
 
     /** Returns an unmodifiable observable view of all dogs. */
     ObservableList<Dog> getDogList();
+
+    /** Returns an unmodifiable observable view of all activities. */
+    ObservableList<Activity> getActivityList();
 
     /**
      * Returns the user prefs' GUI settings.
