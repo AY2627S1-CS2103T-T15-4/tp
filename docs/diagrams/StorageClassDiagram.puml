@@ -18,6 +18,8 @@ Class JsonAddressBookStorage
 Class JsonSerializableAddressBook
 Class JsonAdaptedCustomer
 Class JsonAdaptedDog
+Class JsonAdaptedActivity
+Class JsonAdaptedEnrolment
 }
 
 }
@@ -32,5 +34,10 @@ StorageManager -down-> "1" JsonAddressBookStorage
 JsonAddressBookStorage ..> JsonSerializableAddressBook
 JsonSerializableAddressBook --> "*" JsonAdaptedCustomer
 JsonSerializableAddressBook --> "*" JsonAdaptedDog
+JsonSerializableAddressBook --> "*" JsonAdaptedActivity
+JsonSerializableAddressBook --> "*" JsonAdaptedEnrolment
+JsonAdaptedActivity : completed: boolean
+JsonAdaptedEnrolment : activityId: int
+JsonAdaptedEnrolment : dogId: int
 
 @enduml
