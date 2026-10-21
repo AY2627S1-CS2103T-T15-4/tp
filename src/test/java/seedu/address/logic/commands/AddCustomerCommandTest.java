@@ -120,6 +120,13 @@ public class AddCustomerCommandTest {
             throw new AssertionError("This method should not be called.");
         }
 
+        @Override public ObservableList<Activity> getFilteredActivityList() {
+            throw unused();
+        }
+        @Override public void updateFilteredActivityList(Predicate<Activity> predicate) {
+            throw unused();
+        }
+
         @Override public ReadOnlyUserPrefs getUserPrefs() {
             throw unused();
         }
@@ -145,12 +152,6 @@ public class AddCustomerCommandTest {
             throw unused();
         }
         @Override public void updateFilteredCustomerList(Predicate<Customer> predicate) {
-            throw unused();
-        }
-        @Override public ObservableList<Activity> getFilteredActivityList() {
-            throw unused();
-        }
-        @Override public void updateFilteredActivityList(Predicate<Activity> predicate) {
             throw unused();
         }
         @Override public void selectDog(int dogId) {

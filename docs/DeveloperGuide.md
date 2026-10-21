@@ -314,7 +314,20 @@ to the filtered customer list. The predicate derives ownership from each dog's s
 matches a multi-dog filter only when they own every requested dog. After customer filtering, the command derives
 the matching customer IDs and applies a second predicate to the dog list, showing only dogs owned by those
 customers. Dog IDs in the success message are sorted numerically.
+### Activity filtering
 
+`AddressBookParser` routes `filtera` to `FilterActivityCommandParser`. The parser accepts at least one
+of the lowercase fields `n/`, `d/`, `t/`, and `r/`, rejects duplicate or unknown fields, and validates dates
+and times using strict `YYYY-MM-DD` and `HH:mm` formats. Recurrence is restricted to `Once`, `Weekly`,
+or `Daily`. Names are trimmed, internal whitespace is normalised, and matching is case-insensitive.
+
+`FilterActivityCommand` applies an `ActivityFilterPredicate` to the model's filtered activity list.
+Name matching uses a case-insensitive substring, date matching delegates to `Activity.occursOn(date)`
+so recurring activities are handled correctly, and time matching includes both endpoints. Multiple
+recurrence matching compares the activity's stored recurrence. Multiple fields are combined with AND semantics.
+The activity panel observes this filtered list, while the
+underlying stored schedules remain unchanged. The success message reports only the supplied fields, in the
+order name, time, date, and recurrence.
 ### Activity enrolment and completion
 
 Dogs are linked to activities through separate `Enrolment` records. Each record stores an activity

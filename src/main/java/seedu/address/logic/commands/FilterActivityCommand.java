@@ -1,0 +1,87 @@
+package seedu.address.logic.commands;
+
+import static java.util.Objects.requireNonNull;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Objects;
+import java.util.StringJoiner;
+
+import seedu.address.model.Model;
+import seedu.address.model.activity.ActivityFilterPredicate;
+import seedu.address.model.activity.Recurrence;
+
+/** Filters activities by name, date, and/or time. */
+public class FilterActivityCommand extends Command {
+    public static final String COMMAND_WORD = "filtera";
+    private static final String MESSAGE_SUCCESS_PREFIX = "Successfully filtered activities by ";
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + " [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]: Filters activities by activity fields.";
+
+    private final String name;
+    private final LocalDate date;
+    private final LocalTime time;
+    private final Recurrence recurrence;
+
+    /** Creates a command containing any combination of activity filter fields. */
+    public FilterActivityCommand(String name, LocalDate date, LocalTime time) {
+        this(name, date, time, null);
+    }
+
+    /** Creates a command containing any combination of activity filter fields. */
+    public FilterActivityCommand(String name, LocalDate date, LocalTime time, Recurrence recurrence) {
+        this.name = name;
+        this.date = date;
+        this.time = time;
+        this.recurrence = recurrence;
+    }
+
+    @Override
+    public CommandResult execute(Model model) {
+        requireNonNull(model);
+        model.updateFilteredActivityList(new ActivityFilterPredicate(name, date, time, recurrence));
+        return new CommandResult(createSuccessMessage());
+    }
+
+    private String createSuccessMessage() {
+        StringJoiner fields = new StringJoiner(", ");
+        if (name != null) {
+            fields.add("name: " + name);
+        }
+        if (time != null) {
+            fields.add("time: " + time);
+        }
+        if (date != null) {
+            fields.add("date: " + date);
+        }
+        if (recurrence != null) {
+            fields.add("recurrence: " + formatRecurrence(recurrence));
+        }
+        return MESSAGE_SUCCESS_PREFIX + fields;
+    }
+
+    private static String formatRecurrence(Recurrence recurrence) {
+        String value = recurrence.name().toLowerCase(java.util.Locale.ROOT);
+        return Character.toUpperCase(value.charAt(0)) + value.substring(1);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof FilterActivityCommand otherCommand)) {
+            return false;
+        }
+        return Objects.equals(name, otherCommand.name)
+                && Objects.equals(date, otherCommand.date)
+                && Objects.equals(time, otherCommand.time)
+                && recurrence == otherCommand.recurrence;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("FilterActivityCommand{name=%s, date=%s, time=%s, recurrence=%s}",
+                name, date, time, recurrence);
+    }
+}
