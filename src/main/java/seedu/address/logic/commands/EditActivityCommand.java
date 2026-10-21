@@ -1,157 +1,178 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_BREED;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_DATE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_END;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_SIZE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_RECURRENCE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_START;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Objects;
 import java.util.Optional;
 
-import seedu.address.commons.util.CollectionUtil;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
-import seedu.address.model.dog.Breed;
-import seedu.address.model.dog.Dog;
-import seedu.address.model.dog.DogName;
-import seedu.address.model.dog.Size;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
 
-/** Edits the details of an existing dog in the address book. */
-public class EditDogCommand extends Command {
-    public static final String COMMAND_WORD = "editdog";
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the dog identified by its ID. "
-            + "Parameters: ID [" + PREFIX_NAME + "NAME] [" + PREFIX_BREED + "BREED] ["
-            + PREFIX_SIZE + "SIZE]\n"
-            + "Example: " + COMMAND_WORD + " 1 " + PREFIX_SIZE + "Large";
-    public static final String MESSAGE_EDIT_DOG_SUCCESS = "Edited dog: %1$s";
+/** Edits an activity series identified by its persistent ID. */
+public class EditActivityCommand extends Command {
+    public static final String COMMAND_WORD = "editactivity";
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the activity identified by its ID. "
+            + "Parameters: ID [" + PREFIX_NAME + "NAME] [" + PREFIX_DATE + "YYYY-MM-DD] ["
+            + PREFIX_START + "HH:mm] [" + PREFIX_END + "HH:mm] ["
+            + PREFIX_RECURRENCE + "once|daily|weekly]\n"
+            + "Example: " + COMMAND_WORD + " 1 " + PREFIX_DATE + "2026-11-04 " + PREFIX_START + "10:00";
+    public static final String MESSAGE_EDIT_ACTIVITY_SUCCESS = "Edited activity ID %d. Enrolments removed: %d.";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
-    public static final String MESSAGE_INVALID_DOG_ID = "The dog ID provided is invalid.";
+    public static final String MESSAGE_INVALID_ACTIVITY_ID = "The activity ID provided is invalid.";
 
-    private final int dogId;
-    private final EditDogDescriptor editDogDescriptor;
+    private final int activityId;
+    private final EditActivityDescriptor editActivityDescriptor;
 
-    /** Creates a command to edit the dog with {@code dogId}. */
-    public EditDogCommand(int dogId, EditDogDescriptor editDogDescriptor) {
-        if (dogId < 0) {
-            throw new IllegalArgumentException("Dog ID must be nonnegative.");
+    /** Creates a command to edit the activity with {@code activityId}. */
+    public EditActivityCommand(int activityId, EditActivityDescriptor editActivityDescriptor) {
+        if (activityId < 0) {
+            throw new IllegalArgumentException("Activity ID must be nonnegative.");
         }
-        requireNonNull(editDogDescriptor);
-        this.dogId = dogId;
-        this.editDogDescriptor = new EditDogDescriptor(editDogDescriptor);
+        requireNonNull(editActivityDescriptor);
+        this.activityId = activityId;
+        this.editActivityDescriptor = new EditActivityDescriptor(editActivityDescriptor);
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-
-        Dog dogToEdit = model.getDogList().stream()
-                .filter(dog -> dog.getId() == dogId)
-                .findFirst()
-                .orElseThrow(() -> new CommandException(MESSAGE_INVALID_DOG_ID));
-
-        if (!editDogDescriptor.isAnyFieldEdited()) {
+        if (!editActivityDescriptor.isAnyFieldEdited()) {
             throw new CommandException(MESSAGE_NOT_EDITED);
         }
 
-        Dog editedDog = createEditedDog(dogToEdit, editDogDescriptor);
-        model.setDog(dogToEdit, editedDog);
-        return new CommandResult(String.format(MESSAGE_EDIT_DOG_SUCCESS, Messages.format(editedDog)));
+        Activity activityToEdit = model.getActivityList().stream()
+                .filter(activity -> activity.getId() == activityId)
+                .findFirst()
+                .orElseThrow(() -> new CommandException(MESSAGE_INVALID_ACTIVITY_ID));
+
+        int removedEnrolments;
+        try {
+            Activity editedActivity = createEditedActivity(activityToEdit, editActivityDescriptor);
+            removedEnrolments = model.setActivity(activityToEdit, editedActivity);
+        } catch (IllegalArgumentException e) {
+            throw new CommandException(e.getMessage(), e);
+        }
+        return new CommandResult(String.format(MESSAGE_EDIT_ACTIVITY_SUCCESS, activityId, removedEnrolments));
     }
 
-    private static Dog createEditedDog(Dog dogToEdit, EditDogDescriptor descriptor) {
-        DogName updatedName = descriptor.getName().orElse(dogToEdit.getName());
-        Breed updatedBreed = descriptor.getBreed().orElse(dogToEdit.getBreed());
-        Size updatedSize = descriptor.getSize().orElse(dogToEdit.getSize());
-        return new Dog(dogToEdit.getId(), updatedName, updatedBreed, updatedSize,
-                dogToEdit.getOwnerId().orElse(null));
+    private static Activity createEditedActivity(Activity activity, EditActivityDescriptor descriptor) {
+        return new Activity(activity.getId(),
+                descriptor.getName().orElse(activity.getName()),
+                descriptor.getDate().orElse(activity.getStartDate()),
+                descriptor.getStartTime().orElse(activity.getStartTime()),
+                descriptor.getEndTime().orElse(activity.getEndTime()),
+                descriptor.getRecurrence().orElse(activity.getRecurrence()),
+                activity.isCompleted());
     }
 
     @Override
     public boolean equals(Object other) {
-        if (other == this) {
-            return true;
-        }
-        if (!(other instanceof EditDogCommand otherEditDogCommand)) {
-            return false;
-        }
-        return dogId == otherEditDogCommand.dogId
-                && editDogDescriptor.equals(otherEditDogCommand.editDogDescriptor);
+        return other == this || other instanceof EditActivityCommand command
+                && activityId == command.activityId
+                && editActivityDescriptor.equals(command.editActivityDescriptor);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .add("dogId", dogId)
-                .add("editDogDescriptor", editDogDescriptor)
+                .add("activityId", activityId)
+                .add("editActivityDescriptor", editActivityDescriptor)
                 .toString();
     }
 
-    /** Stores the non-empty dog fields to edit. */
-    public static class EditDogDescriptor {
-        private DogName name;
-        private Breed breed;
-        private Size size;
+    /** Stores the optional replacement fields for an activity. */
+    public static class EditActivityDescriptor {
+        private ActivityName name;
+        private LocalDate date;
+        private LocalTime startTime;
+        private LocalTime endTime;
+        private Recurrence recurrence;
 
-        public EditDogDescriptor() {}
+        public EditActivityDescriptor() {}
 
-        /** Creates a defensive copy of the given descriptor. */
-        public EditDogDescriptor(EditDogDescriptor toCopy) {
+        /** Creates a defensive copy of the descriptor. */
+        public EditActivityDescriptor(EditActivityDescriptor toCopy) {
             requireNonNull(toCopy);
             name = toCopy.name;
-            breed = toCopy.breed;
-            size = toCopy.size;
+            date = toCopy.date;
+            startTime = toCopy.startTime;
+            endTime = toCopy.endTime;
+            recurrence = toCopy.recurrence;
         }
 
-        /** Returns true if at least one field is edited. */
         public boolean isAnyFieldEdited() {
-            return CollectionUtil.isAnyNonNull(name, breed, size);
+            return name != null || date != null || startTime != null || endTime != null || recurrence != null;
         }
 
-        public void setName(DogName name) {
-            this.name = name;
+        public void setName(ActivityName name) {
+            this.name = requireNonNull(name);
         }
 
-        public Optional<DogName> getName() {
+        public Optional<ActivityName> getName() {
             return Optional.ofNullable(name);
         }
 
-        public void setBreed(Breed breed) {
-            this.breed = breed;
+        public void setDate(LocalDate date) {
+            this.date = requireNonNull(date);
         }
 
-        public Optional<Breed> getBreed() {
-            return Optional.ofNullable(breed);
+        public Optional<LocalDate> getDate() {
+            return Optional.ofNullable(date);
         }
 
-        public void setSize(Size size) {
-            this.size = size;
+        public void setStartTime(LocalTime startTime) {
+            this.startTime = requireNonNull(startTime);
         }
 
-        public Optional<Size> getSize() {
-            return Optional.ofNullable(size);
+        public Optional<LocalTime> getStartTime() {
+            return Optional.ofNullable(startTime);
+        }
+
+        public void setEndTime(LocalTime endTime) {
+            this.endTime = requireNonNull(endTime);
+        }
+
+        public Optional<LocalTime> getEndTime() {
+            return Optional.ofNullable(endTime);
+        }
+
+        public void setRecurrence(Recurrence recurrence) {
+            this.recurrence = requireNonNull(recurrence);
+        }
+
+        public Optional<Recurrence> getRecurrence() {
+            return Optional.ofNullable(recurrence);
         }
 
         @Override
         public boolean equals(Object other) {
-            if (other == this) {
-                return true;
-            }
-            if (!(other instanceof EditDogDescriptor otherDescriptor)) {
-                return false;
-            }
-            return Objects.equals(name, otherDescriptor.name)
-                    && Objects.equals(breed, otherDescriptor.breed)
-                    && Objects.equals(size, otherDescriptor.size);
+            return other == this || other instanceof EditActivityDescriptor descriptor
+                    && Objects.equals(name, descriptor.name)
+                    && Objects.equals(date, descriptor.date)
+                    && Objects.equals(startTime, descriptor.startTime)
+                    && Objects.equals(endTime, descriptor.endTime)
+                    && recurrence == descriptor.recurrence;
         }
 
         @Override
         public String toString() {
             return new ToStringBuilder(this)
                     .add("name", name)
-                    .add("breed", breed)
-                    .add("size", size)
+                    .add("date", date)
+                    .add("startTime", startTime)
+                    .add("endTime", endTime)
+                    .add("recurrence", recurrence)
                     .toString();
         }
     }
