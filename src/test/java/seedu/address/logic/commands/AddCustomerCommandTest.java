@@ -96,6 +96,11 @@ public class AddCustomerCommandTest {
         }
 
         @Override
+        public void deleteActivity(Activity activity) {
+            throw unused();
+        }
+
+        @Override
         public void unlinkDogs(List<Integer> dogIds) {
             throw new AssertionError("This method should not be called.");
         }
