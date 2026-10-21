@@ -18,6 +18,7 @@ import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FilterActivityCommand;
 import seedu.address.logic.commands.FilterCustomerCommand;
 import seedu.address.logic.commands.FilterDogCommand;
+import seedu.address.logic.commands.FilterUnlinkedCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.SelectDogCommand;
@@ -89,6 +90,12 @@ public class AddressBookParserTest {
     public void parseCommand_filterDog() throws Exception {
         assertEquals(new FilterDogCommand("lala", null, null, null),
                 parser.parseCommand("filterd n/lala"));
+    }
+
+    @Test
+    public void parseCommand_filterUnlinked() throws Exception {
+        assertEquals(new FilterUnlinkedCommand(true), parser.parseCommand("filterun   dog"));
+        assertEquals(new FilterUnlinkedCommand(false), parser.parseCommand("filterun customer"));
     }
 
     @Test

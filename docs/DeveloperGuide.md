@@ -347,6 +347,13 @@ underlying stored schedules remain unchanged. The success message reports only t
 order name, time, date, and recurrence.
 The activity predicate is reapplied after activity additions and activity state or enrolment changes, so the
 activity display remains filtered without requiring the user to repeat the command.
+### Unlinked filtering
+
+`AddressBookParser` routes `filterun` to `FilterUnlinkedCommandParser`, which accepts only the lowercase
+categories `dog` and `customer`, with arbitrary surrounding whitespace. `FilterUnlinkedCommand` filters dogs
+whose `ownerId` is absent or customers with no owned dogs, and clears the related panel. Its predicates are
+stored by `ModelManager`, so the results refresh after later record or relationship changes.
+
 ### Activity enrolment and completion
 
 Dogs are linked to activities through separate `Enrolment` records. Each record stores an activity
