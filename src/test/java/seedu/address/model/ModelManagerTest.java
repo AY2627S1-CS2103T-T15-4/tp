@@ -123,4 +123,32 @@ public class ModelManagerTest {
         first.updateFilteredActivityList(Model.PREDICATE_SHOW_ALL_ACTIVITIES);
         assertEquals(first, second);
     }
+
+    @Test
+    public void selectDog_unownedDog_refreshesAfterAddingCustomer() {
+        AddressBook addressBook = new AddressBook();
+        addressBook.addDogFromStorage(new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        addressBook.addDogFromStorage(new Dog(43, new DogName("Max"), new Breed("Poodle"), new Size("large")));
+        ModelManager first = new ModelManager(addressBook, new UserPrefs());
+        ModelManager second = new ModelManager(addressBook, new UserPrefs());
+
+        first.selectDog(42);
+        first.addCustomer(ALICE);
+
+        assertFalse(first.equals(second));
+        assertTrue(first.getFilteredCustomerList().isEmpty());
+        assertEquals(1, first.getFilteredDogList().size());
+    }
+
+    @Test
+    public void equals_differentSelectedDog_returnsFalse() {
+        AddressBook addressBook = new AddressBook();
+        addressBook.addDogFromStorage(new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        ModelManager first = new ModelManager(addressBook, new UserPrefs());
+        ModelManager second = new ModelManager(addressBook, new UserPrefs());
+
+        first.selectDog(42);
+
+        assertFalse(first.equals(second));
+    }
 }
