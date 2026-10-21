@@ -105,6 +105,19 @@ Invalid dates, times, recurrence values, missing or repeated fields produce an e
 Creation does not book any dogs, so overlapping empty schedules are allowed. Dog booking commands
 and activity cards are separate features; this contribution reports creation in the command feedback.
 
+### Deleting an activity: `deleteactivity`
+
+Deletes the activity with the specified persistent ID. For a recurring activity, this deletes the
+entire series. All dogs enrolled in that activity are unenrolled; the dogs themselves and their
+enrolments in other activities remain. Deleted activity IDs are not reused.
+
+Format: `deleteactivity ACTIVITY_ID`
+
+Example: `deleteactivity 21`
+
+The ID must be a nonnegative integer belonging to an existing activity. Invalid or missing IDs
+leave the activity and enrolments unchanged.
+
 ### Adding a dog: `adddog`
 
 Adds a dog and assigns it a unique persistent ID.
@@ -366,6 +379,7 @@ Action     | Format, Examples
 **Search customers** | `search customer n/NAME_QUERY` or `search customer id/ID`<br> e.g., `search customer n/alex`
 **Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
 **Add activity** | `addactivity n/NAME date/YYYY-MM-DD start/HH:mm end/HH:mm r/once`<br>Use `r/daily` or `r/weekly` for recurrence.
+**Delete activity** | `deleteactivity ACTIVITY_ID`<br>e.g., `deleteactivity 21`
 **Add dog** | `adddog n/NAME b/BREED s/SIZE`<br>e.g., `adddog n/Cookie b/Chihuahua s/Small`
 **Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 **Edit dog** | `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`<br>e.g., `editdog 1 s/Large`
