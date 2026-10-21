@@ -284,6 +284,17 @@ interface, implemented by `StorageManager`. Concrete lifelines are shown to make
 
 <puml src="diagrams/AddActivitySequenceDiagram.puml" alt="Parsing, executing and saving an addactivity command" />
 
+### Dog filtering
+
+`AddressBookParser` routes `filterd` to `FilterDogCommandParser`. The parser accepts the lowercase fields
+`n/`, `b/`, `s/`, and `i/`, rejects duplicate or unknown fields, normalises whitespace, and validates sizes
+and nonnegative IDs. `DogFilterPredicate` performs case-insensitive substring matching for names and breeds,
+case-insensitive exact matching for sizes, and exact matching for IDs.
+
+`FilterDogCommand` rejects IDs that are not present in the database before changing either filtered list.
+After applying the dog predicate, it derives the owners of the matching dogs and applies a customer predicate
+for those owners. Therefore unowned matching dogs remain visible while the customer list is empty.
+
 ### Activity enrolment and completion
 
 Dogs are linked to activities through separate `Enrolment` records. Each record stores an activity

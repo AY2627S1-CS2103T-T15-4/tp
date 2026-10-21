@@ -214,6 +214,20 @@ Examples:
   showing `Dog IDs: None` when none remain. Existing search filters stay active.
 * Changes are saved automatically and survive restarting the application.
 
+### Filtering dogs: `filterd`
+
+Filters dogs by one or more fields. All supplied fields must match.
+
+Format: `filterd [n/NAME] [b/BREED] [s/SIZE] [i/ID]`
+
+Example: `filterd b/Golden Retriever s/Medium`
+
+* Name and breed matching are case-insensitive substring searches.
+* Size must be `small`, `medium`, `large`, or `giant`, ignoring letter case.
+* ID matching is exact, and the ID must belong to a dog in the database.
+* The customer panel is also filtered to customers linked to the matching dogs.
+* Unowned matching dogs remain visible, but the customer panel is empty.
+
 ### Searching customers and dogs together: `search`
 
 Format: `search n/NAME_QUERY` or `search id/ID`
