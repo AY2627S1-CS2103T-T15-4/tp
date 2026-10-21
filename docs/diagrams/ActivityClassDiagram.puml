@@ -10,6 +10,8 @@ show members
 interface Model {
   +addActivity(name, date, start, end, recurrence): Activity
   +getActivityList(): ObservableList<Activity>
+  +getFilteredActivityList(): ObservableList<Activity>
+  +updateFilteredActivityList(predicate)
   +enrolDogs(activityId, dogIds)
   +unenrolDogs(activityId, dogIds)
   +markActivity(activityId)
@@ -18,6 +20,8 @@ interface Model {
 
 class ModelManager {
   +addActivity(name, date, start, end, recurrence): Activity
+  +getFilteredActivityList(): ObservableList<Activity>
+  +updateFilteredActivityList(predicate)
   +enrolDogs(activityId, dogIds)
   +unenrolDogs(activityId, dogIds)
   +markActivity(activityId)

@@ -18,6 +18,7 @@ import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FilterActivityCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.SelectDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
@@ -41,6 +42,12 @@ public class AddressBookParserTest {
     public void parseCommand_clear() throws Exception {
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD) instanceof ClearCommand);
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD + " 3") instanceof ClearCommand);
+    }
+
+    @Test
+    public void parseCommand_selectDog() throws Exception {
+        SelectDogCommand command = (SelectDogCommand) parser.parseCommand("select dog 21");
+        assertEquals(new SelectDogCommand(21), command);
     }
 
     @Test

@@ -27,7 +27,7 @@ public class FilterActivityCommandParserTest {
 
     @Test
     public void parse_missingDuplicateUnknownOrUppercaseFields_throwsParseException() {
-        String[] invalidInputs = {"", " ", "run n/walk", "n/walk n/run", "x/run", "N/run",
+        String[] invalidInputs = {"", " ", "extra", "run n/walk", "n/walk n/run", "x/run", "N/run",
             "n/run x/value", "n/run d/2026-10-20 extra", "n/", "n/run d/2026-10-20 d/2026-10-21",
             "t/10:00 t/11:00"};
 
