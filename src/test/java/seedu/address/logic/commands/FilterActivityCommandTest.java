@@ -110,6 +110,11 @@ public class FilterActivityCommandTest {
         assertFalse(command.equals(new FilterActivityCommand("run", DATE, LocalTime.NOON, Recurrence.DAILY)));
         assertFalse(command.equals(null));
         assertFalse(command.equals("command"));
+        assertFalse(command.equals(new FilterActivityCommand("other", DATE, LocalTime.NOON, Recurrence.ONCE)));
+        assertFalse(command.equals(new FilterActivityCommand("run", DATE.plusDays(1), LocalTime.NOON,
+                Recurrence.ONCE)));
+        assertFalse(command.equals(new FilterActivityCommand("run", DATE, LocalTime.MIDNIGHT,
+                Recurrence.ONCE)));
     }
 
     private ModelManager modelWithActivities() {

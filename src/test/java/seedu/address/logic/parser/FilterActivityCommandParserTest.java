@@ -28,7 +28,8 @@ public class FilterActivityCommandParserTest {
     @Test
     public void parse_missingDuplicateUnknownOrUppercaseFields_throwsParseException() {
         String[] invalidInputs = {"", " ", "run n/walk", "n/walk n/run", "x/run", "N/run",
-            "n/run x/value", "n/run d/2026-10-20 extra"};
+            "n/run x/value", "n/run d/2026-10-20 extra", "n/", "n/run d/2026-10-20 d/2026-10-21",
+            "t/10:00 t/11:00"};
 
         for (String invalidInput : invalidInputs) {
             assertThrows(ParseException.class, () -> parser.parse(invalidInput));
@@ -64,5 +65,12 @@ public class FilterActivityCommandParserTest {
                 parser.parse("r/WEEKLY"));
         assertEquals(new FilterActivityCommand(null, null, null, Recurrence.DAILY),
                 parser.parse("r/ Daily "));
+    }
+
+    @Test
+    public void parse_fieldsWithLeadingAndTrailingWhitespace_success() throws Exception {
+        assertEquals(new FilterActivityCommand("walk", null, null), parser.parse("  n/  Walk  "));
+        assertEquals(new FilterActivityCommand(null, LocalDate.of(2026, 10, 20), null),
+                parser.parse(" d/2026-10-20 "));
     }
 }
