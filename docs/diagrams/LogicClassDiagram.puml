@@ -13,6 +13,7 @@ Class EnrolDogCommand
 Class UnenrolDogCommand
 Class MarkActivityCommand
 Class UnmarkActivityCommand
+Class SelectDogCommand
 Class CommandResult
 Class "{abstract}\nCommand" as Command
 
@@ -40,6 +41,7 @@ EnrolDogCommand -up-|> Command
 UnenrolDogCommand -up-|> Command
 MarkActivityCommand -up-|> Command
 UnmarkActivityCommand -up-|> Command
+SelectDogCommand -up-|> Command
 LogicManager .left.> Command : <<call>>
 
 LogicManager --> Model

@@ -47,6 +47,7 @@ Dog *--> Size
 Dog --> "0..1" Customer : ownerId
 ModelManager --> "* filtered" Customer
 ModelManager --> "* filtered" Dog
+ModelManager --> "* filtered" Activity
 ModelManager ..> Enrolment : enrols dogs
 Enrolment --> Activity
 Enrolment --> Dog
