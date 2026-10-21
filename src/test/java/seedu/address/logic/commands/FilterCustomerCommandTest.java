@@ -61,6 +61,40 @@ public class FilterCustomerCommandTest {
                 new FilterCustomerCommand(null, null, null, null, Set.of(100)).execute(model));
     }
 
+    @Test
+    public void execute_eachFieldMismatch_excludesCustomer() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+
+        new FilterCustomerCommand("missing", null, null, null, null).execute(model);
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+        new FilterCustomerCommand(null, "99999999", null, null, null).execute(model);
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+        new FilterCustomerCommand(null, null, "other@example.com", null, null).execute(model);
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+        new FilterCustomerCommand(null, null, null, "99999999", null).execute(model);
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+    }
+
+    @Test
+    public void equals_differentFields_returnsFalse() {
+        FilterCustomerCommand command = new FilterCustomerCommand(
+                "anna", "91234567", "anna@example.com", "98765432", Set.of(1));
+
+        assertEquals(command, command);
+        assertTrue(!command.equals(null));
+        assertTrue(!command.equals("command"));
+        assertTrue(!command.equals(new FilterCustomerCommand(
+                "other", "91234567", "anna@example.com", "98765432", Set.of(1))));
+        assertTrue(!command.equals(new FilterCustomerCommand(
+                "anna", "99999999", "anna@example.com", "98765432", Set.of(1))));
+        assertTrue(!command.equals(new FilterCustomerCommand(
+                "anna", "91234567", "other@example.com", "98765432", Set.of(1))));
+        assertTrue(!command.equals(new FilterCustomerCommand(
+                "anna", "91234567", "anna@example.com", "99999999", Set.of(1))));
+        assertTrue(!command.equals(new FilterCustomerCommand(
+                "anna", "91234567", "anna@example.com", "98765432", Set.of(2))));
+    }
+
     private ModelManager modelWithCustomersAndDogs() throws Exception {
         ModelManager model = new ModelManager();
         Customer anna = new Customer(1, "Anna Lee", "91234567", "anna@example.com", "98765432");
