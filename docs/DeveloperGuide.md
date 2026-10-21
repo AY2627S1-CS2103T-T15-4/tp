@@ -302,6 +302,22 @@ interface, implemented by `StorageManager`. Concrete lifelines are shown to make
 
 <puml src="diagrams/AddActivitySequenceDiagram.puml" alt="Parsing, executing and saving an addactivity command" />
 
+### Customer filtering
+
+`AddressBookParser` routes `filterc` to `FilterCustomerCommandParser`. The parser accepts the optional
+lowercase fields `n/`, `p/`, `e/`, `d/`, and `bc/`. Names are normalised for case-insensitive substring
+matching, while contact numbers and email addresses use exact matching. Multiple dog IDs are parsed from
+the `d/` field and are retained as a set.
+
+`FilterCustomerCommand` validates that every requested dog ID exists, then applies `CustomerFilterPredicate`
+to the filtered customer list. The predicate derives ownership from each dog's stored `ownerId`; a customer
+matches a multi-dog filter only when they own every requested dog. After customer filtering, the command derives
+the matching customer IDs and applies a second predicate to the dog list, showing only dogs owned by those
+customers. Dog IDs in the success message are sorted numerically.
+The parser stops field values at any field-like prefix, including unsupported prefixes, so inputs such as
+`filterc n/Anna x/value` are rejected rather than treating `x/value` as part of the name. `ModelManager`
+reapplies active customer and dog predicates after customer edits, dog edits, and relationship changes so
+both filtered views remain consistent.
 ### Activity filtering
 
 `AddressBookParser` routes `filtera` to `FilterActivityCommandParser`. The parser accepts at least one
@@ -316,7 +332,6 @@ recurrence matching compares the activity's stored recurrence. Multiple fields a
 The activity panel observes this filtered list, while the
 underlying stored schedules remain unchanged. The success message reports only the supplied fields, in the
 order name, time, date, and recurrence.
-
 ### Activity enrolment and completion
 
 Dogs are linked to activities through separate `Enrolment` records. Each record stores an activity

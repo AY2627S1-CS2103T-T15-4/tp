@@ -16,6 +16,7 @@ import seedu.address.logic.commands.EditDogCommand;
 import seedu.address.logic.commands.EditDogCommand.EditDogDescriptor;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FilterActivityCommand;
+import seedu.address.logic.commands.FilterCustomerCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.SelectDogCommand;
@@ -75,6 +76,12 @@ public class AddressBookParserTest {
 
         EditDogCommand command = (EditDogCommand) parser.parseCommand("editdog 1 s/Medium");
         assertEquals(new EditDogCommand(1, descriptor), command);
+    }
+
+    @Test
+    public void parseCommand_filterCustomer() throws Exception {
+        assertEquals(new FilterCustomerCommand("anna", null, null, null, null),
+                parser.parseCommand("filterc n/anna"));
     }
 
     @Test
