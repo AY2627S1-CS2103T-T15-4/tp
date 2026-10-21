@@ -314,6 +314,10 @@ to the filtered customer list. The predicate derives ownership from each dog's s
 matches a multi-dog filter only when they own every requested dog. After customer filtering, the command derives
 the matching customer IDs and applies a second predicate to the dog list, showing only dogs owned by those
 customers. Dog IDs in the success message are sorted numerically.
+The parser stops field values at any field-like prefix, including unsupported prefixes, so inputs such as
+`filterc n/Anna x/value` are rejected rather than treating `x/value` as part of the name. `ModelManager`
+reapplies active customer and dog predicates after customer edits, dog edits, and relationship changes so
+both filtered views remain consistent.
 ### Activity filtering
 
 `AddressBookParser` routes `filtera` to `FilterActivityCommandParser`. The parser accepts at least one

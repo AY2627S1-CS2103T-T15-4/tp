@@ -24,7 +24,7 @@ public class FilterCustomerCommandParserTest {
     @Test
     public void parse_invalidFormatOrDuplicateFields_throwsParseException() {
         String[] invalidInputs = {"", " ", "customer", "x/value", "N/Anna", "n/Anna n/Beth",
-            "n/Anna p/1234567", "n/Anna p/91234567 p/92345678", "n/Anna e/a@b.com e/c@d.com",
+            "n/Anna x/value", "n/Anna p/1234567", "n/Anna p/91234567 p/92345678", "n/Anna e/a@b.com e/c@d.com",
             "n/Anna bc/91234567 bc/92345678", "n/Anna d/12 d/13", "extra n/Anna", "n/"};
 
         for (String invalidInput : invalidInputs) {

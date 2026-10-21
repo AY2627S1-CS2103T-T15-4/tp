@@ -46,11 +46,9 @@ public class FilterCustomerCommand extends Command {
         }
         model.updateFilteredCustomerList(new CustomerFilterPredicate(name, phone, email, backupContact,
                 dogIds, model.getDogList()));
-        Set<Integer> matchingCustomerIds = model.getFilteredCustomerList().stream()
-                .map(customer -> customer.getId())
-                .collect(Collectors.toSet());
         model.updateFilteredDogList(dog -> dog.getOwnerId()
-                .map(matchingCustomerIds::contains)
+                .map(ownerId -> model.getFilteredCustomerList().stream()
+                        .anyMatch(customer -> customer.getId() == ownerId))
                 .orElse(false));
         return new CommandResult(createSuccessMessage());
     }

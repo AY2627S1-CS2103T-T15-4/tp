@@ -76,6 +76,28 @@ public class FilterCustomerCommandTest {
     }
 
     @Test
+    public void execute_refreshesLinkedDogsAfterCustomerEdit() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        new FilterCustomerCommand("anna", null, null, null, null).execute(model);
+        Customer anna = model.getCustomerList().get(0);
+        model.setCustomer(anna, new Customer(1, "Beth Lee", "91234567",
+                "anna@example.com", "98765432"));
+
+        assertEquals(1, model.getFilteredCustomerList().size());
+        assertEquals(1, model.getFilteredDogList().size());
+    }
+
+    @Test
+    public void execute_refreshesLinkedDogsAfterRelationshipChange() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        new FilterCustomerCommand("anna", null, null, null, null).execute(model);
+        model.unlinkDogs(List.of(1, 2));
+
+        assertEquals(2, model.getFilteredCustomerList().size());
+        assertEquals(1, model.getFilteredDogList().size());
+    }
+
+    @Test
     public void equals_differentFields_returnsFalse() {
         FilterCustomerCommand command = new FilterCustomerCommand(
                 "anna", "91234567", "anna@example.com", "98765432", Set.of(1));

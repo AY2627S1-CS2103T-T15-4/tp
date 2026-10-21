@@ -250,6 +250,7 @@ Example: `filterc n/Anna d/12 34`
 * Dog IDs in the success message are displayed in ascending numeric order.
 * Only lowercase `n/`, `p/`, `e/`, `d/`, and `bc/` prefixes are accepted.
 * Invalid field values display `Error in filtering customers:` followed by the applicable error message.
+* Unsupported field prefixes are rejected as invalid command formats.
 * If no customers match, the customer panel is empty.
 
 ### Searching customers and dogs together: `search`

@@ -35,6 +35,8 @@ public class ModelManager implements Model {
     private final FilteredList<Customer> filteredCustomers;
     private final FilteredList<Dog> filteredDogs;
     private final FilteredList<Activity> filteredActivities;
+    private Predicate<Customer> activeCustomerPredicate;
+    private Predicate<Dog> activeDogPredicate;
     private Integer selectedDogId;
 
     /**
@@ -123,19 +125,19 @@ public class ModelManager implements Model {
     @Override
     public void linkDogs(int customerId, List<Integer> dogIds) throws LinkException {
         addressBook.linkDogs(customerId, dogIds);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
     }
 
     @Override
     public void unlinkDogs(List<Integer> dogIds) throws UnlinkException {
         addressBook.unlinkDogs(dogIds);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
     }
 
     @Override
     public void unlinkCustomerDogs(int customerId) throws UnlinkException {
         addressBook.unlinkCustomerDogs(customerId);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
     }
 
     @Override
@@ -146,19 +148,19 @@ public class ModelManager implements Model {
     @Override
     public void deleteDog(Dog dog) {
         addressBook.removeDog(dog);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
     }
 
     @Override
     public void setDog(Dog target, Dog editedDog) {
         addressBook.setDog(target, editedDog);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
     }
 
     @Override
     public Dog addDog(Dog dog) {
         Dog addedDog = addressBook.addDog(dog);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
         return addedDog;
     }
 
@@ -172,17 +174,13 @@ public class ModelManager implements Model {
     @Override
     public void deleteCustomer(Customer target) {
         addressBook.removeCustomer(target);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
     }
 
     @Override
     public void addCustomer(Customer customer) {
         addressBook.addCustomer(customer);
-        if (selectedDogId == null) {
-            updateFilteredCustomerList(PREDICATE_SHOW_ALL_CUSTOMERS);
-        } else {
-            refreshSelectedDog();
-        }
+        refreshDisplayedRecords();
     }
 
     @Override
@@ -190,7 +188,7 @@ public class ModelManager implements Model {
         requireAllNonNull(target, editedCustomer);
 
         addressBook.setCustomer(target, editedCustomer);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
     }
 
     //=========== Filtered Record List Accessors =============================================================
@@ -209,6 +207,7 @@ public class ModelManager implements Model {
     public void updateFilteredDogList(Predicate<Dog> predicate) {
         requireNonNull(predicate);
         clearDogSelection();
+        activeDogPredicate = predicate;
         filteredDogs.setPredicate(predicate);
     }
 
@@ -221,6 +220,7 @@ public class ModelManager implements Model {
     public void updateFilteredCustomerList(Predicate<Customer> predicate) {
         requireNonNull(predicate);
         clearDogSelection();
+        activeCustomerPredicate = predicate;
         filteredCustomers.setPredicate(predicate);
     }
 
@@ -250,6 +250,22 @@ public class ModelManager implements Model {
     private void refreshSelectedDog() {
         if (selectedDogId != null) {
             applySelectedDog();
+        }
+    }
+
+    /** Reapplies active filters after stored records or relationships change. */
+    private void refreshDisplayedRecords() {
+        if (selectedDogId != null) {
+            refreshSelectedDog();
+            return;
+        }
+        if (activeCustomerPredicate != null) {
+            filteredCustomers.setPredicate(null);
+            filteredCustomers.setPredicate(activeCustomerPredicate);
+        }
+        if (activeDogPredicate != null) {
+            filteredDogs.setPredicate(null);
+            filteredDogs.setPredicate(activeDogPredicate);
         }
     }
 

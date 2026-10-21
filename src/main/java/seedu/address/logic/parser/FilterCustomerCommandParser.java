@@ -13,7 +13,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 /** Parses arguments for the {@code filterc} command. */
 public class FilterCustomerCommandParser implements Parser<FilterCustomerCommand> {
     private static final Pattern FIELD_FORMAT = Pattern.compile(
-            "(?<prefix>n|p|e|d|bc)/(?<value>.*?)(?=\\s+(?:n|p|e|d|bc)/|$)");
+            "(?<prefix>n|p|e|d|bc)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
     private static final String MESSAGE_INVALID_INFO = "Error in filtering customers:\n"
             + "Info is in the wrong format. Input in the correct format";
 
