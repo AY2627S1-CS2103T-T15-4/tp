@@ -1,0 +1,68 @@
+package seedu.address.logic.parser;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static seedu.address.testutil.Assert.assertThrows;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import org.junit.jupiter.api.Test;
+
+import seedu.address.logic.commands.FilterActivityCommand;
+import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.activity.Recurrence;
+
+public class FilterActivityCommandParserTest {
+    private final FilterActivityCommandParser parser = new FilterActivityCommandParser();
+
+    @Test
+    public void parse_validFields_success() throws Exception {
+        FilterActivityCommand expected = new FilterActivityCommand(
+                "dog run", LocalDate.of(2026, 10, 20), LocalTime.of(16, 0), Recurrence.WEEKLY);
+
+        assertEquals(expected, parser.parse(" n/Dog    run  d/2026-10-20 t/16:00 r/wEeKlY "));
+        assertEquals(new FilterActivityCommand(null, null, LocalTime.MIDNIGHT),
+                parser.parse("t/00:00"));
+    }
+
+    @Test
+    public void parse_missingDuplicateUnknownOrUppercaseFields_throwsParseException() {
+        String[] invalidInputs = {"", " ", "run n/walk", "n/walk n/run", "x/run", "N/run",
+            "n/run x/value", "n/run d/2026-10-20 extra"};
+
+        for (String invalidInput : invalidInputs) {
+            assertThrows(ParseException.class, () -> parser.parse(invalidInput));
+        }
+    }
+
+    @Test
+    public void parse_invalidDate_throwsDateParseException() {
+        for (String date : new String[]{"2026-02-29", "2026-13-01", "2026-1-01", "tomorrow"}) {
+            assertThrows(ParseException.class, () -> parser.parse("d/" + date));
+        }
+    }
+
+    @Test
+    public void parse_invalidTime_throwsTimeParseException() {
+        for (String time : new String[]{"24:00", "09:60", "9:00", "09:00:00", "noon"}) {
+            assertThrows(ParseException.class, () -> parser.parse("t/" + time));
+        }
+    }
+
+    @Test
+    public void parse_invalidOrDuplicateRecurrence_throwsParseException() {
+        for (String input : new String[]{"r/monthly", "r/weekly r/daily", "R/once"}) {
+            assertThrows(ParseException.class, () -> parser.parse(input));
+        }
+    }
+
+    @Test
+    public void parse_eachSupportedRecurrence_isAcceptedCaseInsensitively() throws Exception {
+        assertEquals(new FilterActivityCommand(null, null, null, Recurrence.ONCE),
+                parser.parse("r/once"));
+        assertEquals(new FilterActivityCommand(null, null, null, Recurrence.WEEKLY),
+                parser.parse("r/WEEKLY"));
+        assertEquals(new FilterActivityCommand(null, null, null, Recurrence.DAILY),
+                parser.parse("r/ Daily "));
+    }
+}
