@@ -20,7 +20,7 @@ public class SelectDogCommandParserTest {
     @Test
     public void parse_validId_returnsSelectDogCommand() {
         assertParseSuccess(parser, " dog 21", new SelectDogCommand(21));
-        assertParseSuccess(parser, "   dog   0  ", new SelectDogCommand(0));
+        assertParseSuccess(parser, "   dog   1  ", new SelectDogCommand(1));
         assertParseSuccess(parser, "dog 021", new SelectDogCommand(21));
     }
 
@@ -29,6 +29,7 @@ public class SelectDogCommandParserTest {
         assertParseFailure(parser, "   ", SelectDogCommandParser.MESSAGE_INVALID_FORMAT);
         assertParseFailure(parser, " dog", SelectDogCommandParser.MESSAGE_INVALID_FORMAT);
         assertParseFailure(parser, " Dog 21", SelectDogCommandParser.MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, " dog 0", SelectDogCommandParser.MESSAGE_INVALID_FORMAT);
         assertParseFailure(parser, " dog -1", SelectDogCommandParser.MESSAGE_INVALID_FORMAT);
         assertParseFailure(parser, " dog abc", SelectDogCommandParser.MESSAGE_INVALID_FORMAT);
         assertParseFailure(parser, " dog 21 extra", SelectDogCommandParser.MESSAGE_INVALID_FORMAT);

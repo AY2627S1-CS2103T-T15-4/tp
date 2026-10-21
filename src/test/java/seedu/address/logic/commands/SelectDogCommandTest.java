@@ -79,6 +79,20 @@ public class SelectDogCommandTest {
     }
 
     @Test
+    public void execute_unlinkedDogWithActivities_showsActivitiesAndNoOwner() throws Exception {
+        Dog buddy = model.addDog(dog("Buddy"));
+        Activity future = activity("Future walk", LocalDate.now().plusDays(1), Recurrence.ONCE);
+        Activity past = activity("Past walk", LocalDate.now().minusDays(1), Recurrence.ONCE);
+        model.enrolDogs(future.getId(), List.of(buddy.getId()));
+        model.enrolDogs(past.getId(), List.of(buddy.getId()));
+
+        assertEquals("Selected dog " + buddy.getId() + ": Buddy", execute("select dog " + buddy.getId()));
+        assertEquals(List.of(buddy.getId()), model.getFilteredDogList().stream().map(Dog::getId).toList());
+        assertEquals(List.of(), model.getFilteredCustomerList());
+        assertEquals(List.of(future.getId()), model.getFilteredActivityList().stream().map(Activity::getId).toList());
+    }
+
+    @Test
     public void execute_laterChanges_updateTheSelectedView() throws Exception {
         Customer owner = new Customer(1, "Lily Koh", "91234567", "lily@gmail.com", "98765432");
         model.addCustomer(owner);

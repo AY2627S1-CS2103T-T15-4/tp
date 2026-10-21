@@ -21,7 +21,11 @@ public class SelectDogCommandParser implements Parser<SelectDogCommand> {
             throw new ParseException(MESSAGE_INVALID_FORMAT);
         }
         try {
-            return new SelectDogCommand(Integer.parseInt(idText));
+            int dogId = Integer.parseInt(idText);
+            if (dogId < 1) {
+                throw new ParseException(MESSAGE_INVALID_FORMAT);
+            }
+            return new SelectDogCommand(dogId);
         } catch (NumberFormatException exception) {
             throw new ParseException(MESSAGE_INVALID_FORMAT, exception);
         }

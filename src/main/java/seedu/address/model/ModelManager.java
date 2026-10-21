@@ -268,6 +268,12 @@ public class ModelManager implements Model {
                 .flatMap(Dog::getOwnerId);
     }
 
+    /**
+     * Enrolment currently attaches a dog to a whole schedule, not to one occurrence date.
+     * A recurring schedule therefore stays visible while it still occurs today or later.
+     * A past one-time schedule is hidden. When enrolment stores an occurrence date, this check
+     * should keep only enrolled dates that are today or later.
+     */
     private boolean isVisibleForSelectedDog(int dogId, Activity activity) {
         boolean enrolled = addressBook.getEnrolmentList().stream().anyMatch(enrolment ->
                 enrolment.getDogId() == dogId && enrolment.getActivityId() == activity.getId());
