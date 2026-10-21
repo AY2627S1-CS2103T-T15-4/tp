@@ -12,12 +12,15 @@ import seedu.address.logic.commands.AddDogCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.DeleteCustomerCommand;
 import seedu.address.logic.commands.DeleteDogCommand;
+import seedu.address.logic.commands.EditActivityCommand;
+import seedu.address.logic.commands.EditActivityCommand.EditActivityDescriptor;
 import seedu.address.logic.commands.EditDogCommand;
 import seedu.address.logic.commands.EditDogCommand.EditDogDescriptor;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.activity.ActivityName;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
@@ -67,6 +70,15 @@ public class AddressBookParserTest {
 
         EditDogCommand command = (EditDogCommand) parser.parseCommand("editdog 1 s/Medium");
         assertEquals(new EditDogCommand(1, descriptor), command);
+    }
+
+    @Test
+    public void parseCommand_editActivity() throws Exception {
+        EditActivityDescriptor descriptor = new EditActivityDescriptor();
+        descriptor.setName(new ActivityName("Training"));
+
+        assertEquals(new EditActivityCommand(3, descriptor),
+                parser.parseCommand("editactivity 3 n/Training"));
     }
 
     @Test

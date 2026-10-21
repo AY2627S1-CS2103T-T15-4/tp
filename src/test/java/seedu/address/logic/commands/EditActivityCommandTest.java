@@ -1,6 +1,8 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.time.LocalDate;
@@ -216,5 +218,74 @@ public class EditActivityCommandTest {
         assertEquals(original, model.getActivityList().get(0));
         assertEquals(List.of(new Enrolment(1, 7), new Enrolment(2, 7)),
                 model.getAddressBook().getEnrolmentList());
+    }
+
+    @Test
+    public void execute_noFieldsOrUnknownId_rejectsWithoutChangingData() {
+        EditActivityDescriptor empty = new EditActivityDescriptor();
+        EditActivityDescriptor renamed = new EditActivityDescriptor();
+        renamed.setName(new ActivityName("Training"));
+        List<Activity> originalActivities = List.copyOf(model.getActivityList());
+
+        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_NOT_EDITED, () ->
+                new EditActivityCommand(1, empty).execute(model));
+        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_INVALID_ACTIVITY_ID, () ->
+                new EditActivityCommand(99, renamed).execute(model));
+        assertEquals(originalActivities, model.getActivityList());
+    }
+
+    @Test
+    public void execute_renameCompletedActivity_preservesScheduleCompletionAndEnrolments() throws Exception {
+        model.markActivity(1);
+        Activity original = model.getActivityList().get(0);
+        EditActivityDescriptor descriptor = new EditActivityDescriptor();
+        descriptor.setName(new ActivityName("Training"));
+
+        CommandResult result = new EditActivityCommand(1, descriptor).execute(model);
+
+        Activity edited = model.getActivityList().get(0);
+        assertEquals("Edited activity ID 1. Enrolments removed: 0.", result.getFeedbackToUser());
+        assertEquals(new ActivityName("Training"), edited.getName());
+        assertEquals(original.getStartDate(), edited.getStartDate());
+        assertEquals(original.getStartTime(), edited.getStartTime());
+        assertEquals(original.getEndTime(), edited.getEndTime());
+        assertEquals(original.getRecurrence(), edited.getRecurrence());
+        assertTrue(edited.isCompleted());
+        assertEquals(List.of(new Enrolment(1, 7), new Enrolment(2, 7)),
+                model.getAddressBook().getEnrolmentList());
+    }
+
+    @Test
+    public void constructor_defensivelyCopiesDescriptor() throws Exception {
+        EditActivityDescriptor descriptor = new EditActivityDescriptor();
+        descriptor.setName(new ActivityName("Training"));
+        EditActivityCommand command = new EditActivityCommand(1, descriptor);
+        descriptor.setName(new ActivityName("Changed later"));
+
+        command.execute(model);
+
+        assertEquals(new ActivityName("Training"), model.getActivityList().get(0).getName());
+    }
+
+    @Test
+    public void constructor_invalidArguments_rejected() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new EditActivityCommand(-1, new EditActivityDescriptor()));
+        assertThrows(NullPointerException.class, () -> new EditActivityCommand(1, null));
+    }
+
+    @Test
+    public void equals_sameFieldsAndDifferentFields() {
+        EditActivityDescriptor first = new EditActivityDescriptor();
+        first.setName(new ActivityName("Training"));
+        EditActivityDescriptor same = new EditActivityDescriptor(first);
+        EditActivityDescriptor different = new EditActivityDescriptor();
+        different.setDate(LocalDate.of(2028, 3, 1));
+
+        assertEquals(first, same);
+        assertNotEquals(first, different);
+        assertEquals(new EditActivityCommand(1, first), new EditActivityCommand(1, same));
+        assertNotEquals(new EditActivityCommand(1, first), new EditActivityCommand(2, same));
+        assertNotEquals(new EditActivityCommand(1, first), new EditActivityCommand(1, different));
     }
 }

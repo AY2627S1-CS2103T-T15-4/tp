@@ -9,10 +9,15 @@ import static seedu.address.testutil.TypicalWatchDog.ALICE;
 import static seedu.address.testutil.TypicalWatchDog.MAX;
 import static seedu.address.testutil.TypicalWatchDog.getTypicalAddressBook;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
@@ -38,6 +43,31 @@ public class AddressBookTest {
         AddressBook newData = getTypicalAddressBook();
         addressBook.resetData(newData);
         assertEquals(newData, addressBook);
+    }
+
+    @Test
+    public void setActivity_invalidIdentityOrStaleTarget_rejectsWithoutChangingActivity() {
+        Activity original = addressBook.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.WEEKLY);
+        Activity differentId = new Activity(2, original.getName(), original.getStartDate(),
+                original.getStartTime(), original.getEndTime(), original.getRecurrence());
+        Activity staleTarget = original.withName(new ActivityName("Old name"));
+        Activity renamed = original.withName(new ActivityName("Training"));
+
+        assertThrows(IllegalArgumentException.class, () -> addressBook.setActivity(original, differentId));
+        assertThrows(IllegalArgumentException.class, () -> addressBook.setActivity(staleTarget, renamed));
+        assertEquals(List.of(original), addressBook.getActivityList());
+    }
+
+    @Test
+    public void setActivity_nonexistentTarget_rejectsWithoutChangingActivity() {
+        Activity original = addressBook.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.WEEKLY);
+        Activity missing = new Activity(2, new ActivityName("Training"), LocalDate.of(2028, 3, 1),
+                LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
+
+        assertThrows(IllegalArgumentException.class, () -> addressBook.setActivity(missing, missing));
+        assertEquals(List.of(original), addressBook.getActivityList());
     }
 
     @Test

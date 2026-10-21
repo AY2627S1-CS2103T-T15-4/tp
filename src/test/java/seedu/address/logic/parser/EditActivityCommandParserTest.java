@@ -41,11 +41,37 @@ public class EditActivityCommandParserTest {
     }
 
     @Test
+    public void parse_eachOptionalField_success() throws Exception {
+        EditActivityDescriptor name = new EditActivityDescriptor();
+        name.setName(new ActivityName("Training"));
+        EditActivityDescriptor date = new EditActivityDescriptor();
+        date.setDate(LocalDate.of(2028, 3, 1));
+        EditActivityDescriptor start = new EditActivityDescriptor();
+        start.setStartTime(LocalTime.of(8, 30));
+        EditActivityDescriptor once = new EditActivityDescriptor();
+        once.setRecurrence(Recurrence.ONCE);
+        EditActivityDescriptor daily = new EditActivityDescriptor();
+        daily.setRecurrence(Recurrence.DAILY);
+
+        assertEquals(new EditActivityCommand(0, name), parser.parse(" 0 n/Training"));
+        assertEquals(new EditActivityCommand(3, date), parser.parse(" 3 date/2028-03-01"));
+        assertEquals(new EditActivityCommand(3, start), parser.parse(" 3 start/08:30"));
+        assertEquals(new EditActivityCommand(3, once), parser.parse(" 3 r/once"));
+        assertEquals(new EditActivityCommand(3, daily), parser.parse(" 3 r/daily"));
+    }
+
+    @Test
     public void parse_missingInvalidAndRepeatedFields_failure() {
         for (String input : new String[]{"", " 3", " -1 n/Training", " abc n/Training",
-            " 3 n/", " 3 date/2027-02-29", " 3 start/24:00", " 3 end/9:00",
+            " 2147483648 n/Training", " 3 n/", " 3 date/2027-02-29", " 3 date/2028/03/01",
+            " 3 start/24:00", " 3 start/8:00", " 3 end/9:00", " 3 end/25:00",
             " 3 r/Weekly", " 3 n/Training n/Walk", " 3 d/7", " 3 n/Training x/unused"}) {
             assertThrows(ParseException.class, () -> parser.parse(input));
         }
+    }
+
+    @Test
+    public void parse_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> parser.parse(null));
     }
 }
