@@ -57,6 +57,7 @@
         "implementation": "Implementation",
         "adding-dogs": "Adding dogs",
         "editing-dogs": "Editing dogs",
+        "selecting-a-dog": "Selecting a dog",
         "activity-creation-and-storage": "Activity creation and storage",
         "activity-enrolment-and-completion": "Activity enrolment and completion",
         "design-considerations": "Design considerations",
