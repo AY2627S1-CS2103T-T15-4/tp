@@ -37,6 +37,18 @@ public class FilterUnlinkedCommandTest {
         assertTrue(model.getFilteredDogList().isEmpty());
     }
 
+    @Test
+    public void equals_sameAndDifferentCategories_returnsExpectedResult() {
+        FilterUnlinkedCommand dogCommand = new FilterUnlinkedCommand(true);
+
+        assertTrue(dogCommand.equals(dogCommand));
+        assertTrue(dogCommand.equals(new FilterUnlinkedCommand(true)));
+        assertTrue(!dogCommand.equals(new FilterUnlinkedCommand(false)));
+        assertTrue(!dogCommand.equals(null));
+        assertTrue(!dogCommand.equals("command"));
+        assertEquals(new FilterUnlinkedCommand(false).hashCode(), new FilterUnlinkedCommand(false).hashCode());
+    }
+
     private ModelManager modelWithLinkedAndUnlinkedRecords() throws Exception {
         ModelManager model = new ModelManager();
         model.addCustomer(new Customer(1, "Anna", "91234567", "anna@example.com", "98765432"));
