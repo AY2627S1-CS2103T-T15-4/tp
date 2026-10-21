@@ -214,6 +214,24 @@ Examples:
   showing `Dog IDs: None` when none remain. Existing search filters stay active.
 * Changes are saved automatically and survive restarting the application.
 
+### Filtering customers: `filterc`
+
+Filters customers by one or more fields. All supplied fields must match.
+
+Format: `filterc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT]`
+
+Example: `filterc n/Anna d/12 34`
+
+* Name matching is case-insensitive, uses a substring search, and treats repeated spaces as one space.
+* Phone and backup contact numbers require exactly eight digits and use exact matching.
+* Email matching is case-insensitive and exact.
+* Dog IDs must exist. A customer must own all specified dog IDs to match.
+* The dog panel is also filtered to show only dogs owned by the matching customers.
+* Dog IDs in the success message are displayed in ascending numeric order.
+* Only lowercase `n/`, `p/`, `e/`, `d/`, and `bc/` prefixes are accepted.
+* Invalid field values display `Error in filtering customers:` followed by the applicable error message.
+* If no customers match, the customer panel is empty.
+
 ### Searching customers and dogs together: `search`
 
 Format: `search n/NAME_QUERY` or `search id/ID`

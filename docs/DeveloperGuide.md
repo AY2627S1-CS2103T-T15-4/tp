@@ -284,6 +284,19 @@ interface, implemented by `StorageManager`. Concrete lifelines are shown to make
 
 <puml src="diagrams/AddActivitySequenceDiagram.puml" alt="Parsing, executing and saving an addactivity command" />
 
+### Customer filtering
+
+`AddressBookParser` routes `filterc` to `FilterCustomerCommandParser`. The parser accepts the optional
+lowercase fields `n/`, `p/`, `e/`, `d/`, and `bc/`. Names are normalised for case-insensitive substring
+matching, while contact numbers and email addresses use exact matching. Multiple dog IDs are parsed from
+the `d/` field and are retained as a set.
+
+`FilterCustomerCommand` validates that every requested dog ID exists, then applies `CustomerFilterPredicate`
+to the filtered customer list. The predicate derives ownership from each dog's stored `ownerId`; a customer
+matches a multi-dog filter only when they own every requested dog. After customer filtering, the command derives
+the matching customer IDs and applies a second predicate to the dog list, showing only dogs owned by those
+customers. Dog IDs in the success message are sorted numerically.
+
 ### Activity enrolment and completion
 
 Dogs are linked to activities through separate `Enrolment` records. Each record stores an activity
