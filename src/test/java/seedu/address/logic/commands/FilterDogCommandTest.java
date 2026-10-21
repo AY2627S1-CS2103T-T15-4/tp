@@ -40,6 +40,17 @@ public class FilterDogCommandTest {
     }
 
     @Test
+    public void execute_withoutFields_showsAllDogsAndOwners() throws Exception {
+        ModelManager model = modelWithDogs();
+
+        CommandResult result = new FilterDogCommand(null, null, null, null).execute(model);
+
+        assertEquals("Successfully filtered dogs by ", result.getFeedbackToUser());
+        assertEquals(3, model.getFilteredDogList().size());
+        assertEquals(1, model.getFilteredCustomerList().size());
+    }
+
+    @Test
     public void execute_unownedDog_doesNotDisplayCustomers() throws Exception {
         ModelManager model = modelWithDogs();
 
