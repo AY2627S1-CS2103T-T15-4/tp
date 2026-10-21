@@ -246,6 +246,24 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 <puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog through the application layers" />
 
+### Selecting a dog
+
+`AddressBookParser` routes `select` to `SelectDogCommandParser`. The parser accepts only the
+lowercase category `dog` and a nonnegative integer ID. `SelectDogCommand` looks up that ID in the
+complete dog list. A missing dog leaves every filter unchanged.
+
+On success the command asks `ModelManager` to follow that dog id. The three filters read the current
+records whenever dogs, customers, activities, links, or enrolments change, so the columns stay current
+after later commands. The dog list shows the selected dog. The customer list shows that dog's current
+owner, or nothing when the dog is unlinked. The activity list shows current enrolments that are not
+marked completed and whose schedule still occurs today or later, using
+`Activity.nextOccurrenceOnOrAfter`. A marked activity is hidden, and unmarking it shows it again.
+Another command that sets its own filter, such as `list` or `search`, leaves this view.
+`ModelManager` keeps this filtered activity list separately from `getActivityList()`, which continues
+to expose every stored schedule.
+
+<puml src="diagrams/SelectDogSequenceDiagram.puml" alt="Selecting a dog and its related owner and activities" />
+
 ### Activity creation and storage
 
 The following partial class diagram shows the activity schedules and their integration with the model.
@@ -295,6 +313,36 @@ case-insensitive exact matching for sizes, and exact matching for IDs.
 After applying the dog predicate, it derives the owners of the matching dogs and applies a customer predicate
 for those owners. Therefore unowned matching dogs remain visible while the customer list is empty.
 
+### Customer filtering
+
+`AddressBookParser` routes `filterc` to `FilterCustomerCommandParser`. The parser accepts the optional
+lowercase fields `n/`, `p/`, `e/`, `d/`, and `bc/`. Names are normalised for case-insensitive substring
+matching, while contact numbers and email addresses use exact matching. Multiple dog IDs are parsed from
+the `d/` field and are retained as a set.
+
+`FilterCustomerCommand` validates that every requested dog ID exists, then applies `CustomerFilterPredicate`
+to the filtered customer list. The predicate derives ownership from each dog's stored `ownerId`; a customer
+matches a multi-dog filter only when they own every requested dog. After customer filtering, the command derives
+the matching customer IDs and applies a second predicate to the dog list, showing only dogs owned by those
+customers. Dog IDs in the success message are sorted numerically.
+The parser stops field values at any field-like prefix, including unsupported prefixes, so inputs such as
+`filterc n/Anna x/value` are rejected rather than treating `x/value` as part of the name. `ModelManager`
+reapplies active customer and dog predicates after customer edits, dog edits, and relationship changes so
+both filtered views remain consistent.
+### Activity filtering
+
+`AddressBookParser` routes `filtera` to `FilterActivityCommandParser`. The parser accepts at least one
+of the lowercase fields `n/`, `d/`, `t/`, and `r/`, rejects duplicate or unknown fields, and validates dates
+and times using strict `YYYY-MM-DD` and `HH:mm` formats. Recurrence is restricted to `Once`, `Weekly`,
+or `Daily`. Names are trimmed, internal whitespace is normalised, and matching is case-insensitive.
+
+`FilterActivityCommand` applies an `ActivityFilterPredicate` to the model's filtered activity list.
+Name matching uses a case-insensitive substring, date matching delegates to `Activity.occursOn(date)`
+so recurring activities are handled correctly, and time matching includes both endpoints. Multiple
+recurrence matching compares the activity's stored recurrence. Multiple fields are combined with AND semantics.
+The activity panel observes this filtered list, while the
+underlying stored schedules remain unchanged. The success message reports only the supplied fields, in the
+order name, time, date, and recurrence.
 ### Activity enrolment and completion
 
 Dogs are linked to activities through separate `Enrolment` records. Each record stores an activity

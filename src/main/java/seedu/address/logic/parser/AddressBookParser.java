@@ -18,6 +18,8 @@ import seedu.address.logic.commands.EditCustomerCommand;
 import seedu.address.logic.commands.EditDogCommand;
 import seedu.address.logic.commands.EnrolDogCommand;
 import seedu.address.logic.commands.ExitCommand;
+import seedu.address.logic.commands.FilterActivityCommand;
+import seedu.address.logic.commands.FilterCustomerCommand;
 import seedu.address.logic.commands.FilterDogCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.LinkCommand;
@@ -25,6 +27,7 @@ import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ListDogCommand;
 import seedu.address.logic.commands.MarkActivityCommand;
 import seedu.address.logic.commands.SearchCommand;
+import seedu.address.logic.commands.SelectDogCommand;
 import seedu.address.logic.commands.UnenrolDogCommand;
 import seedu.address.logic.commands.UnlinkCommand;
 import seedu.address.logic.commands.UnmarkActivityCommand;
@@ -79,13 +82,16 @@ public class AddressBookParser {
 
         return switch (commandWord) {
             case AddActivityCommand.COMMAND_WORD -> new AddActivityCommandParser().parse(arguments);
+            case FilterActivityCommand.COMMAND_WORD -> new FilterActivityCommandParser().parse(arguments);
             case AddCustomerCommand.COMMAND_WORD -> new AddCustomerCommandParser().parse(arguments);
             case AddDogCommand.COMMAND_WORD -> new AddDogCommandParser().parse(arguments);
             case EditCustomerCommand.COMMAND_WORD -> new EditCustomerCommandParser().parse(arguments);
             case EditDogCommand.COMMAND_WORD -> new EditDogCommandParser().parse(arguments);
             case FilterDogCommand.COMMAND_WORD -> new FilterDogCommandParser().parse(arguments);
+            case FilterCustomerCommand.COMMAND_WORD -> new FilterCustomerCommandParser().parse(arguments);
             case ClearCommand.COMMAND_WORD -> new ClearCommand();
             case SearchCommand.COMMAND_WORD -> new SearchCommandParser().parse(arguments);
+            case SelectDogCommand.COMMAND_WORD -> new SelectDogCommandParser().parse(arguments);
             case LinkCommand.COMMAND_WORD -> new LinkCommandParser().parse(arguments);
             case UnlinkCommand.COMMAND_WORD -> new UnlinkCommandParser().parse(arguments);
             case EnrolDogCommand.COMMAND_WORD -> new EnrolDogCommandParser().parse(arguments);
