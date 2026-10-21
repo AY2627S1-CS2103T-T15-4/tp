@@ -124,6 +124,7 @@ Example: `filtera n/Dog run t/16:00`
   `name: NAME`, `time: HH:mm`, `date: YYYY-MM-DD`, and `recurrence: Once|Weekly|Daily`. Unused fields are omitted.
   If there are no matches, the activity panel is empty.
 * Invalid input displays `Error in filtering activities:` followed by the applicable error message.
+* The filter remains active while activities are added or their state, enrolments, or details are changed.
 
 ### Adding a dog: `adddog`
 
@@ -234,6 +235,21 @@ Examples:
   showing `Dog IDs: None` when none remain. Existing search filters stay active.
 * Changes are saved automatically and survive restarting the application.
 
+### Filtering dogs: `filterd`
+
+Filters dogs by one or more fields. All supplied fields must match.
+
+Format: `filterd [n/NAME] [b/BREED] [s/SIZE] [i/ID]`
+
+Example: `filterd b/Golden Retriever s/Medium`
+
+* Name and breed matching are case-insensitive substring searches.
+* Size must be `small`, `medium`, `large`, or `giant`, ignoring letter case.
+* ID matching is exact, and the ID must belong to a dog in the database.
+* The customer panel is also filtered to customers linked to the matching dogs.
+* Unowned matching dogs remain visible, but the customer panel is empty.
+* The filter remains active while dogs or customers are added, edited, deleted, linked, or unlinked.
+
 ### Filtering customers: `filterc`
 
 Filters customers by one or more fields. All supplied fields must match.
@@ -252,6 +268,7 @@ Example: `filterc n/Anna d/12 34`
 * Invalid field values display `Error in filtering customers:` followed by the applicable error message.
 * Unsupported field prefixes are rejected as invalid command formats.
 * If no customers match, the customer panel is empty.
+* The filter remains active while customers or their linked dogs are added, edited, deleted, linked, or unlinked.
 
 ### Searching customers and dogs together: `search`
 

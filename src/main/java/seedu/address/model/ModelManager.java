@@ -37,6 +37,7 @@ public class ModelManager implements Model {
     private final FilteredList<Activity> filteredActivities;
     private Predicate<Customer> activeCustomerPredicate;
     private Predicate<Dog> activeDogPredicate;
+    private Predicate<Activity> activeActivityPredicate;
     private Integer selectedDogId;
 
     /**
@@ -93,7 +94,7 @@ public class ModelManager implements Model {
     public Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end,
             Recurrence recurrence) {
         Activity activity = addressBook.addActivity(name, date, start, end, recurrence);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
         return activity;
     }
 
@@ -101,25 +102,25 @@ public class ModelManager implements Model {
     @Override
     public void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
         addressBook.enrolDogs(activityId, dogIds);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
     }
 
     @Override
     public void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
         addressBook.unenrolDogs(activityId, dogIds);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
     }
 
     @Override
     public void markActivity(int activityId) {
         addressBook.markActivity(activityId);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
     }
 
     @Override
     public void unmarkActivity(int activityId) {
         addressBook.unmarkActivity(activityId);
-        refreshSelectedDog();
+        refreshDisplayedRecords();
     }
 
     @Override
@@ -233,6 +234,7 @@ public class ModelManager implements Model {
     public void updateFilteredActivityList(Predicate<Activity> predicate) {
         requireNonNull(predicate);
         clearDogSelection();
+        activeActivityPredicate = predicate;
         filteredActivities.setPredicate(predicate);
     }
 
@@ -266,6 +268,10 @@ public class ModelManager implements Model {
         if (activeDogPredicate != null) {
             filteredDogs.setPredicate(null);
             filteredDogs.setPredicate(activeDogPredicate);
+        }
+        if (activeActivityPredicate != null) {
+            filteredActivities.setPredicate(null);
+            filteredActivities.setPredicate(activeActivityPredicate);
         }
     }
 

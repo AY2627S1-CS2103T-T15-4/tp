@@ -96,6 +96,16 @@ public class FilterActivityCommandTest {
     }
 
     @Test
+    public void execute_keepsNewMatchingActivityAfterFilterIsActive() throws Exception {
+        ModelManager model = modelWithActivities();
+        new FilterActivityCommand("run", null, null).execute(model);
+        model.addActivity(new ActivityName("Evening Run"), DATE, LocalTime.of(18, 0),
+                LocalTime.of(19, 0), Recurrence.ONCE);
+
+        assertEquals(2, model.getFilteredActivityList().size());
+    }
+
+    @Test
     public void execute_nullModel_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () ->
                 new FilterActivityCommand("run", null, null).execute(null));
