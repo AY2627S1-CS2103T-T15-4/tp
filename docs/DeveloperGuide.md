@@ -246,6 +246,20 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 <puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog through the application layers" />
 
+### Selecting a dog
+
+`AddressBookParser` routes `select` to `SelectDogCommandParser`. The parser accepts only the
+lowercase category `dog` and a nonnegative integer ID. `SelectDogCommand` looks up that ID in the
+complete dog list. A missing dog leaves every filter unchanged.
+
+On success the command updates three observable filters and does not change stored records. The dog
+list shows the selected dog. The customer list shows that dog's owner, or nothing when the dog is
+unlinked. The activity list shows enrolments whose schedule still occurs today or later, using
+`Activity.nextOccurrenceOnOrAfter`. `ModelManager` keeps this filtered activity list separately from
+`getActivityList()`, which continues to expose every stored schedule.
+
+<puml src="diagrams/SelectDogSequenceDiagram.puml" alt="Selecting a dog and its related owner and activities" />
+
 ### Activity creation and storage
 
 The following partial class diagram shows the activity schedules and their integration with the model.
