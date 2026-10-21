@@ -47,6 +47,7 @@ public class SelectDogCommand extends Command {
         model.updateFilteredCustomerList(customer -> selectedDog.getOwnerId()
                 .filter(ownerId -> ownerId == customer.getId()).isPresent());
         model.updateFilteredActivityList(activity -> activityIds.contains(activity.getId())
+                && !activity.isCompleted()
                 && activity.nextOccurrenceOnOrAfter(today).isPresent());
         return new CommandResult(String.format(MESSAGE_SUCCESS, selectedDog.getId(), selectedDog.getName()));
     }

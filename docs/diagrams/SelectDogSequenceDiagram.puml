@@ -26,7 +26,7 @@ Command -> Book : getEnrolmentList()
 Book --> Command : enrolments
 Command -> Model : updateFilteredDogList(dog 21)
 Command -> Model : updateFilteredCustomerList(owner)
-Command -> Model : updateFilteredActivityList(current or future)
+Command -> Model : updateFilteredActivityList(incomplete, current or future)
 Command --> Logic : CommandResult
 Logic --> User : display result
 @enduml

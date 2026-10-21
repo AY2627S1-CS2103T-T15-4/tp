@@ -58,9 +58,12 @@ public class SelectDogCommandTest {
         assertEquals("Selected dog " + buddy.getId() + ": Buddy", execute("select dog " + buddy.getId()));
         assertEquals(List.of(buddy.getId()), model.getFilteredDogList().stream().map(Dog::getId).toList());
         assertEquals(List.of(owner), model.getFilteredCustomerList());
-        assertEquals(List.of(current.getId(), future.getId(), daily.getId(), weekly.getId()),
+        assertEquals(List.of(future.getId(), daily.getId(), weekly.getId()),
                 model.getFilteredActivityList().stream().map(Activity::getId).toList());
         assertEquals(before, model.getAddressBook());
+        model.markActivity(future.getId());
+        assertEquals(List.of(daily.getId(), weekly.getId()),
+                model.getFilteredActivityList().stream().map(Activity::getId).toList());
     }
 
     @Test

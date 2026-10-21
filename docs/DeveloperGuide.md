@@ -254,8 +254,8 @@ complete dog list. A missing dog leaves every filter unchanged.
 
 On success the command updates three observable filters and does not change stored records. The dog
 list shows the selected dog. The customer list shows that dog's owner, or nothing when the dog is
-unlinked. The activity list shows enrolments whose schedule still occurs today or later, using
-`Activity.nextOccurrenceOnOrAfter`. `ModelManager` keeps this filtered activity list separately from
+unlinked. The activity list shows enrolments that are not marked completed and whose schedule still occurs
+today or later, using `Activity.nextOccurrenceOnOrAfter`. A marked activity is hidden. `ModelManager` keeps this filtered activity list separately from
 `getActivityList()`, which continues to expose every stored schedule.
 
 <puml src="diagrams/SelectDogSequenceDiagram.puml" alt="Selecting a dog and its related owner and activities" />
