@@ -156,6 +156,16 @@ public class AddressBook implements ReadOnlyAddressBook {
         return activityView;
     }
 
+    /** Removes an existing activity and its enrolments without reusing its ID. */
+    public void removeActivity(Activity activity) {
+        requireNonNull(activity);
+        if (!activities.contains(activity)) {
+            throw new IllegalArgumentException("Activity ID " + activity.getId() + " does not exist or has changed.");
+        }
+        enrolments.removeIf(enrolment -> enrolment.getActivityId() == activity.getId());
+        activities.remove(activity);
+    }
+
     /** Returns true if a customer with the same identity as {@code customer} exists. */
     public boolean hasCustomer(Customer customer) {
         requireNonNull(customer);

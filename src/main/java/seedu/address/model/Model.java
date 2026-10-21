@@ -105,6 +105,9 @@ public interface Model {
     /** Adds an empty schedule and returns it with its persistent ID. */
     Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end, Recurrence recurrence);
 
+    /** Deletes the given activity. The activity must exist in the address book. */
+    void deleteActivity(Activity activity);
+
     /** Returns all schedules, independently of dog/customer filters. */
     default ObservableList<Activity> getActivityList() {
         return getAddressBook().getActivityList();
