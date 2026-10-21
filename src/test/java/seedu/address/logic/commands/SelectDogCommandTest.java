@@ -79,6 +79,36 @@ public class SelectDogCommandTest {
     }
 
     @Test
+    public void execute_laterChanges_updateTheSelectedView() throws Exception {
+        Customer owner = new Customer(1, "Lily Koh", "91234567", "lily@gmail.com", "98765432");
+        model.addCustomer(owner);
+        Dog buddy = model.addDog(dog("Buddy"));
+        execute("select dog " + buddy.getId());
+
+        model.linkDogs(owner.getId(), List.of(buddy.getId()));
+        assertEquals(List.of(owner.getId()), model.getFilteredCustomerList().stream().map(Customer::getId).toList());
+
+        Activity walk = activity("Future walk", LocalDate.now().plusDays(1), Recurrence.ONCE);
+        model.enrolDogs(walk.getId(), List.of(buddy.getId()));
+        assertEquals(List.of(walk.getId()), model.getFilteredActivityList().stream().map(Activity::getId).toList());
+
+        Dog stored = model.getDogList().stream().filter(dog -> dog.getId() == buddy.getId()).findFirst().orElseThrow();
+        model.setDog(stored, new Dog(stored.getId(), new DogName("Biscuit"), stored.getBreed(), stored.getSize(),
+                stored.getOwnerId().orElse(null)));
+        assertEquals("Biscuit", model.getFilteredDogList().get(0).getName().fullName);
+
+        Customer editedOwner = new Customer(owner.getId(), "Lily Koh", "80000000", "lily@gmail.com", "98765432");
+        model.setCustomer(owner, editedOwner);
+        assertEquals("80000000", model.getFilteredCustomerList().get(0).getPhone().value);
+
+        model.unenrolDogs(walk.getId(), List.of(buddy.getId()));
+        assertEquals(List.of(), model.getFilteredActivityList());
+        model.unlinkDogs(List.of(buddy.getId()));
+        assertEquals(List.of(), model.getFilteredCustomerList());
+        assertEquals(List.of(buddy.getId()), model.getFilteredDogList().stream().map(Dog::getId).toList());
+    }
+
+    @Test
     public void execute_missingId_leavesFiltersUnchanged() throws Exception {
         Dog buddy = model.addDog(dog("Buddy"));
         execute("select dog " + buddy.getId());

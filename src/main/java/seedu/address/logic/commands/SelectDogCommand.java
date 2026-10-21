@@ -2,14 +2,9 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import java.time.LocalDate;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
-import seedu.address.model.activity.Enrolment;
 import seedu.address.model.dog.Dog;
 
 /** Shows one dog, its owner, and that dog's current and future activities. */
@@ -37,18 +32,7 @@ public class SelectDogCommand extends Command {
                 .findFirst()
                 .orElseThrow(() -> new CommandException(MESSAGE_INVALID_ID));
 
-        LocalDate today = LocalDate.now();
-        Set<Integer> activityIds = model.getAddressBook().getEnrolmentList().stream()
-                .filter(enrolment -> enrolment.getDogId() == selectedDog.getId())
-                .map(Enrolment::getActivityId)
-                .collect(Collectors.toSet());
-
-        model.updateFilteredDogList(dog -> dog.getId() == selectedDog.getId());
-        model.updateFilteredCustomerList(customer -> selectedDog.getOwnerId()
-                .filter(ownerId -> ownerId == customer.getId()).isPresent());
-        model.updateFilteredActivityList(activity -> activityIds.contains(activity.getId())
-                && !activity.isCompleted()
-                && activity.nextOccurrenceOnOrAfter(today).isPresent());
+        model.selectDog(selectedDog.getId());
         return new CommandResult(String.format(MESSAGE_SUCCESS, selectedDog.getId(), selectedDog.getName()));
     }
 

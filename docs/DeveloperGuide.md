@@ -252,11 +252,15 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 lowercase category `dog` and a nonnegative integer ID. `SelectDogCommand` looks up that ID in the
 complete dog list. A missing dog leaves every filter unchanged.
 
-On success the command updates three observable filters and does not change stored records. The dog
-list shows the selected dog. The customer list shows that dog's owner, or nothing when the dog is
-unlinked. The activity list shows enrolments that are not marked completed and whose schedule still occurs
-today or later, using `Activity.nextOccurrenceOnOrAfter`. A marked activity is hidden. `ModelManager` keeps this filtered activity list separately from
-`getActivityList()`, which continues to expose every stored schedule.
+On success the command asks `ModelManager` to follow that dog id. The three filters read the current
+records whenever dogs, customers, activities, links, or enrolments change, so the columns stay current
+after later commands. The dog list shows the selected dog. The customer list shows that dog's current
+owner, or nothing when the dog is unlinked. The activity list shows current enrolments that are not
+marked completed and whose schedule still occurs today or later, using
+`Activity.nextOccurrenceOnOrAfter`. A marked activity is hidden, and unmarking it shows it again.
+Another command that sets its own filter, such as `list` or `search`, leaves this view.
+`ModelManager` keeps this filtered activity list separately from `getActivityList()`, which continues
+to expose every stored schedule.
 
 <puml src="diagrams/SelectDogSequenceDiagram.puml" alt="Selecting a dog and its related owner and activities" />
 

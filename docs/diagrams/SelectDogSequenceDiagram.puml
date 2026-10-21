@@ -20,13 +20,10 @@ Router --> Logic : command
 Logic -> Command : execute(Model)
 Command -> Model : getDogList()
 Model --> Command : dogs
-Command -> Model : getAddressBook()
-Model --> Command : address book
-Command -> Book : getEnrolmentList()
-Book --> Command : enrolments
-Command -> Model : updateFilteredDogList(dog 21)
-Command -> Model : updateFilteredCustomerList(owner)
-Command -> Model : updateFilteredActivityList(incomplete, current or future)
+Command -> Model : selectDog(21)
+Model -> Book : read current dog, owner and enrolments
+Book --> Model : current records
+Model -> Model : filter dog, owner and incomplete activities
 Command --> Logic : CommandResult
 Logic --> User : display result
 @enduml

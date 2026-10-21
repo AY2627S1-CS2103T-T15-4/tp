@@ -118,6 +118,12 @@ public interface Model {
     /** Updates the activity filter; the predicate must not be null. */
     void updateFilteredActivityList(Predicate<Activity> predicate);
 
+    /**
+     * Shows this dog, its current owner, and its current incomplete activities.
+     * Later changes to those records update the same three lists.
+     */
+    void selectDog(int dogId);
+
     /** Adds a dog and returns the dog with its assigned persistent ID. */
     Dog addDog(Dog dog);
 
