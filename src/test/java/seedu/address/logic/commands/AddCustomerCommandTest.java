@@ -147,6 +147,12 @@ public class AddCustomerCommandTest {
         @Override public void updateFilteredCustomerList(Predicate<Customer> predicate) {
             throw unused();
         }
+        @Override public ObservableList<Activity> getFilteredActivityList() {
+            throw unused();
+        }
+        @Override public void updateFilteredActivityList(Predicate<Activity> predicate) {
+            throw unused();
+        }
         @Override public Dog addDog(Dog dog) {
             throw unused();
         }

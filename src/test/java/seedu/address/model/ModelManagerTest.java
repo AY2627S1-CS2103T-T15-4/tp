@@ -7,9 +7,14 @@ import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalWatchDog.ALICE;
 import static seedu.address.testutil.TypicalWatchDog.BOB;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
@@ -100,6 +105,8 @@ public class ModelManagerTest {
         AddressBook addressBook = new AddressBook();
         addressBook.addCustomer(new Customer(42, "Alex", "91234567", "alex@example.com", "98765432"));
         addressBook.addDogFromStorage(new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        addressBook.addActivity(new ActivityName("Walk"), LocalDate.of(2026, 10, 20),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         ModelManager first = new ModelManager(addressBook, new UserPrefs());
         ModelManager second = new ModelManager(addressBook, new UserPrefs());
 
@@ -110,6 +117,10 @@ public class ModelManagerTest {
         first.updateFilteredDogList(dog -> false);
         assertFalse(first.equals(second));
         first.updateFilteredDogList(dog -> true);
+        assertEquals(first, second);
+        first.updateFilteredActivityList(activity -> false);
+        assertFalse(first.equals(second));
+        first.updateFilteredActivityList(Model.PREDICATE_SHOW_ALL_ACTIVITIES);
         assertEquals(first, second);
     }
 }

@@ -22,6 +22,8 @@ import seedu.address.model.dog.exceptions.UnlinkException;
 public interface Model {
     Predicate<Customer> PREDICATE_SHOW_ALL_CUSTOMERS = unused -> true;
 
+    Predicate<Activity> PREDICATE_SHOW_ALL_ACTIVITIES = unused -> true;
+
     void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException;
 
     void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException;
@@ -109,6 +111,12 @@ public interface Model {
     default ObservableList<Activity> getActivityList() {
         return getAddressBook().getActivityList();
     }
+
+    /** Returns an unmodifiable observable view of filtered activities. */
+    ObservableList<Activity> getFilteredActivityList();
+
+    /** Updates the activity filter; the predicate must not be null. */
+    void updateFilteredActivityList(Predicate<Activity> predicate);
 
     /** Adds a dog and returns the dog with its assigned persistent ID. */
     Dog addDog(Dog dog);
