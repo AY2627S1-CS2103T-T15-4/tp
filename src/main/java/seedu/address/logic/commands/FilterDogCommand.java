@@ -3,8 +3,6 @@ package seedu.address.logic.commands;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -40,10 +38,10 @@ public class FilterDogCommand extends Command {
                     + "Invalid dog id. Please input a valid dog id.");
         }
         model.updateFilteredDogList(new DogFilterPredicate(name, breed, size, id));
-        Set<Integer> ownerIds = model.getFilteredDogList().stream()
-                .flatMap(dog -> dog.getOwnerId().stream())
-                .collect(Collectors.toSet());
-        model.updateFilteredCustomerList(customer -> ownerIds.contains(customer.getId()));
+        model.updateFilteredCustomerList(customer -> model.getFilteredDogList().stream()
+                .anyMatch(dog -> dog.getOwnerId()
+                        .map(ownerId -> ownerId == customer.getId())
+                        .orElse(false)));
         return new CommandResult(createSuccessMessage());
     }
 

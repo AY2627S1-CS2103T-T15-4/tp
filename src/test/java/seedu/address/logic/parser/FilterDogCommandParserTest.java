@@ -21,7 +21,7 @@ public class FilterDogCommandParserTest {
     @Test
     public void parse_invalidFields_throwsParseException() {
         String[] invalidInputs = {"", "n/Waffle n/Max", "b/Poodle b/Lab", "s/tiny", "i/-1", "i/abc",
-            "N/Waffle", "x/value", "text n/Waffle"};
+            "N/Waffle", "x/value", "n/Lala x/value", "text n/Waffle"};
 
         for (String invalidInput : invalidInputs) {
             assertThrows(ParseException.class, () -> parser.parse(invalidInput));

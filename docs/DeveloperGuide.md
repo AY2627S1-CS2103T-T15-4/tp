@@ -312,6 +312,8 @@ case-insensitive exact matching for sizes, and exact matching for IDs.
 `FilterDogCommand` rejects IDs that are not present in the database before changing either filtered list.
 After applying the dog predicate, it derives the owners of the matching dogs and applies a customer predicate
 for those owners. Therefore unowned matching dogs remain visible while the customer list is empty.
+The customer predicate evaluates the current filtered dog list, so dog additions, edits, deletions, and ownership
+changes refresh both filtered panels while the filter remains active.
 
 ### Customer filtering
 
@@ -343,6 +345,8 @@ recurrence matching compares the activity's stored recurrence. Multiple fields a
 The activity panel observes this filtered list, while the
 underlying stored schedules remain unchanged. The success message reports only the supplied fields, in the
 order name, time, date, and recurrence.
+The activity predicate is reapplied after activity additions and activity state or enrolment changes, so the
+activity display remains filtered without requiring the user to repeat the command.
 ### Activity enrolment and completion
 
 Dogs are linked to activities through separate `Enrolment` records. Each record stores an activity

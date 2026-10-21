@@ -50,6 +50,25 @@ public class FilterDogCommandTest {
     }
 
     @Test
+    public void execute_refreshesRelatedCustomersAfterDogRelationshipChange() throws Exception {
+        ModelManager model = modelWithDogs();
+        new FilterDogCommand(null, "poodle", null, null).execute(model);
+        model.unlinkDogs(List.of(2));
+
+        assertEquals(2, model.getFilteredDogList().size());
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+    }
+
+    @Test
+    public void execute_keepsNewMatchingDogAfterFilterIsActive() throws Exception {
+        ModelManager model = modelWithDogs();
+        new FilterDogCommand("waffle", null, null, null).execute(model);
+        model.addDog(new Dog(new DogName("Waffle Puppy"), new Breed("Poodle"), new Size("Small")));
+
+        assertEquals(2, model.getFilteredDogList().size());
+    }
+
+    @Test
     public void execute_unknownId_throwsCommandException() {
         ModelManager model = new ModelManager();
 

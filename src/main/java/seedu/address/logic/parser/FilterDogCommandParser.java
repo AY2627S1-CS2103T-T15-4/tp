@@ -13,7 +13,7 @@ import seedu.address.model.dog.Size;
 /** Parses arguments for the {@code filterd} command. */
 public class FilterDogCommandParser implements Parser<FilterDogCommand> {
     private static final Pattern FIELD_FORMAT = Pattern.compile(
-            "(?<prefix>n|b|s|i)/(?<value>.*?)(?=\\s+(?:n|b|s|i)/|$)");
+            "(?<prefix>n|b|s|i)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
     private static final String MESSAGE_INVALID_INFO = "Error in filtering dogs:\n"
             + "Info is in the wrong format. Input in the correct format";
 

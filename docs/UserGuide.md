@@ -124,6 +124,7 @@ Example: `filtera n/Dog run t/16:00`
   `name: NAME`, `time: HH:mm`, `date: YYYY-MM-DD`, and `recurrence: Once|Weekly|Daily`. Unused fields are omitted.
   If there are no matches, the activity panel is empty.
 * Invalid input displays `Error in filtering activities:` followed by the applicable error message.
+* The filter remains active while activities are added or their state, enrolments, or details are changed.
 
 ### Adding a dog: `adddog`
 
@@ -247,6 +248,7 @@ Example: `filterd b/Golden Retriever s/Medium`
 * ID matching is exact, and the ID must belong to a dog in the database.
 * The customer panel is also filtered to customers linked to the matching dogs.
 * Unowned matching dogs remain visible, but the customer panel is empty.
+* The filter remains active while dogs or customers are added, edited, deleted, linked, or unlinked.
 
 ### Filtering customers: `filterc`
 
@@ -266,6 +268,7 @@ Example: `filterc n/Anna d/12 34`
 * Invalid field values display `Error in filtering customers:` followed by the applicable error message.
 * Unsupported field prefixes are rejected as invalid command formats.
 * If no customers match, the customer panel is empty.
+* The filter remains active while customers or their linked dogs are added, edited, deleted, linked, or unlinked.
 
 ### Searching customers and dogs together: `search`
 
