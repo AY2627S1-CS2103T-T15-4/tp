@@ -37,11 +37,17 @@ public class FilterDogCommand extends Command {
             throw new CommandException("Error in filtering dogs:\n"
                     + "Invalid dog id. Please input a valid dog id.");
         }
-        model.updateFilteredDogList(new DogFilterPredicate(name, breed, size, id));
+        DogFilterPredicate dogPredicate = new DogFilterPredicate(name, breed, size, id);
+        model.updateFilteredDogList(dogPredicate);
         model.updateFilteredCustomerList(customer -> model.getFilteredDogList().stream()
                 .anyMatch(dog -> dog.getOwnerId()
                         .map(ownerId -> ownerId == customer.getId())
                         .orElse(false)));
+        model.updateFilteredActivityList(activity -> model.getAddressBook().getEnrolmentList().stream()
+                .filter(enrolment -> enrolment.getActivityId() == activity.getId())
+                .anyMatch(enrolment -> model.getDogList().stream()
+                        .filter(dog -> dog.getId() == enrolment.getDogId())
+                        .anyMatch(dogPredicate)));
         return new CommandResult(createSuccessMessage());
     }
 

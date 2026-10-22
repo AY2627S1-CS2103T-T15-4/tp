@@ -1,15 +1,21 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.ModelManager;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
@@ -27,6 +33,7 @@ public class FilterDogCommandTest {
                 result.getFeedbackToUser());
         assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
         assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
+        assertTrue(model.getFilteredActivityList().isEmpty());
     }
 
     @Test
@@ -37,6 +44,7 @@ public class FilterDogCommandTest {
 
         assertTrue(model.getFilteredDogList().isEmpty());
         assertTrue(model.getFilteredCustomerList().isEmpty());
+        assertTrue(model.getFilteredActivityList().isEmpty());
     }
 
     @Test
@@ -48,6 +56,7 @@ public class FilterDogCommandTest {
         assertEquals("Successfully filtered dogs by ", result.getFeedbackToUser());
         assertEquals(3, model.getFilteredDogList().size());
         assertEquals(1, model.getFilteredCustomerList().size());
+        assertTrue(model.getFilteredActivityList().isEmpty());
     }
 
     @Test
@@ -80,10 +89,58 @@ public class FilterDogCommandTest {
     }
 
     @Test
+    public void execute_filtersActivitiesToThoseWithMatchingDogsAndReplacesActivityFilter() throws Exception {
+        ModelManager model = modelWithDogs();
+        Activity matchingActivity = model.addActivity(new ActivityName("Waffle walk"), LocalDate.now(),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        Activity unrelatedActivity = model.addActivity(new ActivityName("Bow Wow training"), LocalDate.now(),
+                LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.ONCE);
+        Activity noEnrolmentActivity = model.addActivity(new ActivityName("Empty activity"), LocalDate.now(),
+                LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
+        model.enrolDogs(matchingActivity.getId(), List.of(model.getDogList().get(0).getId()));
+        model.enrolDogs(unrelatedActivity.getId(), List.of(model.getDogList().get(1).getId()));
+
+        new FilterActivityCommand("empty", null, null).execute(model);
+        new FilterDogCommand("waffle", null, null, null).execute(model);
+
+        assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
+        assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
+        assertEquals(List.of(matchingActivity), model.getFilteredActivityList());
+    }
+
+    @Test
+    public void execute_activeFilter_refreshesActivitiesAfterEnrolmentChanges() throws Exception {
+        ModelManager model = modelWithDogs();
+        Activity activity = model.addActivity(new ActivityName("Waffle walk"), LocalDate.now(),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+
+        new FilterDogCommand("waffle", null, null, null).execute(model);
+        assertTrue(model.getFilteredActivityList().isEmpty());
+
+        int waffleId = model.getDogList().get(0).getId();
+        model.enrolDogs(activity.getId(), List.of(waffleId));
+        assertEquals(List.of(activity), model.getFilteredActivityList());
+
+        model.unenrolDogs(activity.getId(), List.of(waffleId));
+        assertTrue(model.getFilteredActivityList().isEmpty());
+    }
+
+    @Test
     public void execute_unknownId_throwsCommandException() {
         ModelManager model = new ModelManager();
 
         assertThrows(CommandException.class, () -> new FilterDogCommand(null, null, null, 99).execute(model));
+    }
+
+    @Test
+    public void equals_sameFields_returnsExpected() {
+        FilterDogCommand command = new FilterDogCommand("waffle", "poodle", "small", 1);
+
+        assertTrue(command.equals(command));
+        assertTrue(command.equals(new FilterDogCommand("waffle", "poodle", "small", 1)));
+        assertFalse(command.equals(new FilterDogCommand("milo", "poodle", "small", 1)));
+        assertFalse(command.equals(null));
+        assertFalse(command.equals("not a filter command"));
     }
 
     private ModelManager modelWithDogs() throws Exception {

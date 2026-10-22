@@ -309,11 +309,15 @@ interface, implemented by `StorageManager`. Concrete lifelines are shown to make
 and nonnegative IDs. `DogFilterPredicate` performs case-insensitive substring matching for names and breeds,
 case-insensitive exact matching for sizes, and exact matching for IDs.
 
-`FilterDogCommand` rejects IDs that are not present in the database before changing either filtered list.
-After applying the dog predicate, it derives the owners of the matching dogs and applies a customer predicate
-for those owners. Therefore unowned matching dogs remain visible while the customer list is empty.
-The customer predicate evaluates the current filtered dog list, so dog additions, edits, deletions, and ownership
-changes refresh both filtered panels while the filter remains active.
+`FilterDogCommand` rejects IDs that are not present in the database before changing filtered lists. It applies
+the dog predicate, derives owners from the current matching dogs, and filters activities to schedules with at
+least one enrolled dog matching the same predicate. Thus unowned matching dogs remain visible while the customer
+list is empty, and activities with no matching enrolments are excluded. The predicates use current model data,
+so dog, customer, activity, and enrolment changes refresh the corresponding panels while the filter remains active.
+This model's `Enrolment` stores only activity and dog IDs, so filtering activities by dog cannot distinguish
+recurrence occurrences or dates; exact occurrence-specific matching requires date-aware enrolment records.
+
+<puml src="diagrams/FilterDogSequenceDiagram.puml" alt="Filtering dogs and related owners and activities" />
 
 ### Customer filtering
 

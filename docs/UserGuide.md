@@ -248,8 +248,10 @@ Example: `filterd b/Golden Retriever s/Medium`
 * Size must be `small`, `medium`, `large`, or `giant`, ignoring letter case.
 * ID matching is exact, and the ID must belong to a dog in the database.
 * The customer panel is also filtered to customers linked to the matching dogs.
+* The activity panel shows activities in which a matching dog is enrolled.
 * Unowned matching dogs remain visible, but the customer panel is empty.
 * The filter remains active while dogs or customers are added, edited, deleted, linked, or unlinked.
+  Matching activities refresh when enrolments change. Activity enrolments currently do not store occurrence dates.
 
 ### Filtering unlinked records: `filterun`
 
