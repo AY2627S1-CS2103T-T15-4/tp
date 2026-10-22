@@ -143,12 +143,43 @@ public class ModelManagerTest {
     @Test
     public void equals_differentSelectedDog_returnsFalse() {
         AddressBook addressBook = new AddressBook();
+        addressBook.addCustomer(new Customer(7, "Alex", "91234567", "alex@example.com", "98765432"));
+        addressBook.addDogFromStorage(new Dog(43, new DogName("Max"), new Breed("Poodle"), new Size("large")));
         addressBook.addDogFromStorage(new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
         ModelManager first = new ModelManager(addressBook, new UserPrefs());
         ModelManager second = new ModelManager(addressBook, new UserPrefs());
 
         first.selectDog(42);
+        second.selectDog(99);
 
         assertFalse(first.equals(second));
+
+        ModelManager sameFiltersFirst = new ModelManager();
+        ModelManager sameFiltersSecond = new ModelManager();
+        sameFiltersFirst.selectDog(2);
+        sameFiltersSecond.selectDog(3);
+        assertFalse(sameFiltersFirst.equals(sameFiltersSecond));
+        assertThrows(AssertionError.class, () -> first.selectDog(0));
+    }
+
+    @Test
+    public void equals_differentSelectedCustomer_returnsFalse() {
+        AddressBook addressBook = new AddressBook();
+        addressBook.addCustomer(new Customer(42, "Alex", "91234567", "alex@example.com", "98765432"));
+        addressBook.addCustomer(new Customer(43, "Bob", "81234567", "bob@example.com", "87654321"));
+        ModelManager first = new ModelManager(addressBook, new UserPrefs());
+        ModelManager second = new ModelManager(addressBook, new UserPrefs());
+
+        first.selectCustomer(42);
+        second.selectCustomer(43);
+
+        assertFalse(first.equals(second));
+
+        ModelManager sameFiltersFirst = new ModelManager();
+        ModelManager sameFiltersSecond = new ModelManager();
+        sameFiltersFirst.selectCustomer(2);
+        sameFiltersSecond.selectCustomer(3);
+        assertFalse(sameFiltersFirst.equals(sameFiltersSecond));
+        assertThrows(AssertionError.class, () -> first.selectCustomer(0));
     }
 }

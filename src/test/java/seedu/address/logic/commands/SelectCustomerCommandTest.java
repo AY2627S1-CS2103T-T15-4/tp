@@ -120,6 +120,7 @@ public class SelectCustomerCommandTest {
         assertNotEquals(command, null);
         assertNotEquals(command, new Object());
         assertEquals(command.toString(), new SelectCustomerCommand(21).toString());
+        assertThrows(AssertionError.class, () -> new SelectCustomerCommand(0));
     }
 
     private String execute(String input) throws Exception {

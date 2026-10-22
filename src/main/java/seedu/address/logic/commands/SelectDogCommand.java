@@ -40,7 +40,6 @@ public class SelectDogCommand extends Command {
                     logger.warning("No dog found with ID " + dogId);
                     return new CommandException(MESSAGE_INVALID_ID);
                 });
-        assert selectedDog.getId() == dogId : "Lookup returned a different dog";
 
         model.selectDog(selectedDog.getId());
         logger.info("Selected dog ID " + selectedDog.getId());

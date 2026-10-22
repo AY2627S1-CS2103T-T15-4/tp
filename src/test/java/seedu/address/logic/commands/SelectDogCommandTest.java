@@ -150,6 +150,8 @@ public class SelectDogCommandTest {
         assertNotEquals(command, new SelectDogCommand(22));
         assertNotEquals(command, null);
         assertNotEquals(command, new Object());
+        assertEquals(command.toString(), new SelectDogCommand(21).toString());
+        assertThrows(AssertionError.class, () -> new SelectDogCommand(0));
     }
 
     private String execute(String input) throws Exception {

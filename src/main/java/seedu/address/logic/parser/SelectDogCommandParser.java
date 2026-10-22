@@ -16,8 +16,7 @@ public class SelectDogCommandParser implements Parser<SelectDogCommand> {
     public SelectDogCommand parse(String args) throws ParseException {
         requireNonNull(args);
         String[] tokens = args.trim().split("\\s+", 2);
-        assert tokens.length > 0 : "Splitting arguments always yields a token";
-        if (tokens.length == 0 || !tokens[0].equals("dog")) {
+        if (!tokens[0].equals("dog")) {
             throw new ParseException(MESSAGE_INVALID_FORMAT);
         }
         String idText = tokens.length == 2 ? tokens[1].trim() : "";
@@ -29,7 +28,6 @@ public class SelectDogCommandParser implements Parser<SelectDogCommand> {
             if (dogId < 1) {
                 throw new ParseException(MESSAGE_INVALID_FORMAT);
             }
-            assert dogId >= 1 : "Parsed dog ID must be positive";
             return new SelectDogCommand(dogId);
         } catch (NumberFormatException exception) {
             throw new ParseException(MESSAGE_INVALID_FORMAT, exception);

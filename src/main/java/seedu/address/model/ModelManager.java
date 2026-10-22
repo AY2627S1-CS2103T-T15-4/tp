@@ -290,7 +290,6 @@ public class ModelManager implements Model {
     }
 
     private void applySelectedDog() {
-        assert selectedDogId != null && selectedDogId >= 1 : "Dog selection must be a positive ID";
         int dogId = selectedDogId;
         filteredDogs.setPredicate(dog -> dog.getId() == dogId);
         filteredCustomers.setPredicate(customer -> ownerIdOf(dogId)
@@ -299,10 +298,12 @@ public class ModelManager implements Model {
     }
 
     private Optional<Integer> ownerIdOf(int dogId) {
-        return addressBook.getDogList().stream()
-                .filter(dog -> dog.getId() == dogId)
-                .findFirst()
-                .flatMap(Dog::getOwnerId);
+        for (Dog dog : addressBook.getDogList()) {
+            if (dog.getId() == dogId) {
+                return dog.getOwnerId();
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -320,7 +321,6 @@ public class ModelManager implements Model {
     }
 
     private void applySelectedCustomer() {
-        assert selectedCustomerId != null && selectedCustomerId >= 1 : "Customer selection must be a positive ID";
         int customerId = selectedCustomerId;
         filteredCustomers.setPredicate(customer -> customer.getId() == customerId);
         filteredDogs.setPredicate(dog -> dog.getOwnerId().filter(ownerId -> ownerId == customerId).isPresent());

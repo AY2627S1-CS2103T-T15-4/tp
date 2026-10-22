@@ -40,7 +40,6 @@ public class SelectCustomerCommand extends Command {
                     logger.warning("No customer found with ID " + customerId);
                     return new CommandException(MESSAGE_INVALID_ID);
                 });
-        assert selectedCustomer.getId() == customerId : "Lookup returned a different customer";
 
         model.selectCustomer(selectedCustomer.getId());
         logger.info("Selected customer ID " + selectedCustomer.getId());

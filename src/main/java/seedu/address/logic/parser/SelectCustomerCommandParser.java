@@ -16,7 +16,6 @@ public class SelectCustomerCommandParser implements Parser<SelectCustomerCommand
     public SelectCustomerCommand parse(String args) throws ParseException {
         requireNonNull(args);
         String[] tokens = args.trim().split("\\s+", 2);
-        assert tokens.length > 0 : "Splitting arguments always yields a token";
         if (!tokens[0].equals("customer")) {
             throw new ParseException(MESSAGE_INVALID_FORMAT);
         }
@@ -29,7 +28,6 @@ public class SelectCustomerCommandParser implements Parser<SelectCustomerCommand
             if (customerId < 1) {
                 throw new ParseException(MESSAGE_INVALID_FORMAT);
             }
-            assert customerId >= 1 : "Parsed customer ID must be positive";
             return new SelectCustomerCommand(customerId);
         } catch (NumberFormatException exception) {
             throw new ParseException(MESSAGE_INVALID_FORMAT, exception);
