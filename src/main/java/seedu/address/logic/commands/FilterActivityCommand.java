@@ -39,8 +39,22 @@ public class FilterActivityCommand extends Command {
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
-        model.updateFilteredActivityList(new ActivityFilterPredicate(name, date, time, recurrence));
+        ActivityFilterPredicate predicate = new ActivityFilterPredicate(name, date, time, recurrence);
+        model.updateFilteredActivityList(predicate);
+        model.updateFilteredDogList(dog -> isEnrolledInMatchingActivity(model, dog.getId(), predicate));
+        model.updateFilteredCustomerList(customer -> model.getDogList().stream()
+                .filter(dog -> dog.getOwnerId().orElse(-1) == customer.getId())
+                .anyMatch(dog -> isEnrolledInMatchingActivity(model, dog.getId(), predicate)));
         return new CommandResult(createSuccessMessage());
+    }
+
+    private static boolean isEnrolledInMatchingActivity(Model model, int dogId,
+            ActivityFilterPredicate predicate) {
+        assert dogId >= 0 : "Stored dog IDs must be nonnegative.";
+        return model.getAddressBook().getEnrolmentList().stream().anyMatch(enrolment ->
+                enrolment.getDogId() == dogId && model.getActivityList().stream()
+                        .filter(activity -> activity.getId() == enrolment.getActivityId())
+                        .anyMatch(predicate));
     }
 
     private String createSuccessMessage() {
