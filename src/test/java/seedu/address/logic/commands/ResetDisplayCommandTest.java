@@ -63,6 +63,18 @@ public class ResetDisplayCommandTest {
     }
 
     @Test
+    public void execute_afterActivityFilter_keepsUpcomingViewAfterNewActivity() {
+        ModelManager model = new ModelManager();
+        Activity upcoming = addActivity(model, TODAY.plusDays(1), Recurrence.ONCE);
+        new FilterActivityCommand("not present", null, null).execute(model);
+
+        new ResetDisplayCommand(CLOCK).execute(model);
+        addActivity(model, TODAY.minusDays(1), Recurrence.ONCE);
+
+        assertEquals(List.of(upcoming), model.getFilteredActivityList());
+    }
+
+    @Test
     public void execute_nullModel_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new ResetDisplayCommand(CLOCK).execute(null));
     }

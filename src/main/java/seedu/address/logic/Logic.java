@@ -34,7 +34,7 @@ public interface Logic {
     /** Returns an unmodifiable observable view of all activities. */
     ObservableList<Activity> getActivityList();
 
-    /** Returns the activities currently shown in the UI. */
+    /** Returns an unmodifiable observable view of filtered activities. */
     ObservableList<Activity> getFilteredActivityList();
 
     /**

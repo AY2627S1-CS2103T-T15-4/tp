@@ -10,6 +10,10 @@ application {
     mainClass = 'seedu.address.Main'
 }
 
+run {
+    enableAssertions = true
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
@@ -26,8 +30,17 @@ checkstyle {
 
 test {
     useJUnitPlatform()
+    enableAssertions = true
     finalizedBy jacocoTestReport
 }
+
+tasks.register('repositoryChecks', Exec) {
+    description = 'Runs the text checks used by Linux CI.'
+    commandLine 'sh', "${rootDir}/.github/run-checks.sh"
+    onlyIf { !org.gradle.internal.os.OperatingSystem.current().isWindows() }
+}
+
+check.dependsOn tasks.named('repositoryChecks')
 
 task coverage(type: JacocoReport) {
     dependsOn test
