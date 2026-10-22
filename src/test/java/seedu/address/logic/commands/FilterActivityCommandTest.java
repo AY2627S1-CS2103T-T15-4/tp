@@ -152,6 +152,28 @@ public class FilterActivityCommandTest {
     }
 
     @Test
+    public void execute_dateFilter_showsDogOnlyForEnrolledOccurrence() throws Exception {
+        ModelManager model = new ModelManager();
+        model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
+        Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
+        model.linkDogs(0, List.of(dog.getId()));
+        var activity = model.addActivity(new ActivityName("Daily walk"), ENROL_DATE, LocalTime.NOON,
+                LocalTime.of(13, 0), Recurrence.DAILY);
+        model.enrolDogs(activity.getId(), ENROL_DATE, List.of(dog.getId()));
+
+        new FilterActivityCommand("daily", ENROL_DATE.plusDays(1), null).execute(model);
+
+        assertEquals(List.of(activity), model.getFilteredActivityList());
+        assertTrue(model.getFilteredDogList().isEmpty());
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+
+        model.enrolDogs(activity.getId(), ENROL_DATE.plusDays(1), List.of(dog.getId()));
+
+        assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
+        assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
+    }
+
+    @Test
     public void execute_dogWithMatchingAndUnrelatedEnrolments_usesOnlyMatchingActivity() throws Exception {
         ModelManager model = new ModelManager();
         model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));

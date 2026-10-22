@@ -23,6 +23,8 @@ import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
 
 public class FilterDogCommandTest {
+    private static final LocalDate ENROL_DATE = LocalDate.now().plusDays(7);
+
     @Test
     public void execute_combinedFields_filtersDogsAndLinkedCustomers() throws Exception {
         ModelManager model = modelWithDogs();
@@ -91,14 +93,14 @@ public class FilterDogCommandTest {
     @Test
     public void execute_filtersActivitiesToThoseWithMatchingDogsAndReplacesActivityFilter() throws Exception {
         ModelManager model = modelWithDogs();
-        Activity matchingActivity = model.addActivity(new ActivityName("Waffle walk"), LocalDate.now(),
+        Activity matchingActivity = model.addActivity(new ActivityName("Waffle walk"), ENROL_DATE,
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
-        Activity unrelatedActivity = model.addActivity(new ActivityName("Bow Wow training"), LocalDate.now(),
+        Activity unrelatedActivity = model.addActivity(new ActivityName("Bow Wow training"), ENROL_DATE,
                 LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.ONCE);
-        Activity noEnrolmentActivity = model.addActivity(new ActivityName("Empty activity"), LocalDate.now(),
+        Activity noEnrolmentActivity = model.addActivity(new ActivityName("Empty activity"), ENROL_DATE,
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
-        model.enrolDogs(matchingActivity.getId(), List.of(model.getDogList().get(0).getId()));
-        model.enrolDogs(unrelatedActivity.getId(), List.of(model.getDogList().get(1).getId()));
+        model.enrolDogs(matchingActivity.getId(), ENROL_DATE, List.of(model.getDogList().get(0).getId()));
+        model.enrolDogs(unrelatedActivity.getId(), ENROL_DATE, List.of(model.getDogList().get(1).getId()));
 
         new FilterActivityCommand("empty", null, null).execute(model);
         new FilterDogCommand("waffle", null, null, null).execute(model);
@@ -111,17 +113,17 @@ public class FilterDogCommandTest {
     @Test
     public void execute_activeFilter_refreshesActivitiesAfterEnrolmentChanges() throws Exception {
         ModelManager model = modelWithDogs();
-        Activity activity = model.addActivity(new ActivityName("Waffle walk"), LocalDate.now(),
+        Activity activity = model.addActivity(new ActivityName("Waffle walk"), ENROL_DATE,
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
 
         new FilterDogCommand("waffle", null, null, null).execute(model);
         assertTrue(model.getFilteredActivityList().isEmpty());
 
         int waffleId = model.getDogList().get(0).getId();
-        model.enrolDogs(activity.getId(), List.of(waffleId));
+        model.enrolDogs(activity.getId(), ENROL_DATE, List.of(waffleId));
         assertEquals(List.of(activity), model.getFilteredActivityList());
 
-        model.unenrolDogs(activity.getId(), List.of(waffleId));
+        model.unenrolDogs(activity.getId(), ENROL_DATE, List.of(waffleId));
         assertTrue(model.getFilteredActivityList().isEmpty());
     }
 

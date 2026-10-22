@@ -358,8 +358,9 @@ the dog predicate, derives owners from the current matching dogs, and filters ac
 least one enrolled dog matching the same predicate. Thus unowned matching dogs remain visible while the customer
 list is empty, and activities with no matching enrolments are excluded. The predicates use current model data,
 so dog, customer, activity, and enrolment changes refresh the corresponding panels while the filter remains active.
-This model's `Enrolment` stores only activity and dog IDs, so filtering activities by dog cannot distinguish
-recurrence occurrences or dates; exact occurrence-specific matching requires date-aware enrolment records.
+Each `Enrolment` stores its occurrence date. `filtera` with a date therefore shows only dogs enrolled on that
+specific occurrence, and shows their owners only when those dogs are visible. `filterd` shows a schedule when a
+matching dog is enrolled on a valid occurrence of that schedule.
 
 <puml src="diagrams/FilterDogSequenceDiagram.puml" alt="Filtering dogs and related owners and activities" />
 
@@ -397,7 +398,11 @@ The activity predicate is reapplied after activity additions and activity state 
 activity display remains filtered without requiring the user to repeat the command.
 The command also derives the dog panel from enrolments in matching activities and the customer panel from those
 dogs' owners. These predicates inspect current model data, so relationship changes refresh all three displays.
+When the filter contains a date, dog visibility additionally requires an enrolment on that exact occurrence date;
+the owners panel is derived from those dogs. When no date is supplied, enrolments from any occurrence may match.
 Gradle test execution enables Java assertions so internal model invariants are checked during verification.
+
+<puml src="diagrams/FilterActivitySequenceDiagram.puml" alt="Filtering activities and related dogs and owners" />
 ### Unlinked filtering
 
 `AddressBookParser` routes `filterun` to `FilterUnlinkedCommandParser`, which accepts only the lowercase

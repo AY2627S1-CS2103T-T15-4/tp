@@ -44,7 +44,8 @@ public class FilterDogCommand extends Command {
                         .map(ownerId -> ownerId == customer.getId())
                         .orElse(false)));
         model.updateFilteredActivityList(activity -> model.getAddressBook().getEnrolmentList().stream()
-                .filter(enrolment -> enrolment.getActivityId() == activity.getId())
+                .filter(enrolment -> enrolment.getActivityId() == activity.getId()
+                        && activity.occursOn(enrolment.getDate()))
                 .anyMatch(enrolment -> model.getDogList().stream()
                         .filter(dog -> dog.getId() == enrolment.getDogId())
                         .anyMatch(dogPredicate)));
