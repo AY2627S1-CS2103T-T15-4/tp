@@ -93,7 +93,6 @@ public class AddressBook implements ReadOnlyAddressBook {
     private final class ActivityList extends ModifiableObservableListBase<Activity> {
         private final List<Activity> values = new ArrayList<>();
 
-        // Kenneth used OpenAI Codex to help implement and test consistent restoration notifications.
         private void restore(List<Activity> restored, List<Enrolment> restoredEnrolments) {
             beginChange();
             try {
