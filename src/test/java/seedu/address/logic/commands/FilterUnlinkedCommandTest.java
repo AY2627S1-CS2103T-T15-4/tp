@@ -38,6 +38,37 @@ public class FilterUnlinkedCommandTest {
     }
 
     @Test
+    public void execute_filterUnlinkedDogs_refreshesAfterLinkAndUnlink() throws Exception {
+        ModelManager model = modelWithLinkedAndUnlinkedRecords();
+        Dog unlinkedDog = model.getDogList().get(1);
+
+        new FilterUnlinkedCommand(true).execute(model);
+        assertEquals(List.of(unlinkedDog), model.getFilteredDogList());
+
+        model.linkDogs(2, List.of(unlinkedDog.getId()));
+        assertTrue(model.getFilteredDogList().isEmpty());
+
+        model.unlinkDogs(List.of(unlinkedDog.getId()));
+        assertEquals(List.of(unlinkedDog), model.getFilteredDogList());
+    }
+
+    @Test
+    public void execute_filterUnlinkedCustomers_refreshesAfterLinkAndUnlink() throws Exception {
+        ModelManager model = modelWithLinkedAndUnlinkedRecords();
+        Customer unlinkedCustomer = model.getCustomerList().get(1);
+        Dog unlinkedDog = model.getDogList().get(1);
+
+        new FilterUnlinkedCommand(false).execute(model);
+        assertEquals(List.of(unlinkedCustomer), model.getFilteredCustomerList());
+
+        model.linkDogs(unlinkedCustomer.getId(), List.of(unlinkedDog.getId()));
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+
+        model.unlinkDogs(List.of(unlinkedDog.getId()));
+        assertEquals(List.of(unlinkedCustomer), model.getFilteredCustomerList());
+    }
+
+    @Test
     public void equals_sameAndDifferentCategories_returnsExpectedResult() {
         FilterUnlinkedCommand dogCommand = new FilterUnlinkedCommand(true);
 
