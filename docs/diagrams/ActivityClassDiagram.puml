@@ -9,6 +9,7 @@ show members
 
 interface Model {
   +addActivity(name, date, start, end, recurrence): Activity
+  +deleteActivity(activity: Activity): void
   +getActivityList(): ObservableList<Activity>
   +enrolDogs(activityId, dogIds)
   +unenrolDogs(activityId, dogIds)
@@ -18,6 +19,7 @@ interface Model {
 
 class ModelManager {
   +addActivity(name, date, start, end, recurrence): Activity
+  +deleteActivity(activity: Activity): void
   +enrolDogs(activityId, dogIds)
   +unenrolDogs(activityId, dogIds)
   +markActivity(activityId)
@@ -32,6 +34,7 @@ interface ReadOnlyAddressBook {
 class AddressBook {
   -nextActivityId: long
   +addActivity(name, date, start, end, recurrence): Activity
+  +removeActivity(activity: Activity): void
   +getActivityList(): ObservableList<Activity>
   +enrolDogs(activityId, dogIds)
   +unenrolDogs(activityId, dogIds)
@@ -86,6 +89,7 @@ Activity --> "1" Recurrence : recurrence
 
 note bottom of AddressBook
   Assigns IDs and exposes an unmodifiable observable list.
+  Deletion removes the activity and its enrolments without reusing the ID.
   Other customer/dog data and unrelated APIs are omitted.
 end note
 
