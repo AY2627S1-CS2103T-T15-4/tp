@@ -157,6 +157,9 @@ public class AddCustomerCommandTest {
         @Override public void selectDog(int dogId) {
             throw unused();
         }
+        @Override public void selectCustomer(int customerId) {
+            throw unused();
+        }
         @Override public Dog addDog(Dog dog) {
             throw unused();
         }

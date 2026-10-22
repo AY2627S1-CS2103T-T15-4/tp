@@ -248,8 +248,8 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 ### Selecting a dog
 
-`AddressBookParser` routes `select` to `SelectDogCommandParser`. The parser accepts only the
-lowercase category `dog` and a nonnegative integer ID. `SelectDogCommand` looks up that ID in the
+`AddressBookParser` routes `select` to `SelectCommandParser`, which accepts the lowercase categories
+`dog` and `customer` with an ID starting at 1. `SelectDogCommand` looks up that ID in the
 complete dog list. A missing dog leaves every filter unchanged.
 
 On success the command asks `ModelManager` to follow that dog id. The three filters read the current
@@ -263,6 +263,19 @@ Another command that sets its own filter, such as `list` or `search`, leaves thi
 to expose every stored schedule.
 
 <puml src="diagrams/SelectDogSequenceDiagram.puml" alt="Selecting a dog and its related owner and activities" />
+
+### Selecting a customer
+
+`SelectCustomerCommand` looks up the ID in the complete customer list. A missing customer leaves every
+filter unchanged. Selecting a customer replaces a previous dog selection, and selecting a dog replaces
+a previous customer selection.
+
+On success the dog column shows every dog currently linked to that customer. The customer column shows
+that customer. The activity column shows incomplete activities, occurring today or later, for those
+dogs. Linking another dog, or enrolling one of those dogs, updates the columns without running
+`select customer` again.
+
+<puml src="diagrams/SelectCustomerSequenceDiagram.puml" alt="Selecting a customer and their dogs and activities" />
 
 ### Activity creation and storage
 
