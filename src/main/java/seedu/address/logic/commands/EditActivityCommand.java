@@ -11,7 +11,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Logger;
 
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -31,6 +33,8 @@ public class EditActivityCommand extends Command {
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
     public static final String MESSAGE_INVALID_ACTIVITY_ID = "The activity ID provided is invalid.";
 
+    private static final Logger logger = LogsCenter.getLogger(EditActivityCommand.class);
+
     private final int activityId;
     private final EditActivityDescriptor editActivityDescriptor;
 
@@ -48,21 +52,27 @@ public class EditActivityCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         if (!editActivityDescriptor.isAnyFieldEdited()) {
+            logger.warning("No fields provided to edit activity ID " + activityId);
             throw new CommandException(MESSAGE_NOT_EDITED);
         }
 
         Activity activityToEdit = model.getActivityList().stream()
                 .filter(activity -> activity.getId() == activityId)
                 .findFirst()
-                .orElseThrow(() -> new CommandException(MESSAGE_INVALID_ACTIVITY_ID));
+                .orElseThrow(() -> {
+                    logger.warning("No activity found with ID " + activityId);
+                    return new CommandException(MESSAGE_INVALID_ACTIVITY_ID);
+                });
 
         int removedEnrolments;
         try {
             Activity editedActivity = createEditedActivity(activityToEdit, editActivityDescriptor);
             removedEnrolments = model.setActivity(activityToEdit, editedActivity);
         } catch (IllegalArgumentException e) {
+            logger.warning("Could not edit activity ID " + activityId + ": " + e.getMessage());
             throw new CommandException(e.getMessage(), e);
         }
+        logger.info("Edited activity ID " + activityId + "; enrolments removed: " + removedEnrolments);
         return new CommandResult(String.format(MESSAGE_EDIT_ACTIVITY_SUCCESS, activityId, removedEnrolments));
     }
 
