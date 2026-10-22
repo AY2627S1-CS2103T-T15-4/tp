@@ -1,5 +1,7 @@
 package seedu.address.logic.parser;
 
+import static java.util.Objects.requireNonNull;
+
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.parser.exceptions.ParseException;
 
@@ -12,6 +14,7 @@ public class SelectCommandParser implements Parser<Command> {
 
     @Override
     public Command parse(String args) throws ParseException {
+        requireNonNull(args);
         String trimmed = args.trim();
         String category = trimmed.split("\\s+", 2)[0];
         if (category.equals("dog")) {

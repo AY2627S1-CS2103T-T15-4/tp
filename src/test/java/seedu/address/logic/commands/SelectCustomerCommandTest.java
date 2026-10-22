@@ -107,6 +107,11 @@ public class SelectCustomerCommandTest {
     }
 
     @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new SelectCustomerCommand(1).execute(null));
+    }
+
+    @Test
     public void equals_sameIdOnly() {
         SelectCustomerCommand command = new SelectCustomerCommand(21);
         assertEquals(command, command);

@@ -241,6 +241,7 @@ public class ModelManager implements Model {
 
     @Override
     public void selectDog(int dogId) {
+        assert dogId >= 1 : "Dog ID must be positive";
         selectedCustomerId = null;
         selectedDogId = dogId;
         applySelectedDog();
@@ -248,6 +249,7 @@ public class ModelManager implements Model {
 
     @Override
     public void selectCustomer(int customerId) {
+        assert customerId >= 1 : "Customer ID must be positive";
         selectedDogId = null;
         selectedCustomerId = customerId;
         applySelectedCustomer();
@@ -288,6 +290,7 @@ public class ModelManager implements Model {
     }
 
     private void applySelectedDog() {
+        assert selectedDogId != null && selectedDogId >= 1 : "Dog selection must be a positive ID";
         int dogId = selectedDogId;
         filteredDogs.setPredicate(dog -> dog.getId() == dogId);
         filteredCustomers.setPredicate(customer -> ownerIdOf(dogId)
@@ -309,6 +312,7 @@ public class ModelManager implements Model {
      * should keep only enrolled dates that are today or later.
      */
     private boolean isVisibleForSelectedDog(int dogId, Activity activity) {
+        requireNonNull(activity);
         boolean enrolled = addressBook.getEnrolmentList().stream().anyMatch(enrolment ->
                 enrolment.getDogId() == dogId && enrolment.getActivityId() == activity.getId());
         return enrolled && !activity.isCompleted()
@@ -316,6 +320,7 @@ public class ModelManager implements Model {
     }
 
     private void applySelectedCustomer() {
+        assert selectedCustomerId != null && selectedCustomerId >= 1 : "Customer selection must be a positive ID";
         int customerId = selectedCustomerId;
         filteredCustomers.setPredicate(customer -> customer.getId() == customerId);
         filteredDogs.setPredicate(dog -> dog.getOwnerId().filter(ownerId -> ownerId == customerId).isPresent());

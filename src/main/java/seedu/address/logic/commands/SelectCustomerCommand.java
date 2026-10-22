@@ -2,6 +2,9 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.logging.Logger;
+
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -17,10 +20,13 @@ public class SelectCustomerCommand extends Command {
     public static final String MESSAGE_SUCCESS = "Selected customer %1$d: %2$s";
     public static final String MESSAGE_INVALID_ID = "No such customer. Input a valid customer id";
 
+    private static final Logger logger = LogsCenter.getLogger(SelectCustomerCommand.class);
+
     private final int customerId;
 
     /** Creates a command that selects the customer with the specified ID. */
     public SelectCustomerCommand(int customerId) {
+        assert customerId >= 1 : "Customer ID must be positive";
         this.customerId = customerId;
     }
 
@@ -30,9 +36,14 @@ public class SelectCustomerCommand extends Command {
         Customer selectedCustomer = model.getCustomerList().stream()
                 .filter(customer -> customer.getId() == customerId)
                 .findFirst()
-                .orElseThrow(() -> new CommandException(MESSAGE_INVALID_ID));
+                .orElseThrow(() -> {
+                    logger.warning("No customer found with ID " + customerId);
+                    return new CommandException(MESSAGE_INVALID_ID);
+                });
+        assert selectedCustomer.getId() == customerId : "Lookup returned a different customer";
 
         model.selectCustomer(selectedCustomer.getId());
+        logger.info("Selected customer ID " + selectedCustomer.getId());
         return new CommandResult(String.format(MESSAGE_SUCCESS, selectedCustomer.getId(),
                 selectedCustomer.getName()));
     }
