@@ -19,12 +19,17 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.BackupContact;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.Email;
 import seedu.address.model.customer.Name;
 import seedu.address.model.customer.Phone;
+import seedu.address.model.dog.Breed;
+import seedu.address.model.dog.Dog;
+import seedu.address.model.dog.DogName;
+import seedu.address.model.dog.Size;
 
 public class ActivityIntegrationTest {
     private static final ActivityName NAME = new ActivityName("Walk");
@@ -131,6 +136,38 @@ public class ActivityIntegrationTest {
         assertNull(failure.get());
         assertEquals(source, snapshot.get());
         assertEquals(2, snapshot.get().getNextActivityId());
+    }
+
+    @Test
+    public void resetData_activityAndEnrolmentListeners_observeCompleteRestoredState() throws Exception {
+        AddressBook target = new AddressBook();
+        Activity oldActivity = target.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
+        Dog oldDog = target.addDog(new Dog(new DogName("Cookie"), new Breed("Poodle"), new Size("small")));
+        target.addEnrolmentFromStorage(new Enrolment(oldActivity.getId(), oldDog.getId(), DATE));
+        AddressBook source = new AddressBook();
+        source.setNextActivityId(5);
+        Activity newActivity = source.addActivity(NAME, DATE, START, END, Recurrence.WEEKLY);
+        Dog newDog = source.addDog(new Dog(new DogName("Biscuit"), new Breed("Poodle"), new Size("small")));
+        LocalDate bookingDate = newActivity.nextOccurrenceOnOrAfter(LocalDate.now()).orElseThrow();
+        source.enrolDogs(newActivity.getId(), bookingDate, List.of(newDog.getId()));
+        source.setNextDogId(20);
+        source.setNextCustomerId(30);
+        AtomicReference<AddressBook> activitySnapshot = new AtomicReference<>();
+        AtomicReference<AddressBook> enrolmentSnapshot = new AtomicReference<>();
+        target.getActivityList().addListener((ListChangeListener<Activity>) change ->
+                activitySnapshot.set(new AddressBook(target)));
+        target.getEnrolmentList().addListener((ListChangeListener<Enrolment>) change ->
+                enrolmentSnapshot.set(new AddressBook(target)));
+
+        target.resetData(source);
+
+        assertEquals(source, activitySnapshot.get());
+        assertEquals(source, enrolmentSnapshot.get());
+        assertEquals(20, activitySnapshot.get().getNextDogId());
+        assertEquals(30, activitySnapshot.get().getNextCustomerId());
+        assertEquals(20, enrolmentSnapshot.get().getNextDogId());
+        assertEquals(30, enrolmentSnapshot.get().getNextCustomerId());
+        assertEquals(source, target);
     }
 
     @Test

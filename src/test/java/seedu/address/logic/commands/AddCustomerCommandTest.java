@@ -86,6 +86,26 @@ public class AddCustomerCommandTest {
         }
 
         @Override
+        public ObservableList<Activity> getFilteredActivityList() {
+            throw unused();
+        }
+
+        @Override
+        public void showActivitiesOnOrAfter(LocalDate date) {
+            throw unused();
+        }
+
+        @Override
+        public void deleteActivity(Activity activity) {
+            throw unused();
+        }
+
+        @Override
+        public int setActivity(Activity target, Activity editedActivity) {
+            throw unused();
+        }
+
+        @Override
         public void unlinkDogs(List<Integer> dogIds) {
             throw new AssertionError("This method should not be called.");
         }
@@ -108,6 +128,10 @@ public class AddCustomerCommandTest {
         @Override
         public void updateFilteredDogList(Predicate<Dog> predicate) {
             throw new AssertionError("This method should not be called.");
+        }
+
+        @Override public void updateFilteredActivityList(Predicate<Activity> predicate) {
+            throw unused();
         }
 
         @Override public ReadOnlyUserPrefs getUserPrefs() {
@@ -135,6 +159,12 @@ public class AddCustomerCommandTest {
             throw unused();
         }
         @Override public void updateFilteredCustomerList(Predicate<Customer> predicate) {
+            throw unused();
+        }
+        @Override public void selectDog(int dogId) {
+            throw unused();
+        }
+        @Override public void selectCustomer(int customerId) {
             throw unused();
         }
         @Override public Dog addDog(Dog dog) {

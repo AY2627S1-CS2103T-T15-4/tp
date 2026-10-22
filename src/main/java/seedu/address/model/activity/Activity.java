@@ -14,7 +14,7 @@ import seedu.address.commons.util.ToStringBuilder;
 /**
  * An immutable activity schedule with a persistent, nonnegative ID.
  * Times are local daycare times on the same date; the end must be later than the start.
- * Dogs belong to separately stored dated bookings, never to this repeating schedule.
+ * Dogs are linked through separately stored schedule enrolments, not dated bookings or fields on this schedule.
  * This class does not allocate IDs, validate booking conflicts, or access the clock.
  */
 public final class Activity {
@@ -119,7 +119,7 @@ public final class Activity {
 
     /**
      * Returns a replacement schedule retaining this ID and name.
-     * The model must validate existing booking dates and conflicts before storing the replacement.
+     * The model is responsible for applying enrolment and conflict policies before storing the replacement.
      */
     public Activity withSchedule(LocalDate newStartDate, LocalTime newStartTime,
             LocalTime newEndTime, Recurrence newRecurrence) {

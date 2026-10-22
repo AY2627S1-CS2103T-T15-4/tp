@@ -145,7 +145,7 @@ public class MainWindow extends UiPart<Stage> {
         dogListPanel = new DogListPanel(logic.getFilteredDogList());
         dogListPanelPlaceholder.getChildren().add(dogListPanel.getRoot());
 
-        activityListPanel = new ActivityListPanel(logic.getActivityList());
+        activityListPanel = new ActivityListPanel(logic.getFilteredActivityList());
         activityListPanelPlaceholder.getChildren().add(activityListPanel.getRoot());
 
         todayActivityListPanel = new TodayActivityListPanel(logic.getActivityList());

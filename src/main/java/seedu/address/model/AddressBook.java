@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.util.ToStringBuilder;
@@ -36,7 +38,7 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     private final UniqueDogList dogs = new UniqueDogList();
     private final UniqueCustomerList customers = new UniqueCustomerList();
-    private final ObservableList<Activity> activities = FXCollections.observableArrayList();
+    private final ActivityList activities = new ActivityList();
     private final ObservableList<Activity> activityView = FXCollections.unmodifiableObservableList(activities);
     private final ObservableList<Enrolment> enrolments = FXCollections.observableArrayList();
     private long nextActivityId = 1;
@@ -65,6 +67,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         requireNonNull(newData);
 
         List<Activity> restored = List.copyOf(newData.getActivityList());
+        List<Enrolment> restoredEnrolments = List.copyOf(newData.getEnrolmentList());
         long minimumId = restored.stream().mapToLong(Activity::getId).max().orElse(0) + 1;
         long nextId = newData.getNextActivityId();
         if (restored.stream().map(Activity::getId).distinct().count() != restored.size()
@@ -74,8 +77,6 @@ public class AddressBook implements ReadOnlyAddressBook {
         dogs.setDogs(newData.getDogList());
         setCustomers(newData.getCustomerList());
         nextActivityId = nextId;
-        activities.setAll(restored);
-        enrolments.setAll(newData.getEnrolmentList());
 
         int restoredNextDogId = newData.getNextDogId();
         this.nextDogId = restoredNextDogId >= 0
@@ -88,6 +89,47 @@ public class AddressBook implements ReadOnlyAddressBook {
                 ? restoredNextCustomerId
                 : customers.asUnmodifiableObservableList().stream()
                         .mapToInt(Customer::getId).max().orElse(0) + 1;
+        activities.restore(restored, restoredEnrolments);
+    }
+
+    /** Delays activity notifications until the corresponding enrolments have also been restored. */
+    private final class ActivityList extends ModifiableObservableListBase<Activity> {
+        private final List<Activity> values = new ArrayList<>();
+
+        private void restore(List<Activity> restored, List<Enrolment> restoredEnrolments) {
+            beginChange();
+            try {
+                setAll(restored);
+                enrolments.setAll(restoredEnrolments);
+            } finally {
+                endChange();
+            }
+        }
+
+        @Override
+        public Activity get(int index) {
+            return values.get(index);
+        }
+
+        @Override
+        public int size() {
+            return values.size();
+        }
+
+        @Override
+        protected void doAdd(int index, Activity activity) {
+            values.add(index, activity);
+        }
+
+        @Override
+        protected Activity doSet(int index, Activity activity) {
+            return values.set(index, activity);
+        }
+
+        @Override
+        protected Activity doRemove(int index) {
+            return values.remove(index);
+        }
     }
 
     public void setCustomers(List<Customer> customers) {
@@ -108,6 +150,69 @@ public class AddressBook implements ReadOnlyAddressBook {
         nextActivityId++;
         activities.add(activity);
         return activity;
+    }
+
+    /** Replaces a schedule after checking retained enrolments for conflicts. */
+    public int setActivity(Activity target, Activity editedActivity) {
+        requireNonNull(target);
+        requireNonNull(editedActivity);
+        if (target.getId() != editedActivity.getId()) {
+            throw new IllegalArgumentException("Edited activity must retain its ID.");
+        }
+        int index = -1;
+        for (int i = 0; i < activities.size(); i++) {
+            if (activities.get(i).getId() == target.getId()) {
+                index = i;
+                break;
+            }
+        }
+        if (index < 0 || !activities.get(index).equals(target)) {
+            throw new IllegalArgumentException("Activity to edit does not match a stored activity.");
+        }
+        boolean occurrenceDatesChanged = !target.getStartDate().equals(editedActivity.getStartDate())
+                || target.getRecurrence() != editedActivity.getRecurrence();
+        if (!occurrenceDatesChanged) {
+            validateNoActivityConflict(editedActivity);
+        }
+        int removedEnrolments = occurrenceDatesChanged
+                ? (int) enrolments.stream().filter(enrolment -> enrolment.getActivityId() == target.getId()).count()
+                : 0;
+        activities.set(index, editedActivity);
+        if (occurrenceDatesChanged) {
+            enrolments.removeIf(enrolment -> enrolment.getActivityId() == target.getId());
+        }
+        return removedEnrolments;
+    }
+
+    /** Rejects an edited schedule that would overlap another activity attended by the same dog. */
+    private void validateNoActivityConflict(Activity editedActivity) {
+        for (Enrolment editedBooking : enrolments) {
+            if (editedBooking.getActivityId() != editedActivity.getId()) {
+                continue;
+            }
+            for (Enrolment otherBooking : enrolments) {
+                if (otherBooking.getDogId() != editedBooking.getDogId()
+                        || !otherBooking.getDate().equals(editedBooking.getDate())
+                        || otherBooking.getActivityId() == editedActivity.getId()) {
+                    continue;
+                }
+                Activity otherActivity = getActivityList().stream()
+                        .filter(candidate -> candidate.getId() == otherBooking.getActivityId())
+                        .findFirst().orElseThrow();
+                if (editedActivity.occursOn(editedBooking.getDate())
+                        && otherActivity.occursOn(otherBooking.getDate())
+                        && timesOverlap(editedActivity, otherActivity)) {
+                    throw new IllegalArgumentException("Dog ID " + editedBooking.getDogId()
+                            + " has an overlapping booking in activity ID " + otherActivity.getId()
+                            + " on " + editedBooking.getDate() + ".");
+                }
+            }
+        }
+    }
+
+    private static boolean timesOverlap(Activity first, Activity second) {
+        return first.getStartTime().isBefore(second.getEndTime())
+                && second.getStartTime().isBefore(first.getEndTime());
     }
 
     /** Restores a schedule with its persisted ID; rejects duplicate identities. */
@@ -137,6 +242,16 @@ public class AddressBook implements ReadOnlyAddressBook {
     @Override
     public ObservableList<Activity> getActivityList() {
         return activityView;
+    }
+
+    /** Removes an existing activity and its enrolments without reusing its ID. */
+    public void removeActivity(Activity activity) {
+        requireNonNull(activity);
+        if (!activities.contains(activity)) {
+            throw new IllegalArgumentException("Activity ID " + activity.getId() + " does not exist or has changed.");
+        }
+        enrolments.removeIf(enrolment -> enrolment.getActivityId() == activity.getId());
+        activities.remove(activity);
     }
 
     /** Returns true if a customer with the same identity as {@code customer} exists. */

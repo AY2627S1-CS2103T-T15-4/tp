@@ -11,6 +11,8 @@ package "Parser Classes" as ParserClasses{
 Class XYZCommand
 Class EnrolDogCommand
 Class UnenrolDogCommand
+Class SelectDogCommand
+Class SelectCustomerCommand
 Class CommandResult
 Class "{abstract}\nCommand" as Command
 
@@ -36,6 +38,8 @@ ParserClasses ..> XYZCommand : <<create>>
 XYZCommand -up-|> Command
 EnrolDogCommand -up-|> Command
 UnenrolDogCommand -up-|> Command
+SelectDogCommand -up-|> Command
+SelectCustomerCommand -up-|> Command
 LogicManager .left.> Command : <<call>>
 
 LogicManager --> Model
