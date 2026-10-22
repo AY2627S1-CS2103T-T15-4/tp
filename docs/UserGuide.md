@@ -33,6 +33,8 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 
    * `list dog` : Lists all dogs.
 
+   * `resetdisplay` : Shows all customers, dogs, and activities.
+
    * `clear` : Deletes all customers, dogs, and activities.
 
    * `exit` : Exits the app.
@@ -59,8 +61,8 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Extraneous parameters for commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
-  For example, `help 123` is interpreted as `help`.
+* Extraneous parameters for some commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
+  For example, `help 123` is interpreted as `help`. `resetdisplay` rejects extra parameters.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
@@ -146,6 +148,13 @@ Shows a list of all dogs in the address book.
 Format: `list dog`
 
 If there are no dogs, WatchDog displays `There are no dogs to display.`
+
+### Resetting the display: `resetdisplay`
+
+Shows all stored customers, dogs, and activities, regardless of activity date or recurrence.
+This command changes the view only; stored records are not changed.
+
+Format: `resetdisplay`
 
 ### Editing a dog: `editdog`
 
