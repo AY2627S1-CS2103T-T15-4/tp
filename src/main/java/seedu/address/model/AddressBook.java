@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.activity.Activity;
@@ -33,7 +35,7 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     private final UniqueDogList dogs = new UniqueDogList();
     private final UniqueCustomerList customers = new UniqueCustomerList();
-    private final ObservableList<Activity> activities = FXCollections.observableArrayList();
+    private final ActivityList activities = new ActivityList();
     private final ObservableList<Activity> activityView = FXCollections.unmodifiableObservableList(activities);
     private final ObservableList<Enrolment> enrolments = FXCollections.observableArrayList();
     private long nextActivityId = 1;
@@ -62,6 +64,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         requireNonNull(newData);
 
         List<Activity> restored = List.copyOf(newData.getActivityList());
+        List<Enrolment> restoredEnrolments = List.copyOf(newData.getEnrolmentList());
         long minimumId = restored.stream().mapToLong(Activity::getId).max().orElse(0) + 1;
         long nextId = newData.getNextActivityId();
         if (restored.stream().map(Activity::getId).distinct().count() != restored.size()
@@ -71,8 +74,6 @@ public class AddressBook implements ReadOnlyAddressBook {
         dogs.setDogs(newData.getDogList());
         setCustomers(newData.getCustomerList());
         nextActivityId = nextId;
-        activities.setAll(restored);
-        enrolments.setAll(newData.getEnrolmentList());
 
         int restoredNextDogId = newData.getNextDogId();
         this.nextDogId = restoredNextDogId >= 0
@@ -85,6 +86,47 @@ public class AddressBook implements ReadOnlyAddressBook {
                 ? restoredNextCustomerId
                 : customers.asUnmodifiableObservableList().stream()
                         .mapToInt(Customer::getId).max().orElse(0) + 1;
+        activities.restore(restored, restoredEnrolments);
+    }
+
+    /** Delays activity notifications until the corresponding enrolments have also been restored. */
+    private final class ActivityList extends ModifiableObservableListBase<Activity> {
+        private final List<Activity> values = new ArrayList<>();
+
+        private void restore(List<Activity> restored, List<Enrolment> restoredEnrolments) {
+            beginChange();
+            try {
+                setAll(restored);
+                enrolments.setAll(restoredEnrolments);
+            } finally {
+                endChange();
+            }
+        }
+
+        @Override
+        public Activity get(int index) {
+            return values.get(index);
+        }
+
+        @Override
+        public int size() {
+            return values.size();
+        }
+
+        @Override
+        protected void doAdd(int index, Activity activity) {
+            values.add(index, activity);
+        }
+
+        @Override
+        protected Activity doSet(int index, Activity activity) {
+            return values.set(index, activity);
+        }
+
+        @Override
+        protected Activity doRemove(int index) {
+            return values.remove(index);
+        }
     }
 
     public void setCustomers(List<Customer> customers) {
