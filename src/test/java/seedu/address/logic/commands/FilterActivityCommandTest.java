@@ -139,8 +139,8 @@ public class FilterActivityCommandTest {
                 LocalTime.of(13, 0), Recurrence.ONCE);
         var unrelatedActivity = model.addActivity(new ActivityName("Training"), DATE, LocalTime.of(14, 0),
                 LocalTime.of(15, 0), Recurrence.ONCE);
-        model.enrolDogs(matchingActivity.getId(), List.of(dog.getId()));
         model.enrolDogs(unrelatedActivity.getId(), List.of(dog.getId()));
+        model.enrolDogs(matchingActivity.getId(), List.of(dog.getId()));
 
         new FilterActivityCommand("group", null, null).execute(model);
 
