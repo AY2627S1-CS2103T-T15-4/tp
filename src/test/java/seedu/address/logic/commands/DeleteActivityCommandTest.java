@@ -1,7 +1,9 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -83,6 +85,26 @@ public class DeleteActivityCommandTest {
     }
 
     @Test
+    public void execute_modelRejectsDeletion_reportsErrorWithoutChangingData() {
+        ModelManager rejectingModel = new ModelManager(model.getAddressBook(), new UserPrefs()) {
+            @Override
+            public void deleteActivity(Activity activity) {
+                throw new IllegalArgumentException("Activity changed before deletion.");
+            }
+        };
+        List<Activity> originalActivities = List.copyOf(rejectingModel.getActivityList());
+        List<Enrolment> originalEnrolments = List.copyOf(rejectingModel.getAddressBook().getEnrolmentList());
+
+        CommandException exception = assertThrows(CommandException.class,
+                () -> new DeleteActivityCommand(1).execute(rejectingModel));
+
+        assertEquals("Activity changed before deletion.", exception.getMessage());
+        assertTrue(exception.getCause() instanceof IllegalArgumentException);
+        assertEquals(originalActivities, rejectingModel.getActivityList());
+        assertEquals(originalEnrolments, rejectingModel.getAddressBook().getEnrolmentList());
+    }
+
+    @Test
     public void removeActivity_staleActivity_doesNotRemoveEnrolments() {
         AddressBook book = new AddressBook(model.getAddressBook());
         Activity stale = book.getActivityList().get(0).withName(new ActivityName("Old name"));
@@ -96,5 +118,17 @@ public class DeleteActivityCommandTest {
     @Test
     public void constructor_negativeId_rejected() {
         assertThrows(IllegalArgumentException.class, () -> new DeleteActivityCommand(-1));
+    }
+
+    @Test
+    public void equalsAndToString_sameAndDifferentIds() {
+        DeleteActivityCommand command = new DeleteActivityCommand(1);
+
+        assertEquals(command, command);
+        assertEquals(command, new DeleteActivityCommand(1));
+        assertNotEquals(command, new DeleteActivityCommand(2));
+        assertNotEquals(command, null);
+        assertNotEquals(command, "deleteactivity 1");
+        assertTrue(command.toString().contains("activityId=1"));
     }
 }
