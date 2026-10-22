@@ -53,6 +53,8 @@ public class ActivityEnrolmentTest {
                     LocalDate.of(2028, 2, 29), dogIds));
         }
         assertThrows(EnrolException.class, () -> addressBook.enrolDogs(99, LocalDate.of(2028, 2, 29), List.of(DOG_ID)));
+        assertThrows(EnrolException.class, () -> addressBook.enrolDogs(-1,
+                LocalDate.of(2028, 2, 29), List.of(DOG_ID)));
         assertEquals(List.of(), addressBook.getEnrolmentList());
 
         addressBook.enrolDogs(ACTIVITY_ID, LocalDate.of(2028, 2, 29), List.of(DOG_ID));
@@ -69,6 +71,8 @@ public class ActivityEnrolmentTest {
                     LocalDate.of(2028, 2, 29), dogIds));
         }
         assertThrows(EnrolException.class, () -> addressBook.unenrolDogs(99,
+                LocalDate.of(2028, 2, 29), List.of(DOG_ID)));
+        assertThrows(EnrolException.class, () -> addressBook.unenrolDogs(-1,
                 LocalDate.of(2028, 2, 29), List.of(DOG_ID)));
         assertEquals(List.of(new Enrolment(ACTIVITY_ID, DOG_ID, LocalDate.of(2028, 2, 29))),
                 addressBook.getEnrolmentList());
@@ -110,6 +114,18 @@ public class ActivityEnrolmentTest {
                 enrolmentException(ACTIVITY_ID, LocalDate.of(2028, 3, 1)).getMessage());
         assertThrows(EnrolException.class, () -> addressBook.enrolDogs(ACTIVITY_ID,
                 LocalDate.of(2027, 2, 28), List.of(DOG_ID)));
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        addressBook.addActivity(new ActivityName("Yesterday"), yesterday,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        assertEquals("Cannot enrol on " + yesterday + ": the date must be today or later. Today is "
+                        + LocalDate.now() + ".",
+                enrolmentException(2, yesterday).getMessage());
+    }
+
+    @Test
+    public void unenrolDogs_rejectsDateOutsideActivityRecurrence() {
+        assertThrows(EnrolException.class, () -> addressBook.unenrolDogs(ACTIVITY_ID,
+                LocalDate.of(2028, 3, 1), List.of(DOG_ID)));
     }
 
     @Test

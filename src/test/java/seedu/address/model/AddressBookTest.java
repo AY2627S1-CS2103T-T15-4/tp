@@ -131,6 +131,21 @@ public class AddressBookTest {
     }
 
     @Test
+    public void setActivity_withOnlyItsOwnEnrolment_allowsScheduleChange() throws Exception {
+        LocalDate date = LocalDate.of(2028, 2, 29);
+        Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
+        addressBook.addDogFromStorage(dog);
+        Activity target = addressBook.addActivity(new ActivityName("Walk"), date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        addressBook.enrolDogs(target.getId(), date, List.of(dog.getId()));
+        Activity edited = target.withSchedule(date, LocalTime.of(8, 0),
+                LocalTime.of(9, 0), target.getRecurrence());
+
+        assertEquals(0, addressBook.setActivity(target, edited));
+        assertEquals(edited, addressBook.getActivityList().get(0));
+    }
+
+    @Test
     public void setActivity_backToBackWithOtherEnrolledActivity_allowsScheduleChange() throws Exception {
         Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
         addressBook.addDogFromStorage(dog);
@@ -179,6 +194,18 @@ public class AddressBookTest {
     }
 
     @Test
+    public void addEnrolmentFromStorage_nonOccurrence_rejectsEnrolment() {
+        LocalDate date = LocalDate.of(2028, 2, 29);
+        Activity activity = addressBook.addActivity(new ActivityName("Walk"), date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        addressBook.addDogFromStorage(new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
+
+        assertThrows(IllegalArgumentException.class, () -> addressBook.addEnrolmentFromStorage(
+                new Enrolment(activity.getId(), 7, date.plusDays(1))));
+        assertTrue(addressBook.getEnrolmentList().isEmpty());
+    }
+
+    @Test
     public void addDog_assignsIncreasingIds() {
         Dog firstDog = addressBook.addDog(new Dog(new DogName("Cookie"),
                 new Breed("Golden Retriever"), new Size("Large")));
@@ -201,6 +228,11 @@ public class AddressBookTest {
 
         assertEquals(7, addressBook.getDogList().get(0).getId());
         assertEquals(8, addedDog.getId());
+    }
+
+    @Test
+    public void setNextDogId_negativeId_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> addressBook.setNextDogId(-1));
     }
 
     @Test

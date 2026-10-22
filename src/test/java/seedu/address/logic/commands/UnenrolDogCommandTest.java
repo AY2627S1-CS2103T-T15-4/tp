@@ -55,6 +55,7 @@ public class UnenrolDogCommandTest {
         assertEquals(command, command);
         assertEquals(command, new UnenrolDogCommand(1, LocalDate.of(2028, 1, 1), List.of(2, 3)));
         assertNotEquals(command, new UnenrolDogCommand(2, LocalDate.of(2028, 1, 1), List.of(2, 3)));
+        assertNotEquals(command, new UnenrolDogCommand(1, LocalDate.of(2028, 1, 2), List.of(2, 3)));
         assertNotEquals(command, new UnenrolDogCommand(1, LocalDate.of(2028, 1, 1), List.of(2)));
         assertNotEquals(command, null);
         assertNotEquals(command, "command");
@@ -62,6 +63,9 @@ public class UnenrolDogCommandTest {
                 LocalDate.of(2028, 1, 1), List.of(2)));
         assertThrows(IllegalArgumentException.class, () -> new UnenrolDogCommand(1,
                 LocalDate.of(2028, 1, 1), List.of()));
+        assertThrows(IllegalArgumentException.class, () -> new UnenrolDogCommand(1, null, List.of(2)));
+        assertThrows(IllegalArgumentException.class, () -> new UnenrolDogCommand(1,
+                LocalDate.of(2028, 1, 1), List.of(-2)));
         assertThrows(IllegalArgumentException.class, () -> new UnenrolDogCommand(1,
                 LocalDate.of(2028, 1, 1), List.of(2, 2)));
     }

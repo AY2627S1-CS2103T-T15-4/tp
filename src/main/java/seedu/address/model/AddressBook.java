@@ -199,9 +199,7 @@ public class AddressBook implements ReadOnlyAddressBook {
                 Activity otherActivity = getActivityList().stream()
                         .filter(candidate -> candidate.getId() == otherBooking.getActivityId())
                         .findFirst().orElseThrow();
-                if (editedActivity.occursOn(editedBooking.getDate())
-                        && otherActivity.occursOn(otherBooking.getDate())
-                        && timesOverlap(editedActivity, otherActivity)) {
+                if (timesOverlap(editedActivity, otherActivity)) {
                     throw new IllegalArgumentException("Dog ID " + editedBooking.getDogId()
                             + " has an overlapping booking in activity ID " + otherActivity.getId()
                             + " on " + editedBooking.getDate() + ".");
@@ -316,7 +314,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
         for (int id : dogIds) {
             validateDogExists(id);
-            validateEnrolment(new Enrolment(activityId, id, date), activity, true);
+            validateEnrolment(new Enrolment(activityId, id, date), activity);
         }
         for (int id : dogIds) {
             enrolments.add(new Enrolment(activityId, id, date));
@@ -548,7 +546,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         try {
             Activity activity = getActivity(enrolment.getActivityId());
             validateDogExists(enrolment.getDogId());
-            validateEnrolment(enrolment, activity, false);
+            validateEnrolment(enrolment, activity);
         } catch (EnrolException e) {
             logger.warning("Rejected stored enrolment (activity ID " + enrolment.getActivityId() + ", dog ID "
                     + enrolment.getDogId() + ", date " + enrolment.getDate() + "): " + e.getMessage());
@@ -595,24 +593,18 @@ public class AddressBook implements ReadOnlyAddressBook {
             return new EnrolException("Activity ID " + activity.getId() + " starts on " + activity.getStartDate()
                     + " and does not occur before that date.");
         }
-        return switch (activity.getRecurrence()) {
-            case ONCE -> new EnrolException("Activity ID " + activity.getId() + " is a one-time activity and "
-                    + "occurs only on " + activity.getStartDate() + ", not " + date + ".");
-            case DAILY -> new EnrolException("Activity ID " + activity.getId()
-                    + " recurs daily starting on " + activity.getStartDate() + ".");
-            case WEEKLY -> new EnrolException("Activity ID " + activity.getId() + " recurs weekly on "
+        if (activity.getRecurrence() == Recurrence.WEEKLY) {
+            return new EnrolException("Activity ID " + activity.getId() + " recurs weekly on "
                     + activity.getStartDate().getDayOfWeek() + ", starting " + activity.getStartDate()
                     + "; it does not occur on " + date + ".");
-        };
+        }
+        // Daily schedules occur on every date from their start date, so only one-time schedules remain here.
+        return new EnrolException("Activity ID " + activity.getId() + " is a one-time activity and "
+                + "occurs only on " + activity.getStartDate() + ", not " + date + ".");
     }
 
-    private void validateEnrolment(Enrolment enrolment, Activity activity, boolean enforceFutureDate)
-            throws EnrolException {
+    private void validateEnrolment(Enrolment enrolment, Activity activity) throws EnrolException {
         LocalDate date = enrolment.getDate();
-        if (enforceFutureDate && date.isBefore(LocalDate.now())) {
-            throw new EnrolException("Cannot enrol on " + date + ": the date must be today or later. Today is "
-                    + LocalDate.now() + ".");
-        }
         if (!activity.occursOn(date)) {
             throw occurrenceError(activity, date);
         }
@@ -621,8 +613,7 @@ public class AddressBook implements ReadOnlyAddressBook {
                     + activity.getId() + " on " + date + ".");
         }
         for (Enrolment existing : enrolments) {
-            if (existing.getDogId() != enrolment.getDogId() || !existing.getDate().equals(date)
-                    || existing.getActivityId() == activity.getId()) {
+            if (existing.getDogId() != enrolment.getDogId() || !existing.getDate().equals(date)) {
                 continue;
             }
             Activity existingActivity = getActivity(existing.getActivityId());
