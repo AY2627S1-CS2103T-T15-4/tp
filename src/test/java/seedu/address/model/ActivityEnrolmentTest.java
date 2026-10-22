@@ -47,7 +47,7 @@ public class ActivityEnrolmentTest {
 
     @Test
     public void enrolDogs_invalidRequest_rejectsWithoutChangingData() throws Exception {
-        for (List<Integer> dogIds : List.of(List.<Integer>of(), List.of(DOG_ID, DOG_ID), List.of(99),
+        for (List<Integer> dogIds : List.<List<Integer>>of(List.of(), List.of(DOG_ID, DOG_ID), List.of(99),
                 List.of(-1), Collections.singletonList(null))) {
             assertThrows(EnrolException.class, () -> addressBook.enrolDogs(ACTIVITY_ID,
                     LocalDate.of(2028, 2, 29), dogIds));
