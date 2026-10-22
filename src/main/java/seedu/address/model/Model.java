@@ -21,6 +21,7 @@ import seedu.address.model.dog.exceptions.UnlinkException;
  */
 public interface Model {
     Predicate<Customer> PREDICATE_SHOW_ALL_CUSTOMERS = unused -> true;
+    Predicate<Dog> PREDICATE_SHOW_ALL_DOGS = unused -> true;
 
     void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException;
 

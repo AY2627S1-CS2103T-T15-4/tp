@@ -23,6 +23,7 @@ import seedu.address.logic.commands.LinkCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ListDogCommand;
 import seedu.address.logic.commands.MarkActivityCommand;
+import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.SearchCommand;
 import seedu.address.logic.commands.UnenrolDogCommand;
 import seedu.address.logic.commands.UnlinkCommand;
@@ -91,6 +92,13 @@ public class AddressBookParser {
             case MarkActivityCommand.COMMAND_WORD -> new MarkActivityCommandParser().parse(arguments);
             case UnmarkActivityCommand.COMMAND_WORD -> new UnmarkActivityCommandParser().parse(arguments);
             case ListCommand.COMMAND_WORD -> new ListCommandParser().parse(arguments);
+            case ResetDisplayCommand.COMMAND_WORD -> {
+                if (!arguments.isBlank()) {
+                    throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                            ResetDisplayCommand.MESSAGE_USAGE));
+                }
+                yield new ResetDisplayCommand();
+            }
             case ExitCommand.COMMAND_WORD -> new ExitCommand();
             case HelpCommand.COMMAND_WORD -> new HelpCommand();
             default -> {
