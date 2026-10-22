@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
@@ -284,8 +285,47 @@ public class EditActivityCommandTest {
 
         assertEquals(first, same);
         assertNotEquals(first, different);
-        assertEquals(new EditActivityCommand(1, first), new EditActivityCommand(1, same));
+        EditActivityCommand command = new EditActivityCommand(1, first);
+        assertEquals(command, command);
+        assertEquals(command, new EditActivityCommand(1, same));
         assertNotEquals(new EditActivityCommand(1, first), new EditActivityCommand(2, same));
         assertNotEquals(new EditActivityCommand(1, first), new EditActivityCommand(1, different));
+        assertNotEquals(command, null);
+        assertNotEquals(command, "command");
+    }
+
+    @Test
+    public void descriptor_equalsEachFieldAndToString() {
+        EditActivityDescriptor full = new EditActivityDescriptor();
+        full.setName(new ActivityName("Training"));
+        full.setDate(LocalDate.of(2028, 3, 1));
+        full.setStartTime(LocalTime.of(8, 30));
+        full.setEndTime(LocalTime.of(9, 30));
+        full.setRecurrence(Recurrence.DAILY);
+
+        EditActivityDescriptor same = new EditActivityDescriptor(full);
+        assertEquals(full, same);
+        assertEquals(full, full);
+        assertFalse(full.equals(null));
+        assertFalse(full.equals("descriptor"));
+
+        EditActivityDescriptor differentName = new EditActivityDescriptor(full);
+        differentName.setName(new ActivityName("Walk"));
+        EditActivityDescriptor differentDate = new EditActivityDescriptor(full);
+        differentDate.setDate(LocalDate.of(2028, 3, 2));
+        EditActivityDescriptor differentStart = new EditActivityDescriptor(full);
+        differentStart.setStartTime(LocalTime.of(8, 0));
+        EditActivityDescriptor differentEnd = new EditActivityDescriptor(full);
+        differentEnd.setEndTime(LocalTime.of(10, 0));
+        EditActivityDescriptor differentRecurrence = new EditActivityDescriptor(full);
+        differentRecurrence.setRecurrence(Recurrence.WEEKLY);
+
+        assertNotEquals(full, differentName);
+        assertNotEquals(full, differentDate);
+        assertNotEquals(full, differentStart);
+        assertNotEquals(full, differentEnd);
+        assertNotEquals(full, differentRecurrence);
+        assertTrue(full.toString().contains("Training"));
+        assertTrue(new EditActivityCommand(1, full).toString().contains("activityId=1"));
     }
 }

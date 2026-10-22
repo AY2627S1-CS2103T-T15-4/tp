@@ -82,6 +82,11 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_editActivityInvalidArgs_failure() {
+        assertThrows(ParseException.class, () -> parser.parseCommand("editactivity invalid n/Training"));
+    }
+
+    @Test
     public void parseCommand_exit() throws Exception {
         assertTrue(parser.parseCommand(ExitCommand.COMMAND_WORD) instanceof ExitCommand);
         assertTrue(parser.parseCommand(ExitCommand.COMMAND_WORD + " 3") instanceof ExitCommand);
