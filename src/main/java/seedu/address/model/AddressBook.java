@@ -107,6 +107,74 @@ public class AddressBook implements ReadOnlyAddressBook {
         return activity;
     }
 
+    /** Replaces a schedule after checking retained enrolments for conflicts. */
+    public int setActivity(Activity target, Activity editedActivity) {
+        requireNonNull(target);
+        requireNonNull(editedActivity);
+        if (target.getId() != editedActivity.getId()) {
+            throw new IllegalArgumentException("Edited activity must retain its ID.");
+        }
+        int index = -1;
+        for (int i = 0; i < activities.size(); i++) {
+            if (activities.get(i).getId() == target.getId()) {
+                index = i;
+                break;
+            }
+        }
+        if (index < 0 || !activities.get(index).equals(target)) {
+            throw new IllegalArgumentException("Activity to edit does not match a stored activity.");
+        }
+        boolean occurrenceDatesChanged = !target.getStartDate().equals(editedActivity.getStartDate())
+                || target.getRecurrence() != editedActivity.getRecurrence();
+        if (!occurrenceDatesChanged) {
+            validateNoActivityConflict(editedActivity);
+        }
+        int removedEnrolments = occurrenceDatesChanged
+                ? (int) enrolments.stream().filter(enrolment -> enrolment.getActivityId() == target.getId()).count()
+                : 0;
+        activities.set(index, editedActivity);
+        if (occurrenceDatesChanged) {
+            enrolments.removeIf(enrolment -> enrolment.getActivityId() == target.getId());
+        }
+        return removedEnrolments;
+    }
+
+    /** Rejects an edited schedule that would overlap another activity attended by the same dog. */
+    private void validateNoActivityConflict(Activity editedActivity) {
+        for (Activity other : activities) {
+            if (other.getId() == editedActivity.getId()
+                    || !timesOverlap(editedActivity, other)
+                    || !occurrencesOverlap(editedActivity, other)) {
+                continue;
+            }
+            for (Enrolment enrolment : enrolments) {
+                if (enrolment.getActivityId() == editedActivity.getId()
+                        && enrolments.contains(new Enrolment(other.getId(), enrolment.getDogId()))) {
+                    throw new IllegalArgumentException("Dog ID " + enrolment.getDogId()
+                            + " has an overlapping booking in activity ID " + other.getId() + ".");
+                }
+            }
+        }
+    }
+
+    private static boolean timesOverlap(Activity first, Activity second) {
+        return first.getStartTime().isBefore(second.getEndTime())
+                && second.getStartTime().isBefore(first.getEndTime());
+    }
+
+    /** Any common date for once, daily, or weekly schedules appears within this seven-day window. */
+    private static boolean occurrencesOverlap(Activity first, Activity second) {
+        LocalDate firstPossible = first.getStartDate().isAfter(second.getStartDate())
+                ? first.getStartDate() : second.getStartDate();
+        for (int days = 0; days < 7 && LocalDate.MAX.toEpochDay() - firstPossible.toEpochDay() >= days; days++) {
+            LocalDate date = firstPossible.plusDays(days);
+            if (first.occursOn(date) && second.occursOn(date)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Restores a schedule with its persisted ID; rejects duplicate identities. */
     public void addActivityFromStorage(Activity activity) {
         requireNonNull(activity);

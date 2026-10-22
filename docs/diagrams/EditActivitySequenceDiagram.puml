@@ -1,0 +1,75 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 230
+
+actor User
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":EditActivityCommandParser" as Parser LOGIC_COLOR
+participant "command:EditActivityCommand" as Command LOGIC_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+participant ":AddressBook" as Book MODEL_COLOR
+participant ":StorageManager" as Storage STORAGE_COLOR
+
+User -> Logic : execute("editactivity 1 start/10:00")
+activate Logic
+Logic -> Router : parseCommand(commandText)
+activate Router
+Router -> Parser : parse(arguments)
+activate Parser
+Parser -> Parser : validate ID and optional fields
+Parser -> Command : new EditActivityCommand(1, descriptor)
+Parser --> Router : command
+deactivate Parser
+Router --> Logic : command
+deactivate Router
+
+Logic -> Command : execute(model)
+activate Command
+Command -> Model : getActivityList()
+activate Model
+Model --> Command : activities
+deactivate Model
+Command -> Command : find activity by persistent ID
+Command -> Command : createEditedActivity(target, descriptor)
+note right of Command
+  The replacement retains the ID, completion state,
+  and values of fields that were not edited.
+end note
+Command -> Model : setActivity(target, editedActivity)
+activate Model
+Model -> Book : setActivity(target, editedActivity)
+activate Book
+Book -> Book : verify target and matching ID
+alt start date or recurrence changed
+  Book -> Book : count enrolments for this activity
+  Book -> Book : replace activity and remove its enrolments
+else start date and recurrence unchanged
+  Book -> Book : validateNoActivityConflict(editedActivity)
+  Book -> Book : replace activity; retain enrolments
+end
+Book --> Model : removedEnrolments
+deactivate Book
+Model --> Command : removedEnrolments
+deactivate Model
+Command --> Logic : CommandResult with activity ID and removed count
+deactivate Command
+
+Logic -> Model : getAddressBook()
+activate Model
+Model --> Logic : addressBook
+deactivate Model
+Logic -> Storage : saveAddressBook(addressBook)
+activate Storage
+Storage --> Logic
+deactivate Storage
+Logic --> User : display result
+deactivate Logic
+
+legend bottom
+  Successful edit is shown. Invalid input, missing IDs,
+  booking conflicts, and storage errors are omitted.
+endlegend
+@enduml

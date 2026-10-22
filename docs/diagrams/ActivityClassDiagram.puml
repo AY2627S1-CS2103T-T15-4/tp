@@ -10,7 +10,10 @@ show members
 interface Model {
   +addActivity(name, date, start, end, recurrence): Activity
   +deleteActivity(activity: Activity): void
+  +setActivity(target, editedActivity): int
   +getActivityList(): ObservableList<Activity>
+  +getFilteredActivityList(): ObservableList<Activity>
+  +updateFilteredActivityList(predicate)
   +enrolDogs(activityId, dogIds)
   +unenrolDogs(activityId, dogIds)
   +markActivity(activityId)
@@ -20,6 +23,9 @@ interface Model {
 class ModelManager {
   +addActivity(name, date, start, end, recurrence): Activity
   +deleteActivity(activity: Activity): void
+  +setActivity(target, editedActivity): int
+  +getFilteredActivityList(): ObservableList<Activity>
+  +updateFilteredActivityList(predicate)
   +enrolDogs(activityId, dogIds)
   +unenrolDogs(activityId, dogIds)
   +markActivity(activityId)
@@ -35,6 +41,7 @@ class AddressBook {
   -nextActivityId: long
   +addActivity(name, date, start, end, recurrence): Activity
   +removeActivity(activity: Activity): void
+  +setActivity(target, editedActivity): int
   +getActivityList(): ObservableList<Activity>
   +enrolDogs(activityId, dogIds)
   +unenrolDogs(activityId, dogIds)
@@ -90,6 +97,7 @@ Activity --> "1" Recurrence : recurrence
 note bottom of AddressBook
   Assigns IDs and exposes an unmodifiable observable list.
   Deletion removes the activity and its enrolments without reusing the ID.
+  Editing replaces a schedule and returns the count of removed enrolments.
   Other customer/dog data and unrelated APIs are omitted.
 end note
 
