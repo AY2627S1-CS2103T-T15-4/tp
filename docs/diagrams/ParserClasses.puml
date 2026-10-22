@@ -16,6 +16,7 @@ Class UnenrolDogCommandParser
 Class MarkActivityCommandParser
 Class UnmarkActivityCommandParser
 Class SelectDogCommandParser
+Class SelectCustomerCommandParser
 Class CliSyntax
 Class ParserUtil
 Class ArgumentMultimap
@@ -34,6 +35,7 @@ UnenrolDogCommandParser ..> UnenrolDogCommand : <<create>>
 MarkActivityCommandParser ..> MarkActivityCommand : <<create>>
 UnmarkActivityCommandParser ..> UnmarkActivityCommand : <<create>>
 SelectDogCommandParser ..> SelectDogCommand : <<create>>
+SelectCustomerCommandParser ..> SelectCustomerCommand : <<create>>
 AddressBookParser ..> Command : <<use>>
 XYZCommandParser .up.|> Parser
 XYZCommandParser ..> ArgumentMultimap
@@ -50,7 +52,9 @@ UnenrolDogCommand -up-|> Command
 MarkActivityCommand -up-|> Command
 UnmarkActivityCommand -up-|> Command
 SelectDogCommand -up-|> Command
+SelectCustomerCommand -up-|> Command
 SelectDogCommandParser .up.|> Parser
+SelectCustomerCommandParser .up.|> Parser
 note right of EnrolDogCommandParser
   enrol a/ACTIVITY_ID d/DOG_ID1,DOG_ID2
   unenrol a/ACTIVITY_ID d/DOG_ID1,DOG_ID2

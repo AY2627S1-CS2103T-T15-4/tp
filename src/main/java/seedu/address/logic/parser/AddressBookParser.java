@@ -91,7 +91,7 @@ public class AddressBookParser {
             case FilterCustomerCommand.COMMAND_WORD -> new FilterCustomerCommandParser().parse(arguments);
             case ClearCommand.COMMAND_WORD -> new ClearCommand();
             case SearchCommand.COMMAND_WORD -> new SearchCommandParser().parse(arguments);
-            case SelectDogCommand.COMMAND_WORD -> new SelectDogCommandParser().parse(arguments);
+            case SelectDogCommand.COMMAND_WORD -> new SelectCommandParser().parse(arguments);
             case LinkCommand.COMMAND_WORD -> new LinkCommandParser().parse(arguments);
             case UnlinkCommand.COMMAND_WORD -> new UnlinkCommandParser().parse(arguments);
             case EnrolDogCommand.COMMAND_WORD -> new EnrolDogCommandParser().parse(arguments);

@@ -39,6 +39,7 @@ public class ModelManager implements Model {
     private Predicate<Dog> activeDogPredicate;
     private Predicate<Activity> activeActivityPredicate;
     private Integer selectedDogId;
+    private Integer selectedCustomerId;
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
@@ -207,7 +208,7 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredDogList(Predicate<Dog> predicate) {
         requireNonNull(predicate);
-        clearDogSelection();
+        clearSelection();
         activeDogPredicate = predicate;
         filteredDogs.setPredicate(predicate);
     }
@@ -220,7 +221,7 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredCustomerList(Predicate<Customer> predicate) {
         requireNonNull(predicate);
-        clearDogSelection();
+        clearSelection();
         activeCustomerPredicate = predicate;
         filteredCustomers.setPredicate(predicate);
     }
@@ -233,19 +234,28 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredActivityList(Predicate<Activity> predicate) {
         requireNonNull(predicate);
-        clearDogSelection();
+        clearSelection();
         activeActivityPredicate = predicate;
         filteredActivities.setPredicate(predicate);
     }
 
     @Override
     public void selectDog(int dogId) {
+        selectedCustomerId = null;
         selectedDogId = dogId;
         applySelectedDog();
     }
 
-    private void clearDogSelection() {
+    @Override
+    public void selectCustomer(int customerId) {
         selectedDogId = null;
+        selectedCustomerId = customerId;
+        applySelectedCustomer();
+    }
+
+    private void clearSelection() {
+        selectedDogId = null;
+        selectedCustomerId = null;
     }
 
     /** Reapplies the current dog selection after stored records change. */
@@ -259,6 +269,10 @@ public class ModelManager implements Model {
     private void refreshDisplayedRecords() {
         if (selectedDogId != null) {
             refreshSelectedDog();
+            return;
+        }
+        if (selectedCustomerId != null) {
+            applySelectedCustomer();
             return;
         }
         if (activeCustomerPredicate != null) {
@@ -303,6 +317,19 @@ public class ModelManager implements Model {
                 && activity.nextOccurrenceOnOrAfter(LocalDate.now()).isPresent();
     }
 
+    private void applySelectedCustomer() {
+        int customerId = selectedCustomerId;
+        filteredCustomers.setPredicate(customer -> customer.getId() == customerId);
+        filteredDogs.setPredicate(dog -> dog.getOwnerId().filter(ownerId -> ownerId == customerId).isPresent());
+        filteredActivities.setPredicate(activity -> isVisibleForSelectedCustomer(customerId, activity));
+    }
+
+    private boolean isVisibleForSelectedCustomer(int customerId, Activity activity) {
+        return addressBook.getDogList().stream()
+                .filter(dog -> dog.getOwnerId().filter(ownerId -> ownerId == customerId).isPresent())
+                .anyMatch(dog -> isVisibleForSelectedDog(dog.getId(), activity));
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other == this) {
@@ -319,7 +346,8 @@ public class ModelManager implements Model {
                 && filteredCustomers.equals(otherModelManager.filteredCustomers)
                 && filteredDogs.equals(otherModelManager.filteredDogs)
                 && filteredActivities.equals(otherModelManager.filteredActivities)
-                && Objects.equals(selectedDogId, otherModelManager.selectedDogId);
+                && Objects.equals(selectedDogId, otherModelManager.selectedDogId)
+                && Objects.equals(selectedCustomerId, otherModelManager.selectedCustomerId);
     }
 
 }
