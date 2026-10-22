@@ -21,6 +21,7 @@ import seedu.address.model.dog.exceptions.UnlinkException;
  */
 public interface Model {
     Predicate<Customer> PREDICATE_SHOW_ALL_CUSTOMERS = unused -> true;
+    Predicate<Dog> PREDICATE_SHOW_ALL_DOGS = unused -> true;
 
     Predicate<Activity> PREDICATE_SHOW_ALL_ACTIVITIES = unused -> true;
 
@@ -123,6 +124,9 @@ public interface Model {
 
     /** Updates the activity filter; the predicate must not be null. */
     void updateFilteredActivityList(Predicate<Activity> predicate);
+
+    /** Shows activities with an occurrence on or after the given date. */
+    void showActivitiesOnOrAfter(LocalDate date);
 
     /**
      * Shows this dog, its current owner, and its current incomplete activities.

@@ -96,6 +96,16 @@ public class AddCustomerCommandTest {
         }
 
         @Override
+        public ObservableList<Activity> getFilteredActivityList() {
+            throw unused();
+        }
+
+        @Override
+        public void showActivitiesOnOrAfter(LocalDate date) {
+            throw unused();
+        }
+
+        @Override
         public void deleteActivity(Activity activity) {
             throw unused();
         }
@@ -130,9 +140,6 @@ public class AddCustomerCommandTest {
             throw new AssertionError("This method should not be called.");
         }
 
-        @Override public ObservableList<Activity> getFilteredActivityList() {
-            throw unused();
-        }
         @Override public void updateFilteredActivityList(Predicate<Activity> predicate) {
             throw unused();
         }

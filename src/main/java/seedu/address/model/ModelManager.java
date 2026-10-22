@@ -109,6 +109,12 @@ public class ModelManager implements Model {
         addressBook.removeActivity(target);
     }
 
+    @Override
+    public void showActivitiesOnOrAfter(LocalDate date) {
+        requireNonNull(date);
+        updateFilteredActivityList(activity -> activity.nextOccurrenceOnOrAfter(date).isPresent());
+    }
+
     //=========== Dog Operations ============================================================================
     @Override
     public void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
