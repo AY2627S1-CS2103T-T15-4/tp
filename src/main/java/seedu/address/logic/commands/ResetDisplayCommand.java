@@ -37,6 +37,7 @@ public class ResetDisplayCommand extends Command {
         model.updateFilteredCustomerList(PREDICATE_SHOW_ALL_CUSTOMERS);
         model.updateFilteredDogList(PREDICATE_SHOW_ALL_DOGS);
         model.showActivitiesOnOrAfter(today);
+        logger.info("Reset display to show all customers, dogs, and activities from " + today);
         logger.fine(() -> String.format("resetdisplay date=%s customers=%d dogs=%d activities=%d",
                 today, model.getFilteredCustomerList().size(), model.getFilteredDogList().size(),
                 model.getFilteredActivityList().size()));
