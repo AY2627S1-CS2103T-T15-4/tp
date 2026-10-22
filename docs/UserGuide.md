@@ -138,6 +138,7 @@ Example: `filtera n/Dog run t/16:00`
 * A successful command displays `Successfully filtered activities by` followed by the supplied values, in the form
   `name: NAME`, `time: HH:mm`, `date: YYYY-MM-DD`, and `recurrence: Once|Weekly|Daily`. Unused fields are omitted.
   If there are no matches, the activity panel is empty.
+* The dog panel shows dogs enrolled in the matching activities, and the customer panel shows their owners.
 * Invalid input displays `Error in filtering activities:` followed by the applicable error message.
  * The filter remains active while activities are added or their state, enrolments, or details are changed.
 
