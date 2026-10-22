@@ -134,6 +134,7 @@
         "adding-a-customer-addcustomer": "Adding a customer: addcustomer",
         "listing-all-customers-list-customer": "Listing all customers: list customer",
         "listing-all-dogs-list-dog": "Listing all dogs: list dog",
+        "resetting-the-display-resetdisplay": "Resetting the display: resetdisplay",
         "editing-a-dog-editdog": "Editing a dog: editdog",
         "editing-a-customer-editcustomer": "Editing a customer: editcustomer",
         "linking-dogs-to-a-customer-link": "Linking dogs to a customer: link",
