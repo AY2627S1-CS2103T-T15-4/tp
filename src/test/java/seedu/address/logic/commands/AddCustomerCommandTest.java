@@ -96,6 +96,11 @@ public class AddCustomerCommandTest {
         }
 
         @Override
+        public void deleteActivity(Activity activity) {
+            throw unused();
+        }
+
+        @Override
         public int setActivity(Activity target, Activity editedActivity) {
             throw unused();
         }

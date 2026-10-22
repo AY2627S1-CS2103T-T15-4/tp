@@ -39,6 +39,24 @@ public class EnrolmentStorageTest {
     }
 
     @Test
+    public void roundTrip_deletedActivity_doesNotRestoreActivityOrEnrolment() throws Exception {
+        AddressBook source = new AddressBook();
+        Activity activity = source.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.WEEKLY);
+        source.addDogFromStorage(new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
+        source.enrolDogs(activity.getId(), List.of(7));
+        source.removeActivity(activity);
+
+        AddressBook restored = JsonUtil.fromJsonString(JsonUtil.toJsonString(new JsonSerializableAddressBook(source)),
+                JsonSerializableAddressBook.class).toModelType();
+
+        assertEquals(List.of(), restored.getActivityList());
+        assertEquals(List.of(), restored.getEnrolmentList());
+        assertEquals(source.getNextActivityId(), restored.getNextActivityId());
+        assertEquals(source.getDogList(), restored.getDogList());
+    }
+
+    @Test
     public void load_invalidOrDuplicateEnrolments_rejectsData() {
         JsonAdaptedActivity activity = new JsonAdaptedActivity(1, "Walk", "2028-02-29",
                 "09:00", "10:00", "ONCE");

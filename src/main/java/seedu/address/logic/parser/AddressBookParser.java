@@ -13,6 +13,7 @@ import seedu.address.logic.commands.AddCustomerCommand;
 import seedu.address.logic.commands.AddDogCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
+import seedu.address.logic.commands.DeleteActivityCommand;
 import seedu.address.logic.commands.DeleteCustomerCommand;
 import seedu.address.logic.commands.EditActivityCommand;
 import seedu.address.logic.commands.EditCustomerCommand;
@@ -87,6 +88,7 @@ public class AddressBookParser {
             case FilterActivityCommand.COMMAND_WORD -> new FilterActivityCommandParser().parse(arguments);
             case AddCustomerCommand.COMMAND_WORD -> new AddCustomerCommandParser().parse(arguments);
             case AddDogCommand.COMMAND_WORD -> new AddDogCommandParser().parse(arguments);
+            case DeleteActivityCommand.COMMAND_WORD -> new DeleteActivityCommandParser().parse(arguments);
             case EditActivityCommand.COMMAND_WORD -> new EditActivityCommandParser().parse(arguments);
             case EditCustomerCommand.COMMAND_WORD -> new EditCustomerCommandParser().parse(arguments);
             case EditDogCommand.COMMAND_WORD -> new EditDogCommandParser().parse(arguments);

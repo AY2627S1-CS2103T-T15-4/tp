@@ -315,6 +315,17 @@ interface, implemented by `StorageManager`. Concrete lifelines are shown to make
 
 <puml src="diagrams/AddActivitySequenceDiagram.puml" alt="Parsing, executing and saving an addactivity command" />
 
+### Deleting an activity
+
+`AddressBookParser` routes `deleteactivity` to `DeleteActivityCommandParser`, which accepts one
+nonnegative persistent ID. The command finds the matching activity in `Model.getActivityList()` and
+passes it to `Model.deleteActivity`. `ModelManager` delegates to `AddressBook.removeActivity`, which
+checks that the activity is still stored, removes its enrolments, and then removes the activity.
+The next activity ID does not change, so deleted IDs are not reused. After the command returns its
+success message, `LogicManager` saves the updated address book.
+
+<puml src="diagrams/DeleteActivitySequenceDiagram.puml" alt="Parsing, executing and saving a deleteactivity command" />
+
 ### Editing an activity
 
 `AddressBookParser` routes `editactivity` to `EditActivityCommandParser`. The parser requires a

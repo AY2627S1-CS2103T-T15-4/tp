@@ -104,6 +104,11 @@ public class ModelManager implements Model {
         return addressBook.setActivity(target, editedActivity);
     }
 
+    @Override
+    public void deleteActivity(Activity target) {
+        addressBook.removeActivity(target);
+    }
+
     //=========== Dog Operations ============================================================================
     @Override
     public void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
