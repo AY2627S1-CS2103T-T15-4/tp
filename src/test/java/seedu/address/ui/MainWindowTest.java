@@ -17,9 +17,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
+import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Ellipse;
 import javafx.stage.Stage;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
@@ -63,6 +68,8 @@ public class MainWindowTest {
         model.addDog(new Dog(new DogName("Cookie"), new Breed("Chihuahua"), new Size("Small")));
         model.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        model.addActivity(new ActivityName("Today walk"), LocalDate.now(),
+                LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
         Logic logic = new LogicManager(model, new StorageManager(
                 new JsonAddressBookStorage(folder.resolve("addressbook.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
@@ -73,10 +80,19 @@ public class MainWindowTest {
             ListView<Supplier<Region>> customers = listView(window.getCustomerListPanel());
             ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
             ListView<Supplier<Region>> activities = listView(window.getActivityListPanel());
+            StackPane todayPanelPlaceholder = (StackPane) window.getPrimaryStage().getScene()
+                    .lookup("#todayActivityListPanelPlaceholder");
+            Label todayHeader = (Label) window.getPrimaryStage().getScene().lookup("#todayActivitiesHeader");
+            @SuppressWarnings("unchecked")
+            ListView<Supplier<Region>> todaysActivities = (ListView<Supplier<Region>>) todayPanelPlaceholder
+                    .lookup("#recordListView");
             assertEquals(1, customers.getItems().size());
             assertEquals(1, dogs.getItems().size());
-            assertEquals(1, activities.getItems().size());
+            assertEquals(2, activities.getItems().size());
             assertEquals("Walk", label(activities.getItems().get(0).get(), "name"));
+            assertTrue(todayHeader.getText().startsWith("Today · "));
+            assertEquals(1, todaysActivities.getItems().size());
+            assertEquals("Today walk", label(todaysActivities.getItems().get(0).get(), "name"));
 
             window.executeCommand("list customer");
             assertEquals(1, customers.getItems().size());
@@ -93,6 +109,74 @@ public class MainWindowTest {
             window.executeCommand("list dog");
             assertEquals(1, dogs.getItems().size());
             assertEquals("Cookie", label(dogs.getItems().get(0).get(), "name"));
+        });
+    }
+
+    @Test
+    public void executeCommand_resetDisplay_restoresBothListsAndShowsUpcomingActivities() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-reset");
+        LocalDate today = LocalDate.now();
+        Model model = new ModelManager();
+        model.addCustomer(LILY);
+        model.addDog(new Dog(new DogName("Cookie"), new Breed("Chihuahua"), new Size("Small")));
+        model.addActivity(new ActivityName("Past walk"), today.minusDays(1),
+                LocalTime.of(8, 0), LocalTime.of(9, 0), Recurrence.ONCE);
+        model.addActivity(new ActivityName("Daily walk"), today.minusDays(2),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.DAILY);
+        model.addActivity(new ActivityName("Today walk"), today,
+                LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.ONCE);
+        model.addActivity(new ActivityName("Future walk"), today.plusDays(1),
+                LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
+        Logic logic = new LogicManager(model, new StorageManager(
+                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            window.fillInnerParts();
+            ListView<Supplier<Region>> customers = listView(window.getCustomerListPanel());
+            ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
+            ListView<Supplier<Region>> activities = listView(window.getActivityListPanel());
+
+            window.executeCommand("list dog");
+            assertTrue(customers.getItems().isEmpty());
+            window.executeCommand("resetdisplay");
+
+            assertEquals(1, customers.getItems().size());
+            assertEquals(1, dogs.getItems().size());
+            assertEquals(3, activities.getItems().size());
+            assertEquals("Daily walk", label(activities.getItems().get(0).get(), "name"));
+            assertEquals("Today walk", label(activities.getItems().get(1).get(), "name"));
+            assertEquals("Future walk", label(activities.getItems().get(2).get(), "name"));
+        });
+    }
+
+    @Test
+    public void fillInnerParts_resizesPawPatternAndRendersPawMarks() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-paw-pattern");
+        Logic logic = new LogicManager(new ModelManager(), new StorageManager(
+                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            window.fillInnerParts();
+            Pane pawPattern = (Pane) window.getPrimaryStage().getScene().lookup("#pawPattern");
+
+            pawPattern.resize(300, 200);
+
+            int initialPawCount = pawPattern.getChildren().size();
+            assertTrue(initialPawCount > 0);
+            Group paw = (Group) pawPattern.getChildren().get(0);
+            assertEquals(5, paw.getChildren().size());
+            assertTrue(paw.getChildren().get(0) instanceof Ellipse);
+            assertTrue(paw.getChildren().get(1) instanceof Circle);
+            assertEquals(0.20, paw.getOpacity());
+
+            pawPattern.resize(420, 200);
+
+            assertTrue(pawPattern.getChildren().size() > initialPawCount);
+            window.getPrimaryStage().close();
         });
     }
 

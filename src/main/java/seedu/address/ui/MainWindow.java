@@ -1,15 +1,24 @@
 package seedu.address.ui;
 
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Random;
 import java.util.logging.Logger;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Ellipse;
 import javafx.stage.Stage;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
@@ -25,17 +34,19 @@ import seedu.address.logic.parser.exceptions.ParseException;
 public class MainWindow extends UiPart<Stage> {
 
     private static final String FXML = "MainWindow.fxml";
+    private static final DateTimeFormatter TODAY_HEADER_FORMAT = DateTimeFormatter.ofPattern("dd MMM yyyy");
+    private static final long PAW_PATTERN_SEED = 2103L;
 
     private final Logger logger = LogsCenter.getLogger(getClass());
 
     private Stage primaryStage;
     private Logic logic;
-    private Path dataFilePath;
 
     // Independent Ui parts residing in this Ui container
     private CustomerListPanel customerListPanel;
     private DogListPanel dogListPanel;
     private ActivityListPanel activityListPanel;
+    private TodayActivityListPanel todayActivityListPanel;
     private ResultDisplay resultDisplay;
     private HelpWindow helpWindow;
 
@@ -55,10 +66,16 @@ public class MainWindow extends UiPart<Stage> {
     private StackPane activityListPanelPlaceholder;
 
     @FXML
-    private StackPane resultDisplayPlaceholder;
+    private StackPane todayActivityListPanelPlaceholder;
 
     @FXML
-    private StackPane statusbarPlaceholder;
+    private Label todayActivitiesHeader;
+
+    @FXML
+    private Pane pawPattern;
+
+    @FXML
+    private StackPane resultDisplayPlaceholder;
 
     /**
      * Creates a {@code MainWindow} with the given {@code Stage}, {@code Logic},
@@ -70,8 +87,6 @@ public class MainWindow extends UiPart<Stage> {
         // Set dependencies
         this.primaryStage = primaryStage;
         this.logic = logic;
-        this.dataFilePath = dataFilePath;
-
         // Configure the UI
         setWindowDefaultSize(logic.getGuiSettings());
 
@@ -122,6 +137,8 @@ public class MainWindow extends UiPart<Stage> {
      * Fills up all the placeholders of this window.
      */
     void fillInnerParts() {
+        addPawPattern();
+
         customerListPanel = new CustomerListPanel(logic.getFilteredCustomerList(), logic.getDogList());
         customerListPanelPlaceholder.getChildren().add(customerListPanel.getRoot());
 
@@ -131,14 +148,77 @@ public class MainWindow extends UiPart<Stage> {
         activityListPanel = new ActivityListPanel(logic.getFilteredActivityList());
         activityListPanelPlaceholder.getChildren().add(activityListPanel.getRoot());
 
+        todayActivityListPanel = new TodayActivityListPanel(logic.getActivityList());
+        todayActivityListPanelPlaceholder.getChildren().add(todayActivityListPanel.getRoot());
+        todayActivitiesHeader.setText("Today · " + LocalDate.now().format(TODAY_HEADER_FORMAT));
+
         resultDisplay = new ResultDisplay();
         resultDisplayPlaceholder.getChildren().add(resultDisplay.getRoot());
 
-        StatusBarFooter statusBarFooter = new StatusBarFooter(dataFilePath);
-        statusbarPlaceholder.getChildren().add(statusBarFooter.getRoot());
-
         CommandBox commandBox = new CommandBox(this::executeCommand);
         commandBoxPlaceholder.getChildren().add(commandBox.getRoot());
+    }
+
+    /** Adds a subtle repeating paw pattern behind the main window content. */
+    private void addPawPattern() {
+        pawPattern.widthProperty().addListener((observable, oldWidth, newWidth) ->
+                renderPawPattern());
+        pawPattern.heightProperty().addListener((observable, oldHeight, newHeight) ->
+                renderPawPattern());
+        renderPawPattern();
+    }
+
+    /** Redraws the paw pattern to cover the currently available background area. */
+    private void renderPawPattern() {
+        double width = pawPattern.getWidth();
+        double height = pawPattern.getHeight();
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+
+        pawPattern.getChildren().clear();
+        Color pawColor = Color.web("#90D1CA");
+        double horizontalSpacing = 112;
+        double verticalSpacing = 96;
+        Random random = new Random(PAW_PATTERN_SEED);
+
+        // Start above the visible area and finish beyond the bottom edge so that
+        // the pattern remains continuous across the entire resizable background.
+        for (int row = -1; row * verticalSpacing < height + 60; row++) {
+            double rowJitter = random.nextDouble() * 28 - 14;
+            double y = -18 + row * verticalSpacing + rowJitter;
+            double rowOffset = row % 2 == 0 ? 0 : horizontalSpacing / 2;
+            for (double x = 35 - rowOffset; x < width + 45; x += horizontalSpacing) {
+                double xJitter = random.nextDouble() * 36 - 18;
+                double yJitter = random.nextDouble() * 24 - 12;
+                double rotation = random.nextDouble() * 50 - 25;
+                Group paw = createPaw(x + xJitter, y + yJitter, pawColor, rotation);
+                pawPattern.getChildren().add(paw);
+            }
+        }
+    }
+
+    /** Creates one small paw mark for the background pattern. */
+    private Group createPaw(double x, double y, Color color, double rotation) {
+        Ellipse pad = new Ellipse(x, y + 11, 9, 7);
+        pad.setFill(color);
+
+        Group paw = new Group(
+                pad,
+                createToe(x - 8, y + 0.5, 3, color),
+                createToe(x - 3, y - 4, 3, color),
+                createToe(x + 3, y - 4, 3, color),
+                createToe(x + 8, y + 0.5, 3, color));
+        paw.setOpacity(0.20);
+        paw.setRotate(rotation);
+        return paw;
+    }
+
+    /** Creates one toe for a paw mark. */
+    private Circle createToe(double x, double y, double radius, Color color) {
+        Circle toe = new Circle(x, y, radius);
+        toe.setFill(color);
+        return toe;
     }
 
     /**

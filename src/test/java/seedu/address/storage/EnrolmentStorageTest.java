@@ -29,7 +29,7 @@ public class EnrolmentStorageTest {
         Activity activity = source.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         source.addDogFromStorage(new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
-        source.enrolDogs(activity.getId(), List.of(7));
+        source.enrolDogs(activity.getId(), activity.getStartDate(), List.of(7));
 
         AddressBook restored = JsonUtil.fromJsonString(JsonUtil.toJsonString(new JsonSerializableAddressBook(source)),
                 JsonSerializableAddressBook.class).toModelType();
@@ -39,22 +39,57 @@ public class EnrolmentStorageTest {
     }
 
     @Test
+    public void roundTrip_deletedActivity_doesNotRestoreActivityOrEnrolment() throws Exception {
+        AddressBook source = new AddressBook();
+        Activity activity = source.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.WEEKLY);
+        source.addDogFromStorage(new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
+        source.enrolDogs(activity.getId(), activity.getStartDate(), List.of(7));
+        source.removeActivity(activity);
+
+        AddressBook restored = JsonUtil.fromJsonString(JsonUtil.toJsonString(new JsonSerializableAddressBook(source)),
+                JsonSerializableAddressBook.class).toModelType();
+
+        assertEquals(List.of(), restored.getActivityList());
+        assertEquals(List.of(), restored.getEnrolmentList());
+        assertEquals(source.getNextActivityId(), restored.getNextActivityId());
+        assertEquals(source.getDogList(), restored.getDogList());
+    }
+
+    @Test
     public void load_invalidOrDuplicateEnrolments_rejectsData() {
         JsonAdaptedActivity activity = new JsonAdaptedActivity(1, "Walk", "2028-02-29",
                 "09:00", "10:00", "ONCE");
         JsonAdaptedDog dog = new JsonAdaptedDog(7, "Buddy", "Poodle", "Small", null);
-        JsonAdaptedEnrolment valid = new JsonAdaptedEnrolment(1, 7);
+        JsonAdaptedEnrolment valid = new JsonAdaptedEnrolment(1, 7, LocalDate.of(2028, 2, 29));
 
         assertThrows(IllegalValueException.class, () -> new JsonSerializableAddressBook(
                 null, List.of(dog), null, null, List.of(activity), List.of(valid, valid), 2L).toModelType());
         assertThrows(IllegalValueException.class, () -> new JsonSerializableAddressBook(
-                null, List.of(dog), null, null, List.of(activity), List.of(new JsonAdaptedEnrolment(1, 8)),
+                null, List.of(dog), null, null, List.of(activity),
+                List.of(new JsonAdaptedEnrolment(1, 8, LocalDate.of(2028, 2, 29))),
+                2L).toModelType());
+        assertThrows(IllegalValueException.class, () -> new JsonSerializableAddressBook(
+                null, List.of(dog), null, null, List.of(activity),
+                List.of(new JsonAdaptedEnrolment(null, 7, LocalDate.of(2028, 2, 29))),
                 2L).toModelType());
     }
 
     @Test
+    public void load_legacyEnrolment_migratesToActivityStartDate() throws Exception {
+        JsonAdaptedActivity activity = new JsonAdaptedActivity(1, "Walk", "2028-02-29",
+                "09:00", "10:00", "ONCE");
+        JsonAdaptedDog dog = new JsonAdaptedDog(7, "Buddy", "Poodle", "Small", null);
+
+        AddressBook restored = new JsonSerializableAddressBook(null, List.of(dog), null, null,
+                List.of(activity), List.of(new JsonAdaptedEnrolment(1, 7)), 2L).toModelType();
+
+        assertEquals(List.of(new Enrolment(1, 7, LocalDate.of(2028, 2, 29))), restored.getEnrolmentList());
+    }
+
+    @Test
     public void enrolment_negativeId_rejected() {
-        assertThrows(IllegalArgumentException.class, () -> new Enrolment(-1, 7));
-        assertThrows(IllegalArgumentException.class, () -> new Enrolment(1, -1));
+        assertThrows(IllegalArgumentException.class, () -> new Enrolment(-1, 7, LocalDate.of(2028, 2, 29)));
+        assertThrows(IllegalArgumentException.class, () -> new Enrolment(1, -1, LocalDate.of(2028, 2, 29)));
     }
 }

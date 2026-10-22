@@ -12,6 +12,8 @@ import seedu.address.logic.commands.AddDogCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.DeleteCustomerCommand;
 import seedu.address.logic.commands.DeleteDogCommand;
+import seedu.address.logic.commands.EditActivityCommand;
+import seedu.address.logic.commands.EditActivityCommand.EditActivityDescriptor;
 import seedu.address.logic.commands.EditDogCommand;
 import seedu.address.logic.commands.EditDogCommand.EditDogDescriptor;
 import seedu.address.logic.commands.ExitCommand;
@@ -21,8 +23,11 @@ import seedu.address.logic.commands.FilterDogCommand;
 import seedu.address.logic.commands.FilterUnlinkedCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.ResetDisplayCommand;
+import seedu.address.logic.commands.SelectCustomerCommand;
 import seedu.address.logic.commands.SelectDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.activity.ActivityName;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
@@ -45,6 +50,12 @@ public class AddressBookParserTest {
     public void parseCommand_clear() throws Exception {
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD) instanceof ClearCommand);
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD + " 3") instanceof ClearCommand);
+    }
+
+    @Test
+    public void parseCommand_selectCustomer() throws Exception {
+        SelectCustomerCommand command = (SelectCustomerCommand) parser.parseCommand("select customer 21");
+        assertEquals(new SelectCustomerCommand(21), command);
     }
 
     @Test
@@ -78,6 +89,20 @@ public class AddressBookParserTest {
 
         EditDogCommand command = (EditDogCommand) parser.parseCommand("editdog 1 s/Medium");
         assertEquals(new EditDogCommand(1, descriptor), command);
+    }
+
+    @Test
+    public void parseCommand_editActivity() throws Exception {
+        EditActivityDescriptor descriptor = new EditActivityDescriptor();
+        descriptor.setName(new ActivityName("Training"));
+
+        assertEquals(new EditActivityCommand(3, descriptor),
+                parser.parseCommand("editactivity 3 n/Training"));
+    }
+
+    @Test
+    public void parseCommand_editActivityInvalidArgs_failure() {
+        assertThrows(ParseException.class, () -> parser.parseCommand("editactivity invalid n/Training"));
     }
 
     @Test
@@ -123,6 +148,14 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_resetDisplay_acceptsOnlyCommandWord() throws Exception {
+        assertTrue(parser.parseCommand("resetdisplay") instanceof ResetDisplayCommand);
+        assertTrue(parser.parseCommand("  resetdisplay  ") instanceof ResetDisplayCommand);
+        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, ResetDisplayCommand.MESSAGE_USAGE);
+        assertThrows(ParseException.class, expectedMessage, () -> parser.parseCommand("resetdisplay tomorrow"));
+    }
+
+    @Test
     public void parseCommand_unrecognisedInput_throwsParseException() {
         assertThrows(ParseException.class, String.format(MESSAGE_INVALID_COMMAND_FORMAT, HelpCommand.MESSAGE_USAGE), ()
             -> parser.parseCommand(""));
@@ -131,6 +164,13 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_retiredPersonCommands_throwUnknownCommand() {
         for (String input : new String[] {"add n/Alice p/91234567", "edit 1 n/Alice", "delete 1", "find Alice"}) {
+            assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
+        }
+    }
+
+    @Test
+    public void parseCommand_removedActivityCommands_throwUnknownCommand() {
+        for (String input : new String[] {"mark 1", "unmark 1"}) {
             assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
         }
     }

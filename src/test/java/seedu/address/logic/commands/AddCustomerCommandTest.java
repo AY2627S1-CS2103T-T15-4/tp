@@ -70,22 +70,12 @@ public class AddCustomerCommandTest {
 
     private abstract static class ModelStub implements Model {
         @Override
-        public void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
+        public void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
             throw unused();
         }
 
         @Override
-        public void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
-            throw unused();
-        }
-
-        @Override
-        public void markActivity(int activityId) {
-            throw unused();
-        }
-
-        @Override
-        public void unmarkActivity(int activityId) {
+        public void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
             throw unused();
         }
 
@@ -93,6 +83,26 @@ public class AddCustomerCommandTest {
         public Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end,
                 Recurrence recurrence) {
             throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public ObservableList<Activity> getFilteredActivityList() {
+            throw unused();
+        }
+
+        @Override
+        public void showActivitiesOnOrAfter(LocalDate date) {
+            throw unused();
+        }
+
+        @Override
+        public void deleteActivity(Activity activity) {
+            throw unused();
+        }
+
+        @Override
+        public int setActivity(Activity target, Activity editedActivity) {
+            throw unused();
         }
 
         @Override
@@ -120,9 +130,6 @@ public class AddCustomerCommandTest {
             throw new AssertionError("This method should not be called.");
         }
 
-        @Override public ObservableList<Activity> getFilteredActivityList() {
-            throw unused();
-        }
         @Override public void updateFilteredActivityList(Predicate<Activity> predicate) {
             throw unused();
         }
@@ -155,6 +162,9 @@ public class AddCustomerCommandTest {
             throw unused();
         }
         @Override public void selectDog(int dogId) {
+            throw unused();
+        }
+        @Override public void selectCustomer(int customerId) {
             throw unused();
         }
         @Override public Dog addDog(Dog dog) {

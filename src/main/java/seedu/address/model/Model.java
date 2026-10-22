@@ -21,16 +21,13 @@ import seedu.address.model.dog.exceptions.UnlinkException;
  */
 public interface Model {
     Predicate<Customer> PREDICATE_SHOW_ALL_CUSTOMERS = unused -> true;
+    Predicate<Dog> PREDICATE_SHOW_ALL_DOGS = unused -> true;
 
     Predicate<Activity> PREDICATE_SHOW_ALL_ACTIVITIES = unused -> true;
 
-    void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException;
+    void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
 
-    void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException;
-
-    void markActivity(int activityId);
-
-    void unmarkActivity(int activityId);
+    void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
 
     /** Links an entire batch or throws without changing records or filters. */
     void linkDogs(int customerId, List<Integer> dogIds) throws LinkException;
@@ -107,6 +104,12 @@ public interface Model {
     /** Adds an empty schedule and returns it with its persistent ID. */
     Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end, Recurrence recurrence);
 
+    /** Deletes the given activity. The activity must exist in the address book. */
+    void deleteActivity(Activity activity);
+
+    /** Replaces an activity and returns the number of enrolments removed by a date or recurrence change. */
+    int setActivity(Activity target, Activity editedActivity);
+
     /** Returns all schedules, independently of dog/customer filters. */
     default ObservableList<Activity> getActivityList() {
         return getAddressBook().getActivityList();
@@ -118,11 +121,20 @@ public interface Model {
     /** Updates the activity filter; the predicate must not be null. */
     void updateFilteredActivityList(Predicate<Activity> predicate);
 
+    /** Shows activities with an occurrence on or after the given date. */
+    void showActivitiesOnOrAfter(LocalDate date);
+
     /**
-     * Shows this dog, its current owner, and its current incomplete activities.
+     * Shows this dog, its current owner, and its activities with enrolments today or later.
      * Later changes to those records update the same three lists.
      */
     void selectDog(int dogId);
+
+    /**
+     * Shows this customer, that customer's dogs, and their activities with enrolments today or later.
+     * Later changes to those records update the same three lists.
+     */
+    void selectCustomer(int customerId);
 
     /** Adds a dog and returns the dog with its assigned persistent ID. */
     Dog addDog(Dog dog);

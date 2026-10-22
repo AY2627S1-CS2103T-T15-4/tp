@@ -1,5 +1,7 @@
 package seedu.address.logic.parser;
 
+import static java.util.Objects.requireNonNull;
+
 import seedu.address.logic.commands.SelectDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
@@ -12,8 +14,9 @@ public class SelectDogCommandParser implements Parser<SelectDogCommand> {
 
     @Override
     public SelectDogCommand parse(String args) throws ParseException {
+        requireNonNull(args);
         String[] tokens = args.trim().split("\\s+", 2);
-        if (tokens.length == 0 || !tokens[0].equals("dog")) {
+        if (!tokens[0].equals("dog")) {
             throw new ParseException(MESSAGE_INVALID_FORMAT);
         }
         String idText = tokens.length == 2 ? tokens[1].trim() : "";

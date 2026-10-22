@@ -79,4 +79,14 @@ public class AddActivityCommandParserTest {
                 LocalTime.MIDNIGHT, LocalTime.of(23, 59), Recurrence.ONCE), parser.parse(
                        " n/Walk & play date/2000-01-01 start/00:00 end/23:59 r/once"));
     }
+
+    @Test
+    public void parse_oneMinuteSchedulesAtDayBoundaries_success() throws Exception {
+        assertEquals(new AddActivityCommand(new ActivityName("Training"), LocalDate.of(2028, 2, 29),
+                LocalTime.MIDNIGHT, LocalTime.of(0, 1), Recurrence.WEEKLY), parser.parse(
+                        VALID.replace("start/09:00 end/10:00", "start/00:00 end/00:01")));
+        assertEquals(new AddActivityCommand(new ActivityName("Training"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(23, 58), LocalTime.of(23, 59), Recurrence.WEEKLY), parser.parse(
+                        VALID.replace("start/09:00 end/10:00", "start/23:58 end/23:59")));
+    }
 }

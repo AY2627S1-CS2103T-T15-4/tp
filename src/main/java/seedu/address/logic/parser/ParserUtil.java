@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.activity.ActivityName;
 import seedu.address.model.customer.BackupContact;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.DogName;
@@ -129,4 +130,19 @@ public class ParserUtil {
         }
         return new BackupContact(trimmedPhone);
     }
+
+    //==========================ACTIVITY RELATED====================================
+    /** Parses a nonblank activity name. */
+    public static ActivityName parseActivityName(String name) throws ParseException {
+        requireNonNull(name);
+        String trimmedName = name.trim();
+        if (!ActivityName.isValidName(trimmedName)) {
+            throw new ParseException(ActivityName.MESSAGE_CONSTRAINTS);
+        }
+        return new ActivityName(trimmedName);
+    }
+
+
+
+
 }

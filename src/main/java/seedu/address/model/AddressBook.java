@@ -4,14 +4,18 @@ import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ModifiableObservableListBase;
 import javafx.collections.ObservableList;
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
@@ -30,10 +34,11 @@ import seedu.address.model.dog.exceptions.UnlinkException;
  * Stores customers and dogs with unique persistent identities.
  */
 public class AddressBook implements ReadOnlyAddressBook {
+    private static final Logger logger = LogsCenter.getLogger(AddressBook.class);
 
     private final UniqueDogList dogs = new UniqueDogList();
     private final UniqueCustomerList customers = new UniqueCustomerList();
-    private final ObservableList<Activity> activities = FXCollections.observableArrayList();
+    private final ActivityList activities = new ActivityList();
     private final ObservableList<Activity> activityView = FXCollections.unmodifiableObservableList(activities);
     private final ObservableList<Enrolment> enrolments = FXCollections.observableArrayList();
     private long nextActivityId = 1;
@@ -62,6 +67,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         requireNonNull(newData);
 
         List<Activity> restored = List.copyOf(newData.getActivityList());
+        List<Enrolment> restoredEnrolments = List.copyOf(newData.getEnrolmentList());
         long minimumId = restored.stream().mapToLong(Activity::getId).max().orElse(0) + 1;
         long nextId = newData.getNextActivityId();
         if (restored.stream().map(Activity::getId).distinct().count() != restored.size()
@@ -71,8 +77,6 @@ public class AddressBook implements ReadOnlyAddressBook {
         dogs.setDogs(newData.getDogList());
         setCustomers(newData.getCustomerList());
         nextActivityId = nextId;
-        activities.setAll(restored);
-        enrolments.setAll(newData.getEnrolmentList());
 
         int restoredNextDogId = newData.getNextDogId();
         this.nextDogId = restoredNextDogId >= 0
@@ -85,6 +89,47 @@ public class AddressBook implements ReadOnlyAddressBook {
                 ? restoredNextCustomerId
                 : customers.asUnmodifiableObservableList().stream()
                         .mapToInt(Customer::getId).max().orElse(0) + 1;
+        activities.restore(restored, restoredEnrolments);
+    }
+
+    /** Delays activity notifications until the corresponding enrolments have also been restored. */
+    private final class ActivityList extends ModifiableObservableListBase<Activity> {
+        private final List<Activity> values = new ArrayList<>();
+
+        private void restore(List<Activity> restored, List<Enrolment> restoredEnrolments) {
+            beginChange();
+            try {
+                setAll(restored);
+                enrolments.setAll(restoredEnrolments);
+            } finally {
+                endChange();
+            }
+        }
+
+        @Override
+        public Activity get(int index) {
+            return values.get(index);
+        }
+
+        @Override
+        public int size() {
+            return values.size();
+        }
+
+        @Override
+        protected void doAdd(int index, Activity activity) {
+            values.add(index, activity);
+        }
+
+        @Override
+        protected Activity doSet(int index, Activity activity) {
+            return values.set(index, activity);
+        }
+
+        @Override
+        protected Activity doRemove(int index) {
+            return values.remove(index);
+        }
     }
 
     public void setCustomers(List<Customer> customers) {
@@ -107,6 +152,67 @@ public class AddressBook implements ReadOnlyAddressBook {
         return activity;
     }
 
+    /** Replaces a schedule after checking retained enrolments for conflicts. */
+    public int setActivity(Activity target, Activity editedActivity) {
+        requireNonNull(target);
+        requireNonNull(editedActivity);
+        if (target.getId() != editedActivity.getId()) {
+            throw new IllegalArgumentException("Edited activity must retain its ID.");
+        }
+        int index = -1;
+        for (int i = 0; i < activities.size(); i++) {
+            if (activities.get(i).getId() == target.getId()) {
+                index = i;
+                break;
+            }
+        }
+        if (index < 0 || !activities.get(index).equals(target)) {
+            throw new IllegalArgumentException("Activity to edit does not match a stored activity.");
+        }
+        boolean occurrenceDatesChanged = !target.getStartDate().equals(editedActivity.getStartDate())
+                || target.getRecurrence() != editedActivity.getRecurrence();
+        if (!occurrenceDatesChanged) {
+            validateNoActivityConflict(editedActivity);
+        }
+        int removedEnrolments = occurrenceDatesChanged
+                ? (int) enrolments.stream().filter(enrolment -> enrolment.getActivityId() == target.getId()).count()
+                : 0;
+        activities.set(index, editedActivity);
+        if (occurrenceDatesChanged) {
+            enrolments.removeIf(enrolment -> enrolment.getActivityId() == target.getId());
+        }
+        return removedEnrolments;
+    }
+
+    /** Rejects an edited schedule that would overlap another activity attended by the same dog. */
+    private void validateNoActivityConflict(Activity editedActivity) {
+        for (Enrolment editedBooking : enrolments) {
+            if (editedBooking.getActivityId() != editedActivity.getId()) {
+                continue;
+            }
+            for (Enrolment otherBooking : enrolments) {
+                if (otherBooking.getDogId() != editedBooking.getDogId()
+                        || !otherBooking.getDate().equals(editedBooking.getDate())
+                        || otherBooking.getActivityId() == editedActivity.getId()) {
+                    continue;
+                }
+                Activity otherActivity = getActivityList().stream()
+                        .filter(candidate -> candidate.getId() == otherBooking.getActivityId())
+                        .findFirst().orElseThrow();
+                if (timesOverlap(editedActivity, otherActivity)) {
+                    throw new IllegalArgumentException("Dog ID " + editedBooking.getDogId()
+                            + " has an overlapping booking in activity ID " + otherActivity.getId()
+                            + " on " + editedBooking.getDate() + ".");
+                }
+            }
+        }
+    }
+
+    private static boolean timesOverlap(Activity first, Activity second) {
+        return first.getStartTime().isBefore(second.getEndTime())
+                && second.getStartTime().isBefore(first.getEndTime());
+    }
+
     /** Restores a schedule with its persisted ID; rejects duplicate identities. */
     public void addActivityFromStorage(Activity activity) {
         requireNonNull(activity);
@@ -115,26 +221,6 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
         nextActivityId = Math.max(nextActivityId, (long) activity.getId() + 1);
         activities.add(activity);
-    }
-
-    /** Marks the activity with the specified ID as completed. */
-    public void markActivity(int activityId) {
-        replaceActivity(activityId, Activity::markCompleted);
-    }
-
-    /** Marks the activity with the specified ID as incomplete. */
-    public void unmarkActivity(int activityId) {
-        replaceActivity(activityId, Activity::markIncomplete);
-    }
-
-    private void replaceActivity(int activityId, java.util.function.UnaryOperator<Activity> replacement) {
-        for (int i = 0; i < activities.size(); i++) {
-            if (activities.get(i).getId() == activityId) {
-                activities.set(i, replacement.apply(activities.get(i)));
-                return;
-            }
-        }
-        throw new IllegalArgumentException("Activity ID " + activityId + " does not exist.");
     }
 
     /** Restores a counter above all stored IDs; MAX_VALUE + 1 represents exhausted IDs. */
@@ -154,6 +240,16 @@ public class AddressBook implements ReadOnlyAddressBook {
     @Override
     public ObservableList<Activity> getActivityList() {
         return activityView;
+    }
+
+    /** Removes an existing activity and its enrolments without reusing its ID. */
+    public void removeActivity(Activity activity) {
+        requireNonNull(activity);
+        if (!activities.contains(activity)) {
+            throw new IllegalArgumentException("Activity ID " + activity.getId() + " does not exist or has changed.");
+        }
+        enrolments.removeIf(enrolment -> enrolment.getActivityId() == activity.getId());
+        activities.remove(activity);
     }
 
     /** Returns true if a customer with the same identity as {@code customer} exists. */
@@ -200,56 +296,59 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Enrols a batch of existing dogs into an existing activity atomically.
+     * Enrols a batch of existing dogs into one occurrence of an existing activity atomically.
      *
-     * @throws EnrolException if the IDs are invalid or an endpoint is missing
+     * @throws EnrolException if the date, IDs, recurrence, duplicate, or time-conflict checks fail
      */
-    public void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
+    public void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
+        requireNonNull(date);
         requireNonNull(dogIds);
-        if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
-                || new HashSet<>(dogIds).size() != dogIds.size()) {
-            throw new EnrolException("Specify at least one dog ID, with no repeated IDs.");
+        validateDogIdBatch(dogIds);
+        if (date.isBefore(LocalDate.now())) {
+            throw new EnrolException("Cannot enrol on " + date + ": the date must be today or later. Today is "
+                    + LocalDate.now() + ".");
         }
-        if (getActivityList().stream().noneMatch(activity -> activity.getId() == activityId)) {
-            throw new EnrolException("Activity ID " + activityId + " does not exist.");
-        }
-        for (int id : dogIds) {
-            getDogList().stream().filter(candidate -> candidate.getId() == id).findFirst()
-                    .orElseThrow(() -> new EnrolException("Dog ID " + id + " does not exist."));
-            if (enrolments.stream().anyMatch(enrolment -> enrolment.equals(new Enrolment(activityId, id)))) {
-                throw new EnrolException("Dog ID " + id + " is already enrolled in activity ID " + activityId + ".");
-            }
+        Activity activity = getActivity(activityId);
+        if (!activity.occursOn(date)) {
+            throw occurrenceError(activity, date);
         }
         for (int id : dogIds) {
-            enrolments.add(new Enrolment(activityId, id));
+            validateDogExists(id);
+            validateEnrolment(new Enrolment(activityId, id, date), activity);
         }
+        for (int id : dogIds) {
+            enrolments.add(new Enrolment(activityId, id, date));
+        }
+        assert dogIds.stream().allMatch(id -> enrolments.contains(new Enrolment(activityId, id, date)));
+        logger.fine("Enrolled dog IDs " + dogIds + " in activity ID " + activityId + " on " + date + ".");
     }
 
     /**
-     * Removes a batch of existing dogs from an existing activity atomically.
+     * Removes a batch of existing dogs from one occurrence of an existing activity atomically.
      *
-     * @throws EnrolException if the IDs are invalid or an enrolment is missing
+     * @throws EnrolException if the date, IDs, recurrence, or enrolment checks fail
      */
-    public void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
+    public void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
+        requireNonNull(date);
         requireNonNull(dogIds);
-        if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
-                || new HashSet<>(dogIds).size() != dogIds.size()) {
-            throw new EnrolException("Specify at least one dog ID, with no repeated IDs.");
-        }
-        if (getActivityList().stream().noneMatch(activity -> activity.getId() == activityId)) {
-            throw new EnrolException("Activity ID " + activityId + " does not exist.");
+        validateDogIdBatch(dogIds);
+        Activity activity = getActivity(activityId);
+        if (!activity.occursOn(date)) {
+            throw occurrenceError(activity, date);
         }
         for (int dogId : dogIds) {
-            if (getDogList().stream().noneMatch(dog -> dog.getId() == dogId)) {
-                throw new EnrolException("Dog ID " + dogId + " does not exist.");
-            }
+            validateDogExists(dogId);
             if (enrolments.stream().noneMatch(enrolment ->
-                    enrolment.equals(new Enrolment(activityId, dogId)))) {
-                throw new EnrolException("Dog ID " + dogId + " is not enrolled in activity ID " + activityId + ".");
+                    enrolment.equals(new Enrolment(activityId, dogId, date)))) {
+                throw new EnrolException("Dog ID " + dogId + " is not enrolled in activity ID " + activityId
+                        + " on " + date + ".");
             }
         }
         enrolments.removeIf(enrolment -> enrolment.getActivityId() == activityId
-                && dogIds.contains(enrolment.getDogId()));
+                && enrolment.getDate().equals(date) && dogIds.contains(enrolment.getDogId()));
+        assert dogIds.stream().noneMatch(dogId ->
+                enrolments.contains(new Enrolment(activityId, dogId, date)));
+        logger.fine("Unenrolled dog IDs " + dogIds + " from activity ID " + activityId + " on " + date + ".");
     }
 
     /**
@@ -391,10 +490,24 @@ public class AddressBook implements ReadOnlyAddressBook {
         return dogs.contains(dog);
     }
 
-    /** Removes the given dog from this address book. */
+    /**
+     * Removes the given dog and all of its enrolments, including enrolments for past activity occurrences.
+     *
+     * @throws IllegalArgumentException if no stored dog has the same persistent ID
+     */
     public void removeDog(Dog dog) {
         requireNonNull(dog);
-        dogs.remove(dog);
+        Dog storedDog = getDogList().stream()
+                .filter(candidate -> candidate.isSameDog(dog))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Dog does not exist."));
+        int dogId = storedDog.getId();
+        long removedEnrolmentCount = enrolments.stream().filter(enrolment -> enrolment.getDogId() == dogId).count();
+        enrolments.removeIf(enrolment -> enrolment.getDogId() == dogId);
+        dogs.remove(storedDog);
+        assert enrolments.stream().noneMatch(enrolment -> enrolment.getDogId() == dogId);
+        assert getDogList().stream().noneMatch(remainingDog -> remainingDog.isSameDog(storedDog));
+        logger.fine("Deleted dog ID " + dogId + " and removed " + removedEnrolmentCount + " enrolments.");
     }
 
     /** Replaces an existing dog with its edited version. */
@@ -430,10 +543,89 @@ public class AddressBook implements ReadOnlyAddressBook {
     /** Adds a validated enrolment restored from storage. */
     public void addEnrolmentFromStorage(Enrolment enrolment) {
         requireNonNull(enrolment);
-        if (enrolments.contains(enrolment)) {
-            throw new IllegalArgumentException("Enrolments list contains duplicate enrolments.");
+        try {
+            Activity activity = getActivity(enrolment.getActivityId());
+            validateDogExists(enrolment.getDogId());
+            validateEnrolment(enrolment, activity);
+        } catch (EnrolException e) {
+            logger.warning("Rejected stored enrolment (activity ID " + enrolment.getActivityId() + ", dog ID "
+                    + enrolment.getDogId() + ", date " + enrolment.getDate() + "): " + e.getMessage());
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
         enrolments.add(enrolment);
+    }
+
+    private Activity getActivity(int activityId) throws EnrolException {
+        if (activityId < 0) {
+            throw new EnrolException("Activity IDs must be whole numbers from 0 to 2147483647.");
+        }
+        return getActivityList().stream().filter(activity -> activity.getId() == activityId).findFirst()
+                .orElseThrow(() -> new EnrolException("Activity ID " + activityId + " does not exist."));
+    }
+
+    private void validateDogExists(int dogId) throws EnrolException {
+        if (getDogList().stream().noneMatch(dog -> dog.getId() == dogId)) {
+            throw new EnrolException("Dog ID " + dogId + " does not exist.");
+        }
+    }
+
+    private void validateDogIdBatch(List<Integer> dogIds) throws EnrolException {
+        if (dogIds.isEmpty()) {
+            throw new EnrolException("Provide at least one dog ID.");
+        }
+        if (dogIds.stream().anyMatch(Objects::isNull)) {
+            throw new EnrolException("Dog IDs must not be null.");
+        }
+        HashSet<Integer> seen = new HashSet<>();
+        for (int dogId : dogIds) {
+            if (dogId < 0) {
+                throw new EnrolException("Dog IDs must be whole numbers from 0 to 2147483647.");
+            }
+            if (!seen.add(dogId)) {
+                throw new EnrolException("Dog ID " + dogId
+                        + " is listed more than once. Provide each dog ID only once.");
+            }
+        }
+    }
+
+    private EnrolException occurrenceError(Activity activity, LocalDate date) {
+        if (date.isBefore(activity.getStartDate())) {
+            return new EnrolException("Activity ID " + activity.getId() + " starts on " + activity.getStartDate()
+                    + " and does not occur before that date.");
+        }
+        if (activity.getRecurrence() == Recurrence.WEEKLY) {
+            return new EnrolException("Activity ID " + activity.getId() + " recurs weekly on "
+                    + activity.getStartDate().getDayOfWeek() + ", starting " + activity.getStartDate()
+                    + "; it does not occur on " + date + ".");
+        }
+        // Daily schedules occur on every date from their start date, so only one-time schedules remain here.
+        return new EnrolException("Activity ID " + activity.getId() + " is a one-time activity and "
+                + "occurs only on " + activity.getStartDate() + ", not " + date + ".");
+    }
+
+    private void validateEnrolment(Enrolment enrolment, Activity activity) throws EnrolException {
+        LocalDate date = enrolment.getDate();
+        if (!activity.occursOn(date)) {
+            throw occurrenceError(activity, date);
+        }
+        if (enrolments.contains(enrolment)) {
+            throw new EnrolException("Dog ID " + enrolment.getDogId() + " is already enrolled in activity "
+                    + activity.getId() + " on " + date + ".");
+        }
+        for (Enrolment existing : enrolments) {
+            if (existing.getDogId() != enrolment.getDogId() || !existing.getDate().equals(date)) {
+                continue;
+            }
+            Activity existingActivity = getActivity(existing.getActivityId());
+            if (activity.getStartTime().isBefore(existingActivity.getEndTime())
+                    && existingActivity.getStartTime().isBefore(activity.getEndTime())) {
+                throw new EnrolException("Dog ID " + enrolment.getDogId() + " is already enrolled in \""
+                        + existingActivity.getName() + "\" (activity " + existingActivity.getId() + ", "
+                        + existingActivity.getStartTime() + "-" + existingActivity.getEndTime() + ") on " + date
+                        + "; this overlaps \"" + activity.getName() + "\" (activity " + activity.getId() + ", "
+                        + activity.getStartTime() + "-" + activity.getEndTime() + ").");
+            }
+        }
     }
 
     @Override
