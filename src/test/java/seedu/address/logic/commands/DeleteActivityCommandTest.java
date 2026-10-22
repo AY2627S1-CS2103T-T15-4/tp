@@ -95,8 +95,8 @@ public class DeleteActivityCommandTest {
         List<Activity> originalActivities = List.copyOf(rejectingModel.getActivityList());
         List<Enrolment> originalEnrolments = List.copyOf(rejectingModel.getAddressBook().getEnrolmentList());
 
-        CommandException exception = assertThrows(CommandException.class,
-                () -> new DeleteActivityCommand(1).execute(rejectingModel));
+        DeleteActivityCommand command = new DeleteActivityCommand(1);
+        CommandException exception = assertThrows(CommandException.class, () -> command.execute(rejectingModel));
 
         assertEquals("Activity changed before deletion.", exception.getMessage());
         assertTrue(exception.getCause() instanceof IllegalArgumentException);
