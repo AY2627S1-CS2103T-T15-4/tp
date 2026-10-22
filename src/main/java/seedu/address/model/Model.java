@@ -124,6 +124,12 @@ public interface Model {
      */
     void selectDog(int dogId);
 
+    /**
+     * Shows this customer, that customer's dogs, and those dogs' current incomplete activities.
+     * Later changes to those records update the same three lists.
+     */
+    void selectCustomer(int customerId);
+
     /** Adds a dog and returns the dog with its assigned persistent ID. */
     Dog addDog(Dog dog);
 

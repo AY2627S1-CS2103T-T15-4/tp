@@ -138,6 +138,11 @@ public class SelectDogCommandTest {
     }
 
     @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new SelectDogCommand(1).execute(null));
+    }
+
+    @Test
     public void equals_sameIdOnly() {
         SelectDogCommand command = new SelectDogCommand(21);
         assertEquals(command, command);
@@ -145,6 +150,8 @@ public class SelectDogCommandTest {
         assertNotEquals(command, new SelectDogCommand(22));
         assertNotEquals(command, null);
         assertNotEquals(command, new Object());
+        assertEquals(command.toString(), new SelectDogCommand(21).toString());
+        assertThrows(AssertionError.class, () -> new SelectDogCommand(0));
     }
 
     private String execute(String input) throws Exception {
