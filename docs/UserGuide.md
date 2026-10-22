@@ -33,7 +33,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 
    * `list dog` : Lists all dogs.
 
-   * `resetdisplay` : Shows all customers, dogs, and activities.
+   * `resetdisplay` : Shows all customers and dogs, plus activities occurring today or later.
 
    * `clear` : Deletes all customers, dogs, and activities.
 
@@ -151,8 +151,11 @@ If there are no dogs, WatchDog displays `There are no dogs to display.`
 
 ### Resetting the display: `resetdisplay`
 
-Shows all stored customers, dogs, and activities, regardless of activity date or recurrence.
-This command changes the view only; stored records are not changed.
+Shows all stored customers and dogs, plus activities with an occurrence today or later according to
+the computer's local date. One-time activities before today are hidden. A daily or weekly activity
+remains visible while it has a future occurrence, even if its first date is in the past. Activity
+cards continue to show the schedule's first date. This command changes the view only; stored records
+are not changed.
 
 Format: `resetdisplay`
 

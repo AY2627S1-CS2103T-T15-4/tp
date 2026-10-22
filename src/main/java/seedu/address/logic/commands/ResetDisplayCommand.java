@@ -4,20 +4,36 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_CUSTOMERS;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_DOGS;
 
+import java.time.Clock;
+import java.time.LocalDate;
+
 import seedu.address.model.Model;
 
-/** Restores the display of all customers, dogs, and activities. */
+/** Restores all customers and dogs and shows activities occurring today or later. */
 public class ResetDisplayCommand extends Command {
     public static final String COMMAND_WORD = "resetdisplay";
-    public static final String MESSAGE_USAGE = "resetdisplay: Shows all customers, dogs, and activities.";
-    public static final String MESSAGE_SUCCESS = "Showing all customers, dogs, and activities.";
+    public static final String MESSAGE_USAGE = "resetdisplay: Shows all customers, dogs, and upcoming activities.";
+    public static final String MESSAGE_SUCCESS = "Showing all customers, dogs, and activities from %s onward.";
+
+    private final Clock clock;
+
+    public ResetDisplayCommand() {
+        this(Clock.systemDefaultZone());
+    }
+
+    /** Creates a command with a specified clock so the current date can be controlled in tests. */
+    public ResetDisplayCommand(Clock clock) {
+        this.clock = requireNonNull(clock);
+    }
 
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
+        LocalDate today = LocalDate.now(clock);
         model.updateFilteredCustomerList(PREDICATE_SHOW_ALL_CUSTOMERS);
         model.updateFilteredDogList(PREDICATE_SHOW_ALL_DOGS);
-        return new CommandResult(MESSAGE_SUCCESS);
+        model.showActivitiesOnOrAfter(today);
+        return new CommandResult(String.format(MESSAGE_SUCCESS, today));
     }
 
     @Override

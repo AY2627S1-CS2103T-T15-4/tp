@@ -97,14 +97,19 @@ public class MainWindowTest {
     }
 
     @Test
-    public void executeCommand_resetDisplay_restoresBothListsAndShowsAllActivities() throws Exception {
+    public void executeCommand_resetDisplay_restoresBothListsAndShowsUpcomingActivities() throws Exception {
         Path folder = Files.createTempDirectory("mainwindow-reset");
+        LocalDate today = LocalDate.now();
         Model model = new ModelManager();
         model.addCustomer(LILY);
         model.addDog(new Dog(new DogName("Cookie"), new Breed("Chihuahua"), new Size("Small")));
-        model.addActivity(new ActivityName("Past walk"), LocalDate.of(2025, 1, 1),
+        model.addActivity(new ActivityName("Past walk"), today.minusDays(1),
+                LocalTime.of(8, 0), LocalTime.of(9, 0), Recurrence.ONCE);
+        model.addActivity(new ActivityName("Daily walk"), today.minusDays(2),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.DAILY);
-        model.addActivity(new ActivityName("Future walk"), LocalDate.of(2028, 1, 1),
+        model.addActivity(new ActivityName("Today walk"), today,
+                LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.ONCE);
+        model.addActivity(new ActivityName("Future walk"), today.plusDays(1),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
         Logic logic = new LogicManager(model, new StorageManager(
                 new JsonAddressBookStorage(folder.resolve("addressbook.json")),
@@ -123,10 +128,10 @@ public class MainWindowTest {
 
             assertEquals(1, customers.getItems().size());
             assertEquals(1, dogs.getItems().size());
-            assertEquals(2, activities.getItems().size());
-            assertEquals("Past walk", label(activities.getItems().get(0).get(), "name"));
-            assertEquals("Date: 2025-01-01", label(activities.getItems().get(0).get(), "date"));
-            assertEquals("Future walk", label(activities.getItems().get(1).get(), "name"));
+            assertEquals(3, activities.getItems().size());
+            assertEquals("Daily walk", label(activities.getItems().get(0).get(), "name"));
+            assertEquals("Today walk", label(activities.getItems().get(1).get(), "name"));
+            assertEquals("Future walk", label(activities.getItems().get(2).get(), "name"));
         });
     }
 

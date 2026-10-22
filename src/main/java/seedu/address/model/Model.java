@@ -111,6 +111,12 @@ public interface Model {
         return getAddressBook().getActivityList();
     }
 
+    /** Returns the activities currently shown in the UI. */
+    ObservableList<Activity> getFilteredActivityList();
+
+    /** Shows activities with an occurrence on or after the given date. */
+    void showActivitiesOnOrAfter(LocalDate date);
+
     /** Adds a dog and returns the dog with its assigned persistent ID. */
     Dog addDog(Dog dog);
 

@@ -34,6 +34,9 @@ public interface Logic {
     /** Returns an unmodifiable observable view of all activities. */
     ObservableList<Activity> getActivityList();
 
+    /** Returns the activities currently shown in the UI. */
+    ObservableList<Activity> getFilteredActivityList();
+
     /**
      * Returns the user prefs' GUI settings.
      */
