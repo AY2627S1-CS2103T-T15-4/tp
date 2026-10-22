@@ -5,6 +5,7 @@ import static seedu.address.testutil.Assert.assertThrows;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +47,8 @@ public class ActivityEnrolmentTest {
 
     @Test
     public void enrolDogs_invalidRequest_rejectsWithoutChangingData() throws Exception {
-        for (List<Integer> dogIds : List.of(List.<Integer>of(), List.of(DOG_ID, DOG_ID), List.of(99))) {
+        for (List<Integer> dogIds : List.of(List.<Integer>of(), List.of(DOG_ID, DOG_ID), List.of(99),
+                List.of(-1), Collections.singletonList(null))) {
             assertThrows(EnrolException.class, () -> addressBook.enrolDogs(ACTIVITY_ID,
                     LocalDate.of(2028, 2, 29), dogIds));
         }
@@ -96,6 +98,8 @@ public class ActivityEnrolmentTest {
 
         assertEquals(List.of(new Enrolment(ACTIVITY_ID, DOG_ID, LocalDate.of(2028, 2, 29)),
                 new Enrolment(ACTIVITY_ID, DOG_ID, LocalDate.of(2028, 3, 7))), addressBook.getEnrolmentList());
+        assertEquals("Activity ID 1 recurs weekly on TUESDAY, starting 2028-02-29; it does not occur on 2028-03-08.",
+                enrolmentException(ACTIVITY_ID, LocalDate.of(2028, 3, 8)).getMessage());
     }
 
     @Test

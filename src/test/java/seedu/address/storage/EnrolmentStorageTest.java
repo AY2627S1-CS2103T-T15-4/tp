@@ -69,6 +69,10 @@ public class EnrolmentStorageTest {
                 null, List.of(dog), null, null, List.of(activity),
                 List.of(new JsonAdaptedEnrolment(1, 8, LocalDate.of(2028, 2, 29))),
                 2L).toModelType());
+        assertThrows(IllegalValueException.class, () -> new JsonSerializableAddressBook(
+                null, List.of(dog), null, null, List.of(activity),
+                List.of(new JsonAdaptedEnrolment(null, 7, LocalDate.of(2028, 2, 29))),
+                2L).toModelType());
     }
 
     @Test

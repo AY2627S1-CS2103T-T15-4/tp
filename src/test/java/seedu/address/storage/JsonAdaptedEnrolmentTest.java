@@ -19,6 +19,14 @@ public class JsonAdaptedEnrolmentTest {
     }
 
     @Test
+    public void toModelType_legacyFields_usesProvidedActivityDate() throws Exception {
+        LocalDate legacyDate = LocalDate.of(2028, 2, 29);
+
+        assertEquals(new Enrolment(3, 7, legacyDate), new JsonAdaptedEnrolment(3, 7).toModelType(legacyDate));
+        assertThrows(IllegalValueException.class, () -> new JsonAdaptedEnrolment(3, 7).toModelType());
+    }
+
+    @Test
     public void toModelType_missingOrNegativeFields_throwsException() {
         assertThrows(IllegalValueException.class, () ->
                 new JsonAdaptedEnrolment(null, 7, LocalDate.of(2028, 2, 29)).toModelType());

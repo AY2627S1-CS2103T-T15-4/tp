@@ -17,10 +17,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
+import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Ellipse;
 import javafx.stage.Stage;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
@@ -144,6 +148,35 @@ public class MainWindowTest {
             assertEquals("Daily walk", label(activities.getItems().get(0).get(), "name"));
             assertEquals("Today walk", label(activities.getItems().get(1).get(), "name"));
             assertEquals("Future walk", label(activities.getItems().get(2).get(), "name"));
+        });
+    }
+
+    @Test
+    public void fillInnerParts_resizesPawPatternAndRendersPawMarks() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-paw-pattern");
+        Logic logic = new LogicManager(new ModelManager(), new StorageManager(
+                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            window.fillInnerParts();
+            Pane pawPattern = (Pane) window.getPrimaryStage().getScene().lookup("#pawPattern");
+
+            pawPattern.resize(300, 200);
+
+            int initialPawCount = pawPattern.getChildren().size();
+            assertTrue(initialPawCount > 0);
+            Group paw = (Group) pawPattern.getChildren().get(0);
+            assertEquals(5, paw.getChildren().size());
+            assertTrue(paw.getChildren().get(0) instanceof Ellipse);
+            assertTrue(paw.getChildren().get(1) instanceof Circle);
+            assertEquals(0.20, paw.getOpacity());
+
+            pawPattern.resize(420, 200);
+
+            assertTrue(pawPattern.getChildren().size() > initialPawCount);
+            window.getPrimaryStage().close();
         });
     }
 

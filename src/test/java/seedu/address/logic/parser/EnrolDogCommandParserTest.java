@@ -28,9 +28,19 @@ public class EnrolDogCommandParserTest {
         for (String input : List.of("", "a/1", "d/2", "a/ d/2", "a/1 d/", "a/1 date/2028-02-29 d/2,2",
                 "a/1 date/2028-02-29 d/2,", "a/-1 date/2028-02-29 d/2", "a/1 date/2028-02-29 d/-2",
                 "a/1 date/2028-02-29 d/2.0", "a/x date/2028-02-29 d/2", "a/1 date/2028-02-29 d/x",
-                "a/1 date/2028-02-30 d/2", "a/999999999999 date/2028-02-29 d/2")) {
+                "a/1 date/2028-02-30 d/2", "a/999999999999 date/2028-02-29 d/2",
+                "a/1 date/2028-02-29 d/", "a/-1 date/2028-02-29 d/2")) {
             assertThrows(ParseException.class, () -> parser.parse(input), input);
         }
+    }
+
+    @Test
+    public void parse_malformedDatedInput_reportsExpectedFormat() {
+        ParseException exception = assertThrows(ParseException.class,
+                () -> parser.parse("a/1 d/2"));
+
+        assertEquals("Invalid enrol format. Use: enrol a/ACTIVITY_ID date/YYYY-MM-DD "
+                + "d/DOG_ID[,DOG_ID...]. Example: enrol a/1 date/2026-10-27 d/2,3", exception.getMessage());
     }
 
     @Test

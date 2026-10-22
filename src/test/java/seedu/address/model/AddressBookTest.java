@@ -54,6 +54,22 @@ public class AddressBookTest {
     }
 
     @Test
+    public void resetData_restoresActivitiesAndTheirEnrolments() throws Exception {
+        AddressBook source = new AddressBook();
+        LocalDate date = LocalDate.of(2028, 2, 29);
+        Activity activity = source.addActivity(new ActivityName("Walk"), date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
+        source.addDogFromStorage(dog);
+        source.enrolDogs(activity.getId(), date, List.of(dog.getId()));
+
+        addressBook.resetData(source);
+
+        assertEquals(List.of(activity), addressBook.getActivityList());
+        assertEquals(List.of(new Enrolment(activity.getId(), dog.getId(), date)), addressBook.getEnrolmentList());
+    }
+
+    @Test
     public void resetData_withoutPersistedDogAndCustomerCounters_derivesNextIds() {
         Customer customer = new Customer(9, new Name("Alex Tan"), new Phone("91234567"),
                 new Email("alex@example.com"), new BackupContact("98765432"));
@@ -197,6 +213,14 @@ public class AddressBookTest {
                 new Breed("Poodle"), new Size("Small"));
 
         assertTrue(addressBook.hasDog(sameIdentity));
+    }
+
+    @Test
+    public void removeDog_nonexistentDog_throwsIllegalArgumentException() {
+        Dog missingDog = new Dog(99, new DogName("Missing"), new Breed("Poodle"), new Size("Small"));
+
+        assertThrows(IllegalArgumentException.class, () -> addressBook.removeDog(missingDog));
+        assertTrue(addressBook.getDogList().isEmpty());
     }
 
     @Test
