@@ -22,6 +22,7 @@ import seedu.address.model.dog.Size;
 
 public class FilterActivityCommandTest {
     private static final LocalDate DATE = LocalDate.of(2026, 10, 20);
+    private static final LocalDate ENROL_DATE = LocalDate.now().plusDays(7);
 
     @Test
     public void execute_combinedFields_filtersWithAndLogic() throws Exception {
@@ -80,11 +81,11 @@ public class FilterActivityCommandTest {
         Dog unrelatedDog = model.addDog(new Dog(new DogName("Luna"), new Breed("Beagle"), new Size("Medium")));
         model.linkDogs(0, List.of(firstDog.getId(), secondDog.getId()));
         model.linkDogs(1, List.of(unrelatedDog.getId()));
-        var matchingActivity = model.addActivity(new ActivityName("Group walk"), DATE, LocalTime.NOON,
+        var matchingActivity = model.addActivity(new ActivityName("Group walk"), ENROL_DATE, LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
-        model.addActivity(new ActivityName("Training"), DATE, LocalTime.of(10, 0), LocalTime.of(11, 0),
+        model.addActivity(new ActivityName("Training"), ENROL_DATE, LocalTime.of(10, 0), LocalTime.of(11, 0),
                 Recurrence.ONCE);
-        model.enrolDogs(matchingActivity.getId(), List.of(firstDog.getId(), secondDog.getId()));
+        model.enrolDogs(matchingActivity.getId(), ENROL_DATE, List.of(firstDog.getId(), secondDog.getId()));
 
         new FilterActivityCommand("group", null, null).execute(model);
 
@@ -99,9 +100,9 @@ public class FilterActivityCommandTest {
         model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
         Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
         model.linkDogs(0, List.of(dog.getId()));
-        var activity = model.addActivity(new ActivityName("Walk"), DATE, LocalTime.NOON,
+        var activity = model.addActivity(new ActivityName("Walk"), ENROL_DATE, LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
-        model.enrolDogs(activity.getId(), List.of(dog.getId()));
+        model.enrolDogs(activity.getId(), ENROL_DATE, List.of(dog.getId()));
 
         new FilterActivityCommand("unknown", null, null).execute(model);
 
@@ -116,14 +117,14 @@ public class FilterActivityCommandTest {
         model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
         Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
         model.linkDogs(0, List.of(dog.getId()));
-        var activity = model.addActivity(new ActivityName("Walk"), DATE, LocalTime.NOON,
+        var activity = model.addActivity(new ActivityName("Walk"), ENROL_DATE, LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
 
         new FilterActivityCommand("walk", null, null).execute(model);
         assertTrue(model.getFilteredDogList().isEmpty());
         assertTrue(model.getFilteredCustomerList().isEmpty());
 
-        model.enrolDogs(activity.getId(), List.of(dog.getId()));
+        model.enrolDogs(activity.getId(), ENROL_DATE, List.of(dog.getId()));
 
         assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
         assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
@@ -135,15 +136,15 @@ public class FilterActivityCommandTest {
         model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
         Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
         model.linkDogs(0, List.of(dog.getId()));
-        var activity = model.addActivity(new ActivityName("Walk"), DATE, LocalTime.NOON,
+        var activity = model.addActivity(new ActivityName("Walk"), ENROL_DATE, LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
-        model.enrolDogs(activity.getId(), List.of(dog.getId()));
+        model.enrolDogs(activity.getId(), ENROL_DATE, List.of(dog.getId()));
 
         new FilterActivityCommand("walk", null, null).execute(model);
         assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
         assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
 
-        model.unenrolDogs(activity.getId(), List.of(dog.getId()));
+        model.unenrolDogs(activity.getId(), ENROL_DATE, List.of(dog.getId()));
 
         assertEquals(List.of(activity), model.getFilteredActivityList());
         assertTrue(model.getFilteredDogList().isEmpty());
@@ -156,12 +157,12 @@ public class FilterActivityCommandTest {
         model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
         Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
         model.linkDogs(0, List.of(dog.getId()));
-        var matchingActivity = model.addActivity(new ActivityName("Group walk"), DATE, LocalTime.NOON,
+        var matchingActivity = model.addActivity(new ActivityName("Group walk"), ENROL_DATE, LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
-        var unrelatedActivity = model.addActivity(new ActivityName("Training"), DATE, LocalTime.of(14, 0),
+        var unrelatedActivity = model.addActivity(new ActivityName("Training"), ENROL_DATE, LocalTime.of(14, 0),
                 LocalTime.of(15, 0), Recurrence.ONCE);
-        model.enrolDogs(unrelatedActivity.getId(), List.of(dog.getId()));
-        model.enrolDogs(matchingActivity.getId(), List.of(dog.getId()));
+        model.enrolDogs(unrelatedActivity.getId(), ENROL_DATE, List.of(dog.getId()));
+        model.enrolDogs(matchingActivity.getId(), ENROL_DATE, List.of(dog.getId()));
 
         new FilterActivityCommand("group", null, null).execute(model);
 

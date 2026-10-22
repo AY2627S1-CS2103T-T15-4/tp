@@ -5,6 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -12,6 +16,9 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
@@ -42,6 +49,30 @@ public class DeleteDogCommandTest {
 
         assertEquals(1, model.getDogList().size());
         assertEquals("Leo", model.getDogList().get(0).getName().fullName);
+    }
+
+    @Test
+    public void execute_dogWithEnrolments_deletesOnlyThatDogsEnrolments() throws Exception {
+        AddressBook addressBook = new AddressBook();
+        Dog dogToDelete = addressBook.addDog(new Dog(new DogName("Leo"), new Breed("Poodle"), new Size("Large")));
+        Dog retainedDog = addressBook.addDog(new Dog(new DogName("Milo"), new Breed("Beagle"), new Size("Small")));
+        LocalDate pastDate = LocalDate.now().minusDays(14);
+        LocalDate firstFutureDate = LocalDate.now().plusDays(7);
+        LocalDate secondFutureDate = firstFutureDate.plusDays(7);
+        addressBook.addActivity(new ActivityName("Walk"), pastDate, LocalTime.of(9, 0), LocalTime.of(10, 0),
+                Recurrence.WEEKLY);
+        addressBook.addEnrolmentFromStorage(new Enrolment(1, dogToDelete.getId(), pastDate));
+        addressBook.addEnrolmentFromStorage(new Enrolment(1, retainedDog.getId(), pastDate));
+        addressBook.enrolDogs(1, firstFutureDate, List.of(dogToDelete.getId(), retainedDog.getId()));
+        addressBook.enrolDogs(1, secondFutureDate, List.of(dogToDelete.getId(), retainedDog.getId()));
+        Model model = new ModelManager(addressBook, new UserPrefs());
+
+        new DeleteDogCommand(dogToDelete.getId()).execute(model);
+
+        assertEquals(List.of(retainedDog), model.getDogList());
+        assertEquals(3, model.getAddressBook().getEnrolmentList().size());
+        assertTrue(model.getAddressBook().getEnrolmentList().stream()
+                .allMatch(enrolment -> enrolment.getDogId() == retainedDog.getId()));
     }
 
     @Test

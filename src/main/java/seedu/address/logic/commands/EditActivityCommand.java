@@ -82,8 +82,7 @@ public class EditActivityCommand extends Command {
                 descriptor.getDate().orElse(activity.getStartDate()),
                 descriptor.getStartTime().orElse(activity.getStartTime()),
                 descriptor.getEndTime().orElse(activity.getEndTime()),
-                descriptor.getRecurrence().orElse(activity.getRecurrence()),
-                activity.isCompleted());
+                descriptor.getRecurrence().orElse(activity.getRecurrence()));
     }
 
     @Override

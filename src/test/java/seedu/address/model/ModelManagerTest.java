@@ -9,11 +9,14 @@ import static seedu.address.testutil.TypicalWatchDog.BOB;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
@@ -55,6 +58,16 @@ public class ModelManagerTest {
         GuiSettings guiSettings = new GuiSettings(1, 2, 3, 4);
         modelManager.setGuiSettings(guiSettings);
         assertEquals(guiSettings, modelManager.getGuiSettings());
+    }
+
+    @Test
+    public void hasCustomer_checksCustomerIdentity() {
+        AddressBook addressBook = new AddressBook();
+        addressBook.addCustomer(ALICE);
+        modelManager = new ModelManager(addressBook, new UserPrefs());
+
+        assertTrue(modelManager.hasCustomer(ALICE));
+        assertFalse(modelManager.hasCustomer(BOB));
     }
 
     @Test
@@ -138,6 +151,35 @@ public class ModelManagerTest {
         assertFalse(first.equals(second));
         assertTrue(first.getFilteredCustomerList().isEmpty());
         assertEquals(1, first.getFilteredDogList().size());
+    }
+
+    @Test
+    public void selectDog_showsOnlyItsTodayAndFutureEnrolments() {
+        AddressBook addressBook = new AddressBook();
+        LocalDate today = LocalDate.now();
+        Dog selectedDog = new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small"));
+        Dog otherDog = new Dog(43, new DogName("Max"), new Breed("Poodle"), new Size("large"));
+        addressBook.addDogFromStorage(selectedDog);
+        addressBook.addDogFromStorage(otherDog);
+        Activity pastActivity = addressBook.addActivity(new ActivityName("Past"), today.minusDays(1),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        Activity todayActivity = addressBook.addActivity(new ActivityName("Today"), today,
+                LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.ONCE);
+        Activity futureActivity = addressBook.addActivity(new ActivityName("Future"), today.plusDays(1),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        Activity otherDogActivity = addressBook.addActivity(new ActivityName("Other dog"), today,
+                LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
+        addressBook.addEnrolmentFromStorage(new Enrolment(pastActivity.getId(), selectedDog.getId(),
+                today.minusDays(1)));
+        addressBook.addEnrolmentFromStorage(new Enrolment(todayActivity.getId(), selectedDog.getId(), today));
+        addressBook.addEnrolmentFromStorage(new Enrolment(futureActivity.getId(), selectedDog.getId(),
+                today.plusDays(1)));
+        addressBook.addEnrolmentFromStorage(new Enrolment(otherDogActivity.getId(), otherDog.getId(), today));
+        modelManager = new ModelManager(addressBook, new UserPrefs());
+
+        modelManager.selectDog(selectedDog.getId());
+
+        assertEquals(List.of(todayActivity, futureActivity), modelManager.getFilteredActivityList());
     }
 
     @Test

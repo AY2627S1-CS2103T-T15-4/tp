@@ -9,11 +9,12 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.stage.Stage?>
 
-<fx:root minHeight="600" minWidth="450" onCloseRequest="#handleExit" title="WatchDog" type="javafx.stage.Stage" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root minHeight="650" minWidth="1100" onCloseRequest="#handleExit" title="WatchDog" type="javafx.stage.Stage" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
   <icons>
     <Image url="@/images/watchdog_logo.png" />
   </icons>
@@ -24,48 +25,58 @@
         <URL value="@Extensions.css" />
       </stylesheets>
 
-      <VBox>
-        <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
+      <StackPane styleClass="app-background">
+        <Pane fx:id="pawPattern" mouseTransparent="true" />
+        <VBox>
+          <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
           <Menu mnemonicParsing="false" text="File">
             <MenuItem mnemonicParsing="false" onAction="#handleExit" text="Exit" />
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <MenuItem fx:id="helpMenuItem" mnemonicParsing="false" onAction="#handleHelp" text="Help" />
           </Menu>
-        </MenuBar>
+          </MenuBar>
 
-        <StackPane fx:id="commandBoxPlaceholder" styleClass="pane-with-border" VBox.vgrow="NEVER">
+        <VBox spacing="10" styleClass="top-content" VBox.vgrow="NEVER">
           <padding>
-            <Insets bottom="5" left="10" right="10" top="5" />
+            <Insets bottom="8" left="24" right="24" top="8" />
           </padding>
-        </StackPane>
+          <StackPane fx:id="commandBoxPlaceholder" maxHeight="55" minHeight="55" prefHeight="55" styleClass="command-area" VBox.vgrow="NEVER">
+            <padding>
+              <Insets bottom="2" left="6" right="6" top="2" />
+            </padding>
+          </StackPane>
 
-        <StackPane fx:id="resultDisplayPlaceholder" maxHeight="100" minHeight="100" prefHeight="100" styleClass="pane-with-border" VBox.vgrow="NEVER">
-          <padding>
-            <Insets bottom="5" left="10" right="10" top="5" />
-          </padding>
-        </StackPane>
+          <StackPane fx:id="resultDisplayPlaceholder" maxHeight="75" minHeight="75" prefHeight="75" styleClass="result-area" VBox.vgrow="NEVER">
+            <padding>
+              <Insets bottom="3" left="10" right="10" top="3" />
+            </padding>
+          </StackPane>
+        </VBox>
 
-        <HBox fx:id="recordLists" styleClass="pane-with-border" VBox.vgrow="ALWAYS">
+        <HBox fx:id="recordLists" spacing="10" styleClass="record-lists" VBox.vgrow="ALWAYS">
           <padding>
-            <Insets bottom="10" left="10" right="10" top="10" />
+            <Insets bottom="10" left="24" right="24" top="10" />
           </padding>
-          <VBox minWidth="250" prefWidth="300" HBox.hgrow="ALWAYS">
+          <VBox minWidth="250" prefWidth="300" HBox.hgrow="ALWAYS" styleClass="panel">
             <Label styleClass="label-header" text="Customers" />
             <StackPane fx:id="customerListPanelPlaceholder" VBox.vgrow="ALWAYS" />
           </VBox>
-          <VBox minWidth="250" prefWidth="300" HBox.hgrow="ALWAYS">
+          <VBox minWidth="250" prefWidth="300" HBox.hgrow="ALWAYS" styleClass="panel">
             <Label styleClass="label-header" text="Dogs" />
             <StackPane fx:id="dogListPanelPlaceholder" VBox.vgrow="ALWAYS" />
           </VBox>
-          <VBox minWidth="250" prefWidth="300" HBox.hgrow="ALWAYS">
+          <VBox minWidth="250" prefWidth="300" HBox.hgrow="ALWAYS" styleClass="panel">
             <Label styleClass="label-header" text="Activities" />
             <StackPane fx:id="activityListPanelPlaceholder" VBox.vgrow="ALWAYS" />
           </VBox>
+          <VBox minWidth="250" prefWidth="300" HBox.hgrow="ALWAYS" styleClass="today-panel">
+            <Label fx:id="todayActivitiesHeader" styleClass="label-header" text="Today" />
+            <StackPane fx:id="todayActivityListPanelPlaceholder" VBox.vgrow="ALWAYS" />
+          </VBox>
         </HBox>
-
-        <StackPane fx:id="statusbarPlaceholder" VBox.vgrow="NEVER" />
-      </VBox>
+        </VBox>
+      </StackPane>
     </Scene>
   </scene>
 </fx:root>

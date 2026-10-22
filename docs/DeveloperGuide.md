@@ -66,11 +66,14 @@ with older files. Negative owner IDs and references to missing customers are rej
 customers are restored before dogs. Copies of the address book retain ownership through immutable dogs.
 `EditDogCommand` preserves the current owner ID when constructing a replacement dog, so editing details
 does not unlink the dog. Ownership changes remain explicit through linking, unlinking, or customer deletion.
+Deleting a dog also removes its enrolment records in the same address-book operation, including past
+occurrences; other dogs' enrolments and activity schedules are preserved.
 
 ### Dog–activity enrolment
 
-Dog participation in an activity is represented by a separate `Enrolment` record containing an
-activity ID and a dog ID. This separates the reusable activity schedule from the dogs attending it.
+Dog participation in an activity occurrence is represented by a separate `Enrolment` record containing
+an activity ID, a dog ID, and an occurrence date. This separates the reusable activity schedule from
+the dogs attending it while distinguishing occurrences of recurring activities.
 It also allows dogs to be enrolled or unenrolled independently without modifying the activity's
 schedule or storing duplicate dog objects inside `Activity`.
 
@@ -120,7 +123,10 @@ The **API** of this component is specified in [`Ui.java`](https://github.com/se-
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
-The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `RecordListPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
+The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `RecordListPanel`,
+`ActivityListPanel`, `TodayActivityListPanel`, and `StatusBarFooter`. `TodayActivityListPanel` reuses the
+activity list and filters it to schedules occurring today. All of these, including `MainWindow`, inherit
+from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
 
 `RecordListPanel` observes the filtered customer and dog lists, plus the complete dog list exposed by `Logic`.
 It displays customers followed by dogs in a single list, using `CustomerCard` and `DogCard`.
@@ -255,9 +261,8 @@ complete dog list. A missing dog leaves every filter unchanged.
 On success the command asks `ModelManager` to follow that dog id. The three filters read the current
 records whenever dogs, customers, activities, links, or enrolments change, so the columns stay current
 after later commands. The dog list shows the selected dog. The customer list shows that dog's current
-owner, or nothing when the dog is unlinked. The activity list shows current enrolments that are not
-marked completed and whose schedule still occurs today or later, using
-`Activity.nextOccurrenceOnOrAfter`. A marked activity is hidden, and unmarking it shows it again.
+owner, or nothing when the dog is unlinked. The activity list shows activities with a dated enrolment
+for that dog today or on a future date.
 Another command that sets its own filter, such as `list` or `search`, leaves this view.
 `ModelManager` keeps this filtered activity list separately from `getActivityList()`, which continues
 to expose every stored schedule.
@@ -271,7 +276,7 @@ filter unchanged. Selecting a customer replaces a previous dog selection, and se
 a previous customer selection.
 
 On success the dog column shows every dog currently linked to that customer. The customer column shows
-that customer. The activity column shows incomplete activities, occurring today or later, for those
+that customer. The activity column shows activities with dated enrolments today or later for those
 dogs. Linking another dog, or enrolling one of those dogs, updates the columns without running
 `select customer` again.
 
@@ -331,7 +336,7 @@ success message, `LogicManager` saves the updated address book.
 
 `AddressBookParser` routes `editactivity` to `EditActivityCommandParser`. The parser requires a
 persistent activity ID and at least one replacement field. `EditActivityCommand` finds the stored
-activity by ID, builds an immutable replacement with the same ID and completion state, and calls
+activity by ID, builds an immutable replacement with the same ID, and calls
 `Model.setActivity`. Fields omitted from the command retain their stored values.
 
 `ModelManager` delegates the replacement to `AddressBook`. If the start date or recurrence changes,
@@ -396,48 +401,41 @@ categories `dog` and `customer`, with arbitrary surrounding whitespace. `FilterU
 whose `ownerId` is absent or customers with no owned dogs, and clears the related panel. Its predicates are
 stored by `ModelManager`, so the results refresh after later record or relationship changes.
 
-### Activity enrolment and completion
+### Activity enrolment
 
-Dogs are linked to activities through separate `Enrolment` records. Each record stores an activity
-ID and a dog ID, allowing an activity to have multiple dogs without storing dog objects directly
-inside the reusable activity schedule.
+Dogs are linked to activity occurrences through separate `Enrolment` records. Each record stores an
+activity ID, a dog ID, and an occurrence date, allowing an activity to have multiple dogs without
+storing dog objects directly inside the reusable activity schedule.
 
 Users can enrol or unenrol one or more dogs using:
 
 ```text
-enrol a/ACTIVITY_ID d/DOG_ID1,DOG_ID2
-unenrol a/ACTIVITY_ID d/DOG_ID1,DOG_ID2
+enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2
+unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2
 ```
 
-The parser converts the activity ID and comma-separated dog IDs into a command. The command
-delegates through `Model` and `ModelManager` to `AddressBook`, which verifies that the activity
-and dogs exist and that the requested enrolments are valid before updating the enrolment list.
-Enrolment changes are persisted with the address book.
+The parser converts the activity ID, occurrence date, and comma-separated dog IDs into a command.
+The command delegates through `Model` and `ModelManager` to `AddressBook`, which verifies that the
+activity and dogs exist, the date is a valid occurrence and is today or later, and the requested
+enrolments are valid before updating the enrolment list. A dog cannot be enrolled in another activity
+with an overlapping time on the same date; adjacent activities are allowed. Batch operations are
+atomic. Successful mutations are logged at `FINE` and guarded by postcondition assertions. Enrolment
+changes are persisted with the address book.
 
 <puml src="diagrams/EnrolDogSequenceDiagram.puml" alt="Enrolling dogs into an activity" />
 
-Unenrolment follows the same parser and model delegation path. After validation, the address book
-removes the matching existing enrolment records instead of changing the activity schedule itself.
+Unenrolment follows the same parser and model delegation path. After validating the activity, date,
+dogs, and exact dated enrolments, the address book removes only the matching activity/dog/date records
+instead of changing the activity schedule itself. Past dates may be unenrolled for correction. Successful
+removal is logged and checked with a postcondition assertion.
 
 <puml src="diagrams/UnenrolDogSequenceDiagram.puml" alt="Unenrolling dogs from an activity" />
 
-Activities can be marked as completed or restored to an incomplete state using:
-
-```text
-mark ACTIVITY_ID
-unmark ACTIVITY_ID
-```
-
-`Activity` remains immutable. Marking or unmarking creates a replacement activity with the same
-identity and schedule but a different completion status. The updated status is included when the
-address book is saved.
-
-<puml src="diagrams/MarkActivitySequenceDiagram.puml" alt="Marking an activity as completed" />
-
-Unmarking follows the same flow as marking, but replaces the activity with a copy whose completion
-status is false.
-
-<puml src="diagrams/UnmarkActivitySequenceDiagram.puml" alt="Marking an activity as incomplete" />
+`ActivityEnrolmentTest` covers recurrence validation, atomic batches, overlap boundaries and error details;
+the enrol and unenrol command/parser tests cover command construction and malformed or impossible dates.
+`EnrolmentStorageTest` covers persisted and legacy records. `DeleteDogCommandTest` checks that deleting a dog
+removes both past and future enrolments without affecting other dogs. `ListPanelsTest` and `MainWindowTest`
+cover the today-only activity filter and its UI integration.
 
 The sequence diagrams focus on interactions between application layers. Low-level list operations
 and exception propagation are omitted where they do not affect the overall design.
@@ -446,9 +444,26 @@ and exception propagation are omitted where they do not affect the overall desig
 
 Use `Model.getActivityList()` for observing activities and `Activity.getId()` for identity,
 independently of displayed positions. Use `Activity.occursOn(date)` for dated schedule queries.
-Enrolments are stored separately from activity schedules and are keyed by activity ID and dog ID.
-The activity card UI is outside this contribution.
+An activity's start date is its first occurrence. Enrolments are stored separately from activity schedules
+and are keyed by activity ID, dog ID, and occurrence date. Legacy enrolment records without a date are
+migrated to their activity's first date when loaded.
+`MainWindow` displays all activities alongside a today-only panel and a date-specific heading. The panel
+reacts to activity-list changes through the shared observable list.
 `addActivityFromStorage` and `setNextActivityId` are restoration APIs, not command entry points.
+
+### Defensive programming, logging, and assertions
+
+Command arguments and model invariants are validated explicitly and produce domain or parser exceptions;
+Java assertions are reserved for internal postconditions, never for user-input validation. Enrolment,
+unenrolment, and dog deletion assert that the expected dated records are present or absent after a successful
+mutation. The Gradle `run` and `test` tasks enable assertions so these checks are active during development
+and automated testing.
+
+`LogicManager` records each command. `AddressBook` logs successful enrolment changes and dog deletion at
+`FINE`, including the number of enrolment records removed. An invalid enrolment restored from storage is
+logged at `WARNING` with its IDs, date, and validation reason before the load error is propagated. Expected
+user validation failures are returned through command feedback rather than logged as warnings, avoiding
+misleading error logs for routine input mistakes.
 
 `AddActivityCommandParserTest`, `AddActivityCommandTest`, `ActivityIntegrationTest` and
 `ActivityStorageTest` cover parser failures, unchanged state, observable access, identity boundaries,
@@ -535,9 +550,9 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | Forgetful dog day-care manager                         | Maintain a checklist for each dog                                          | I can ensure that all required tasks are completed                |
 | `* * *`  | Dog day-care manager managing multiple dogs            | Schedule activities for customers and their dogs                           | I can keep track of upcoming activities                           |
 | `* * *`  | Dog day-care manager preparing for the day             | View all activities scheduled for a particular day                         | I know what needs to be prepared each day                         |
+| `* * *`  | Dog day-care manager                                   | Mark scheduled activities as completed                                     | I can keep track of which tasks have been carried out             |
 | `* * *`  | Dog day-care manager                                   | View a list of dogs currently present                                      | I can monitor the dogs at the day-care centre                     |
 | `* * *`  | Dog day-care manager                                   | Record when a dog checks in and checks out                                 | I can accurately track which dogs are currently present           |
-| `* * *`  | Dog day-care manager                                   | Mark scheduled activities as completed                                     | I can keep track of which tasks have been carried out             |
 | `* * *`  | Dog day-care manager responsible for dog safety        | Record multiple emergency contacts for each dog                            | I can contact someone if the owner is unavailable                 |
 | `* * *`  | Dog day-care manager entering information              | View clear error messages when invalid information or commands are entered | I can correct mistakes without crashing the program               |
 | `* *`    | Dog day-care manager                                   | View all dogs belonging to a specific customer                             | I can see every dog owned by that customer                        |
@@ -819,7 +834,6 @@ NFR-10. **Privacy**: WatchDog shall store dog and customer records locally and s
 * **Check-in / Check-out**: Recording a dog's arrival at or departure from the daycare.
 * **Present dog**: A dog that has checked in and has not yet checked out.
 * **Activity**: A care task planned for a dog, such as feeding, grooming or exercise.
-* **Checklist**: A list of a dog's activities with an indication of which have been completed.
 * **Aggressiveness**: Recorded tendency to show threatening or potentially harmful behaviour towards humans or other dogs, including any known triggers.
 * **Temperament**: A dog's usual behavioural tendencies, such as being calm, shy or friendly. This is broader than aggressiveness.
 * **Care instructions**: Recorded directions for looking after a particular dog, including feeding, exercise and special precautions.
@@ -857,7 +871,8 @@ testers are expected to do more *exploratory* testing.
 ### Deleting a dog
 
 1. Add a dog with `adddog n/Buddy b/Poodle s/small` and note its displayed ID.
-1. Run `delete dog ID` with that ID. The dog disappears; customer records remain intact.
+1. Run `delete dog ID` with that ID. The dog and all of its activity enrolments, including past occurrences,
+   are removed; other dogs' enrolments and customer records remain intact.
 1. Repeat the command. It reports an invalid dog ID without changing stored records.
 1. Try `delete 1`. The retired person command reports an unknown command.
 

@@ -117,26 +117,14 @@ public class ModelManager implements Model {
 
     //=========== Dog Operations ============================================================================
     @Override
-    public void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
-        addressBook.enrolDogs(activityId, dogIds);
+    public void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
+        addressBook.enrolDogs(activityId, date, dogIds);
         refreshDisplayedRecords();
     }
 
     @Override
-    public void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
-        addressBook.unenrolDogs(activityId, dogIds);
-        refreshDisplayedRecords();
-    }
-
-    @Override
-    public void markActivity(int activityId) {
-        addressBook.markActivity(activityId);
-        refreshDisplayedRecords();
-    }
-
-    @Override
-    public void unmarkActivity(int activityId) {
-        addressBook.unmarkActivity(activityId);
+    public void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
+        addressBook.unenrolDogs(activityId, date, dogIds);
         refreshDisplayedRecords();
     }
 
@@ -322,18 +310,13 @@ public class ModelManager implements Model {
         return Optional.empty();
     }
 
-    /**
-     * Enrolment currently attaches a dog to a whole schedule, not to one occurrence date.
-     * A recurring schedule therefore stays visible while it still occurs today or later.
-     * A past one-time schedule is hidden. When enrolment stores an occurrence date, this check
-     * should keep only enrolled dates that are today or later.
-     */
+    /** Shows an activity for a selected dog when it has a dated enrolment today or later. */
     private boolean isVisibleForSelectedDog(int dogId, Activity activity) {
         requireNonNull(activity);
-        boolean enrolled = addressBook.getEnrolmentList().stream().anyMatch(enrolment ->
-                enrolment.getDogId() == dogId && enrolment.getActivityId() == activity.getId());
-        return enrolled && !activity.isCompleted()
-                && activity.nextOccurrenceOnOrAfter(LocalDate.now()).isPresent();
+        LocalDate today = LocalDate.now();
+        return addressBook.getEnrolmentList().stream().anyMatch(enrolment ->
+                enrolment.getDogId() == dogId && enrolment.getActivityId() == activity.getId()
+                        && !enrolment.getDate().isBefore(today) && activity.occursOn(enrolment.getDate()));
     }
 
     private void applySelectedCustomer() {

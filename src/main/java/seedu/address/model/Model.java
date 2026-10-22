@@ -25,13 +25,9 @@ public interface Model {
 
     Predicate<Activity> PREDICATE_SHOW_ALL_ACTIVITIES = unused -> true;
 
-    void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException;
+    void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
 
-    void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException;
-
-    void markActivity(int activityId);
-
-    void unmarkActivity(int activityId);
+    void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
 
     /** Links an entire batch or throws without changing records or filters. */
     void linkDogs(int customerId, List<Integer> dogIds) throws LinkException;
@@ -129,13 +125,13 @@ public interface Model {
     void showActivitiesOnOrAfter(LocalDate date);
 
     /**
-     * Shows this dog, its current owner, and its current incomplete activities.
+     * Shows this dog, its current owner, and its activities with enrolments today or later.
      * Later changes to those records update the same three lists.
      */
     void selectDog(int dogId);
 
     /**
-     * Shows this customer, that customer's dogs, and those dogs' current incomplete activities.
+     * Shows this customer, that customer's dogs, and their activities with enrolments today or later.
      * Later changes to those records update the same three lists.
      */
     void selectCustomer(int customerId);

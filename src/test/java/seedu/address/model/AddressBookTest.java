@@ -54,6 +54,22 @@ public class AddressBookTest {
     }
 
     @Test
+    public void resetData_restoresActivitiesAndTheirEnrolments() throws Exception {
+        AddressBook source = new AddressBook();
+        LocalDate date = LocalDate.of(2028, 2, 29);
+        Activity activity = source.addActivity(new ActivityName("Walk"), date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
+        source.addDogFromStorage(dog);
+        source.enrolDogs(activity.getId(), date, List.of(dog.getId()));
+
+        addressBook.resetData(source);
+
+        assertEquals(List.of(activity), addressBook.getActivityList());
+        assertEquals(List.of(new Enrolment(activity.getId(), dog.getId(), date)), addressBook.getEnrolmentList());
+    }
+
+    @Test
     public void resetData_withoutPersistedDogAndCustomerCounters_derivesNextIds() {
         Customer customer = new Customer(9, new Name("Alex Tan"), new Phone("91234567"),
                 new Email("alex@example.com"), new BackupContact("98765432"));
@@ -115,6 +131,21 @@ public class AddressBookTest {
     }
 
     @Test
+    public void setActivity_withOnlyItsOwnEnrolment_allowsScheduleChange() throws Exception {
+        LocalDate date = LocalDate.of(2028, 2, 29);
+        Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
+        addressBook.addDogFromStorage(dog);
+        Activity target = addressBook.addActivity(new ActivityName("Walk"), date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        addressBook.enrolDogs(target.getId(), date, List.of(dog.getId()));
+        Activity edited = target.withSchedule(date, LocalTime.of(8, 0),
+                LocalTime.of(9, 0), target.getRecurrence());
+
+        assertEquals(0, addressBook.setActivity(target, edited));
+        assertEquals(edited, addressBook.getActivityList().get(0));
+    }
+
+    @Test
     public void setActivity_backToBackWithOtherEnrolledActivity_allowsScheduleChange() throws Exception {
         Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
         addressBook.addDogFromStorage(dog);
@@ -122,8 +153,8 @@ public class AddressBookTest {
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         Activity other = addressBook.addActivity(new ActivityName("Training"), LocalDate.of(2028, 2, 29),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
-        addressBook.enrolDogs(target.getId(), List.of(dog.getId()));
-        addressBook.enrolDogs(other.getId(), List.of(dog.getId()));
+        addressBook.enrolDogs(target.getId(), target.getStartDate(), List.of(dog.getId()));
+        addressBook.enrolDogs(other.getId(), other.getStartDate(), List.of(dog.getId()));
         Activity edited = target.withSchedule(target.getStartDate(), LocalTime.of(12, 0),
                 LocalTime.of(13, 0), target.getRecurrence());
 
@@ -139,8 +170,9 @@ public class AddressBookTest {
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         Activity previousDay = addressBook.addActivity(new ActivityName("Training"), LocalDate.MAX.minusDays(1),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
-        addressBook.enrolDogs(target.getId(), List.of(dog.getId()));
-        addressBook.enrolDogs(previousDay.getId(), List.of(dog.getId()));
+        addressBook.enrolDogs(target.getId(), target.getStartDate(), List.of(dog.getId()));
+        addressBook.addEnrolmentFromStorage(new Enrolment(previousDay.getId(), dog.getId(),
+                previousDay.getStartDate()));
         Activity edited = target.withSchedule(target.getStartDate(), LocalTime.of(8, 0),
                 LocalTime.of(10, 0), target.getRecurrence());
 
@@ -150,11 +182,27 @@ public class AddressBookTest {
 
     @Test
     public void addEnrolmentFromStorage_duplicate_rejectsDuplicate() {
-        Enrolment enrolment = new Enrolment(1, 7);
+        LocalDate date = LocalDate.of(2028, 2, 29);
+        addressBook.addActivity(new ActivityName("Walk"), date, LocalTime.of(9, 0),
+                LocalTime.of(10, 0), Recurrence.ONCE);
+        addressBook.addDogFromStorage(new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
+        Enrolment enrolment = new Enrolment(1, 7, date);
         addressBook.addEnrolmentFromStorage(enrolment);
 
         assertThrows(IllegalArgumentException.class, () -> addressBook.addEnrolmentFromStorage(enrolment));
         assertEquals(List.of(enrolment), addressBook.getEnrolmentList());
+    }
+
+    @Test
+    public void addEnrolmentFromStorage_nonOccurrence_rejectsEnrolment() {
+        LocalDate date = LocalDate.of(2028, 2, 29);
+        Activity activity = addressBook.addActivity(new ActivityName("Walk"), date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        addressBook.addDogFromStorage(new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
+
+        assertThrows(IllegalArgumentException.class, () -> addressBook.addEnrolmentFromStorage(
+                new Enrolment(activity.getId(), 7, date.plusDays(1))));
+        assertTrue(addressBook.getEnrolmentList().isEmpty());
     }
 
     @Test
@@ -183,6 +231,11 @@ public class AddressBookTest {
     }
 
     @Test
+    public void setNextDogId_negativeId_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> addressBook.setNextDogId(-1));
+    }
+
+    @Test
     public void hasDog_sameId_returnsTrue() {
         Dog storedDog = new Dog(3, new DogName("Cookie"),
                 new Breed("Golden Retriever"), new Size("Large"));
@@ -192,6 +245,14 @@ public class AddressBookTest {
                 new Breed("Poodle"), new Size("Small"));
 
         assertTrue(addressBook.hasDog(sameIdentity));
+    }
+
+    @Test
+    public void removeDog_nonexistentDog_throwsIllegalArgumentException() {
+        Dog missingDog = new Dog(99, new DogName("Missing"), new Breed("Poodle"), new Size("Small"));
+
+        assertThrows(IllegalArgumentException.class, () -> addressBook.removeDog(missingDog));
+        assertTrue(addressBook.getDogList().isEmpty());
     }
 
     @Test

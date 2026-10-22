@@ -70,22 +70,12 @@ public class AddCustomerCommandTest {
 
     private abstract static class ModelStub implements Model {
         @Override
-        public void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
+        public void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
             throw unused();
         }
 
         @Override
-        public void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
-            throw unused();
-        }
-
-        @Override
-        public void markActivity(int activityId) {
-            throw unused();
-        }
-
-        @Override
-        public void unmarkActivity(int activityId) {
+        public void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
             throw unused();
         }
 

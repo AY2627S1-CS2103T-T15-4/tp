@@ -141,15 +141,19 @@ class JsonSerializableAddressBook {
             if (adapted == null) {
                 throw new IllegalValueException("Enrolments list must not contain null entries.");
             }
-            Enrolment enrolment = adapted.toModelType();
-            boolean activityExists = addressBook.getActivityList().stream()
-                    .anyMatch(activity -> activity.getId() == enrolment.getActivityId());
-            boolean dogExists = addressBook.getDogList().stream()
-                    .anyMatch(dog -> dog.getId() == enrolment.getDogId());
-            if (!activityExists || !dogExists || addressBook.getEnrolmentList().contains(enrolment)) {
+            Activity activity = adapted.getActivityId() == null ? null : addressBook.getActivityList().stream()
+                    .filter(candidate -> candidate.getId() == adapted.getActivityId())
+                    .findFirst()
+                    .orElse(null);
+            if (activity == null) {
                 throw new IllegalValueException("Invalid or duplicate enrolment.");
             }
-            addressBook.addEnrolmentFromStorage(enrolment);
+            Enrolment enrolment = adapted.toModelType(activity.getStartDate());
+            try {
+                addressBook.addEnrolmentFromStorage(enrolment);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalValueException(e.getMessage(), e);
+            }
         }
         return addressBook;
     }

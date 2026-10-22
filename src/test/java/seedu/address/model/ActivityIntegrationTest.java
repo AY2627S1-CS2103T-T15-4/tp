@@ -143,12 +143,13 @@ public class ActivityIntegrationTest {
         AddressBook target = new AddressBook();
         Activity oldActivity = target.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
         Dog oldDog = target.addDog(new Dog(new DogName("Cookie"), new Breed("Poodle"), new Size("small")));
-        target.enrolDogs(oldActivity.getId(), List.of(oldDog.getId()));
+        target.addEnrolmentFromStorage(new Enrolment(oldActivity.getId(), oldDog.getId(), DATE));
         AddressBook source = new AddressBook();
         source.setNextActivityId(5);
         Activity newActivity = source.addActivity(NAME, DATE, START, END, Recurrence.WEEKLY);
         Dog newDog = source.addDog(new Dog(new DogName("Biscuit"), new Breed("Poodle"), new Size("small")));
-        source.enrolDogs(newActivity.getId(), List.of(newDog.getId()));
+        LocalDate bookingDate = newActivity.nextOccurrenceOnOrAfter(LocalDate.now()).orElseThrow();
+        source.enrolDogs(newActivity.getId(), bookingDate, List.of(newDog.getId()));
         source.setNextDogId(20);
         source.setNextCustomerId(30);
         AtomicReference<AddressBook> activitySnapshot = new AtomicReference<>();

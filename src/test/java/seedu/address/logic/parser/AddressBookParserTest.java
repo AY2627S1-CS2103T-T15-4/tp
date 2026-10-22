@@ -169,6 +169,13 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_removedActivityCommands_throwUnknownCommand() {
+        for (String input : new String[] {"mark 1", "unmark 1"}) {
+            assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
+        }
+    }
+
+    @Test
     public void parseCommand_unknownCommand_throwsParseException() {
         assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand("unknownCommand"));
     }

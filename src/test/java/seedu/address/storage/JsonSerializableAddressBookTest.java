@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalWatchDog.getTypicalAddressBook;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -12,11 +15,19 @@ import org.junit.jupiter.api.Test;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.AddressBook;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.BackupContact;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.Email;
 import seedu.address.model.customer.Name;
 import seedu.address.model.customer.Phone;
+import seedu.address.model.dog.Breed;
+import seedu.address.model.dog.Dog;
+import seedu.address.model.dog.DogName;
+import seedu.address.model.dog.Size;
 
 public class JsonSerializableAddressBookTest {
 
@@ -66,6 +77,51 @@ public class JsonSerializableAddressBookTest {
 
         assertThrows(IllegalValueException.class, JsonSerializableAddressBook.MESSAGE_DUPLICATE_CUSTOMER,
                 data::toModelType);
+    }
+
+    @Test
+    public void toModelType_duplicateDogs_throwsIllegalValueException() {
+        Dog dog = new Dog(1, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
+        JsonSerializableAddressBook data = new JsonSerializableAddressBook(null,
+                List.of(new JsonAdaptedDog(dog), new JsonAdaptedDog(dog)), null, null, null, null, null);
+
+        assertThrows(IllegalValueException.class, JsonSerializableAddressBook.MESSAGE_DUPLICATE_DOG,
+                data::toModelType);
+    }
+
+    @Test
+    public void toModelType_nullEnrolment_throwsIllegalValueException() {
+        JsonSerializableAddressBook data = new JsonSerializableAddressBook(null, null, null, null,
+                null, Collections.singletonList(null), null);
+
+        assertThrows(IllegalValueException.class, "Enrolments list must not contain null entries.",
+                data::toModelType);
+    }
+
+    @Test
+    public void toModelType_enrolmentReferencesUnknownActivity_throwsIllegalValueException() {
+        LocalDate date = LocalDate.of(2028, 2, 29);
+        Activity activity = new Activity(1, new ActivityName("Walk"), date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        JsonSerializableAddressBook data = new JsonSerializableAddressBook(null, null, null, null,
+                List.of(new JsonAdaptedActivity(activity)),
+                List.of(new JsonAdaptedEnrolment(new Enrolment(2, 7, date))), null);
+
+        assertThrows(IllegalValueException.class, "Invalid or duplicate enrolment.", data::toModelType);
+    }
+
+    @Test
+    public void toModelType_negativePersistedIdCounters_derivesCountersFromRecords() throws Exception {
+        Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
+        JsonSerializableAddressBook data = new JsonSerializableAddressBook(
+                List.of(new JsonAdaptedCustomer(customer(9, "Alice Tan"))),
+                List.of(new JsonAdaptedDog(dog)), -1, 0, null, null, null);
+
+        AddressBook restored = data.toModelType();
+
+        assertEquals(10, restored.addCustomer(customer(-1, "Beth Tan")).getId());
+        assertEquals(8, restored.addDog(new Dog(new DogName("Milo"), new Breed("Poodle"),
+                new Size("Small"))).getId());
     }
 
     @Test

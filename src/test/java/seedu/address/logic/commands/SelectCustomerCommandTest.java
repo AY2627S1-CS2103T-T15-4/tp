@@ -47,17 +47,15 @@ public class SelectCustomerCommandTest {
         Activity current = activity("Today walk", today, Recurrence.ONCE);
         Activity future = activity("Future walk", today.plusDays(1), Recurrence.ONCE);
         Activity otherActivity = activity("Buddy walk", today.plusDays(2), Recurrence.ONCE);
-        model.enrolDogs(past.getId(), List.of(cookie.getId()));
-        model.enrolDogs(current.getId(), List.of(cookie.getId()));
-        model.enrolDogs(future.getId(), List.of(max.getId()));
-        model.enrolDogs(otherActivity.getId(), List.of(otherDog.getId()));
-        model.markActivity(current.getId());
+        model.enrolDogs(current.getId(), today, List.of(cookie.getId()));
+        model.enrolDogs(future.getId(), future.getStartDate(), List.of(max.getId()));
+        model.enrolDogs(otherActivity.getId(), otherActivity.getStartDate(), List.of(otherDog.getId()));
 
         assertEquals("Selected customer 1: Lily Koh", execute("select customer 1"));
         assertEquals(List.of(owner), model.getFilteredCustomerList());
         assertEquals(List.of(cookie.getId(), max.getId()),
                 model.getFilteredDogList().stream().map(Dog::getId).toList());
-        assertEquals(List.of(future.getId()),
+        assertEquals(List.of(current.getId(), future.getId()),
                 model.getFilteredActivityList().stream().map(Activity::getId).toList());
     }
 
@@ -66,7 +64,7 @@ public class SelectCustomerCommandTest {
         model.addCustomer(new Customer(1, "Lily Koh", "91234567", "lily@gmail.com", "98765432"));
         Dog buddy = model.addDog(dog("Buddy"));
         Activity walk = activity("Future walk", LocalDate.now().plusDays(1), Recurrence.ONCE);
-        model.enrolDogs(walk.getId(), List.of(buddy.getId()));
+        model.enrolDogs(walk.getId(), walk.getStartDate(), List.of(buddy.getId()));
 
         assertEquals("Selected customer 1: Lily Koh", execute("select   customer   1"));
         assertEquals(1, model.getFilteredCustomerList().size());
@@ -85,7 +83,7 @@ public class SelectCustomerCommandTest {
         assertEquals(List.of(cookie.getId()), model.getFilteredDogList().stream().map(Dog::getId).toList());
 
         Activity walk = activity("Future walk", LocalDate.now().plusDays(1), Recurrence.ONCE);
-        model.enrolDogs(walk.getId(), List.of(cookie.getId()));
+        model.enrolDogs(walk.getId(), walk.getStartDate(), List.of(cookie.getId()));
         assertEquals(List.of(walk.getId()), model.getFilteredActivityList().stream().map(Activity::getId).toList());
 
         model.unlinkDogs(List.of(cookie.getId()));

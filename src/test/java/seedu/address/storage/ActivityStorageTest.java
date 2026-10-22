@@ -1,6 +1,7 @@
 package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
@@ -75,11 +76,23 @@ public class ActivityStorageTest {
         Activity activity = activity(7);
         AddressBook restored = data(List.of(new JsonAdaptedActivity(activity)), null).toModelType();
         assertEquals(List.of(activity), restored.getActivityList());
-        Activity completed = activity(8).markCompleted();
-        assertEquals(List.of(completed), data(List.of(new JsonAdaptedActivity(completed)), null)
-                .toModelType().getActivityList());
         assertEquals(8, restored.getNextActivityId());
         assertEquals(20, data(List.of(new JsonAdaptedActivity(activity)), 20L).toModelType().getNextActivityId());
+    }
+
+    @Test
+    public void adaptedActivity_legacyCompletionField_isIgnoredAndNotResaved() throws Exception {
+        String legacyJson = """
+                {"id":8,"name":"Walk","startDate":"2028-02-29","startTime":"09:00",
+                "endTime":"10:00","recurrence":"WEEKLY","completed":true}
+                """;
+
+        JsonAdaptedActivity adapted = JsonUtil.fromJsonString(legacyJson, JsonAdaptedActivity.class);
+        Activity restored = adapted.toModelType();
+        String savedJson = JsonUtil.toJsonString(new JsonAdaptedActivity(restored));
+
+        assertEquals(activity(8), restored);
+        assertFalse(savedJson.contains("completed"));
     }
 
     @Test

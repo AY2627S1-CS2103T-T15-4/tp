@@ -38,8 +38,9 @@ public class DeleteActivityCommandTest {
         book.addActivity(new ActivityName("Grooming"), LocalDate.of(2028, 2, 29),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
         book.addDogFromStorage(new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
-        book.enrolDogs(1, List.of(7));
-        book.enrolDogs(2, List.of(7));
+        LocalDate bookingDate = LocalDate.of(2028, 2, 29);
+        book.enrolDogs(1, bookingDate, List.of(7));
+        book.enrolDogs(2, bookingDate, List.of(7));
         model = new ModelManager(book, new UserPrefs());
     }
 
@@ -51,7 +52,8 @@ public class DeleteActivityCommandTest {
 
         assertEquals("Successfully deleted activity 1: Walk", result.getFeedbackToUser());
         assertEquals(List.of(other), model.getActivityList());
-        assertEquals(List.of(new Enrolment(2, 7)), model.getAddressBook().getEnrolmentList());
+        assertEquals(List.of(new Enrolment(2, 7, LocalDate.of(2028, 2, 29))),
+                model.getAddressBook().getEnrolmentList());
         assertEquals(7, model.getDogList().get(0).getId());
         assertEquals(3, model.addActivity(new ActivityName("Training"), LocalDate.of(2028, 3, 1),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE).getId());
@@ -61,14 +63,17 @@ public class DeleteActivityCommandTest {
     public void execute_activityWithMultipleEnrolledDogs_removesAllItsEnrolments() throws Exception {
         AddressBook book = new AddressBook(model.getAddressBook());
         book.addDogFromStorage(new Dog(8, new DogName("Max"), new Breed("Beagle"), new Size("Medium")));
-        book.enrolDogs(1, List.of(8));
+        book.enrolDogs(1, LocalDate.of(2028, 2, 29), List.of(8));
         model = new ModelManager(book, new UserPrefs());
-        assertEquals(List.of(new Enrolment(1, 7), new Enrolment(2, 7), new Enrolment(1, 8)),
+        assertEquals(List.of(new Enrolment(1, 7, LocalDate.of(2028, 2, 29)),
+                new Enrolment(2, 7, LocalDate.of(2028, 2, 29)),
+                new Enrolment(1, 8, LocalDate.of(2028, 2, 29))),
                 model.getAddressBook().getEnrolmentList());
 
         new AddressBookParser().parseCommand("deleteactivity 1").execute(model);
 
-        assertEquals(List.of(new Enrolment(2, 7)), model.getAddressBook().getEnrolmentList());
+        assertEquals(List.of(new Enrolment(2, 7, LocalDate.of(2028, 2, 29))),
+                model.getAddressBook().getEnrolmentList());
         assertEquals(List.of(7, 8), model.getDogList().stream().map(Dog::getId).toList());
         assertEquals(List.of(book.getActivityList().get(1)), model.getActivityList());
     }
@@ -112,7 +117,8 @@ public class DeleteActivityCommandTest {
         assertThrows(IllegalArgumentException.class, () -> book.removeActivity(stale));
 
         assertEquals(2, book.getActivityList().size());
-        assertEquals(List.of(new Enrolment(1, 7), new Enrolment(2, 7)), book.getEnrolmentList());
+        assertEquals(List.of(new Enrolment(1, 7, LocalDate.of(2028, 2, 29)),
+                new Enrolment(2, 7, LocalDate.of(2028, 2, 29))), book.getEnrolmentList());
     }
 
     @Test

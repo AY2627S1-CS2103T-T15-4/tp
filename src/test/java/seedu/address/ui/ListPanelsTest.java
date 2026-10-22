@@ -122,6 +122,29 @@ public class ListPanelsTest {
     }
 
     @Test
+    public void todayActivityListPanel_showsOnlyTodaysActivitiesAndRefreshes() throws Exception {
+        runOnFxThread(() -> {
+            LocalDate today = LocalDate.now();
+            Activity todayActivity = new Activity(5, new ActivityName("Today walk"), today,
+                    LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+            ObservableList<Activity> activities = javafx.collections.FXCollections.observableArrayList(
+                    todayActivity,
+                    new Activity(6, new ActivityName("Upcoming"), today.plusDays(1),
+                            LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE));
+            TodayActivityListPanel panel = new TodayActivityListPanel(activities);
+            ListView<Supplier<Region>> list = listView(panel);
+
+            assertEquals(1, list.getItems().size());
+            assertEquals("Today walk", label(list.getItems().get(0).get(), "name"));
+
+            activities.add(new Activity(7, new ActivityName("Today training"), today,
+                    LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.WEEKLY));
+            assertEquals(2, list.getItems().size());
+            assertEquals("Today training", label(list.getItems().get(1).get(), "name"));
+        });
+    }
+
+    @Test
     public void emptyPanels_renderWithoutCards() throws Exception {
         runOnFxThread(() -> {
             CustomerListPanel customers = new CustomerListPanel(FXCollections.observableArrayList(),

@@ -43,27 +43,24 @@ public class SelectDogCommandTest {
         Activity past = activity("Past walk", today.minusDays(1), Recurrence.ONCE);
         Activity current = activity("Today walk", today, Recurrence.ONCE);
         Activity future = activity("Future walk", today.plusDays(1), Recurrence.ONCE);
-        Activity daily = activity("Daily walk", today.minusDays(3), Recurrence.DAILY);
-        Activity weekly = activity("Weekly walk", today.minusWeeks(1), Recurrence.WEEKLY);
+        Activity daily = model.addActivity(new ActivityName("Daily walk"), today.minusDays(3),
+                LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.DAILY);
+        Activity weekly = model.addActivity(new ActivityName("Weekly walk"), today.minusWeeks(1),
+                LocalTime.of(13, 0), LocalTime.of(14, 0), Recurrence.WEEKLY);
         Activity otherDog = activity("Max walk", today.plusDays(2), Recurrence.ONCE);
-        model.enrolDogs(past.getId(), List.of(buddy.getId()));
-        model.enrolDogs(current.getId(), List.of(buddy.getId()));
-        model.enrolDogs(future.getId(), List.of(buddy.getId()));
-        model.enrolDogs(daily.getId(), List.of(buddy.getId()));
-        model.enrolDogs(weekly.getId(), List.of(buddy.getId()));
-        model.enrolDogs(otherDog.getId(), List.of(max.getId()));
-        model.markActivity(current.getId());
+        model.enrolDogs(current.getId(), today, List.of(buddy.getId()));
+        model.enrolDogs(future.getId(), future.getStartDate(), List.of(buddy.getId()));
+        model.enrolDogs(daily.getId(), today, List.of(buddy.getId()));
+        model.enrolDogs(weekly.getId(), today, List.of(buddy.getId()));
+        model.enrolDogs(otherDog.getId(), otherDog.getStartDate(), List.of(max.getId()));
         AddressBook before = new AddressBook(model.getAddressBook());
 
         assertEquals("Selected dog " + buddy.getId() + ": Buddy", execute("select dog " + buddy.getId()));
         assertEquals(List.of(buddy.getId()), model.getFilteredDogList().stream().map(Dog::getId).toList());
         assertEquals(List.of(owner), model.getFilteredCustomerList());
-        assertEquals(List.of(future.getId(), daily.getId(), weekly.getId()),
+        assertEquals(List.of(current.getId(), future.getId(), daily.getId(), weekly.getId()),
                 model.getFilteredActivityList().stream().map(Activity::getId).toList());
         assertEquals(before, model.getAddressBook());
-        model.markActivity(future.getId());
-        assertEquals(List.of(daily.getId(), weekly.getId()),
-                model.getFilteredActivityList().stream().map(Activity::getId).toList());
     }
 
     @Test
@@ -83,8 +80,7 @@ public class SelectDogCommandTest {
         Dog buddy = model.addDog(dog("Buddy"));
         Activity future = activity("Future walk", LocalDate.now().plusDays(1), Recurrence.ONCE);
         Activity past = activity("Past walk", LocalDate.now().minusDays(1), Recurrence.ONCE);
-        model.enrolDogs(future.getId(), List.of(buddy.getId()));
-        model.enrolDogs(past.getId(), List.of(buddy.getId()));
+        model.enrolDogs(future.getId(), future.getStartDate(), List.of(buddy.getId()));
 
         assertEquals("Selected dog " + buddy.getId() + ": Buddy", execute("select dog " + buddy.getId()));
         assertEquals(List.of(buddy.getId()), model.getFilteredDogList().stream().map(Dog::getId).toList());
@@ -103,7 +99,7 @@ public class SelectDogCommandTest {
         assertEquals(List.of(owner.getId()), model.getFilteredCustomerList().stream().map(Customer::getId).toList());
 
         Activity walk = activity("Future walk", LocalDate.now().plusDays(1), Recurrence.ONCE);
-        model.enrolDogs(walk.getId(), List.of(buddy.getId()));
+        model.enrolDogs(walk.getId(), walk.getStartDate(), List.of(buddy.getId()));
         assertEquals(List.of(walk.getId()), model.getFilteredActivityList().stream().map(Activity::getId).toList());
 
         Dog stored = model.getDogList().stream().filter(dog -> dog.getId() == buddy.getId()).findFirst().orElseThrow();
@@ -115,7 +111,7 @@ public class SelectDogCommandTest {
         model.setCustomer(owner, editedOwner);
         assertEquals("80000000", model.getFilteredCustomerList().get(0).getPhone().value);
 
-        model.unenrolDogs(walk.getId(), List.of(buddy.getId()));
+        model.unenrolDogs(walk.getId(), walk.getStartDate(), List.of(buddy.getId()));
         assertEquals(List.of(), model.getFilteredActivityList());
         model.unlinkDogs(List.of(buddy.getId()));
         assertEquals(List.of(), model.getFilteredCustomerList());

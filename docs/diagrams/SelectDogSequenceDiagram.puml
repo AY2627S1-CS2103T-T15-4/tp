@@ -23,7 +23,7 @@ Model --> Command : dogs
 Command -> Model : selectDog(21)
 Model -> Book : read current dog, owner and enrolments
 Book --> Model : current records
-Model -> Model : filter dog, owner and incomplete activities
+Model -> Model : filter dog, owner and future/current enrolments
 Command --> Logic : CommandResult
 Logic --> User : display result
 @enduml

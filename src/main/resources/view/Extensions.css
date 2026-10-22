@@ -4,8 +4,8 @@
 }
 
 .list-cell:empty {
-    /* Empty cells will not have alternating colours */
-    -fx-background: #383838;
+    /* Empty space remains part of the seafoam panel. */
+    -fx-background-color: #90D1CA;
 }
 
 .tooltip-text {

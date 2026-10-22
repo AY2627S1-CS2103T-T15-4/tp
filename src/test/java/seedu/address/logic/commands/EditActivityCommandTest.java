@@ -30,6 +30,8 @@ import seedu.address.model.dog.Size;
 
 /** Tests editing an activity series and its enrolments. */
 public class EditActivityCommandTest {
+    private static final LocalDate INITIAL_DATE = LocalDate.of(2028, 2, 29);
+    private static final LocalDate LATER_DATE = LocalDate.of(2028, 3, 7);
     private ModelManager model;
 
     @BeforeEach
@@ -40,8 +42,8 @@ public class EditActivityCommandTest {
         addressBook.addActivity(new ActivityName("Grooming"), LocalDate.of(2028, 2, 29),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
         addressBook.addDogFromStorage(new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
-        addressBook.enrolDogs(1, List.of(7));
-        addressBook.enrolDogs(2, List.of(7));
+        addressBook.enrolDogs(1, INITIAL_DATE, List.of(7));
+        addressBook.enrolDogs(2, INITIAL_DATE, List.of(7));
         model = new ModelManager(addressBook, new UserPrefs());
     }
 
@@ -54,7 +56,7 @@ public class EditActivityCommandTest {
 
         assertEquals("Edited activity ID 1. Enrolments removed: 1.", result.getFeedbackToUser());
         assertEquals(LocalDate.of(2028, 3, 1), model.getActivityList().get(0).getStartDate());
-        assertEquals(List.of(new Enrolment(2, 7)), model.getAddressBook().getEnrolmentList());
+        assertEquals(List.of(new Enrolment(2, 7, INITIAL_DATE)), model.getAddressBook().getEnrolmentList());
     }
 
     @Test
@@ -65,7 +67,7 @@ public class EditActivityCommandTest {
         new EditActivityCommand(1, descriptor).execute(model);
 
         assertEquals(LocalTime.of(8, 0), model.getActivityList().get(0).getStartTime());
-        assertEquals(List.of(new Enrolment(1, 7), new Enrolment(2, 7)),
+        assertEquals(List.of(new Enrolment(1, 7, INITIAL_DATE), new Enrolment(2, 7, INITIAL_DATE)),
                 model.getAddressBook().getEnrolmentList());
     }
 
@@ -74,13 +76,13 @@ public class EditActivityCommandTest {
         EditActivityDescriptor descriptor = new EditActivityDescriptor();
         descriptor.setEndTime(LocalTime.of(11, 30));
         Activity original = model.getActivityList().get(0);
-        String conflictMessage = "Dog ID 7 has an overlapping booking in activity ID 2.";
+        String conflictMessage = "Dog ID 7 has an overlapping booking in activity ID 2 on 2028-02-29.";
         EditActivityCommand command = new EditActivityCommand(1, descriptor);
 
         assertThrows(CommandException.class, conflictMessage, () -> command.execute(model));
 
         assertEquals(original, model.getActivityList().get(0));
-        assertEquals(List.of(new Enrolment(1, 7), new Enrolment(2, 7)),
+        assertEquals(List.of(new Enrolment(1, 7, INITIAL_DATE), new Enrolment(2, 7, INITIAL_DATE)),
                 model.getAddressBook().getEnrolmentList());
     }
 
@@ -92,16 +94,17 @@ public class EditActivityCommandTest {
         new EditActivityCommand(1, descriptor).execute(model);
 
         assertEquals(LocalTime.of(11, 0), model.getActivityList().get(0).getEndTime());
-        assertEquals(List.of(new Enrolment(1, 7), new Enrolment(2, 7)),
+        assertEquals(List.of(new Enrolment(1, 7, INITIAL_DATE), new Enrolment(2, 7, INITIAL_DATE)),
                 model.getAddressBook().getEnrolmentList());
     }
 
     @Test
     public void execute_timeChangeOverlapsLaterWeeklyBooking_rejects() throws Exception {
-        model.unenrolDogs(2, List.of(7));
+        model.unenrolDogs(2, INITIAL_DATE, List.of(7));
         Activity later = model.addActivity(new ActivityName("Training"), LocalDate.of(2028, 3, 7),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.WEEKLY);
-        model.enrolDogs(later.getId(), List.of(7));
+        model.enrolDogs(1, LATER_DATE, List.of(7));
+        model.enrolDogs(later.getId(), LATER_DATE, List.of(7));
         EditActivityDescriptor descriptor = new EditActivityDescriptor();
         descriptor.setEndTime(LocalTime.of(11, 30));
 
@@ -112,17 +115,19 @@ public class EditActivityCommandTest {
 
     @Test
     public void execute_timeChangeOverlapsLaterDailyBooking_rejects() throws Exception {
-        model.unenrolDogs(2, List.of(7));
+        model.unenrolDogs(2, INITIAL_DATE, List.of(7));
         Activity daily = model.addActivity(new ActivityName("Training"), LocalDate.of(2028, 3, 1),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.DAILY);
-        model.enrolDogs(daily.getId(), List.of(7));
+        model.enrolDogs(1, LATER_DATE, List.of(7));
+        model.enrolDogs(daily.getId(), LATER_DATE, List.of(7));
         EditActivityDescriptor descriptor = new EditActivityDescriptor();
         descriptor.setEndTime(LocalTime.of(11, 30));
 
         assertThrows(CommandException.class, () -> new EditActivityCommand(1, descriptor).execute(model));
 
         assertEquals(LocalTime.of(10, 0), model.getActivityList().get(0).getEndTime());
-        assertEquals(List.of(new Enrolment(1, 7), new Enrolment(daily.getId(), 7)),
+        assertEquals(List.of(new Enrolment(1, 7, INITIAL_DATE), new Enrolment(1, 7, LATER_DATE),
+                new Enrolment(daily.getId(), 7, LATER_DATE)),
                 model.getAddressBook().getEnrolmentList());
     }
 
@@ -135,7 +140,7 @@ public class EditActivityCommandTest {
         assertThrows(CommandException.class, () -> new EditActivityCommand(1, descriptor).execute(model));
 
         assertEquals(LocalTime.of(10, 0), model.getActivityList().get(0).getEndTime());
-        assertEquals(List.of(new Enrolment(1, 7), new Enrolment(2, 7)),
+        assertEquals(List.of(new Enrolment(1, 7, INITIAL_DATE), new Enrolment(2, 7, INITIAL_DATE)),
                 model.getAddressBook().getEnrolmentList());
     }
 
@@ -149,15 +154,15 @@ public class EditActivityCommandTest {
 
         assertEquals("Edited activity ID 1. Enrolments removed: 1.", result.getFeedbackToUser());
         assertEquals(Recurrence.DAILY, model.getActivityList().get(0).getRecurrence());
-        assertEquals(List.of(new Enrolment(2, 7)), model.getAddressBook().getEnrolmentList());
+        assertEquals(List.of(new Enrolment(2, 7, INITIAL_DATE)), model.getAddressBook().getEnrolmentList());
     }
 
     @Test
     public void execute_dateChangeRemovesEnrolmentsBeforeConflictCheck() throws Exception {
-        model.unenrolDogs(2, List.of(7));
+        model.unenrolDogs(2, INITIAL_DATE, List.of(7));
         Activity daily = model.addActivity(new ActivityName("Training"), LocalDate.of(2028, 2, 29),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.DAILY);
-        model.enrolDogs(daily.getId(), List.of(7));
+        model.enrolDogs(daily.getId(), INITIAL_DATE, List.of(7));
         EditActivityDescriptor descriptor = new EditActivityDescriptor();
         descriptor.setDate(LocalDate.of(2028, 3, 1));
         descriptor.setEndTime(LocalTime.of(11, 30));
@@ -165,28 +170,29 @@ public class EditActivityCommandTest {
         new EditActivityCommand(1, descriptor).execute(model);
 
         assertEquals(LocalDate.of(2028, 3, 1), model.getActivityList().get(0).getStartDate());
-        assertEquals(List.of(new Enrolment(daily.getId(), 7)), model.getAddressBook().getEnrolmentList());
+        assertEquals(List.of(new Enrolment(daily.getId(), 7, INITIAL_DATE)),
+                model.getAddressBook().getEnrolmentList());
     }
 
     @Test
     public void parseAndExecute_conflictingEdit_reportsCommandErrorWithoutChangingData() throws Exception {
         Activity original = model.getActivityList().get(0);
         Command command = new AddressBookParser().parseCommand("editactivity 1 end/11:30");
-        String conflictMessage = "Dog ID 7 has an overlapping booking in activity ID 2.";
+        String conflictMessage = "Dog ID 7 has an overlapping booking in activity ID 2 on 2028-02-29.";
 
         assertThrows(CommandException.class, conflictMessage, () -> command.execute(model));
 
         assertEquals(original, model.getActivityList().get(0));
-        assertEquals(List.of(new Enrolment(1, 7), new Enrolment(2, 7)),
+        assertEquals(List.of(new Enrolment(1, 7, INITIAL_DATE), new Enrolment(2, 7, INITIAL_DATE)),
                 model.getAddressBook().getEnrolmentList());
     }
 
     @Test
     public void execute_timeChangeOverlapsAnotherActivityOnDifferentWeekday_succeeds() throws Exception {
-        model.unenrolDogs(2, List.of(7));
+        model.unenrolDogs(2, INITIAL_DATE, List.of(7));
         Activity other = model.addActivity(new ActivityName("Training"), LocalDate.of(2028, 3, 1),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.WEEKLY);
-        model.enrolDogs(other.getId(), List.of(7));
+        model.enrolDogs(other.getId(), other.getStartDate(), List.of(7));
         EditActivityDescriptor descriptor = new EditActivityDescriptor();
         descriptor.setEndTime(LocalTime.of(11, 30));
 
@@ -197,9 +203,9 @@ public class EditActivityCommandTest {
 
     @Test
     public void execute_timeChangeOverlapsActivityWithDifferentDog_succeeds() throws Exception {
-        model.unenrolDogs(2, List.of(7));
+        model.unenrolDogs(2, INITIAL_DATE, List.of(7));
         Dog otherDog = model.addDog(new Dog(new DogName("Cookie"), new Breed("Poodle"), new Size("Small")));
-        model.enrolDogs(2, List.of(otherDog.getId()));
+        model.enrolDogs(2, INITIAL_DATE, List.of(otherDog.getId()));
         EditActivityDescriptor descriptor = new EditActivityDescriptor();
         descriptor.setEndTime(LocalTime.of(11, 30));
 
@@ -217,7 +223,7 @@ public class EditActivityCommandTest {
         assertThrows(CommandException.class, () -> new EditActivityCommand(1, descriptor).execute(model));
 
         assertEquals(original, model.getActivityList().get(0));
-        assertEquals(List.of(new Enrolment(1, 7), new Enrolment(2, 7)),
+        assertEquals(List.of(new Enrolment(1, 7, INITIAL_DATE), new Enrolment(2, 7, INITIAL_DATE)),
                 model.getAddressBook().getEnrolmentList());
     }
 
@@ -236,8 +242,7 @@ public class EditActivityCommandTest {
     }
 
     @Test
-    public void execute_renameCompletedActivity_preservesScheduleCompletionAndEnrolments() throws Exception {
-        model.markActivity(1);
+    public void execute_renameActivity_preservesScheduleAndEnrolments() throws Exception {
         Activity original = model.getActivityList().get(0);
         EditActivityDescriptor descriptor = new EditActivityDescriptor();
         descriptor.setName(new ActivityName("Training"));
@@ -251,8 +256,7 @@ public class EditActivityCommandTest {
         assertEquals(original.getStartTime(), edited.getStartTime());
         assertEquals(original.getEndTime(), edited.getEndTime());
         assertEquals(original.getRecurrence(), edited.getRecurrence());
-        assertTrue(edited.isCompleted());
-        assertEquals(List.of(new Enrolment(1, 7), new Enrolment(2, 7)),
+        assertEquals(List.of(new Enrolment(1, 7, INITIAL_DATE), new Enrolment(2, 7, INITIAL_DATE)),
                 model.getAddressBook().getEnrolmentList());
     }
 
