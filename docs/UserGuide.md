@@ -250,6 +250,15 @@ Example: `filterd b/Golden Retriever s/Medium`
 * Unowned matching dogs remain visible, but the customer panel is empty.
 * The filter remains active while dogs or customers are added, edited, deleted, linked, or unlinked.
 
+### Filtering unlinked records: `filterun`
+
+Format: `filterun dog` or `filterun customer`
+
+* `filterun dog` displays dogs that are not linked to any customer and clears the customer panel.
+* `filterun customer` displays customers that do not own any dogs and clears the dog panel.
+* The category must be lowercase. Multiple spaces between `filterun` and the category are accepted.
+* The filter remains active while records are added, edited, deleted, linked, or unlinked.
+
 ### Filtering customers: `filterc`
 
 Filters customers by one or more fields. All supplied fields must match.
