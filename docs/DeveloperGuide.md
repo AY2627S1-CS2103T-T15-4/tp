@@ -284,6 +284,20 @@ interface, implemented by `StorageManager`. Concrete lifelines are shown to make
 
 <puml src="diagrams/AddActivitySequenceDiagram.puml" alt="Parsing, executing and saving an addactivity command" />
 
+### Editing an activity
+
+`AddressBookParser` routes `editactivity` to `EditActivityCommandParser`. The parser requires a
+persistent activity ID and at least one replacement field. `EditActivityCommand` finds the stored
+activity by ID, builds an immutable replacement with the same ID and completion state, and calls
+`Model.setActivity`. Fields omitted from the command retain their stored values.
+
+`ModelManager` delegates the replacement to `AddressBook`. If the start date or recurrence changes,
+the address book removes that activity's enrolments. Otherwise it retains them after checking that
+the edited schedule does not overlap another activity attended by the same dog. The returned count
+of removed enrolments appears in the command feedback. `LogicManager` then saves the address book.
+
+<puml src="diagrams/EditActivitySequenceDiagram.puml" alt="Parsing, executing and saving an editactivity command" />
+
 ### Activity enrolment and completion
 
 Dogs are linked to activities through separate `Enrolment` records. Each record stores an activity
