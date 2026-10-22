@@ -36,8 +36,8 @@ JsonSerializableAddressBook --> "*" JsonAdaptedCustomer
 JsonSerializableAddressBook --> "*" JsonAdaptedDog
 JsonSerializableAddressBook --> "*" JsonAdaptedActivity
 JsonSerializableAddressBook --> "*" JsonAdaptedEnrolment
-JsonAdaptedActivity : completed: boolean
 JsonAdaptedEnrolment : activityId: int
 JsonAdaptedEnrolment : dogId: int
+JsonAdaptedEnrolment : date: LocalDate
 
 @enduml

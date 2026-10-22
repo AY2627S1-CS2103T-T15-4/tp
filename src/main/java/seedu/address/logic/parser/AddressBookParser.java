@@ -22,11 +22,9 @@ import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.LinkCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ListDogCommand;
-import seedu.address.logic.commands.MarkActivityCommand;
 import seedu.address.logic.commands.SearchCommand;
 import seedu.address.logic.commands.UnenrolDogCommand;
 import seedu.address.logic.commands.UnlinkCommand;
-import seedu.address.logic.commands.UnmarkActivityCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
 /**
@@ -88,8 +86,6 @@ public class AddressBookParser {
             case UnlinkCommand.COMMAND_WORD -> new UnlinkCommandParser().parse(arguments);
             case EnrolDogCommand.COMMAND_WORD -> new EnrolDogCommandParser().parse(arguments);
             case UnenrolDogCommand.COMMAND_WORD -> new UnenrolDogCommandParser().parse(arguments);
-            case MarkActivityCommand.COMMAND_WORD -> new MarkActivityCommandParser().parse(arguments);
-            case UnmarkActivityCommand.COMMAND_WORD -> new UnmarkActivityCommandParser().parse(arguments);
             case ListCommand.COMMAND_WORD -> new ListCommandParser().parse(arguments);
             case ExitCommand.COMMAND_WORD -> new ExitCommand();
             case HelpCommand.COMMAND_WORD -> new HelpCommand();

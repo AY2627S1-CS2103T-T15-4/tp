@@ -143,19 +143,4 @@ public class ActivityTest {
         assertTrue(original.toString().contains("Training"));
     }
 
-    @Test
-    public void completion_markAndUnmark_preserveDetails() {
-        Activity original = activity(Recurrence.ONCE);
-        Activity completed = original.markCompleted();
-        Activity pending = completed.markIncomplete();
-
-        assertTrue(completed.isCompleted());
-        assertFalse(pending.isCompleted());
-        assertEquals(original.getId(), completed.getId());
-        assertEquals(original.getName(), completed.getName());
-        assertEquals(original.getStartDate(), completed.getStartDate());
-        assertEquals(original.getStartTime(), completed.getStartTime());
-        assertEquals(original.getEndTime(), completed.getEndTime());
-        assertEquals(original.getRecurrence(), completed.getRecurrence());
-    }
 }

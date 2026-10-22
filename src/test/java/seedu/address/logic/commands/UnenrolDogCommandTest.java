@@ -25,10 +25,10 @@ import seedu.address.model.dog.Size;
 public class UnenrolDogCommandTest {
     private ModelManager modelWithEnrolment() throws Exception {
         AddressBook book = new AddressBook();
-        book.addActivity(new ActivityName("Walk"), LocalDate.of(2026, 1, 1),
+        book.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 1, 1),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         book.addDogFromStorage(new Dog(1, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
-        book.enrolDogs(1, List.of(1));
+        book.enrolDogs(1, LocalDate.of(2028, 1, 1), List.of(1));
         return new ModelManager(book, new UserPrefs());
     }
 
@@ -36,29 +36,33 @@ public class UnenrolDogCommandTest {
     public void execute_validEnrolment_removesEnrolment() throws Exception {
         ModelManager model = modelWithEnrolment();
 
-        CommandResult result = new UnenrolDogCommand(1, List.of(1)).execute(model);
+        CommandResult result = new UnenrolDogCommand(1, LocalDate.of(2028, 1, 1), List.of(1)).execute(model);
 
-        assertEquals("Unenrolled dog IDs [1] from activity ID 1.", result.getFeedbackToUser());
+        assertEquals("Unenrolled dog IDs [1] from activity ID 1 on 2028-01-01.", result.getFeedbackToUser());
         assertEquals(List.of(), model.getAddressBook().getEnrolmentList());
     }
 
     @Test
     public void execute_missingEnrolment_throwsCommandException() throws Exception {
         ModelManager model = new ModelManager();
-        assertThrows(CommandException.class, () -> new UnenrolDogCommand(1, List.of(1)).execute(model));
+        assertThrows(CommandException.class, () -> new UnenrolDogCommand(1, LocalDate.of(2028, 1, 1),
+                List.of(1)).execute(model));
     }
 
     @Test
     public void constructorAndEquals_validateAndCompareFields() {
-        UnenrolDogCommand command = new UnenrolDogCommand(1, List.of(2, 3));
+        UnenrolDogCommand command = new UnenrolDogCommand(1, LocalDate.of(2028, 1, 1), List.of(2, 3));
         assertEquals(command, command);
-        assertEquals(command, new UnenrolDogCommand(1, List.of(2, 3)));
-        assertNotEquals(command, new UnenrolDogCommand(2, List.of(2, 3)));
-        assertNotEquals(command, new UnenrolDogCommand(1, List.of(2)));
+        assertEquals(command, new UnenrolDogCommand(1, LocalDate.of(2028, 1, 1), List.of(2, 3)));
+        assertNotEquals(command, new UnenrolDogCommand(2, LocalDate.of(2028, 1, 1), List.of(2, 3)));
+        assertNotEquals(command, new UnenrolDogCommand(1, LocalDate.of(2028, 1, 1), List.of(2)));
         assertNotEquals(command, null);
         assertNotEquals(command, "command");
-        assertThrows(IllegalArgumentException.class, () -> new UnenrolDogCommand(-1, List.of(2)));
-        assertThrows(IllegalArgumentException.class, () -> new UnenrolDogCommand(1, List.of()));
-        assertThrows(IllegalArgumentException.class, () -> new UnenrolDogCommand(1, List.of(2, 2)));
+        assertThrows(IllegalArgumentException.class, () -> new UnenrolDogCommand(-1,
+                LocalDate.of(2028, 1, 1), List.of(2)));
+        assertThrows(IllegalArgumentException.class, () -> new UnenrolDogCommand(1,
+                LocalDate.of(2028, 1, 1), List.of()));
+        assertThrows(IllegalArgumentException.class, () -> new UnenrolDogCommand(1,
+                LocalDate.of(2028, 1, 1), List.of(2, 2)));
     }
 }

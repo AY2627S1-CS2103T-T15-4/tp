@@ -22,13 +22,9 @@ import seedu.address.model.dog.exceptions.UnlinkException;
 public interface Model {
     Predicate<Customer> PREDICATE_SHOW_ALL_CUSTOMERS = unused -> true;
 
-    void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException;
+    void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
 
-    void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException;
-
-    void markActivity(int activityId);
-
-    void unmarkActivity(int activityId);
+    void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
 
     /** Links an entire batch or throws without changing records or filters. */
     void linkDogs(int customerId, List<Integer> dogIds) throws LinkException;

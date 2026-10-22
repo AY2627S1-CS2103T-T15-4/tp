@@ -272,7 +272,8 @@ Examples: `search customer n/Alex Tan`, `search customer id/42`.
 
 ### Deleting a dog: `delete dog`
 
-Deletes a dog using its persistent dog ID.
+Deletes a dog using its persistent dog ID and removes all of that dog's activity enrolments, including past
+occurrences. Other dogs' enrolments and the activity schedules remain unchanged.
 
 Format: `delete dog ID`
 
@@ -366,6 +367,8 @@ Action     | Format, Examples
 **Search customers** | `search customer n/NAME_QUERY` or `search customer id/ID`<br> e.g., `search customer n/alex`
 **Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
 **Add activity** | `addactivity n/NAME date/YYYY-MM-DD start/HH:mm end/HH:mm r/once`<br>Use `r/daily` or `r/weekly` for recurrence.
+**Enrol dogs** | `enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2`<br>Date must be today or a future occurrence; overlapping activities for the same dog are rejected.
+**Unenrol dogs** | `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2`<br>Removes only the specified dated enrolments.
 **Add dog** | `adddog n/NAME b/BREED s/SIZE`<br>e.g., `adddog n/Cookie b/Chihuahua s/Small`
 **Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 **Edit dog** | `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`<br>e.g., `editdog 1 s/Large`

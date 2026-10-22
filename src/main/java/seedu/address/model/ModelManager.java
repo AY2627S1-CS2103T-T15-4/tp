@@ -89,23 +89,13 @@ public class ModelManager implements Model {
 
     //=========== Dog Operations ============================================================================
     @Override
-    public void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
-        addressBook.enrolDogs(activityId, dogIds);
+    public void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
+        addressBook.enrolDogs(activityId, date, dogIds);
     }
 
     @Override
-    public void unenrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {
-        addressBook.unenrolDogs(activityId, dogIds);
-    }
-
-    @Override
-    public void markActivity(int activityId) {
-        addressBook.markActivity(activityId);
-    }
-
-    @Override
-    public void unmarkActivity(int activityId) {
-        addressBook.unmarkActivity(activityId);
+    public void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
+        addressBook.unenrolDogs(activityId, date, dogIds);
     }
 
     @Override

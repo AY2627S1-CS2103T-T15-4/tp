@@ -10,18 +10,16 @@ show members
 interface Model {
   +addActivity(name, date, start, end, recurrence): Activity
   +getActivityList(): ObservableList<Activity>
-  +enrolDogs(activityId, dogIds)
-  +unenrolDogs(activityId, dogIds)
-  +markActivity(activityId)
-  +unmarkActivity(activityId)
+  +enrolDogs(activityId, date, dogIds)
+  +unenrolDogs(activityId, date, dogIds)
+  +deleteDog(dog)
 }
 
 class ModelManager {
   +addActivity(name, date, start, end, recurrence): Activity
-  +enrolDogs(activityId, dogIds)
-  +unenrolDogs(activityId, dogIds)
-  +markActivity(activityId)
-  +unmarkActivity(activityId)
+  +enrolDogs(activityId, date, dogIds)
+  +unenrolDogs(activityId, date, dogIds)
+  +deleteDog(dog)
 }
 
 interface ReadOnlyAddressBook {
@@ -33,15 +31,13 @@ class AddressBook {
   -nextActivityId: long
   +addActivity(name, date, start, end, recurrence): Activity
   +getActivityList(): ObservableList<Activity>
-  +enrolDogs(activityId, dogIds)
-  +unenrolDogs(activityId, dogIds)
-  +markActivity(activityId)
-  +unmarkActivity(activityId)
+  +enrolDogs(activityId, date, dogIds)
+  +unenrolDogs(activityId, date, dogIds)
+  +removeDog(dog)
 }
 
 class Activity <<immutable>> {
   -id: int
-  -completed: boolean
   -startDate: LocalDate
   -startTime: LocalTime
   -endTime: LocalTime
@@ -49,17 +45,16 @@ class Activity <<immutable>> {
   +nextOccurrenceOnOrAfter(date: LocalDate): Optional<LocalDate>
   +withName(name: ActivityName): Activity
   +withSchedule(date, start, end, recurrence): Activity
-  +isCompleted(): boolean
-  +markCompleted(): Activity
-  +markIncomplete(): Activity
   +isSameActivity(other: Activity): boolean
 }
 
 class Enrolment <<immutable>> {
   -activityId: int
   -dogId: int
+  -date: LocalDate
   +getActivityId(): int
   +getDogId(): int
+  +getDate(): LocalDate
 }
 
 class ActivityName <<immutable>> {
@@ -86,6 +81,7 @@ Activity --> "1" Recurrence : recurrence
 
 note bottom of AddressBook
   Assigns IDs and exposes an unmodifiable observable list.
+  Dog deletion removes that dog's enrolments before its record.
   Other customer/dog data and unrelated APIs are omitted.
 end note
 
