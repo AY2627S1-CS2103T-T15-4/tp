@@ -35,7 +35,7 @@ deactivate Model
 Command -> Command : find activity by persistent ID
 Command -> Command : createEditedActivity(target, descriptor)
 note right of Command
-  The replacement retains the ID, completion state,
+  The replacement retains the activity ID,
   and values of fields that were not edited.
 end note
 Command -> Model : setActivity(target, editedActivity)

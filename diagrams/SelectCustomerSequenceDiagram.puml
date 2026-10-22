@@ -26,7 +26,7 @@ Model --> Command : customers
 Command -> Model : selectCustomer(21)
 Model -> Book : read current customer, owned dogs and enrolments
 Book --> Model : current records
-Model -> Model : filter customer, owned dogs and incomplete activities
+Model -> Model : filter customer, owned dogs and future/current enrolments
 Command --> Logic : CommandResult
 Logic --> User : display result
 @enduml
