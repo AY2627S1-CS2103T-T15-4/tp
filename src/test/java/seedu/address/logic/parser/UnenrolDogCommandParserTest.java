@@ -36,8 +36,7 @@ public class UnenrolDogCommandParserTest {
 
     @Test
     public void parse_malformedDatedInput_reportsExpectedFormat() {
-        ParseException exception = assertThrows(ParseException.class,
-                () -> parser.parse("a/1 d/2"));
+        ParseException exception = assertThrows(ParseException.class, () -> parser.parse("a/1 d/2"));
 
         assertEquals("Invalid unenrol format. Use: unenrol a/ACTIVITY_ID date/YYYY-MM-DD "
                 + "d/DOG_ID[,DOG_ID...]. Example: unenrol a/1 date/2026-10-27 d/2,3", exception.getMessage());

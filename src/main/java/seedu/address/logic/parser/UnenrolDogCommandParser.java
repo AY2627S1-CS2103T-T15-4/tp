@@ -30,7 +30,7 @@ public class UnenrolDogCommandParser implements Parser<UnenrolDogCommand> {
             throw invalidFormat();
         }
         try {
-            String[] fields = input.split("\\s+d/");
+            String[] fields = input.split("\\s+d/", -1);
             String[] activityFields = activityIdAndDate(fields[0]);
             int activityId = Integer.parseInt(activityFields[0]);
             LocalDate date = LocalDate.parse(activityFields[1], DATE_FORMAT);
