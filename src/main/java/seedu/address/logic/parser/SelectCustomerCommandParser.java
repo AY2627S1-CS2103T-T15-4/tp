@@ -13,7 +13,7 @@ public class SelectCustomerCommandParser implements Parser<SelectCustomerCommand
     @Override
     public SelectCustomerCommand parse(String args) throws ParseException {
         String[] tokens = args.trim().split("\\s+", 2);
-        if (tokens.length == 0 || !tokens[0].equals("customer")) {
+        if (!tokens[0].equals("customer")) {
             throw new ParseException(MESSAGE_INVALID_FORMAT);
         }
         String idText = tokens.length == 2 ? tokens[1].trim() : "";

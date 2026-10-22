@@ -114,6 +114,7 @@ public class SelectCustomerCommandTest {
         assertNotEquals(command, new SelectCustomerCommand(22));
         assertNotEquals(command, null);
         assertNotEquals(command, new Object());
+        assertEquals(command.toString(), new SelectCustomerCommand(21).toString());
     }
 
     private String execute(String input) throws Exception {

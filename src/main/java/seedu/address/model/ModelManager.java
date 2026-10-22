@@ -260,9 +260,7 @@ public class ModelManager implements Model {
 
     /** Reapplies the current dog selection after stored records change. */
     private void refreshSelectedDog() {
-        if (selectedDogId != null) {
-            applySelectedDog();
-        }
+        applySelectedDog();
     }
 
     /** Reapplies active filters after stored records or relationships change. */
