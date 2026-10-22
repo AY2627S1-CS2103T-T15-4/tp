@@ -17,6 +17,7 @@ import seedu.address.logic.commands.EditDogCommand.EditDogDescriptor;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
@@ -85,6 +86,14 @@ public class AddressBookParserTest {
     public void parseCommand_list() throws Exception {
         assertTrue(parser.parseCommand(ListCommand.COMMAND_WORD + " customer") instanceof ListCommand);
         assertTrue(parser.parseCommand(ListCommand.COMMAND_WORD + "   customer  ") instanceof ListCommand);
+    }
+
+    @Test
+    public void parseCommand_resetDisplay_acceptsOnlyCommandWord() throws Exception {
+        assertTrue(parser.parseCommand("resetdisplay") instanceof ResetDisplayCommand);
+        assertTrue(parser.parseCommand("  resetdisplay  ") instanceof ResetDisplayCommand);
+        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, ResetDisplayCommand.MESSAGE_USAGE);
+        assertThrows(ParseException.class, expectedMessage, () -> parser.parseCommand("resetdisplay tomorrow"));
     }
 
     @Test

@@ -96,6 +96,40 @@ public class MainWindowTest {
         });
     }
 
+    @Test
+    public void executeCommand_resetDisplay_restoresBothListsAndShowsAllActivities() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-reset");
+        Model model = new ModelManager();
+        model.addCustomer(LILY);
+        model.addDog(new Dog(new DogName("Cookie"), new Breed("Chihuahua"), new Size("Small")));
+        model.addActivity(new ActivityName("Past walk"), LocalDate.of(2025, 1, 1),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.DAILY);
+        model.addActivity(new ActivityName("Future walk"), LocalDate.of(2028, 1, 1),
+                LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
+        Logic logic = new LogicManager(model, new StorageManager(
+                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            window.fillInnerParts();
+            ListView<Supplier<Region>> customers = listView(window.getCustomerListPanel());
+            ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
+            ListView<Supplier<Region>> activities = listView(window.getActivityListPanel());
+
+            window.executeCommand("list dog");
+            assertTrue(customers.getItems().isEmpty());
+            window.executeCommand("resetdisplay");
+
+            assertEquals(1, customers.getItems().size());
+            assertEquals(1, dogs.getItems().size());
+            assertEquals(2, activities.getItems().size());
+            assertEquals("Past walk", label(activities.getItems().get(0).get(), "name"));
+            assertEquals("Date: 2025-01-01", label(activities.getItems().get(0).get(), "date"));
+            assertEquals("Future walk", label(activities.getItems().get(1).get(), "name"));
+        });
+    }
+
     private static String label(Region card, String id) {
         return ((Label) card.lookup("#" + id)).getText();
     }
