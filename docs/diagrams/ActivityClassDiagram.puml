@@ -11,6 +11,8 @@ interface Model {
   +addActivity(name, date, start, end, recurrence): Activity
   +setActivity(target, editedActivity): int
   +getActivityList(): ObservableList<Activity>
+  +getFilteredActivityList(): ObservableList<Activity>
+  +updateFilteredActivityList(predicate)
   +enrolDogs(activityId, dogIds)
   +unenrolDogs(activityId, dogIds)
   +markActivity(activityId)
@@ -20,6 +22,8 @@ interface Model {
 class ModelManager {
   +addActivity(name, date, start, end, recurrence): Activity
   +setActivity(target, editedActivity): int
+  +getFilteredActivityList(): ObservableList<Activity>
+  +updateFilteredActivityList(predicate)
   +enrolDogs(activityId, dogIds)
   +unenrolDogs(activityId, dogIds)
   +markActivity(activityId)
