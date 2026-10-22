@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.time.Clock;
@@ -64,6 +65,14 @@ public class ResetDisplayCommandTest {
     @Test
     public void execute_nullModel_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new ResetDisplayCommand(CLOCK).execute(null));
+    }
+
+    @Test
+    public void equals_sameCommandType() {
+        ResetDisplayCommand command = new ResetDisplayCommand(CLOCK);
+
+        assertEquals(command, new ResetDisplayCommand(CLOCK));
+        assertNotEquals(command, new Object());
     }
 
     private static Activity addActivity(ModelManager model, LocalDate date, Recurrence recurrence) {
