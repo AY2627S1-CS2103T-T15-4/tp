@@ -107,6 +107,9 @@ public interface Model {
     /** Adds an empty schedule and returns it with its persistent ID. */
     Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end, Recurrence recurrence);
 
+    /** Replaces an activity and returns the number of enrolments removed by a date or recurrence change. */
+    int setActivity(Activity target, Activity editedActivity);
+
     /** Returns all schedules, independently of dog/customer filters. */
     default ObservableList<Activity> getActivityList() {
         return getAddressBook().getActivityList();

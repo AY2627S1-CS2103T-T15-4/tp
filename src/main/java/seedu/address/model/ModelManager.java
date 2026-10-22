@@ -99,6 +99,11 @@ public class ModelManager implements Model {
         return activity;
     }
 
+    @Override
+    public int setActivity(Activity target, Activity editedActivity) {
+        return addressBook.setActivity(target, editedActivity);
+    }
+
     //=========== Dog Operations ============================================================================
     @Override
     public void enrolDogs(int activityId, List<Integer> dogIds) throws EnrolException {

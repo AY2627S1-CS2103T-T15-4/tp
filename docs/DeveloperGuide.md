@@ -315,6 +315,20 @@ interface, implemented by `StorageManager`. Concrete lifelines are shown to make
 
 <puml src="diagrams/AddActivitySequenceDiagram.puml" alt="Parsing, executing and saving an addactivity command" />
 
+### Editing an activity
+
+`AddressBookParser` routes `editactivity` to `EditActivityCommandParser`. The parser requires a
+persistent activity ID and at least one replacement field. `EditActivityCommand` finds the stored
+activity by ID, builds an immutable replacement with the same ID and completion state, and calls
+`Model.setActivity`. Fields omitted from the command retain their stored values.
+
+`ModelManager` delegates the replacement to `AddressBook`. If the start date or recurrence changes,
+the address book removes that activity's enrolments. Otherwise it retains them after checking that
+the edited schedule does not overlap another activity attended by the same dog. The returned count
+of removed enrolments appears in the command feedback. `LogicManager` then saves the address book.
+
+<puml src="diagrams/EditActivitySequenceDiagram.puml" alt="Parsing, executing and saving an editactivity command" />
+
 ### Dog filtering
 
 `AddressBookParser` routes `filterd` to `FilterDogCommandParser`. The parser accepts the lowercase fields
@@ -355,7 +369,7 @@ or `Daily`. Names are trimmed, internal whitespace is normalised, and matching i
 Name matching uses a case-insensitive substring, date matching delegates to `Activity.occursOn(date)`
 so recurring activities are handled correctly, and time matching includes both endpoints. Multiple
 recurrence matching compares the activity's stored recurrence. Multiple fields are combined with AND semantics.
-The activity panel observes this filtered list, while the
+ The activity panel observes this filtered list, while the
 underlying stored schedules remain unchanged. The success message reports only the supplied fields, in the
 order name, time, date, and recurrence.
 The activity predicate is reapplied after activity additions and activity state or enrolment changes, so the
