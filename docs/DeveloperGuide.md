@@ -347,6 +347,8 @@ underlying stored schedules remain unchanged. The success message reports only t
 order name, time, date, and recurrence.
 The activity predicate is reapplied after activity additions and activity state or enrolment changes, so the
 activity display remains filtered without requiring the user to repeat the command.
+The command also derives the dog panel from enrolments in matching activities and the customer panel from those
+dogs' owners. These predicates inspect current model data, so relationship changes refresh all three displays.
 ### Unlinked filtering
 
 `AddressBookParser` routes `filterun` to `FilterUnlinkedCommandParser`, which accepts only the lowercase
