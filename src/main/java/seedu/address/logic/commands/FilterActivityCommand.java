@@ -41,18 +41,19 @@ public class FilterActivityCommand extends Command {
         requireNonNull(model);
         ActivityFilterPredicate predicate = new ActivityFilterPredicate(name, date, time, recurrence);
         model.updateFilteredActivityList(predicate);
-        model.updateFilteredDogList(dog -> isEnrolledInMatchingActivity(model, dog.getId(), predicate));
+        model.updateFilteredDogList(dog -> isEnrolledInMatchingActivity(model, dog.getId(), predicate, date));
         model.updateFilteredCustomerList(customer -> model.getDogList().stream()
                 .filter(dog -> dog.getOwnerId().orElse(-1) == customer.getId())
-                .anyMatch(dog -> isEnrolledInMatchingActivity(model, dog.getId(), predicate)));
+                .anyMatch(dog -> isEnrolledInMatchingActivity(model, dog.getId(), predicate, date)));
         return new CommandResult(createSuccessMessage());
     }
 
     private static boolean isEnrolledInMatchingActivity(Model model, int dogId,
-            ActivityFilterPredicate predicate) {
+            ActivityFilterPredicate predicate, LocalDate date) {
         assert dogId >= 0 : "Stored dog IDs must be nonnegative.";
         return model.getAddressBook().getEnrolmentList().stream().anyMatch(enrolment ->
-                enrolment.getDogId() == dogId && model.getActivityList().stream()
+                enrolment.getDogId() == dogId && (date == null || enrolment.getDate().equals(date))
+                        && model.getActivityList().stream()
                         .filter(activity -> activity.getId() == enrolment.getActivityId())
                         .anyMatch(predicate));
     }

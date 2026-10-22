@@ -12,6 +12,7 @@ application {
 
 run {
     enableAssertions = true
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
 }
 
 java {
@@ -31,6 +32,7 @@ checkstyle {
 test {
     useJUnitPlatform()
     enableAssertions = true
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
     finalizedBy jacocoTestReport
 }
 

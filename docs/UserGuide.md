@@ -138,7 +138,8 @@ Example: `filtera n/Dog run t/16:00`
 * A successful command displays `Successfully filtered activities by` followed by the supplied values, in the form
   `name: NAME`, `time: HH:mm`, `date: YYYY-MM-DD`, and `recurrence: Once|Weekly|Daily`. Unused fields are omitted.
   If there are no matches, the activity panel is empty.
-* The dog panel shows dogs enrolled in the matching activities, and the customer panel shows their owners.
+* The dog panel shows dogs enrolled in the matching activities; when a date is supplied, only enrolments on that
+  occurrence date are included. The customer panel shows owners of those dogs.
 * Invalid input displays `Error in filtering activities:` followed by the applicable error message.
  * The filter remains active while activities are added or their state, enrolments, or details are changed.
 
@@ -273,8 +274,10 @@ Example: `filterd b/Golden Retriever s/Medium`
 * Size must be `small`, `medium`, `large`, or `giant`, ignoring letter case.
 * ID matching is exact, and the ID must belong to a dog in the database.
 * The customer panel is also filtered to customers linked to the matching dogs.
+* The activity panel shows activities in which a matching dog is enrolled.
 * Unowned matching dogs remain visible, but the customer panel is empty.
 * The filter remains active while dogs or customers are added, edited, deleted, linked, or unlinked.
+  Matching activities refresh when enrolments change.
 
 ### Filtering unlinked records: `filterun`
 
