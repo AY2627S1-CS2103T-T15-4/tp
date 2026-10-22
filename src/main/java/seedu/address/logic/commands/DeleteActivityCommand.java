@@ -2,6 +2,9 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.logging.Logger;
+
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -16,6 +19,8 @@ public class DeleteActivityCommand extends Command {
             + "Example: deleteactivity 21";
     public static final String MESSAGE_SUCCESS = "Successfully deleted activity %1$d: %2$s";
     public static final String MESSAGE_INVALID_ID = "Activity ID %d does not exist.";
+
+    private static final Logger logger = LogsCenter.getLogger(DeleteActivityCommand.class);
 
     private final int activityId;
 
@@ -33,12 +38,17 @@ public class DeleteActivityCommand extends Command {
         Activity activityToDelete = model.getActivityList().stream()
                 .filter(activity -> activity.getId() == activityId)
                 .findFirst()
-                .orElseThrow(() -> new CommandException(String.format(MESSAGE_INVALID_ID, activityId)));
+                .orElseThrow(() -> {
+                    logger.warning("No activity found with ID " + activityId);
+                    return new CommandException(String.format(MESSAGE_INVALID_ID, activityId));
+                });
         try {
             model.deleteActivity(activityToDelete);
         } catch (IllegalArgumentException e) {
+            logger.warning("Could not delete activity ID " + activityId + ": " + e.getMessage());
             throw new CommandException(e.getMessage(), e);
         }
+        logger.info("Deleted activity ID " + activityId);
         return new CommandResult(String.format(MESSAGE_SUCCESS, activityToDelete.getId(), activityToDelete.getName()));
     }
 
