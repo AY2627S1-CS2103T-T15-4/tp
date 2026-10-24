@@ -28,6 +28,7 @@ import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.LinkCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ListDogCommand;
+import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.SearchCommand;
 import seedu.address.logic.commands.SelectDogCommand;
@@ -112,6 +113,13 @@ public class AddressBookParser {
             }
             case ExitCommand.COMMAND_WORD -> new ExitCommand();
             case HelpCommand.COMMAND_WORD -> new HelpCommand();
+            case RedoCommand.COMMAND_WORD -> {
+                if (!arguments.isBlank()) {
+                    throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                            RedoCommand.COMMAND_WORD));
+                }
+                yield new RedoCommand();
+            }
             case UndoCommand.COMMAND_WORD -> {
                 if (!arguments.isBlank()) {
                     throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
