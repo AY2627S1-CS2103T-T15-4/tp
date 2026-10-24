@@ -60,6 +60,27 @@ public class ModelManager implements Model {
         this(new AddressBook(), new UserPrefs());
     }
 
+    @Override
+    public ModelState createState() {
+        return new ModelState(new AddressBook(addressBook), activeCustomerPredicate, activeDogPredicate,
+                activeActivityPredicate, selectedDogId, selectedCustomerId);
+    }
+
+    @Override
+    public void restoreState(ModelState state) {
+        requireNonNull(state);
+        addressBook.resetData(state.addressBook());
+        activeCustomerPredicate = state.customerPredicate();
+        activeDogPredicate = state.dogPredicate();
+        activeActivityPredicate = state.activityPredicate();
+        selectedDogId = state.selectedDogId();
+        selectedCustomerId = state.selectedCustomerId();
+        filteredCustomers.setPredicate(null);
+        filteredDogs.setPredicate(null);
+        filteredActivities.setPredicate(null);
+        refreshDisplayedRecords();
+    }
+
     //=========== UserPrefs ==================================================================================
 
     @Override

@@ -7,12 +7,16 @@ import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.RedoCommand;
+import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
+import seedu.address.model.Model.ModelState;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
@@ -32,6 +36,10 @@ public class LogicManager implements Logic {
     private final Model model;
     private final Storage storage;
     private final AddressBookParser addressBookParser;
+    private ModelState undoState;
+    private String undoCommandText;
+    private ModelState redoState;
+    private String redoCommandText;
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
@@ -48,6 +56,52 @@ public class LogicManager implements Logic {
 
         CommandResult commandResult;
         Command command = addressBookParser.parseCommand(commandText);
+
+        if (command instanceof UndoCommand) {
+            if (undoState == null) {
+                throw new CommandException(UndoCommand.MESSAGE_NO_COMMAND);
+            }
+            ModelState state = undoState;
+            String undoneCommand = undoCommandText;
+            ModelState stateAfterUndo = model.createState();
+            model.restoreState(state);
+            try {
+                storage.saveAddressBook(model.getAddressBook());
+            } catch (AccessDeniedException e) {
+                throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
+            } catch (IOException ioe) {
+                throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
+            }
+            undoState = null;
+            undoCommandText = null;
+            redoState = stateAfterUndo;
+            redoCommandText = undoneCommand;
+            return new CommandResult(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, undoneCommand));
+        }
+
+        if (command instanceof RedoCommand) {
+            if (redoState == null) {
+                throw new CommandException(RedoCommand.MESSAGE_NO_COMMAND);
+            }
+            ModelState stateBeforeRedo = model.createState();
+            ModelState state = redoState;
+            String redoneCommand = redoCommandText;
+            model.restoreState(state);
+            try {
+                storage.saveAddressBook(model.getAddressBook());
+            } catch (AccessDeniedException e) {
+                throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
+            } catch (IOException ioe) {
+                throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
+            }
+            undoState = stateBeforeRedo;
+            undoCommandText = redoneCommand;
+            redoState = null;
+            redoCommandText = null;
+            return new CommandResult(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, redoneCommand));
+        }
+
+        ModelState stateBeforeCommand = command instanceof ClearCommand ? null : model.createState();
         commandResult = command.execute(model);
 
         try {
@@ -62,6 +116,17 @@ public class LogicManager implements Logic {
             throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
         }
 
+        if (command instanceof ClearCommand) {
+            undoState = null;
+            undoCommandText = null;
+            redoState = null;
+            redoCommandText = null;
+        } else {
+            undoState = stateBeforeCommand;
+            undoCommandText = commandText.trim();
+            redoState = null;
+            redoCommandText = null;
+        }
         return commandResult;
     }
 
