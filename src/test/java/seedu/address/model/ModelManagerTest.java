@@ -49,6 +49,50 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void restoreState_restoresDataAndActiveFilters() {
+        modelManager.addCustomer(ALICE);
+        Dog buddy = modelManager.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        Activity walk = modelManager.addActivity(new ActivityName("Walk"), LocalDate.now(),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        modelManager.updateFilteredCustomerList(customer -> customer.equals(ALICE));
+        modelManager.updateFilteredDogList(dog -> dog.equals(buddy));
+        modelManager.updateFilteredActivityList(activity -> activity.equals(walk));
+        Model.ModelState state = modelManager.createState();
+
+        modelManager.addCustomer(BOB);
+        modelManager.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("large")));
+        modelManager.updateFilteredCustomerList(customer -> false);
+        modelManager.updateFilteredDogList(dog -> false);
+        modelManager.updateFilteredActivityList(activity -> false);
+        modelManager.restoreState(state);
+
+        assertEquals(List.of(ALICE), modelManager.getFilteredCustomerList());
+        assertEquals(List.of(buddy), modelManager.getFilteredDogList());
+        assertEquals(List.of(walk), modelManager.getFilteredActivityList());
+        assertEquals(1, modelManager.getAddressBook().getCustomerList().size());
+        assertEquals(1, modelManager.getAddressBook().getDogList().size());
+    }
+
+    @Test
+    public void restoreState_restoresSelectedRecord() {
+        modelManager.addCustomer(ALICE);
+        Dog buddy = modelManager.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        modelManager.selectDog(buddy.getId());
+        Model.ModelState selectedDogState = modelManager.createState();
+        modelManager.selectCustomer(ALICE.getId());
+        Model.ModelState selectedCustomerState = modelManager.createState();
+
+        modelManager.restoreState(selectedDogState);
+        assertEquals(List.of(buddy), modelManager.getFilteredDogList());
+        assertEquals(List.of(), modelManager.getFilteredCustomerList());
+
+        modelManager.restoreState(selectedCustomerState);
+        assertEquals(List.of(ALICE), modelManager.getFilteredCustomerList());
+        assertEquals(List.of(), modelManager.getFilteredDogList());
+        assertThrows(NullPointerException.class, () -> modelManager.restoreState(null));
+    }
+
+    @Test
     public void setGuiSettings_nullGuiSettings_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> modelManager.setGuiSettings(null));
     }
