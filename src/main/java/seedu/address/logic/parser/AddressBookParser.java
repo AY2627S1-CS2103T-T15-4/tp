@@ -31,6 +31,7 @@ import seedu.address.logic.commands.ListDogCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.SearchCommand;
 import seedu.address.logic.commands.SelectDogCommand;
+import seedu.address.logic.commands.SummaryCommand;
 import seedu.address.logic.commands.UnenrolDogCommand;
 import seedu.address.logic.commands.UnlinkCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -102,6 +103,13 @@ public class AddressBookParser {
             case EnrolDogCommand.COMMAND_WORD -> new EnrolDogCommandParser().parse(arguments);
             case UnenrolDogCommand.COMMAND_WORD -> new UnenrolDogCommandParser().parse(arguments);
             case ListCommand.COMMAND_WORD -> new ListCommandParser().parse(arguments);
+            case SummaryCommand.COMMAND_WORD -> {
+                if (!arguments.isBlank()) {
+                    throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                            SummaryCommand.MESSAGE_USAGE));
+                }
+                yield new SummaryCommand();
+            }
             case ResetDisplayCommand.COMMAND_WORD -> {
                 if (!arguments.isBlank()) {
                     throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,

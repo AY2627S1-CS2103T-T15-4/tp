@@ -35,6 +35,8 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 
    * `resetdisplay` : Shows all customers and dogs, plus activities occurring today or later.
 
+   * `summary` : Shows overall counts and today's activities and distinct enrolled dogs.
+
    * `clear` : Deletes all customers, dogs, and activities.
 
    * `exit` : Exits the app.
@@ -62,7 +64,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
 * Extraneous parameters for some commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
-  For example, `help 123` is interpreted as `help`. `resetdisplay` rejects extra parameters.
+  For example, `help 123` is interpreted as `help`. `resetdisplay` and `summary` reject extra parameters.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
@@ -194,6 +196,35 @@ cards continue to show the schedule's first date. This command changes the view 
 are not changed.
 
 Format: `resetdisplay`
+
+### Viewing daycare statistics: `summary`
+
+Shows six statistics using all stored records, including records hidden by search or filters.
+The command preserves your records, filters and selection.
+
+Format: `summary` (no parameters; surrounding whitespace is accepted)
+
+Example output:
+
+```text
+Overall: 24 dogs | 18 customers
+Activity schedules: 10 total | 7 from today onwards
+Today (2026-10-24): 5 activities | 12 distinct dogs enrolled
+```
+
+* Overall counts include dogs without owners and customers without dogs. Records with the same name
+  but different IDs count separately.
+* Total activity schedules includes past one-time activities. Each recurring schedule counts once.
+* From today onwards counts schedules with an occurrence today or later, including recurring
+  schedules that started earlier. It excludes past one-time activities.
+* Today's activities counts schedules occurring today, including activities with no enrolled dogs.
+  All activity counts include empty activities and sessions that ended earlier today.
+* Today's distinct dogs enrolled counts each dog ID once across all activities on that date.
+  Yesterday's and tomorrow's enrolments are excluded. Enrolment does not indicate attendance.
+
+The date shown is read once when the command runs, using the computer's local date.
+Like other successful commands, `summary` is followed by the application's normal save attempt;
+a storage permission or save error can therefore appear instead of the statistics.
 
 ### Editing a dog: `editdog`
 
@@ -455,6 +486,7 @@ _Details coming soon ..._
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Clear**  | `clear`
+**Daycare summary** | `summary`<br>Overall dogs/customers, total/upcoming schedules, and today's activities/distinct enrolled dogs.
 **Search all** | `search n/NAME_QUERY` or `search id/ID`<br> e.g., `search n/alex`
 **Link dogs** | `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`<br> e.g., `link c/1 d/2 d/3`
 **Unlink dogs** | `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`<br> e.g., `unlink d/2 d/3` or `unlink c/1`
