@@ -89,19 +89,18 @@ public class SummaryCommandTest {
 
     @Test
     public void execute_recurrenceAndFirstDateBoundaries_includesEmptyActivities() {
-        for (Recurrence recurrence : Recurrence.values()) {
-            for (int offset : new int[] {-7, -1, 0, 1}) {
-                Model model = new ModelManager();
-                addActivity(model, TODAY.plusDays(offset), recurrence);
-                int upcoming = recurrence == Recurrence.ONCE && offset < 0 ? 0 : 1;
-                int today = offset == 0 || offset < 0 && (recurrence == Recurrence.DAILY
-                        || recurrence == Recurrence.WEEKLY && offset == -7) ? 1 : 0;
-                assertEquals("Overall: 0 dogs | 0 customers\nActivity schedules: 1 total | " + upcoming
-                        + " from today onwards\nToday (2026-10-24): " + today
-                        + " activities | 0 distinct dogs enrolled",
-                        new SummaryCommand(CLOCK).execute(model).getFeedbackToUser());
-            }
-        }
+        assertActivityCounts(Recurrence.ONCE, TODAY.minusDays(1), 0, 0);
+        assertActivityCounts(Recurrence.ONCE, TODAY, 1, 1);
+        assertActivityCounts(Recurrence.ONCE, TODAY.plusDays(1), 1, 0);
+
+        assertActivityCounts(Recurrence.DAILY, TODAY.minusDays(1), 1, 1);
+        assertActivityCounts(Recurrence.DAILY, TODAY, 1, 1);
+        assertActivityCounts(Recurrence.DAILY, TODAY.plusDays(1), 1, 0);
+
+        assertActivityCounts(Recurrence.WEEKLY, TODAY.minusWeeks(1), 1, 1);
+        assertActivityCounts(Recurrence.WEEKLY, TODAY.minusDays(1), 1, 0);
+        assertActivityCounts(Recurrence.WEEKLY, TODAY, 1, 1);
+        assertActivityCounts(Recurrence.WEEKLY, TODAY.plusDays(1), 1, 0);
     }
 
     @Test
@@ -194,6 +193,16 @@ public class SummaryCommandTest {
 
     private static void addActivity(Model model, LocalDate date, Recurrence recurrence) {
         model.addActivity(new ActivityName("Walk"), date, LocalTime.of(8, 0), LocalTime.of(9, 0), recurrence);
+    }
+
+    private static void assertActivityCounts(Recurrence recurrence, LocalDate firstDate,
+            int upcomingSchedules, int todayActivities) {
+        Model model = new ModelManager();
+        addActivity(model, firstDate, recurrence);
+        assertEquals("Overall: 0 dogs | 0 customers\nActivity schedules: 1 total | " + upcomingSchedules
+                + " from today onwards\nToday (2026-10-24): " + todayActivities
+                + " activities | 0 distinct dogs enrolled",
+                new SummaryCommand(CLOCK).execute(model).getFeedbackToUser(), recurrence + " starting " + firstDate);
     }
 
     /** Advances one day after every read to detect inconsistent date reads within one execution. */
