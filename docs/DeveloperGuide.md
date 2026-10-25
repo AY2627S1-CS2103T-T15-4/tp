@@ -282,6 +282,29 @@ dogs. Linking another dog, or enrolling one of those dogs, updates the columns w
 
 <puml src="diagrams/SelectCustomerSequenceDiagram.puml" alt="Selecting a customer and their dogs and activities" />
 
+### Daycare summary
+
+`AddressBookParser` accepts `summary` with blank arguments only and constructs `SummaryCommand`.
+At execution, the command captures `LocalDate.now(clock)` once and uses that date for every count
+and the feedback date. The default clock uses the system's local zone; tests inject a clock.
+Counts use the full model lists, so filters and dog/customer selection remain unchanged.
+
+Each stored activity schedule contributes once to the total. A schedule contributes to the
+from-today-onwards count when `nextOccurrenceOnOrAfter(today)` is present, and to today's activity
+count when `occursOn(today)` is true. Empty activities and sessions that ended earlier today are
+included; recurring series are never expanded into future dates.
+
+`Model.getDogsEnrolledOn(LocalDate)` returns an unmodifiable snapshot. `ModelManager` collects dog
+IDs from enrolments on that date into a set, then resolves them against the full dog list in its
+existing order. This counts a dog enrolled in multiple activities once while keeping same-name
+dogs with different IDs distinct. Null dates are rejected with `NullPointerException`.
+The query takes time proportional to the number of enrolments plus dogs and stores no cached count.
+
+Feedback follows the existing `CommandResult` and `ResultDisplay` path. No records, filters or
+selection are mutated, and no storage schema changes are needed. `LogicManager` still attempts
+to save after successful execution, preserving its existing save-error handling. When undo/redo
+is integrated, summary must neither create an undo entry nor discard redo history.
+
 ### Activity creation and storage
 
 The following partial class diagram shows the activity schedules and their integration with the model.
@@ -876,6 +899,29 @@ testers are expected to do more *exploratory* testing.
        Expected: The most recent window size and location are retained.
 
 1. _{ more test cases … }_
+
+### Daycare summary
+
+Use a disposable data folder for this test. Substitute the computer's current local date for
+`TODAY`, the preceding date for `YESTERDAY`, and the following date for `TOMORROW`.
+
+1. With no records, run `summary`. Expect zero for all six counts and today's date.
+1. Add two dogs and one customer; leave both dogs unowned and the customer without dogs.
+   Add five schedules: one-time yesterday, today and tomorrow, daily starting yesterday, and
+   weekly starting today. Use non-overlapping times for the today and daily schedules.
+1. Enrol the first dog in the one-time today schedule and the daily schedule on `TODAY`.
+   Enrol the second dog in the daily schedule on `TOMORROW`. Leave the weekly activity empty.
+1. Run `summary`. Expect `2 dogs | 1 customers`, `5 total | 4 from today onwards`, and
+   `3 activities | 1 distinct dogs enrolled` for today, even after today's sessions have ended.
+1. Hide records using search/filter commands and run `summary` again. Expect identical counts
+   and unchanged panels. Run `summary extra`; expect the usage error and unchanged data/view.
+1. Delete the first dog and run `summary` again. Expect one dog and zero dogs enrolled today;
+   the customer and all five schedules remain counted.
+1. At the minimum window size and normal/larger display scaling, verify that all three feedback
+   lines can be read, scrolling within the result area if needed. Repeat with larger counts.
+
+After undo/redo is integrated, also verify mutation → undo → summary → redo: summary must preserve
+the redo operation and must not appear as an undoable mutation.
 
 ### Deleting a dog
 

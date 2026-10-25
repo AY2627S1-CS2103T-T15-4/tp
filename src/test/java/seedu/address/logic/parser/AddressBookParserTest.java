@@ -26,6 +26,7 @@ import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.SelectCustomerCommand;
 import seedu.address.logic.commands.SelectDogCommand;
+import seedu.address.logic.commands.SummaryCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.dog.Breed;
@@ -36,6 +37,20 @@ import seedu.address.model.dog.Size;
 public class AddressBookParserTest {
 
     private final AddressBookParser parser = new AddressBookParser();
+
+    @Test
+    public void parseCommand_summary_acceptsSurroundingWhitespace() throws Exception {
+        assertEquals(new SummaryCommand(), parser.parseCommand("summary"));
+        assertEquals(new SummaryCommand(), parser.parseCommand(" \t summary \t "));
+    }
+
+    @Test
+    public void parseCommand_summaryWithArguments_throwsParseException() {
+        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SummaryCommand.MESSAGE_USAGE);
+        for (String input : new String[] {"summary today", "summary 1", "summary date/2026-10-24"}) {
+            assertThrows(ParseException.class, expectedMessage, () -> parser.parseCommand(input));
+        }
+    }
 
     @Test
     public void parseCommand_addDog() throws Exception {

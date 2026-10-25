@@ -8,8 +8,10 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -126,6 +128,18 @@ public class ModelManager implements Model {
     public void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
         addressBook.unenrolDogs(activityId, date, dogIds);
         refreshDisplayedRecords();
+    }
+
+    @Override
+    public List<Dog> getDogsEnrolledOn(LocalDate date) {
+        requireNonNull(date);
+        Set<Integer> enrolledDogIds = addressBook.getEnrolmentList().stream()
+                .filter(enrolment -> enrolment.getDate().equals(date))
+                .map(enrolment -> enrolment.getDogId())
+                .collect(Collectors.toSet());
+        return addressBook.getDogList().stream()
+                .filter(dog -> enrolledDogIds.contains(dog.getId()))
+                .toList();
     }
 
     @Override
