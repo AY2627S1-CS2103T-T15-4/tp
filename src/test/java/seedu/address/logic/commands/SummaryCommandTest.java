@@ -150,8 +150,10 @@ public class SummaryCommandTest {
         assertThrows(NullPointerException.class, () -> new SummaryCommand(null));
         assertThrows(NullPointerException.class, () -> new SummaryCommand(CLOCK).execute(null));
         SummaryCommand command = new SummaryCommand(CLOCK);
+        SummaryCommand otherCommand = new SummaryCommand(CLOCK);
         assertEquals(command, command);
-        assertEquals(command, new SummaryCommand(CLOCK));
+        assertEquals(command, otherCommand);
+        assertEquals(command.hashCode(), otherCommand.hashCode());
         assertNotEquals(command, new Object());
         assertNotEquals(command, null);
     }

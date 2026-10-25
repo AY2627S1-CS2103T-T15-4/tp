@@ -63,4 +63,9 @@ public class UnlinkCommand extends Command {
         return other == this || other instanceof UnlinkCommand otherCommand
                 && Objects.equals(customerId, otherCommand.customerId) && dogIds.equals(otherCommand.dogIds);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(customerId, dogIds);
+    }
 }

@@ -74,6 +74,7 @@ public class AddActivityCommandTest {
         AddActivityCommand command = command(Recurrence.ONCE);
         assertEquals(command, command);
         assertEquals(command, command(Recurrence.ONCE));
+        assertEquals(command.hashCode(), command(Recurrence.ONCE).hashCode());
         assertFalse(command.equals(null));
         assertFalse(command.equals("command"));
         assertFalse(command.equals(command(Recurrence.DAILY)));
