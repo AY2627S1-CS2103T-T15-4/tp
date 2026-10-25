@@ -14,7 +14,7 @@ import seedu.address.commons.util.ToStringBuilder;
 /**
  * An immutable activity schedule with a persistent, nonnegative ID.
  * Times are local daycare times on the same date; the end must be later than the start.
- * Dogs are linked through separately stored schedule enrolments, not dated bookings or fields on this schedule.
+ * Dogs participate through separately stored, dated occurrence enrolments.
  * This class does not allocate IDs, validate booking conflicts, or access the clock.
  */
 public final class Activity {
