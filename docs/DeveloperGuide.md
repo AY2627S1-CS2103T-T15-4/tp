@@ -25,6 +25,11 @@ Refer to the guide [_Setting up and getting started_](SettingUp.md).
 
 ## **Design**
 
+The diagrams below describe the implemented design. Class diagrams are partial views: they omit
+unrelated members and utility classes. Solid arrows show navigable associations, dashed arrows show
+dependencies, and hollow triangles point to a superclass or implemented interface. Labels explain
+the purpose of a dependency where needed.
+
 ### Persistent identities
 
 Customers, dogs and activities use persistent IDs as their identities. These IDs are assigned by the
@@ -58,7 +63,7 @@ Unlinking preserves records and filters, including a customer's last dog, and us
 preserving their persistent IDs and details. Unowned dog cards show `Owner ID: None`.
 Removing a dog leaves its customer intact. Customer edits must preserve persistent IDs to keep links valid.
 Observable list updates refresh dog cards, which display owner IDs without changing search filters.
-Customer cards display owned dog IDs below backup contact. `RecordListPanel` observes the complete dog list
+Customer cards display owned dog IDs below backup contact. `CustomerListPanel` observes the complete dog list
 as well as visible records, so these IDs remain accurate when dog cards are filtered out.
 
 `JsonAdaptedDog` persists `ownerId`. A missing or null field means unlinked, preserving compatibility
@@ -77,11 +82,22 @@ the dogs attending it while distinguishing occurrences of recurring activities.
 It also allows dogs to be enrolled or unenrolled independently without modifying the activity's
 schedule or storing duplicate dog objects inside `Activity`.
 
+The conceptual class diagram below summarises these domain relationships. Each enrolment belongs
+to one dog and one activity schedule, with its date identifying the occurrence. A dog can have at most
+one owner, and each dog or activity can have many dated enrolments.
+
+<puml src="diagrams/DomainClassDiagram.puml" alt="Conceptual ownership and dated activity enrolment relationships" />
+
+These lines describe domain relationships, rather than Java object references. In the implementation,
+`Dog` stores `ownerId`, and `Enrolment` stores `dogId`, `activityId`, and `date`. The model resolves these
+IDs against the complete lists. The model diagrams below show that storage structure separately.
+
 ### Architecture
 
-<puml src="diagrams/ArchitectureDiagram.puml" width="280" />
+<puml src="diagrams/ArchitectureDiagram.puml" alt="Dependencies between the four main application components" />
 
-The ***Architecture Diagram*** given above explains the high-level design of the App.
+The architecture diagram shows dependencies between the four main components. `MainApp` wires
+them together at startup. `Commons` supplies shared utilities; its dependency arrows are omitted.
 
 The following provides a quick overview of the main components and their interactions.
 
@@ -104,7 +120,12 @@ The bulk of the app's work is done by the following four components:
 
 The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete dog 1`.
 
-<puml src="diagrams/ArchitectureSequenceDiagram.puml" width="574" />
+<puml src="diagrams/ArchitectureSequenceDiagram.puml" alt="Successful dog deletion and saving at component boundaries" />
+
+This is a component-level view: calls made by commands inside `Logic` are represented at the
+`LogicManager` boundary. Observable-list notifications are omitted. `LogicManager` attempts to save
+after every successful command execution, including queries; a save failure is reported as a command
+error. The diagram shows the successful execution and save path.
 
 Each of the four main components (also shown in the diagram above),
 
@@ -113,7 +134,7 @@ Each of the four main components (also shown in the diagram above),
 
 For example, the `Logic` component defines its API in `Logic.java` and implements it in `LogicManager.java`. Other components interact with a component through its interface rather than its concrete class, preventing them from coupling to that component's implementation, as illustrated in the following partial class diagram.
 
-<puml src="diagrams/ComponentManagers.puml" width="300" />
+<puml src="diagrams/ComponentManagers.puml" alt="Component interfaces and their manager implementations" />
 
 The sections below give more details of each component.
 
@@ -123,17 +144,18 @@ The **API** of this component is specified in [`Ui.java`](https://github.com/se-
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
-The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `RecordListPanel`,
-`ActivityListPanel`, `TodayActivityListPanel`, and `StatusBarFooter`. `TodayActivityListPanel` reuses the
+The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `CustomerListPanel`,
+`DogListPanel`, `ActivityListPanel`, and `TodayActivityListPanel`. `TodayActivityListPanel` reuses the
 activity list and filters it to schedules occurring today. All of these, including `MainWindow`, inherit
 from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
+The diagram omits this common superclass and JavaFX internals to focus on the active panels and cards.
 
-`RecordListPanel` observes the filtered customer and dog lists, plus the complete dog list exposed by `Logic`.
-It displays customers followed by dogs in a single list, using `CustomerCard` and `DogCard`.
+`CustomerListPanel` and `DogListPanel` observe their respective filtered lists and display
+`CustomerCard` and `DogCard` in separate columns. `CustomerListPanel` also observes the complete dog list exposed by `Logic`.
 List changes rebuild the card factories; JavaFX creates card nodes as cells need them.
 Cards use persistent IDs, not row numbers. The complete dog list supplies ownership details independently of filters.
 
-The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
+The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in `.fxml` files in `src/main/resources/view`; the customer and dog panels both reuse `RecordListPanel.fxml`. For example, [`MainWindow.fxml`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
 
 The `UI` component,
 
@@ -148,43 +170,47 @@ The `UI` component,
 
 Here's a (partial) class diagram of the `Logic` component:
 
-<puml src="diagrams/LogicClassDiagram.puml" width="550"/>
+<puml src="diagrams/LogicClassDiagram.puml" alt="Logic interfaces, command execution, and representative commands" />
 
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete dog 1")` API call as an example.
+The sequence diagram below expands the parsing stage of `LogicManager.execute("delete dog 1")`.
+The returned command is then executed by `LogicManager`. Model interactions and saving are shown
+in the architecture sequence.
 
 <puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `delete dog 1` Command" />
 
-<box type="info" seamless>
-
-**Note:** The lifeline for `DeleteDogCommandParser` should end at the destroy marker (X), but due to a limitation of PlantUML, the lifeline continues till the end of diagram.
-</box>
-
+This sequence shows parser and command construction at the point they occur. Activation bars and
+temporary-object disposal are omitted. Other feature sequences begin with an already parsed command;
+they reuse this execution path and the save path shown in the architecture sequence.
 
 How the `Logic` component works:
 
 1. When `Logic` is called upon to execute a command, the command is passed to an `AddressBookParser` object, which in turn creates a parser that matches the command (e.g., `DeleteDogCommandParser`) and uses it to parse the command.
 1. This results in a `Command` object (more precisely, an object of one of its subclasses e.g., `DeleteDogCommand`) which is executed by the `LogicManager`.
-1. The command can communicate with the `Model` when it is executed (e.g. to delete a dog).<br>
-   Note that although this is shown as a single step in the diagram above for simplicity, the code can require several interactions between the command object and the `Model` to complete the operation.
+1. The command communicates with the `Model` when it is executed (e.g. to find and delete a dog by persistent ID). These interactions are omitted from this Logic view and shown at component level in the architecture sequence.
 1. The result of the command execution is encapsulated as a `CommandResult` object which is returned from `Logic`.
 
-Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
+The following diagram expands a representative parser and the utilities it uses:
 
-<puml src="diagrams/ParserClasses.puml" width="600"/>
+<puml src="diagrams/ParserClasses.puml" alt="Representative add-dog parser and its parsing utilities" />
 
 How the parsing works:
-* When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddDogCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddDogCommand`). The `AddressBookParser` returns that object as a `Command` object.
-* All `XYZCommandParser` classes, such as `AddDogCommandParser` and `DeleteDogCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
+* For commands requiring field parsing, `AddressBookParser` creates the appropriate parser. The diagram uses `AddDogCommandParser` as a representative example: it tokenises the arguments, validates values with parsing utilities, and creates an `AddDogCommand` containing a dog without an allocated persistent ID.
+* Concrete command parsers implement `Parser` and return command objects. The diagram omits the other parsers; some commands, such as `summary`, are constructed directly by `AddressBookParser` after checking their arguments.
 
 ### Model component
 **API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
 
-<puml src="diagrams/ModelClassDiagram.puml" width="450" />
+<puml src="diagrams/ModelClassDiagram.puml" alt="Model interfaces, stored records, and filtered views" />
+
+This implementation view shows stored collections separately from filtered views. Ownership and
+enrolment references use ID attributes; there are no direct `Dog`-to-`Customer` or
+`Enrolment`-to-`Activity` object references. The activity detail view below expands the schedule fields.
 
 
 The `Model` component,
 
 * stores customers and dogs in `UniqueCustomerList` and `UniqueDogList`, with persistent IDs and dog ownership links.
+* stores activity schedules and dated enrolments separately; filtered activities are a view of the stored schedules.
 * exposes separate unmodifiable observable customer and dog lists for search and category filtering. The UI observes these lists to update cards when records or filters change.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
@@ -195,7 +221,7 @@ The `Model` component,
 
 **API** : [`Storage.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/storage/Storage.java)
 
-<puml src="diagrams/StorageClassDiagram.puml" width="550" />
+<puml src="diagrams/StorageClassDiagram.puml" alt="Storage interfaces, JSON file access, and model dependencies" />
 
 The `Storage` component,
 * can save both address book data and user preference data in JSON format, and read them back into corresponding objects.
@@ -222,6 +248,11 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 ## **Implementation**
 
+Feature sequence diagrams show successful command execution through the `Model` API, with
+`ModelManager` as the concrete participant. Parsing and saving follow the shared flows above.
+Model validation and list updates are summarised in notes; their internal calls and exception
+paths are omitted. The summary query is a separate view of the model's internal ID resolution.
+
 ### Adding dogs
 
 `AddDogCommandParser` validates the dog details supplied by the user and creates an
@@ -233,11 +264,11 @@ monotonically increasing counter rather than from the dog's position in the list
 does not change the identities of the remaining dogs. The counter and dog IDs are persisted so that
 new dogs continue to receive unique IDs after the application restarts.
 
-The following diagram shows the add-dog command flow. The important part of this flow is that the
+The following diagram shows the add-dog command's interaction with the model. The important part is that the
 persistent dog ID is assigned by the address book only
 after the command reaches the model layer.
 
-<puml src="diagrams/AddDogSequenceDiagram.puml" alt="Adding a dog through the application layers" />
+<puml src="diagrams/AddDogSequenceDiagram.puml" alt="Adding a dog and receiving its persistent ID from the model" />
 
 ### Editing dogs
 
@@ -250,7 +281,7 @@ The following diagram shows the edit-dog command flow. The command locates the d
 persistent ID, so editing remains independent of the current
 filtered-list position. The replacement dog retains both its ID and owner relationship.
 
-<puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog through the application layers" />
+<puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog using its persistent ID" />
 
 ### Selecting a dog
 
@@ -300,6 +331,12 @@ existing order. This counts a dog enrolled in multiple activities once while kee
 dogs with different IDs distinct. Null dates are rejected with `NullPointerException`.
 The query takes time proportional to the number of enrolments plus dogs and stores no cached count.
 
+The sequence below focuses on this model query. It shows why multiple enrolments count a dog once,
+and why hidden dogs still contribute to the summary. Stream operations are explained in notes;
+activity schedule counts and feedback formatting are omitted.
+
+<puml src="diagrams/DogsEnrolledOnSequenceDiagram.puml" alt="Resolving distinct dogs enrolled on the summary date from stored IDs" />
+
 Feedback follows the existing `CommandResult` and `ResultDisplay` path. No records, filters or
 selection are mutated, and no storage schema changes are needed. `LogicManager` still attempts
 to save after successful execution, preserving its existing save-error handling. When undo/redo
@@ -307,8 +344,10 @@ is integrated, summary must neither create an undo entry nor discard redo histor
 
 ### Activity creation and storage
 
-The following partial class diagram shows the activity schedules and their integration with the model.
+The following partial class diagram expands the activity fields and separately stored enrolments.
 An activity represents a reusable schedule; its occurrence dates are calculated from its recurrence rule.
+Some parameter and return details are omitted. `nextOccurrenceOnOrAfter(date)` returns an
+`Optional<LocalDate>`, containing the next occurrence when one exists.
 
 <puml src="diagrams/ActivityClassDiagram.puml" alt="Activity schedule classes and model integration" />
 
@@ -339,10 +378,10 @@ are restored, so listeners of either list see the restored schedules, enrolments
 
 The following sequence diagram shows successful execution of
 `addactivity n/Training date/2026-10-20 start/10:00 end/11:00 r/weekly`.
-The command uses the `Model` interface, implemented by `ModelManager`; saving uses the `Storage`
-interface, implemented by `StorageManager`. Concrete lifelines are shown to make the delegation clear.
+The command uses the `Model` interface, implemented by `ModelManager`. The diagram focuses on the
+identified schedule returned by that API; parsing and persistence follow the shared Logic flow.
 
-<puml src="diagrams/AddActivitySequenceDiagram.puml" alt="Parsing, executing and saving an addactivity command" />
+<puml src="diagrams/AddActivitySequenceDiagram.puml" alt="Creating an activity schedule through the model API" />
 
 ### Deleting an activity
 
@@ -353,7 +392,7 @@ checks that the activity is still stored, removes its enrolments, and then remov
 The next activity ID does not change, so deleted IDs are not reused. After the command returns its
 success message, `LogicManager` saves the updated address book.
 
-<puml src="diagrams/DeleteActivitySequenceDiagram.puml" alt="Parsing, executing and saving a deleteactivity command" />
+<puml src="diagrams/DeleteActivitySequenceDiagram.puml" alt="Deleting an activity schedule and its enrolments through the model API" />
 
 ### Editing an activity
 
@@ -367,7 +406,7 @@ the address book removes that activity's enrolments. Otherwise it retains them a
 the edited schedule does not overlap another activity attended by the same dog. The returned count
 of removed enrolments appears in the command feedback. `LogicManager` then saves the address book.
 
-<puml src="diagrams/EditActivitySequenceDiagram.puml" alt="Parsing, executing and saving an editactivity command" />
+<puml src="diagrams/EditActivitySequenceDiagram.puml" alt="Editing an activity schedule and reporting removed enrolments" />
 
 ### Dog filtering
 
@@ -403,6 +442,7 @@ The parser stops field values at any field-like prefix, including unsupported pr
 `filterc n/Anna x/value` are rejected rather than treating `x/value` as part of the name. `ModelManager`
 reapplies active customer and dog predicates after customer edits, dog edits, and relationship changes so
 both filtered views remain consistent.
+
 ### Activity filtering
 
 `AddressBookParser` routes `filtera` to `FilterActivityCommandParser`. The parser accepts at least one
@@ -426,6 +466,7 @@ the owners panel is derived from those dogs. When no date is supplied, enrolment
 Gradle test execution enables Java assertions so internal model invariants are checked during verification.
 
 <puml src="diagrams/FilterActivitySequenceDiagram.puml" alt="Filtering activities and related dogs and owners" />
+
 ### Unlinked filtering
 
 `AddressBookParser` routes `filterun` to `FilterUnlinkedCommandParser`, which accepts only the lowercase
@@ -506,7 +547,7 @@ all recurrence modes, old files and command-to-disk round trips using temporary 
 Without a category, `SearchCommandParser` accepts one name or ID field and creates a `SearchCommand`.
 It reuses `CustomerSearchPredicate` and `DogSearchPredicate` to update both observable lists.
 Customer and dog IDs are independent, so an ID search can match both categories.
-The existing `RecordListPanel` renders customers first, then dogs; feedback reports both counts.
+The separate customer and dog panels render their filtered lists; feedback reports both counts.
 
 `AddressBookParser` routes `search` to `SearchCommandParser`, which dispatches explicit categories.
 The three search parsers delegate shared name/ID validation to `SearchFieldParser` while retaining
@@ -520,14 +561,14 @@ they are not AB3's one-based list indices.
 and compares IDs directly with `Dog.getId()`. A name query is one literal substring,
 including internal spaces. `SearchDogCommand` updates the model's filtered dog list and hides
 customer cards using the customer filter. `Logic.getFilteredDogList()` supplies the observable
-list to `RecordListPanel`, so matching dogs appear as cards. `CommandResult` contains only the
+list to `DogListPanel`, so matching dogs appear as cards. `CommandResult` contains only the
 match count. Each new predicate applies to all stored dogs, without changing stored records.
 `list dog` resets the dog filter so all dogs can be displayed again after a search.
 
 `SearchDogCommandParserTest` covers command routing, whitespace, prefix misuse and ID boundaries.
 `DogSearchPredicateTest` covers field selection and matching. `SearchDogCommandTest` exercises
 the real model, including duplicate names, consecutive searches and unchanged stored records.
-`RecordListPanelTest` checks that search and list commands update the displayed cards.
+`ListPanelsTest` checks that observable-list changes update the displayed dog cards.
 
 Customer search follows the same command/parser/predicate structure through
 `SearchCustomerCommandParser`, `SearchCustomerCommand` and `CustomerSearchPredicate`.

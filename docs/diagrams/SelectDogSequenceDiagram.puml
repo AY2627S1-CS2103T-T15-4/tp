@@ -1,29 +1,29 @@
 @startuml
 !include style.puml
-skinparam arrowColor LOGIC_COLOR_T4
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 180
 
-actor User
-participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":AddressBookParser" as Router LOGIC_COLOR
-participant ":SelectDogCommandParser" as Parser LOGIC_COLOR
 participant "command:SelectDogCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
-participant ":AddressBook" as Book MODEL_COLOR
 
-User -> Logic : execute("select dog 21")
-Logic -> Router : parseCommand(...)
-Router -> Parser : parse(" dog 21")
-Parser -> Parser : validate "dog" and nonnegative ID
-Parser -> Command : new SelectDogCommand(21)
-Parser --> Router : command
-Router --> Logic : command
-Logic -> Command : execute(Model)
+[-> Command : execute(model)
 Command -> Model : getDogList()
 Model --> Command : dogs
+note over Command
+  Finds the dog with persistent ID 21.
+end note
 Command -> Model : selectDog(21)
-Model -> Book : read current dog, owner and enrolments
-Book --> Model : current records
-Model -> Model : filter dog, owner and future/current enrolments
-Command --> Logic : CommandResult
-Logic --> User : display result
+note right of Model
+  Tracks the selected dog ID.
+  Shows the dog, its owner, and activities
+  with enrolments today or later.
+end note
+[<-- Command : commandResult
+
+legend bottom
+  Selects dog 21. Model internals are omitted.
+  Parsing and saving follow the shared Logic flow.
+  Successful execution only; validation failures are omitted.
+endlegend
 @enduml

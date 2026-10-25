@@ -1,55 +1,58 @@
 @startuml
 !include style.puml
 skinparam arrowThickness 1.1
-skinparam arrowColor MODEL_COLOR
+skinparam arrowColor MODEL_COLOR_T4
 skinparam classBackgroundColor MODEL_COLOR
+show members
 
-package Model {
-interface ReadOnlyAddressBook
-interface ReadOnlyUserPrefs
-interface Model
+class "<<interface>>\nModel" as Model
 class ModelManager
+class "<<interface>>\nReadOnlyAddressBook" as ReadOnlyAddressBook
+class "<<interface>>\nReadOnlyUserPrefs" as ReadOnlyUserPrefs
 class AddressBook
 class UserPrefs
 class UniqueCustomerList
 class UniqueDogList
-class Enrolment
-class Customer
-class Dog
-class "customer.Name" as CustomerName
-class "customer.Phone" as CustomerPhone
-class "customer.Email" as CustomerEmail
-class BackupContact
-class DogName
-class Breed
-class Size
+class Customer {
+  -id: int
+}
+class Dog {
+  -id: int
+  -ownerId: Integer
+}
+class Activity {
+  -id: int
+}
+class Enrolment {
+  -activityId: int
+  -dogId: int
+  -date: LocalDate
 }
 
-ModelManager ..|> Model
-ModelManager --> "1" AddressBook
-ModelManager --> "1" UserPrefs
-Model ..> ReadOnlyAddressBook
-Model ..> ReadOnlyUserPrefs
-AddressBook ..|> ReadOnlyAddressBook
-UserPrefs ..|> ReadOnlyUserPrefs
-AddressBook *--> "1" UniqueCustomerList
-AddressBook *--> "1" UniqueDogList
-AddressBook *--> "0..*" Enrolment
+ModelManager .up.|> Model
+ModelManager --> "1" AddressBook : addressBook
+ModelManager --> "1" UserPrefs : userPrefs
+Model ..> ReadOnlyAddressBook : exposes
+Model ..> ReadOnlyUserPrefs : exposes
+AddressBook .up.|> ReadOnlyAddressBook
+UserPrefs .up.|> ReadOnlyUserPrefs
+AddressBook --> "1" UniqueCustomerList : customers
+AddressBook --> "1" UniqueDogList : dogs
+AddressBook --> "*" Activity : activities
+AddressBook --> "*" Enrolment : enrolments
 UniqueCustomerList --> "*" Customer
 UniqueDogList --> "*" Dog
-Customer *--> CustomerName
-Customer *--> CustomerPhone
-Customer *--> CustomerEmail
-Customer *--> BackupContact
-Dog *--> DogName
-Dog *--> Breed
-Dog *--> Size
-Dog --> "0..1" Customer : ownerId
-ModelManager --> "* filtered" Customer
-ModelManager --> "* filtered" Dog
-ModelManager --> "* filtered" Activity
-ModelManager ..> Enrolment : enrols dogs
-Enrolment --> Activity
-Enrolment --> Dog
-Activity --> "0..*" Enrolment
+
+note bottom of ModelManager
+  Maintains filtered observable views of
+  customers, dogs and activities.
+  Views share the stored records.
+end note
+
+note bottom of Dog
+  ownerId is null for an unlinked dog.
+  Ownership and enrolment endpoints use IDs,
+  not direct references to other records.
+  Other record details and APIs are omitted.
+end note
 @enduml

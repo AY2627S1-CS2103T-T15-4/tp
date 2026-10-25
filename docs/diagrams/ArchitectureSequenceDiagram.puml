@@ -1,39 +1,29 @@
 @startuml
 !include style.puml
 skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 180
 
-Actor User as user USER_COLOR
-Participant ":UI" as ui UI_COLOR
-Participant ":Logic" as logic LOGIC_COLOR
-Participant ":Model" as model MODEL_COLOR
-Participant ":Storage" as storage STORAGE_COLOR
+actor User USER_COLOR
+participant ":MainWindow" as UI UI_COLOR
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+participant ":StorageManager" as Storage STORAGE_COLOR
 
-user -[USER_COLOR]> ui : "delete dog 1"
-activate ui UI_COLOR
+User -> UI : delete dog 1
+UI -> Logic : execute("delete dog 1")
+Logic -> Model : getDogList()
+Model --> Logic : dogs
+Logic -> Model : deleteDog(dog)
+Logic -> Model : getAddressBook()
+Model --> Logic : addressBook
+Logic -> Storage : saveAddressBook(addressBook)
+Logic --> UI : commandResult
+UI --> User : feedback displayed
 
-ui -[UI_COLOR]> logic : execute("delete dog 1")
-activate logic LOGIC_COLOR
-
-logic -[LOGIC_COLOR]> model : deleteDog(p)
-activate model MODEL_COLOR
-
-model -[MODEL_COLOR]-> logic
-deactivate model
-
-logic -[LOGIC_COLOR]> storage : saveAddressBook(addressBook)
-activate storage STORAGE_COLOR
-
-storage -[STORAGE_COLOR]> storage : Save to file
-activate storage STORAGE_COLOR_T1
-storage --[STORAGE_COLOR]> storage
-deactivate storage
-
-storage --[STORAGE_COLOR]> logic
-deactivate storage
-
-logic --[LOGIC_COLOR]> ui
-deactivate logic
-
-ui--[UI_COLOR]> user
-deactivate ui
+legend bottom
+  Successful deletion at component boundaries; internal calls are omitted.
+  Calls made by DeleteDogCommand are represented by its Logic component.
+  Observable-list updates refresh the UI; notifications are omitted.
+endlegend
 @enduml

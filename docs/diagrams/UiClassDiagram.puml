@@ -4,73 +4,39 @@ skinparam arrowThickness 1.1
 skinparam arrowColor UI_COLOR_T4
 skinparam classBackgroundColor UI_COLOR
 
-package UI <<Rectangle>>{
-Class "<<interface>>\nUi" as Ui
-Class "{abstract}\nUiPart" as UiPart
-Class UiManager
-Class MainWindow
-Class HelpWindow
-Class ResultDisplay
-Class RecordListPanel
-Class ActivityListPanel
-Class TodayActivityListPanel
-Class CustomerCard
-Class DogCard
-Class StatusBarFooter
-Class CommandBox
-}
+class "<<interface>>\nUi" as Ui
+class UiManager
+class MainWindow
+class CommandBox
+class ResultDisplay
+class HelpWindow
+class CustomerListPanel
+class DogListPanel
+class ActivityListPanel
+class TodayActivityListPanel
+class CustomerCard
+class DogCard
+class ActivityCard
+class "<<interface>>\nLogic" as Logic LOGIC_COLOR
 
-package Model <<Rectangle>> {
-Class HiddenModel #FFFFFF
-}
+UiManager .up.|> Ui
+UiManager --> "1" MainWindow : mainWindow
+UiManager --> "1" Logic : logic
+MainWindow --> "1" Logic : logic
+MainWindow -left-> "1" ResultDisplay
+MainWindow -right-> "1" HelpWindow
+MainWindow --> "1" CustomerListPanel
+MainWindow --> "1" DogListPanel
+MainWindow --> "1" ActivityListPanel
+MainWindow --> "1" TodayActivityListPanel
+MainWindow .left.> CommandBox : creates
+TodayActivityListPanel -up-|> ActivityListPanel
+CustomerListPanel ..> CustomerCard : creates
+DogListPanel ..> DogCard : creates
+ActivityListPanel ..> ActivityCard : creates
 
-package Logic <<Rectangle>> {
-Class HiddenLogic #FFFFFF
-}
-
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Ui
-
-UiManager .left.|> Ui
-UiManager -down-> "1" MainWindow
-MainWindow *-down->  "1" CommandBox
-MainWindow *-down-> "1" ResultDisplay
-MainWindow *-down-> "1" RecordListPanel
-MainWindow *-down-> "1" ActivityListPanel
-MainWindow *-down-> "1" TodayActivityListPanel
-MainWindow *-down-> "1" StatusBarFooter
-MainWindow --> "0..1" HelpWindow
-
-RecordListPanel -down-> "*" CustomerCard
-RecordListPanel --> "*" DogCard
-TodayActivityListPanel --|> ActivityListPanel
-
-MainWindow -left-|> UiPart
-
-ResultDisplay --|> UiPart
-CommandBox --|> UiPart
-RecordListPanel --|> UiPart
-ActivityListPanel --|> UiPart
-CustomerCard --|> UiPart
-DogCard --|> UiPart
-StatusBarFooter --|> UiPart
-HelpWindow --|> UiPart
-
-CustomerCard ..> Model
-DogCard ..> Model
-UiManager -right-> Logic
-MainWindow -left-> Logic
-
-RecordListPanel -[hidden]left- HelpWindow
-TodayActivityListPanel -[hidden]right- ActivityListPanel
-HelpWindow -[hidden]left- CommandBox
-CommandBox -[hidden]left- ResultDisplay
-ResultDisplay -[hidden]left- StatusBarFooter
-
-MainWindow -[hidden]-|> UiPart
-
-note right of TodayActivityListPanel
-  Filters the shared activity list
-  to schedules occurring today.
+note bottom of TodayActivityListPanel
+  Uses the complete activity list,
+  filtered to schedules occurring today.
 end note
 @enduml

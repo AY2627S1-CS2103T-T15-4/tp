@@ -1,0 +1,30 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 180
+
+participant "command:SummaryCommand" as Command LOGIC_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+participant ":AddressBook" as Book MODEL_COLOR
+
+Command -> Model : getDogsEnrolledOn(today)
+Model -> Book : getEnrolmentList()
+Book --> Model : enrolments
+note over Model
+  Collects distinct dog IDs from
+  enrolments whose date equals today.
+end note
+Model -> Book : getDogList()
+Book --> Model : dogs
+note over Model
+  Selects dogs with those IDs,
+  preserving the full list's order.
+end note
+Model --> Command : enrolledDogs
+
+legend bottom
+  Model query used by summary; other summary counts are omitted.
+  Returns an unmodifiable snapshot without changing filters or records.
+endlegend
+@enduml

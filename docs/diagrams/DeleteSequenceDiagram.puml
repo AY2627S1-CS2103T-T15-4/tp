@@ -1,78 +1,23 @@
 @startuml
 !include style.puml
 skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 180
 
-box Logic LOGIC_COLOR_T1
-participant ":LogicManager" as LogicManager LOGIC_COLOR
-participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
-participant ":DeleteDogCommandParser" as DeleteDogCommandParser LOGIC_COLOR
-participant "d:DeleteDogCommand" as DeleteDogCommand LOGIC_COLOR
-participant "r:CommandResult" as CommandResult LOGIC_COLOR
-end box
+participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":DeleteDogCommandParser" as Parser LOGIC_COLOR
+participant ":DeleteDogCommand" as Command LOGIC_COLOR
 
-box Model MODEL_COLOR_T1
-participant "m:ModelManager" as ModelManager MODEL_COLOR
-participant "b:AddressBook" as AddressBook MODEL_COLOR
-end box
+create Parser
+Router -> Parser : new DeleteDogCommandParser()
+Router -> Parser : parse(" 1")
+create Command
+Parser -> Command : new DeleteDogCommand(1)
+Parser --> Router : command
 
-[-> LogicManager : execute("delete dog 1")
-activate LogicManager
-
-LogicManager -> AddressBookParser : parseCommand("delete dog 1")
-activate AddressBookParser
-
-create DeleteDogCommandParser
-AddressBookParser -> DeleteDogCommandParser
-activate DeleteDogCommandParser
-
-DeleteDogCommandParser --> AddressBookParser
-deactivate DeleteDogCommandParser
-
-AddressBookParser -> DeleteDogCommandParser : parse("1")
-activate DeleteDogCommandParser
-
-create DeleteDogCommand
-DeleteDogCommandParser -> DeleteDogCommand
-activate DeleteDogCommand
-
-DeleteDogCommand --> DeleteDogCommandParser :
-deactivate DeleteDogCommand
-
-DeleteDogCommandParser --> AddressBookParser : d
-deactivate DeleteDogCommandParser
-'Hidden arrow to position the destroy marker below the end of the activation bar.
-DeleteDogCommandParser -[hidden]-> AddressBookParser
-destroy DeleteDogCommandParser
-
-AddressBookParser --> LogicManager : d
-deactivate AddressBookParser
-
-LogicManager -> DeleteDogCommand : execute(m)
-activate DeleteDogCommand
-
-DeleteDogCommand -> ModelManager : deleteDog(dog)
-activate ModelManager
-
-ModelManager -> AddressBook : removeDog(dog)
-activate AddressBook
-AddressBook -> AddressBook : remove all enrolments for dog ID
-AddressBook -> AddressBook : remove dog record
-AddressBook --> ModelManager
-deactivate AddressBook
-
-ModelManager --> DeleteDogCommand
-deactivate ModelManager
-
-create CommandResult
-DeleteDogCommand -> CommandResult
-activate CommandResult
-
-CommandResult --> DeleteDogCommand
-deactivate CommandResult
-
-DeleteDogCommand --> LogicManager : r
-deactivate DeleteDogCommand
-
-[<--LogicManager
-deactivate LogicManager
+legend bottom
+  Inside parseCommand("delete dog 1").
+  LogicManager then executes the returned command and saves.
+  Validation failures, activation bars and disposal are omitted.
+endlegend
 @enduml
