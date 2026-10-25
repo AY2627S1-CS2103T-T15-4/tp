@@ -10,7 +10,10 @@ import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.ExitCommand;
+import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.RedoCommand;
+import seedu.address.logic.commands.SummaryCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.AddressBookParser;
@@ -65,6 +68,10 @@ public class LogicManager implements Logic {
             String undoneCommand = undoCommandText;
             ModelState stateAfterUndo = model.createState();
             model.restoreState(state);
+            undoState = null;
+            undoCommandText = null;
+            redoState = stateAfterUndo;
+            redoCommandText = undoneCommand;
             try {
                 storage.saveAddressBook(model.getAddressBook());
             } catch (AccessDeniedException e) {
@@ -72,10 +79,6 @@ public class LogicManager implements Logic {
             } catch (IOException ioe) {
                 throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
             }
-            undoState = null;
-            undoCommandText = null;
-            redoState = stateAfterUndo;
-            redoCommandText = undoneCommand;
             return new CommandResult(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, undoneCommand));
         }
 
@@ -87,6 +90,10 @@ public class LogicManager implements Logic {
             ModelState state = redoState;
             String redoneCommand = redoCommandText;
             model.restoreState(state);
+            undoState = stateBeforeRedo;
+            undoCommandText = redoneCommand;
+            redoState = null;
+            redoCommandText = null;
             try {
                 storage.saveAddressBook(model.getAddressBook());
             } catch (AccessDeniedException e) {
@@ -94,15 +101,27 @@ public class LogicManager implements Logic {
             } catch (IOException ioe) {
                 throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
             }
-            undoState = stateBeforeRedo;
-            undoCommandText = redoneCommand;
-            redoState = null;
-            redoCommandText = null;
             return new CommandResult(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, redoneCommand));
         }
 
-        ModelState stateBeforeCommand = command instanceof ClearCommand ? null : model.createState();
+        boolean isClear = command instanceof ClearCommand;
+        boolean isHistoryNeutral = command instanceof HelpCommand || command instanceof SummaryCommand
+                || command instanceof ExitCommand;
+        ModelState stateBeforeCommand = isClear || isHistoryNeutral ? null : model.createState();
         commandResult = command.execute(model);
+
+        // Execution can change memory even when saving fails; history must describe that live state.
+        if (isClear) {
+            undoState = null;
+            undoCommandText = null;
+            redoState = null;
+            redoCommandText = null;
+        } else if (!isHistoryNeutral) {
+            undoState = stateBeforeCommand;
+            undoCommandText = commandText.trim();
+            redoState = null;
+            redoCommandText = null;
+        }
 
         try {
             storage.saveAddressBook(model.getAddressBook());
@@ -116,17 +135,6 @@ public class LogicManager implements Logic {
             throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
         }
 
-        if (command instanceof ClearCommand) {
-            undoState = null;
-            undoCommandText = null;
-            redoState = null;
-            redoCommandText = null;
-        } else {
-            undoState = stateBeforeCommand;
-            undoCommandText = commandText.trim();
-            redoState = null;
-            redoCommandText = null;
-        }
         return commandResult;
     }
 

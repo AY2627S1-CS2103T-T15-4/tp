@@ -45,6 +45,14 @@ public interface Model {
 
     void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
 
+    /**
+     * Returns an unmodifiable snapshot of distinct stored dogs enrolled on {@code date}, in full dog-list order.
+     * Matches persistent IDs independently of displayed filters. Later model mutations do not change the snapshot.
+     *
+     * @throws NullPointerException if {@code date} is null.
+     */
+    List<Dog> getDogsEnrolledOn(LocalDate date);
+
     /** Links an entire batch or throws without changing records or filters. */
     void linkDogs(int customerId, List<Integer> dogIds) throws LinkException;
 

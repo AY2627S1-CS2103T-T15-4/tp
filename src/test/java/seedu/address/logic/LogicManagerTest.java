@@ -7,6 +7,7 @@ import static seedu.address.testutil.Assert.assertThrows;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,7 @@ import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
@@ -69,6 +71,40 @@ public class LogicManagerTest {
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD + " customer";
         assertCommandSuccess(listCommand, ListCommand.MESSAGE_EMPTY, model);
+    }
+
+    @Test
+    public void execute_summary_preservesFilteredDataAndSavesExistingRecords() throws Exception {
+        model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        model.updateFilteredDogList(unused -> false);
+        AddressBook before = new AddressBook(model.getAddressBook());
+
+        assertEquals("Overall: 1 dogs | 0 customers\n"
+                + "Activity schedules: 0 total | 0 from today onwards\n"
+                + "Today (" + LocalDate.now() + "): 0 activities | 0 distinct dogs enrolled",
+                logic.execute("summary").getFeedbackToUser());
+        assertEquals(before, model.getAddressBook());
+        assertEquals(List.of(), model.getFilteredDogList());
+        assertEquals(before, new AddressBook(new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"))
+                .readAddressBook().orElseThrow()));
+    }
+
+    @Test
+    public void execute_summaryStorageFailure_reportsSaveErrorWithoutChangingRecords() {
+        for (IOException exception : List.of(DUMMY_IO_EXCEPTION, DUMMY_AD_EXCEPTION)) {
+            JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("summary.json")) {
+                @Override
+                public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
+                    throw exception;
+                }
+            };
+            logic = new LogicManager(model, new StorageManager(storage,
+                    new JsonUserPrefsStorage(temporaryFolder.resolve("summaryPrefs.json"))));
+            String expected = exception instanceof AccessDeniedException
+                    ? String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, exception.getMessage())
+                    : String.format(LogicManager.FILE_OPS_ERROR_FORMAT, exception.getMessage());
+            assertCommandFailure("summary", CommandException.class, expected);
+        }
     }
 
     @Test

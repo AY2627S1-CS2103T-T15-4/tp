@@ -122,6 +122,7 @@ public class LinkCommandTest {
         LinkCommand command = new LinkCommand(7, List.of(42, 43));
         assertEquals(command, command);
         assertEquals(command, new LinkCommand(7, List.of(42, 43)));
+        assertEquals(command.hashCode(), new LinkCommand(7, List.of(42, 43)).hashCode());
         assertNotEquals(command, new LinkCommand(8, List.of(42, 43)));
         assertNotEquals(command, new LinkCommand(7, List.of(42)));
         assertNotEquals(command, null);
