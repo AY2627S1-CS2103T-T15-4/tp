@@ -46,4 +46,9 @@ public class SummaryCommand extends Command {
     public boolean equals(Object other) {
         return other instanceof SummaryCommand;
     }
+
+    @Override
+    public int hashCode() {
+        return SummaryCommand.class.hashCode();
+    }
 }

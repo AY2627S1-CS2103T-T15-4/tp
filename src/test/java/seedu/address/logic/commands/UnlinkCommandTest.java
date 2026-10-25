@@ -114,6 +114,9 @@ public class UnlinkCommandTest {
         UnlinkCommand command = new UnlinkCommand(List.of(42, 43));
         assertEquals(command, command);
         assertEquals(command, new UnlinkCommand(List.of(42, 43)));
+        assertEquals(command.hashCode(), new UnlinkCommand(List.of(42, 43)).hashCode());
+        assertEquals(new UnlinkCommand(7), new UnlinkCommand(7));
+        assertEquals(new UnlinkCommand(7).hashCode(), new UnlinkCommand(7).hashCode());
         assertNotEquals(command, new UnlinkCommand(8));
         assertNotEquals(command, new UnlinkCommand(List.of(42)));
         assertNotEquals(command, null);

@@ -5,6 +5,7 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -47,5 +48,10 @@ public class LinkCommand extends Command {
     public boolean equals(Object other) {
         return other == this || other instanceof LinkCommand otherCommand
                 && customerId == otherCommand.customerId && dogIds.equals(otherCommand.dogIds);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(customerId, dogIds);
     }
 }
