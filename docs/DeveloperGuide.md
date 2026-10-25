@@ -277,10 +277,34 @@ a previous customer selection.
 
 On success the dog column shows every dog currently linked to that customer. The customer column shows
 that customer. The activity column shows activities with dated enrolments today or later for those
-dogs. Linking another dog, or enrolling one of those dogs, updates the columns without running
+dogs; a past enrolment is excluded, even when its activity schedule still exists. Linking another
+dog, or enrolling one of those dogs, updates the columns without running
 `select customer` again.
 
 <puml src="diagrams/SelectCustomerSequenceDiagram.puml" alt="Selecting a customer and their dogs and activities" />
+
+### Undo and redo
+
+`AddressBookParser` accepts `undo` and `redo` only without arguments. `LogicManager` handles these
+commands before ordinary command execution. It keeps one undo snapshot and one redo snapshot, each
+paired with the original command text for feedback. A successful ordinary command replaces the undo
+snapshot with the state captured before its execution and clears the redo snapshot. A failed command
+does not update either snapshot. `clear` discards both snapshots and cannot itself be undone.
+
+`Model.createState()` copies the `AddressBook`, including its records and ID counters, and captures
+the active customer, dog and activity predicates and the selected record IDs. `Model.restoreState()`
+resets the existing address book and reapplies the saved display state. Reusing the existing model
+and observable lists lets UI listeners continue to see updates after a restoration.
+
+On `undo`, `LogicManager` captures the current state for redo, restores the undo snapshot, saves the
+address book, and clears the undo slot. On `redo`, it captures the current state for another undo,
+restores the redo snapshot, saves, and clears the redo slot. A subsequent successful command after
+`undo` invalidates redo. History is held only in memory, so it is unavailable after a restart.
+Missing history produces a `CommandException`; save failures are translated to command errors.
+
+`LogicManagerTest` covers the undo/redo cycle, invalidated history, `clear`, failed commands, and
+save failures. `ModelManagerTest` checks restoration of data, filters, and selection, while
+`AddressBookParserTest` checks argument validation.
 
 ### Activity creation and storage
 
