@@ -20,10 +20,13 @@ import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FilterUnlinkedCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.SearchActivityCommand;
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.commands.SearchDogCommand;
+import seedu.address.logic.commands.SummaryCommand;
+import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.dog.Breed;
@@ -34,6 +37,20 @@ import seedu.address.model.dog.Size;
 public class AddressBookParserTest {
 
     private final AddressBookParser parser = new AddressBookParser();
+
+    @Test
+    public void parseCommand_summary_acceptsSurroundingWhitespace() throws Exception {
+        assertEquals(new SummaryCommand(), parser.parseCommand("summary"));
+        assertEquals(new SummaryCommand(), parser.parseCommand(" \t summary \t "));
+    }
+
+    @Test
+    public void parseCommand_summaryWithArguments_throwsParseException() {
+        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SummaryCommand.MESSAGE_USAGE);
+        for (String input : new String[] {"summary today", "summary 1", "summary date/2026-10-24"}) {
+            assertThrows(ParseException.class, expectedMessage, () -> parser.parseCommand(input));
+        }
+    }
 
     @Test
     public void parseCommand_addDog() throws Exception {
@@ -140,6 +157,16 @@ public class AddressBookParserTest {
     public void parseCommand_help() throws Exception {
         assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD) instanceof HelpCommand);
         assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD + " 3") instanceof HelpCommand);
+    }
+
+    @Test
+    public void parseCommand_undoRedo_acceptOnlyCommandWord() throws Exception {
+        assertTrue(parser.parseCommand("  undo  ") instanceof UndoCommand);
+        assertTrue(parser.parseCommand("  redo  ") instanceof RedoCommand);
+        String undoError = String.format(MESSAGE_INVALID_COMMAND_FORMAT, UndoCommand.COMMAND_WORD);
+        String redoError = String.format(MESSAGE_INVALID_COMMAND_FORMAT, RedoCommand.COMMAND_WORD);
+        assertThrows(ParseException.class, undoError, () -> parser.parseCommand("undo 1"));
+        assertThrows(ParseException.class, redoError, () -> parser.parseCommand("redo 1"));
     }
 
     @Test

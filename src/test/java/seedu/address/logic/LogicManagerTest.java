@@ -7,6 +7,7 @@ import static seedu.address.testutil.Assert.assertThrows;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +19,11 @@ import javafx.collections.ObservableList;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteDogCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.RedoCommand;
+import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
@@ -70,6 +74,40 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_summary_preservesFilteredDataAndSavesExistingRecords() throws Exception {
+        model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        model.updateFilteredDogList(unused -> false);
+        AddressBook before = new AddressBook(model.getAddressBook());
+
+        assertEquals("Overall: 1 dogs | 0 customers\n"
+                + "Activity schedules: 0 total | 0 from today onwards\n"
+                + "Today (" + LocalDate.now() + "): 0 activities | 0 distinct dogs enrolled",
+                logic.execute("summary").getFeedbackToUser());
+        assertEquals(before, model.getAddressBook());
+        assertEquals(List.of(), model.getFilteredDogList());
+        assertEquals(before, new AddressBook(new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"))
+                .readAddressBook().orElseThrow()));
+    }
+
+    @Test
+    public void execute_summaryStorageFailure_reportsSaveErrorWithoutChangingRecords() {
+        for (IOException exception : List.of(DUMMY_IO_EXCEPTION, DUMMY_AD_EXCEPTION)) {
+            JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("summary.json")) {
+                @Override
+                public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
+                    throw exception;
+                }
+            };
+            logic = new LogicManager(model, new StorageManager(storage,
+                    new JsonUserPrefsStorage(temporaryFolder.resolve("summaryPrefs.json"))));
+            String expected = exception instanceof AccessDeniedException
+                    ? String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, exception.getMessage())
+                    : String.format(LogicManager.FILE_OPS_ERROR_FORMAT, exception.getMessage());
+            assertCommandFailure("summary", CommandException.class, expected);
+        }
+    }
+
+    @Test
     public void execute_storageThrowsIoException_throwsCommandException() {
         assertCommandFailureForExceptionFromStorage(DUMMY_IO_EXCEPTION, String.format(
                 LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()));
@@ -114,6 +152,100 @@ public class LogicManagerTest {
         assertEquals(List.of(new Dog(1, new DogName("Buddy"), new Breed("Poodle"), new Size("small"))), dogs);
         assertEquals(1, notifications[0]);
         assertThrows(UnsupportedOperationException.class, () -> dogs.remove(0));
+    }
+
+    @Test
+    public void execute_undoRedo_restoresDataAndAllowsAnotherUndo() throws Exception {
+        ObservableList<Dog> dogs = logic.getDogList();
+        String addCommand = "  adddog n/Buddy b/Poodle s/small  ";
+
+        logic.execute(addCommand);
+        Dog buddy = dogs.get(0);
+        assertEquals(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, addCommand.trim()),
+                logic.execute("undo").getFeedbackToUser());
+        assertEquals(List.of(), dogs);
+        assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
+
+        assertEquals(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, addCommand.trim()),
+                logic.execute("redo").getFeedbackToUser());
+        assertEquals(List.of(buddy), dogs);
+        assertCommandException("redo", RedoCommand.MESSAGE_NO_COMMAND);
+
+        logic.execute("undo");
+        assertEquals(List.of(), dogs);
+    }
+
+    @Test
+    public void executeUndoRedo_withoutHistory_throwsCommandException() {
+        assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
+        assertCommandException("redo", RedoCommand.MESSAGE_NO_COMMAND);
+    }
+
+    @Test
+    public void execute_commandAfterUndo_discardsRedoHistory() throws Exception {
+        logic.execute("adddog n/Buddy b/Poodle s/small");
+        logic.execute("undo");
+        logic.execute("adddog n/Max b/Poodle s/large");
+
+        assertCommandException("redo", RedoCommand.MESSAGE_NO_COMMAND);
+        assertEquals("Max", logic.getDogList().get(0).getName().toString());
+    }
+
+    @Test
+    public void execute_clear_discardsUndoAndRedoHistory() throws Exception {
+        logic.execute("adddog n/Buddy b/Poodle s/small");
+        logic.execute("undo");
+        logic.execute("clear");
+        assertCommandException("redo", RedoCommand.MESSAGE_NO_COMMAND);
+        assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
+
+        logic.execute("adddog n/Max b/Poodle s/large");
+        logic.execute("clear");
+        assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
+    }
+
+    @Test
+    public void execute_failedCommand_preservesUndoHistory() throws Exception {
+        logic.execute("adddog n/Buddy b/Poodle s/small");
+        assertCommandException("delete dog 9", DeleteDogCommand.MESSAGE_INVALID_ID);
+
+        logic.execute("undo");
+        assertEquals(List.of(), logic.getDogList());
+    }
+
+    @Test
+    public void executeUndoRedo_storageFailure_reportsCause() throws Exception {
+        for (IOException failure : List.of(DUMMY_IO_EXCEPTION, DUMMY_AD_EXCEPTION)) {
+            assertHistoryStorageFailure(failure, true);
+            assertHistoryStorageFailure(failure, false);
+        }
+    }
+
+    private void assertHistoryStorageFailure(IOException failure, boolean undo) throws Exception {
+        model = new ModelManager();
+        boolean[] failSave = {false};
+        Path historyPath = temporaryFolder.resolve("history.json");
+        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(historyPath) {
+            @Override
+            public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
+                if (failSave[0]) {
+                    throw failure;
+                }
+                super.saveAddressBook(addressBook);
+            }
+        };
+        JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("historyPrefs.json"));
+        logic = new LogicManager(model, new StorageManager(addressBookStorage, userPrefsStorage));
+        logic.execute("adddog n/Buddy b/Poodle s/small");
+        if (!undo) {
+            logic.execute("undo");
+        }
+
+        failSave[0] = true;
+        String expectedMessage = failure instanceof AccessDeniedException
+                ? String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, failure.getMessage())
+                : String.format(LogicManager.FILE_OPS_ERROR_FORMAT, failure.getMessage());
+        assertThrows(CommandException.class, expectedMessage, () -> logic.execute(undo ? "undo" : "redo"));
     }
 
     /**

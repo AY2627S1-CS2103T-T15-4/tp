@@ -9,11 +9,14 @@ import static seedu.address.testutil.TypicalWatchDog.BOB;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
@@ -43,6 +46,71 @@ public class ModelManagerTest {
         UserPrefs oldUserPrefs = new UserPrefs(userPrefs);
         userPrefs.setGuiSettings(new GuiSettings(5, 6, 7, 8));
         assertEquals(oldUserPrefs, modelManager.getUserPrefs());
+    }
+
+    @Test
+    public void restoreState_restoresDataAndActiveFilters() {
+        modelManager.addCustomer(ALICE);
+        Dog buddy = modelManager.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        Activity walk = modelManager.addActivity(new ActivityName("Walk"), LocalDate.now(),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        modelManager.updateFilteredCustomerList(customer -> customer.equals(ALICE));
+        modelManager.updateFilteredDogList(dog -> dog.equals(buddy));
+        modelManager.updateFilteredActivityList(activity -> activity.equals(walk));
+        Model.ModelState state = modelManager.createState();
+
+        modelManager.addCustomer(BOB);
+        modelManager.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("large")));
+        modelManager.updateFilteredCustomerList(customer -> false);
+        modelManager.updateFilteredDogList(dog -> false);
+        modelManager.updateFilteredActivityList(activity -> false);
+        modelManager.restoreState(state);
+
+        assertEquals(List.of(ALICE), modelManager.getFilteredCustomerList());
+        assertEquals(List.of(buddy), modelManager.getFilteredDogList());
+        assertEquals(List.of(walk), modelManager.getFilteredActivityList());
+        assertEquals(1, modelManager.getAddressBook().getCustomerList().size());
+        assertEquals(1, modelManager.getAddressBook().getDogList().size());
+    }
+
+    @Test
+    public void restoreState_preservesRelationshipsAndNextIds() throws Exception {
+        Customer owner = new Customer(1, "Alice", "91234567", "alice@example.com", "98765432");
+        Customer nextCustomer = new Customer(2, "Bob", "81234567", "bob@example.com", "87654321");
+        modelManager.addCustomer(owner);
+        Dog buddy = modelManager.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        Activity walk = modelManager.addActivity(new ActivityName("Walk"), LocalDate.now(),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        modelManager.linkDogs(owner.getId(), List.of(buddy.getId()));
+        modelManager.enrolDogs(walk.getId(), walk.getStartDate(), List.of(buddy.getId()));
+        Model.ModelState state = modelManager.createState();
+        int nextCustomerId = state.addressBook().getNextCustomerId();
+        int nextDogId = state.addressBook().getNextDogId();
+        long nextActivityId = state.addressBook().getNextActivityId();
+
+        modelManager.addCustomer(nextCustomer);
+        modelManager.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("large")));
+        modelManager.addActivity(new ActivityName("Run"), LocalDate.now(),
+                LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.ONCE);
+        modelManager.restoreState(state);
+
+        ReadOnlyAddressBook restored = modelManager.getAddressBook();
+        assertEquals(List.of(owner), restored.getCustomerList());
+        assertEquals(List.of(walk), restored.getActivityList());
+        assertEquals(List.of(new Enrolment(walk.getId(), buddy.getId(), walk.getStartDate())),
+                restored.getEnrolmentList());
+        assertEquals(owner.getId(), restored.getDogList().get(0).getOwnerId().orElseThrow());
+        assertEquals(nextCustomerId, restored.getNextCustomerId());
+        assertEquals(nextDogId, restored.getNextDogId());
+        assertEquals(nextActivityId, restored.getNextActivityId());
+
+        modelManager.addCustomer(nextCustomer);
+        Dog nextDog = modelManager.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("large")));
+        Activity nextActivity = modelManager.addActivity(new ActivityName("Run"), LocalDate.now(),
+                LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.ONCE);
+        assertEquals(nextCustomerId, modelManager.getAddressBook().getCustomerList().get(1).getId());
+        assertEquals(nextDogId, nextDog.getId());
+        assertEquals(nextActivityId, nextActivity.getId());
     }
 
     @Test

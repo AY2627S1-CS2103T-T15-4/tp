@@ -252,6 +252,92 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 <puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog through the application layers" />
 
+### Selecting a dog
+
+`AddressBookParser` routes `select` to `SelectCommandParser`, which accepts the lowercase categories
+`dog` and `customer` with an ID starting at 1. `SelectDogCommand` looks up that ID in the
+complete dog list. A missing dog leaves every filter unchanged.
+
+On success the command asks `ModelManager` to follow that dog id. The three filters read the current
+records whenever dogs, customers, activities, links, or enrolments change, so the columns stay current
+after later commands. The dog list shows the selected dog. The customer list shows that dog's current
+owner, or nothing when the dog is unlinked. The activity list shows activities with a dated enrolment
+for that dog today or on a future date.
+Another command that sets its own filter, such as `list` or `search`, leaves this view.
+`ModelManager` keeps this filtered activity list separately from `getActivityList()`, which continues
+to expose every stored schedule.
+
+<puml src="diagrams/SelectDogSequenceDiagram.puml" alt="Selecting a dog and its related owner and activities" />
+
+### Selecting a customer
+
+`SelectCustomerCommand` looks up the ID in the complete customer list. A missing customer leaves every
+filter unchanged. Selecting a customer replaces a previous dog selection, and selecting a dog replaces
+a previous customer selection.
+
+On success the dog column shows every dog currently linked to that customer. The customer column shows
+that customer. The activity column shows activities with dated enrolments today or later for those
+dogs; a past enrolment is excluded, even when its activity schedule still exists. Linking another
+dog, or enrolling one of those dogs, updates the columns without running
+`select customer` again.
+
+<puml src="diagrams/SelectCustomerSequenceDiagram.puml" alt="Selecting a customer and their dogs and activities" />
+
+### Undo and redo
+
+`AddressBookParser` accepts `undo` and `redo` only without arguments. `LogicManager` handles these
+commands before ordinary command execution; `UndoCommand.execute` and `RedoCommand.execute` alone
+cannot restore history. `LogicManager` keeps one undo snapshot and one redo snapshot, each paired
+with the original command text for feedback. A successful undoable command replaces the undo
+snapshot with the state captured before its execution and clears the redo snapshot. View-changing
+commands are undoable. `help`, `summary`, and `exit` preserve both slots, as do parse errors and
+commands rejected during execution. `clear` discards both snapshots and cannot itself be undone.
+
+`Model.createState()` copies the `AddressBook`, including its records and all three next-ID counters, and captures
+the active customer, dog and activity predicates and the selected record IDs. `Model.restoreState()`
+resets the existing address book and reapplies the saved display state. Reusing the existing model
+and observable lists lets UI listeners continue to see updates after a restoration. It refreshes
+predicates twice: the first pass installs source filters, and the second re-evaluates dependent filters.
+This handles both dog filters whose customer predicate reads filtered dogs and customer filters whose
+dog predicate reads filtered customers.
+
+On `undo`, `LogicManager` captures the current state for redo, restores the undo snapshot, moves
+the history slots, then saves the address book. `redo` symmetrically captures the current state for
+undo, restores the redo snapshot, moves the slots, and saves. An ordinary command updates history
+immediately after successful execution and before saving. This ordering matches the existing policy
+of retaining in-memory changes when a save fails: the corresponding inverse remains available,
+and `clear` still invalidates history. The disk may contain an older state, or a partially written
+state if an actual write had started. Missing history produces a `CommandException`; save failures
+are reported as command errors. History is held only in memory and is unavailable after a restart.
+
+`LogicManagerTest` and `LogicManagerHistoryTest` cover the undo/redo cycle, neutral commands,
+invalidated history, `clear`, failed commands, dependent filters, and save failures.
+`ModelManagerTest` checks restoration of data, ID counters, relationships, filters, and selection, while
+`AddressBookParserTest` checks argument validation.
+
+### Daycare summary
+
+`AddressBookParser` accepts `summary` with blank arguments only and constructs `SummaryCommand`.
+At execution, the command captures `LocalDate.now(clock)` once and uses that date for every count
+and the feedback date. The default clock uses the system's local zone; tests inject a clock.
+Counts use the full model lists, so filters and dog/customer selection remain unchanged.
+
+Each stored activity schedule contributes once to the total. A schedule contributes to the
+from-today-onwards count when `nextOccurrenceOnOrAfter(today)` is present, and to today's activity
+count when `occursOn(today)` is true. Empty activities and sessions that ended earlier today are
+included; recurring series are never expanded into future dates.
+
+`Model.getDogsEnrolledOn(LocalDate)` returns an unmodifiable snapshot. `ModelManager` collects dog
+IDs from enrolments on that date into a set, then resolves them against the full dog list in its
+existing order. This counts a dog enrolled in multiple activities once while keeping same-name
+dogs with different IDs distinct. Null dates are rejected with `NullPointerException`.
+The query takes time proportional to the number of enrolments plus dogs and stores no cached count.
+
+Feedback follows the existing `CommandResult` and `ResultDisplay` path. No records, filters or
+selection are mutated, and no storage schema changes are needed. `LogicManager` still attempts
+to save after successful execution, preserving its existing save-error handling. Summary neither
+creates an undo entry nor discards redo history.
+
 ### Activity creation and storage
 
 The following partial class diagram shows the activity schedules and their integration with the model.
@@ -858,6 +944,41 @@ testers are expected to do more *exploratory* testing.
        Expected: The most recent window size and location are retained.
 
 1. _{ more test cases … }_
+
+### Daycare summary
+
+Use a disposable data folder for this test. Substitute the computer's current local date for
+`TODAY`, the preceding date for `YESTERDAY`, and the following date for `TOMORROW`.
+
+1. With no records, run `summary`. Expect zero for all six counts and today's date.
+1. Add two dogs and one customer; leave both dogs unowned and the customer without dogs.
+   Add five schedules: one-time yesterday, today and tomorrow, daily starting yesterday, and
+   weekly starting today. Use non-overlapping times for the today and daily schedules.
+1. Enrol the first dog in the one-time today schedule and the daily schedule on `TODAY`.
+   Enrol the second dog in the daily schedule on `TOMORROW`. Leave the weekly activity empty.
+1. Run `summary`. Expect `2 dogs | 1 customers`, `5 total | 4 from today onwards`, and
+   `3 activities | 1 distinct dogs enrolled` for today, even after today's sessions have ended.
+1. Hide records using search/filter commands and run `summary` again. Expect identical counts
+   and unchanged panels. Run `summary extra`; expect the usage error and unchanged data/view.
+1. Delete the first dog and run `summary` again. Expect one dog and zero dogs enrolled today;
+   the customer and all five schedules remain counted.
+1. At the minimum window size and normal/larger display scaling, verify that all three feedback
+   lines can be read, scrolling within the result area if needed. Repeat with larger counts.
+
+Also verify mutation → undo → summary → redo: summary preserves the redo operation and does not
+appear as an undoable mutation.
+
+### Undo and redo
+
+1. Add a dog, run `help`, then `undo`. The dog disappears; `help` is not the undone command.
+1. Run `help`, then `redo`. The dog returns. Repeat with `summary` instead of `help`.
+1. Undo again, then add another dog. `redo` reports no command to redo and does not replace the new dog.
+1. Link two dogs to different customers. Run `filterd n/Buddy`, `resetdisplay`, then `undo`.
+   Only Buddy and Buddy's owner appear. Repeat using `filterc n/Alice`; only Alice and her dog appear.
+1. With disposable data, make the data file unwritable after a successful add, then run `undo`.
+   The save reports an error, but the dog disappears from memory. Restore write access and run `redo`;
+   the dog returns and saves. Repeat for a failed `redo`, a new add after `undo`, and `clear`.
+   A failed `clear` leaves memory empty and neither history operation available.
 
 ### Deleting a dog
 

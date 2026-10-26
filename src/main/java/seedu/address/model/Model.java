@@ -25,9 +25,33 @@ public interface Model {
 
     Predicate<Activity> PREDICATE_SHOW_ALL_ACTIVITIES = unused -> true;
 
+    /** Captures the complete model state needed to restore a previous command. */
+    record ModelState(ReadOnlyAddressBook addressBook, Predicate<Customer> customerPredicate,
+            Predicate<Dog> dogPredicate, Predicate<Activity> activityPredicate,
+            Integer selectedDogId, Integer selectedCustomerId) {
+    }
+
+    /** Returns a snapshot of the current data and display state. */
+    default ModelState createState() {
+        throw new UnsupportedOperationException("Model snapshots are not supported");
+    }
+
+    /** Restores a snapshot previously returned by {@link #createState()}. */
+    default void restoreState(ModelState state) {
+        throw new UnsupportedOperationException("Model snapshots are not supported");
+    }
+
     void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
 
     void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
+
+    /**
+     * Returns an unmodifiable snapshot of distinct stored dogs enrolled on {@code date}, in full dog-list order.
+     * Matches persistent IDs independently of displayed filters. Later model mutations do not change the snapshot.
+     *
+     * @throws NullPointerException if {@code date} is null.
+     */
+    List<Dog> getDogsEnrolledOn(LocalDate date);
 
     /** Links an entire batch or throws without changing records or filters. */
     void linkDogs(int customerId, List<Integer> dogIds) throws LinkException;

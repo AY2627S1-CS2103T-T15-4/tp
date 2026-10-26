@@ -6,8 +6,10 @@ import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -54,6 +56,27 @@ public class ModelManager implements Model {
 
     public ModelManager() {
         this(new AddressBook(), new UserPrefs());
+    }
+
+    @Override
+    public ModelState createState() {
+        return new ModelState(new AddressBook(addressBook), activeCustomerPredicate, activeDogPredicate,
+                activeActivityPredicate, null, null);
+    }
+
+    @Override
+    public void restoreState(ModelState state) {
+        requireNonNull(state);
+        addressBook.resetData(state.addressBook());
+        activeCustomerPredicate = state.customerPredicate();
+        activeDogPredicate = state.dogPredicate();
+        activeActivityPredicate = state.activityPredicate();
+        filteredCustomers.setPredicate(null);
+        filteredDogs.setPredicate(null);
+        filteredActivities.setPredicate(null);
+        refreshDisplayedRecords();
+        // Some restored predicates read another filtered list; re-evaluate after their source is installed.
+        refreshDisplayedRecords();
     }
 
     //=========== UserPrefs ==================================================================================
@@ -122,6 +145,18 @@ public class ModelManager implements Model {
     public void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
         addressBook.unenrolDogs(activityId, date, dogIds);
         refreshDisplayedRecords();
+    }
+
+    @Override
+    public List<Dog> getDogsEnrolledOn(LocalDate date) {
+        requireNonNull(date);
+        Set<Integer> enrolledDogIds = addressBook.getEnrolmentList().stream()
+                .filter(enrolment -> enrolment.getDate().equals(date))
+                .map(enrolment -> enrolment.getDogId())
+                .collect(Collectors.toSet());
+        return addressBook.getDogList().stream()
+                .filter(dog -> enrolledDogIds.contains(dog.getId()))
+                .toList();
     }
 
     @Override

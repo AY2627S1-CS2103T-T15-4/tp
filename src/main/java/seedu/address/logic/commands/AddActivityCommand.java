@@ -50,6 +50,11 @@ public class AddActivityCommand extends Command {
     }
 
     @Override
+    public int hashCode() {
+        return details.hashCode();
+    }
+
+    @Override
     public String toString() {
         return new ToStringBuilder(this).add("details", details).toString();
     }
