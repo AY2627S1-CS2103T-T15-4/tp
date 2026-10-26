@@ -19,6 +19,15 @@ public class FilterDogCommandParserTest {
     }
 
     @Test
+    public void parse_eachSupportedField_acceptsValidValue() throws Exception {
+        assertEquals(new FilterDogCommand("Waffle", null, null, null), parser.parse("n/Waffle"));
+        assertEquals(new FilterDogCommand(null, "Golden Retriever", null, null),
+                parser.parse("b/Golden Retriever"));
+        assertEquals(new FilterDogCommand(null, null, "large", null), parser.parse("s/LARGE"));
+        assertEquals(new FilterDogCommand(null, null, null, 21), parser.parse("i/21"));
+    }
+
+    @Test
     public void parse_invalidFields_throwsParseException() {
         String[] invalidInputs = {"", "n/Waffle n/Max", "b/Poodle b/Lab", "s/tiny", "i/-1", "i/abc",
             "N/Waffle", "x/value", "n/Lala x/value", "n/", "s/medium s/large", "i/1 i/2",
@@ -27,5 +36,20 @@ public class FilterDogCommandParserTest {
         for (String invalidInput : invalidInputs) {
             assertThrows(ParseException.class, () -> parser.parse(invalidInput));
         }
+    }
+
+    @Test
+    public void parse_eachInvalidField_rejectsIndividually() {
+        assertThrows(ParseException.class, () -> parser.parse("n/"));
+        assertThrows(ParseException.class, () -> parser.parse("b/"));
+        assertThrows(ParseException.class, () -> parser.parse("s/tiny"));
+        assertThrows(ParseException.class, () -> parser.parse("i/not-a-number"));
+    }
+
+    @Test
+    public void parse_invalidSize_includesSearchingErrorMessage() {
+        String expectedMessage = "Error in searching dogs:\n"
+                + "Invalid dog size. Please input small/medium/large/giant only.";
+        assertThrows(ParseException.class, expectedMessage, () -> parser.parse("s/tiny"));
     }
 }

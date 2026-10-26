@@ -12,40 +12,56 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.customer.CustomerFilterPredicate;
 
-/** Filters customers by name, contact details, and owned dogs. */
+/** Searches customers by name, contact details, owned dogs, and customer ID. */
 public class FilterCustomerCommand extends Command {
-    public static final String COMMAND_WORD = "filterc";
+    public static final String COMMAND_WORD = "searchc";
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + " [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_IDS] [bc/BACKUP_CONTACT]";
-    public static final String MESSAGE_INVALID_DOG_ID = "Error in filtering customers:\n"
+            + " [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_IDS] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]";
+    public static final String MESSAGE_INVALID_DOG_ID = "Error in searching customers:\n"
             + "Invalid dog id. Please input a valid dog id.";
-    private static final String MESSAGE_SUCCESS_PREFIX = "Successfully filtered customers by ";
+    public static final String MESSAGE_INVALID_CUSTOMER_ID = "Error in searching customers:\n"
+            + "Invalid customer id. Please input a valid customer id.";
+    private static final String MESSAGE_SUCCESS_PREFIX = "Successfully searched customers by ";
 
     private final String name;
     private final String phone;
     private final String email;
     private final String backupContact;
     private final Set<Integer> dogIds;
+    private final Integer customerId;
 
-    /** Creates a customer filter with any combination of supported fields. */
+    /** Creates a customer search with any combination of supported fields except customer ID. */
     public FilterCustomerCommand(String name, String phone, String email,
                                  String backupContact, Set<Integer> dogIds) {
+        this(name, phone, email, backupContact, dogIds, null);
+    }
+
+    /** Creates a customer search with any combination of supported fields. */
+    public FilterCustomerCommand(String name, String phone, String email,
+                                 String backupContact, Set<Integer> dogIds, Integer customerId) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.backupContact = backupContact;
         this.dogIds = dogIds;
+        this.customerId = customerId;
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
+        if (customerId != null && model.getCustomerList().stream()
+                .noneMatch(customer -> customer.getId() == customerId)) {
+            throw new CommandException(MESSAGE_INVALID_CUSTOMER_ID);
+        }
         if (dogIds != null && dogIds.stream()
                 .anyMatch(id -> model.getDogList().stream().noneMatch(dog -> dog.getId() == id))) {
             throw new CommandException(MESSAGE_INVALID_DOG_ID);
         }
-        model.updateFilteredCustomerList(new CustomerFilterPredicate(name, phone, email, backupContact,
-                dogIds, model.getDogList()));
+        CustomerFilterPredicate predicate = new CustomerFilterPredicate(name, phone, email, backupContact,
+                dogIds, model.getDogList());
+        model.updateFilteredCustomerList(customer -> (customerId == null || customer.getId() == customerId)
+                && predicate.test(customer));
         model.updateFilteredDogList(dog -> dog.getOwnerId()
                 .map(ownerId -> model.getFilteredCustomerList().stream()
                         .anyMatch(customer -> customer.getId() == ownerId))
@@ -71,6 +87,9 @@ public class FilterCustomerCommand extends Command {
         if (backupContact != null) {
             fields.add("backup contact: " + backupContact);
         }
+        if (customerId != null) {
+            fields.add("customer id: " + customerId);
+        }
         return MESSAGE_SUCCESS_PREFIX + fields;
     }
 
@@ -86,6 +105,7 @@ public class FilterCustomerCommand extends Command {
                 && Objects.equals(phone, otherCommand.phone)
                 && Objects.equals(email, otherCommand.email)
                 && Objects.equals(backupContact, otherCommand.backupContact)
-                && Objects.equals(dogIds, otherCommand.dogIds);
+                && Objects.equals(dogIds, otherCommand.dogIds)
+                && Objects.equals(customerId, otherCommand.customerId);
     }
 }

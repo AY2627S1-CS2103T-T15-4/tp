@@ -120,14 +120,14 @@ Example: `deleteactivity 21`
 The ID must be a nonnegative integer belonging to an existing activity. Invalid or missing IDs
 leave the activity and enrolments unchanged.
 
-### Filtering activities: `filtera`
+### Searching activities: `searcha`
 
-Filters activities by name, date, time, and/or recurrence. At least one field must be provided, and all supplied
+Searches activities by name, date, time, and/or recurrence. At least one field must be provided, and all supplied
 fields must match.
 
-Format: `filtera [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`
+Format: `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`
 
-Example: `filtera n/Dog run t/16:00`
+Example: `searcha n/Dog run t/16:00`
 
 * Name matching is case-insensitive (`run` and `RUN` are equivalent) and treats repeated internal spaces as one space.
 * Date matching includes activities that occur on the specified date, including daily and weekly recurrences.
@@ -135,12 +135,12 @@ Example: `filtera n/Dog run t/16:00`
 * Recurrence matching accepts `Once`, `Weekly`, or `Daily`, and is case-insensitive.
 * Dates must use `YYYY-MM-DD`, and times must use 24-hour `HH:mm` format.
 * Only lowercase `n/`, `d/`, `t/`, and `r/` field prefixes are accepted.
-* A successful command displays `Successfully filtered activities by` followed by the supplied values, in the form
+* A successful command displays `Successfully searched activities by` followed by the supplied values, in the form
   `name: NAME`, `time: HH:mm`, `date: YYYY-MM-DD`, and `recurrence: Once|Weekly|Daily`. Unused fields are omitted.
   If there are no matches, the activity panel is empty.
 * The dog panel shows dogs enrolled in the matching activities; when a date is supplied, only enrolments on that
   occurrence date are included. The customer panel shows owners of those dogs.
-* Invalid input displays `Error in filtering activities:` followed by the applicable error message.
+* Invalid date, time, or recurrence input displays `Error in searching activities:` followed by the applicable error message.
  * The filter remains active while activities are added or their state, enrolments, or details are changed.
 
 ### Adding a dog: `adddog`
@@ -262,17 +262,21 @@ Examples:
   showing `Dog IDs: None` when none remain. Existing search filters stay active.
 * Changes are saved automatically and survive restarting the application.
 
-### Filtering dogs: `filterd`
+### Searching dogs: `searchd`
 
-Filters dogs by one or more fields. All supplied fields must match.
+Searches dogs by one or more fields. All supplied fields must match.
 
-Format: `filterd [n/NAME] [b/BREED] [s/SIZE] [i/ID]`
+Format: `searchd [n/NAME] [b/BREED] [s/SIZE] [i/ID]`
 
-Example: `filterd b/Golden Retriever s/Medium`
+Example: `searchd b/Golden Retriever s/Medium`
 
 * Name and breed matching are case-insensitive substring searches.
 * Size must be `small`, `medium`, `large`, or `giant`, ignoring letter case.
 * ID matching is exact, and the ID must belong to a dog in the database.
+* A successful command displays `Successfully searched dogs by` followed by only the supplied fields.
+* Invalid input displays `Error in searching dogs:` followed by the applicable error message. Invalid or nonexistent
+  dog IDs display `Invalid dog id. Please input a valid dog id.`
+* Invalid sizes display `Invalid dog size. Please input small/medium/large/giant only.`
 * The customer panel is also filtered to customers linked to the matching dogs.
 * The activity panel shows activities in which a matching dog is enrolled.
 * Unowned matching dogs remain visible, but the customer panel is empty.
@@ -288,22 +292,23 @@ Format: `filterun dog` or `filterun customer`
 * The category must be lowercase. Multiple spaces between `filterun` and the category are accepted.
 * The filter remains active while records are added, edited, deleted, linked, or unlinked.
 
-### Filtering customers: `filterc`
+### Searching customers: `searchc`
 
-Filters customers by one or more fields. All supplied fields must match.
+Searches customers by one or more fields. All supplied fields must match.
 
-Format: `filterc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT]`
+Format: `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`
 
-Example: `filterc n/Anna d/12 34`
+Example: `searchc n/Anna d/12 34`
 
 * Name matching is case-insensitive, uses a substring search, and treats repeated spaces as one space.
 * Phone and backup contact numbers require exactly eight digits and use exact matching.
 * Email matching is case-insensitive and exact.
 * Dog IDs must exist. A customer must own all specified dog IDs to match.
+* Customer ID must be a nonnegative ID belonging to an existing customer; it matches that customer exactly.
 * The dog panel is also filtered to show only dogs owned by the matching customers.
-* Dog IDs in the success message are displayed in ascending numeric order.
-* Only lowercase `n/`, `p/`, `e/`, `d/`, and `bc/` prefixes are accepted.
-* Invalid field values display `Error in filtering customers:` followed by the applicable error message.
+* Dog IDs and customer ID appear in the success message only when supplied; dog IDs are displayed in ascending numeric order.
+* Only lowercase `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/` prefixes are accepted.
+* Invalid field values display `Error in searching customers:` followed by the applicable error message. Invalid or nonexistent dog and customer IDs have specific messages.
 * Unsupported field prefixes are rejected as invalid command formats.
 * If no customers match, the customer panel is empty.
 * The filter remains active while customers or their linked dogs are added, edited, deleted, linked, or unlinked.
@@ -464,7 +469,8 @@ Action     | Format, Examples
 **Enrol dogs** | `enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2`<br>Date must be today or a future occurrence; overlapping activities for the same dog are rejected.
 **Unenrol dogs** | `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2`<br>Removes only the specified dated enrolments.
 **Delete activity** | `deleteactivity ACTIVITY_ID`<br>e.g., `deleteactivity 21`
-**Filter activities** | `filtera [n/NAME] [d/YYYY-MM-DD] [t/HH:mm]`<br>e.g., `filtera n/Dog run t/16:00`
+**Search activities** | `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`<br>e.g., `searcha n/Dog run t/16:00`
+**Search customers by fields** | `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`<br>e.g., `searchc n/Anna i/21`
 **Add dog** | `adddog n/NAME b/BREED s/SIZE`<br>e.g., `adddog n/Cookie b/Chihuahua s/Small`
 **Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 **Edit dog** | `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`<br>e.g., `editdog 1 s/Large`

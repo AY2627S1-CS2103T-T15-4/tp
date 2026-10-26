@@ -11,12 +11,12 @@ import seedu.address.model.Model;
 import seedu.address.model.activity.ActivityFilterPredicate;
 import seedu.address.model.activity.Recurrence;
 
-/** Filters activities by name, date, and/or time. */
+/** Searches activities by name, date, time, and/or recurrence. */
 public class FilterActivityCommand extends Command {
-    public static final String COMMAND_WORD = "filtera";
-    private static final String MESSAGE_SUCCESS_PREFIX = "Successfully filtered activities by ";
+    public static final String COMMAND_WORD = "searcha";
+    private static final String MESSAGE_SUCCESS_PREFIX = "Successfully searched activities by ";
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + " [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]: Filters activities by activity fields.";
+            + " [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]: Searches activities by activity fields.";
 
     private final String name;
     private final LocalDate date;

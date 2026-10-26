@@ -15,8 +15,9 @@ import seedu.address.logic.commands.FilterActivityCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.Recurrence;
 
-/** Parses arguments for the {@code filtera} command. */
+/** Parses arguments for the {@code searcha} command. */
 public class FilterActivityCommandParser implements Parser<FilterActivityCommand> {
+    private static final String MESSAGE_SEARCH_ERROR_PREFIX = "Error in searching activities:\n";
     private static final Pattern FIELD_FORMAT = Pattern.compile(
             "(?<prefix>[A-Za-z]+)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
@@ -87,7 +88,7 @@ public class FilterActivityCommandParser implements Parser<FilterActivityCommand
         try {
             return LocalDate.parse(value, DATE_FORMAT);
         } catch (DateTimeParseException exception) {
-            throw new ParseException("Error in filtering activities:\n"
+            throw new ParseException(MESSAGE_SEARCH_ERROR_PREFIX
                     + "Activity date must be a valid date in YYYY-MM-DD format.", exception);
         }
     }
@@ -96,7 +97,7 @@ public class FilterActivityCommandParser implements Parser<FilterActivityCommand
         try {
             return LocalTime.parse(value, TIME_FORMAT);
         } catch (DateTimeParseException exception) {
-            throw new ParseException("Error in filtering activities:\n"
+            throw new ParseException(MESSAGE_SEARCH_ERROR_PREFIX
                     + "Activity times must use 24-hour HH:mm format (00:00 to 23:59).", exception);
         }
     }
@@ -105,7 +106,7 @@ public class FilterActivityCommandParser implements Parser<FilterActivityCommand
         try {
             return Recurrence.valueOf(value.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException exception) {
-            throw new ParseException("Error in filtering activities:\n"
+            throw new ParseException(MESSAGE_SEARCH_ERROR_PREFIX
                     + "Activity recurrence must be Once, Weekly, or Daily.", exception);
         }
     }

@@ -124,18 +124,6 @@ public interface Model {
     /** Shows activities with an occurrence on or after the given date. */
     void showActivitiesOnOrAfter(LocalDate date);
 
-    /**
-     * Shows this dog, its current owner, and its activities with enrolments today or later.
-     * Later changes to those records update the same three lists.
-     */
-    void selectDog(int dogId);
-
-    /**
-     * Shows this customer, that customer's dogs, and their activities with enrolments today or later.
-     * Later changes to those records update the same three lists.
-     */
-    void selectCustomer(int customerId);
-
     /** Adds a dog and returns the dog with its assigned persistent ID. */
     Dog addDog(Dog dog);
 

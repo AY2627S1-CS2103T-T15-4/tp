@@ -10,11 +10,11 @@ import seedu.address.logic.commands.FilterDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.dog.Size;
 
-/** Parses arguments for the {@code filterd} command. */
+/** Parses arguments for the {@code searchd} command. */
 public class FilterDogCommandParser implements Parser<FilterDogCommand> {
     private static final Pattern FIELD_FORMAT = Pattern.compile(
             "(?<prefix>n|b|s|i)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
-    private static final String MESSAGE_INVALID_INFO = "Error in filtering dogs:\n"
+    private static final String MESSAGE_INVALID_INFO = "Error in searching dogs:\n"
             + "Info is in the wrong format. Input in the correct format";
 
     @Override
@@ -61,8 +61,8 @@ public class FilterDogCommandParser implements Parser<FilterDogCommand> {
 
     private static String parseSize(String value, String existing) throws ParseException {
         if (existing != null || !Size.isValidSize(value)) {
-            throw new ParseException("Error in filtering dogs:\n"
-                    + "Invalid dog size. Please input small/medium/large/giant only");
+            throw new ParseException("Error in searching dogs:\n"
+                    + "Invalid dog size. Please input small/medium/large/giant only.");
         }
         return value.toLowerCase(Locale.ROOT);
     }

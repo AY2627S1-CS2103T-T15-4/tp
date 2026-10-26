@@ -44,6 +44,13 @@ public class FilterActivityCommandParserTest {
     }
 
     @Test
+    public void parse_invalidDate_includesSearchErrorPrefix() {
+        String expectedMessage = "Error in searching activities:\n"
+                + "Activity date must be a valid date in YYYY-MM-DD format.";
+        assertThrows(ParseException.class, expectedMessage, () -> parser.parse("d/2026-02-29"));
+    }
+
+    @Test
     public void parse_invalidTime_throwsTimeParseException() {
         for (String time : new String[]{"24:00", "09:60", "9:00", "09:00:00", "noon"}) {
             assertThrows(ParseException.class, () -> parser.parse("t/" + time));
@@ -51,10 +58,24 @@ public class FilterActivityCommandParserTest {
     }
 
     @Test
+    public void parse_invalidTime_includesSearchErrorPrefix() {
+        String expectedMessage = "Error in searching activities:\n"
+                + "Activity times must use 24-hour HH:mm format (00:00 to 23:59).";
+        assertThrows(ParseException.class, expectedMessage, () -> parser.parse("t/24:00"));
+    }
+
+    @Test
     public void parse_invalidOrDuplicateRecurrence_throwsParseException() {
         for (String input : new String[]{"r/monthly", "r/weekly r/daily", "R/once"}) {
             assertThrows(ParseException.class, () -> parser.parse(input));
         }
+    }
+
+    @Test
+    public void parse_invalidRecurrence_includesSearchErrorPrefix() {
+        String expectedMessage = "Error in searching activities:\n"
+                + "Activity recurrence must be Once, Weekly, or Daily.";
+        assertThrows(ParseException.class, expectedMessage, () -> parser.parse("r/monthly"));
     }
 
     @Test

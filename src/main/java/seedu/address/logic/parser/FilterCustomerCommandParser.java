@@ -10,11 +10,11 @@ import java.util.regex.Pattern;
 import seedu.address.logic.commands.FilterCustomerCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
-/** Parses arguments for the {@code filterc} command. */
+/** Parses arguments for the {@code searchc} command. */
 public class FilterCustomerCommandParser implements Parser<FilterCustomerCommand> {
     private static final Pattern FIELD_FORMAT = Pattern.compile(
-            "(?<prefix>n|p|e|d|bc)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
-    private static final String MESSAGE_INVALID_INFO = "Error in filtering customers:\n"
+            "(?<prefix>n|p|e|d|bc|i)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
+    private static final String MESSAGE_INVALID_INFO = "Error in searching customers:\n"
             + "Info is in the wrong format. Input in the correct format";
 
     @Override
@@ -28,6 +28,7 @@ public class FilterCustomerCommandParser implements Parser<FilterCustomerCommand
         String email = null;
         String backupContact = null;
         Set<Integer> dogIds = null;
+        Integer customerId = null;
         int end = 0;
         Matcher matcher = FIELD_FORMAT.matcher(input);
         while (matcher.find()) {
@@ -54,6 +55,7 @@ public class FilterCustomerCommandParser implements Parser<FilterCustomerCommand
                     }
                     dogIds = parseDogIds(value);
                 }
+                case "i" -> customerId = parseCustomerId(value, customerId);
                 default -> throw invalidFormat();
             }
             end = matcher.end();
@@ -61,7 +63,7 @@ public class FilterCustomerCommandParser implements Parser<FilterCustomerCommand
         if (end == 0 || !input.substring(end).isBlank()) {
             throw invalidFormat();
         }
-        return new FilterCustomerCommand(name, phone, email, backupContact, dogIds);
+        return new FilterCustomerCommand(name, phone, email, backupContact, dogIds, customerId);
     }
 
     private static String parsePhone(String value, String existing) throws ParseException {
@@ -92,6 +94,21 @@ public class FilterCustomerCommandParser implements Parser<FilterCustomerCommand
             }
         }
         return dogIds;
+    }
+
+    private static Integer parseCustomerId(String value, Integer existing) throws ParseException {
+        if (existing != null) {
+            throw invalidFormat();
+        }
+        try {
+            int customerId = Integer.parseInt(value);
+            if (customerId < 0) {
+                throw new NumberFormatException();
+            }
+            return customerId;
+        } catch (NumberFormatException exception) {
+            throw new ParseException(MESSAGE_INVALID_INFO, exception);
+        }
     }
 
     private static ParseException invalidFormat() {

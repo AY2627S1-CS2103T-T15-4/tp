@@ -30,7 +30,7 @@ public class FilterActivityCommandTest {
 
         CommandResult result = new FilterActivityCommand("dog run", DATE, LocalTime.of(16, 0)).execute(model);
 
-        assertEquals("Successfully filtered activities by name: dog run, time: 16:00, date: 2026-10-20",
+        assertEquals("Successfully searched activities by name: dog run, time: 16:00, date: 2026-10-20",
                 result.getFeedbackToUser());
         assertEquals(List.of(model.getActivityList().get(0)), model.getFilteredActivityList());
     }
@@ -43,10 +43,10 @@ public class FilterActivityCommandTest {
 
         assertEquals(List.of(model.getActivityList().get(1)), model.getFilteredActivityList());
         CommandResult timeResult = new FilterActivityCommand(null, null, LocalTime.of(8, 30)).execute(model);
-        assertEquals("Successfully filtered activities by time: 08:30", timeResult.getFeedbackToUser());
+        assertEquals("Successfully searched activities by time: 08:30", timeResult.getFeedbackToUser());
 
         CommandResult dateResult = new FilterActivityCommand(null, DATE, null).execute(model);
-        assertEquals("Successfully filtered activities by date: 2026-10-20", dateResult.getFeedbackToUser());
+        assertEquals("Successfully searched activities by date: 2026-10-20", dateResult.getFeedbackToUser());
 
         new FilterActivityCommand(null, DATE, LocalTime.of(16, 30)).execute(model);
         new FilterActivityCommand(null, DATE, LocalTime.of(17, 0)).execute(model);
@@ -199,7 +199,7 @@ public class FilterActivityCommandTest {
 
         CommandResult result = new FilterActivityCommand(null, null, null, Recurrence.DAILY).execute(model);
 
-        assertEquals("Successfully filtered activities by recurrence: Daily", result.getFeedbackToUser());
+        assertEquals("Successfully searched activities by recurrence: Daily", result.getFeedbackToUser());
         assertEquals(List.of(model.getActivityList().get(1)), model.getFilteredActivityList());
     }
 
@@ -209,7 +209,7 @@ public class FilterActivityCommandTest {
 
         CommandResult result = new FilterActivityCommand("WALK", null, null, Recurrence.DAILY).execute(model);
 
-        assertEquals("Successfully filtered activities by name: WALK, recurrence: Daily",
+        assertEquals("Successfully searched activities by name: WALK, recurrence: Daily",
                 result.getFeedbackToUser());
         assertEquals(List.of(model.getActivityList().get(1)), model.getFilteredActivityList());
     }

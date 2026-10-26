@@ -252,36 +252,6 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 <puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog through the application layers" />
 
-### Selecting a dog
-
-`AddressBookParser` routes `select` to `SelectCommandParser`, which accepts the lowercase categories
-`dog` and `customer` with an ID starting at 1. `SelectDogCommand` looks up that ID in the
-complete dog list. A missing dog leaves every filter unchanged.
-
-On success the command asks `ModelManager` to follow that dog id. The three filters read the current
-records whenever dogs, customers, activities, links, or enrolments change, so the columns stay current
-after later commands. The dog list shows the selected dog. The customer list shows that dog's current
-owner, or nothing when the dog is unlinked. The activity list shows activities with a dated enrolment
-for that dog today or on a future date.
-Another command that sets its own filter, such as `list` or `search`, leaves this view.
-`ModelManager` keeps this filtered activity list separately from `getActivityList()`, which continues
-to expose every stored schedule.
-
-<puml src="diagrams/SelectDogSequenceDiagram.puml" alt="Selecting a dog and its related owner and activities" />
-
-### Selecting a customer
-
-`SelectCustomerCommand` looks up the ID in the complete customer list. A missing customer leaves every
-filter unchanged. Selecting a customer replaces a previous dog selection, and selecting a dog replaces
-a previous customer selection.
-
-On success the dog column shows every dog currently linked to that customer. The customer column shows
-that customer. The activity column shows activities with dated enrolments today or later for those
-dogs. Linking another dog, or enrolling one of those dogs, updates the columns without running
-`select customer` again.
-
-<puml src="diagrams/SelectCustomerSequenceDiagram.puml" alt="Selecting a customer and their dogs and activities" />
-
 ### Activity creation and storage
 
 The following partial class diagram shows the activity schedules and their integration with the model.
@@ -346,9 +316,9 @@ of removed enrolments appears in the command feedback. `LogicManager` then saves
 
 <puml src="diagrams/EditActivitySequenceDiagram.puml" alt="Parsing, executing and saving an editactivity command" />
 
-### Dog filtering
+### Dog search
 
-`AddressBookParser` routes `filterd` to `FilterDogCommandParser`. The parser accepts the lowercase fields
+`AddressBookParser` routes `searchd` to `FilterDogCommandParser`. The parser accepts the lowercase fields
 `n/`, `b/`, `s/`, and `i/`, rejects duplicate or unknown fields, normalises whitespace, and validates sizes
 and nonnegative IDs. `DogFilterPredicate` performs case-insensitive substring matching for names and breeds,
 case-insensitive exact matching for sizes, and exact matching for IDs.
@@ -358,36 +328,43 @@ the dog predicate, derives owners from the current matching dogs, and filters ac
 least one enrolled dog matching the same predicate. Thus unowned matching dogs remain visible while the customer
 list is empty, and activities with no matching enrolments are excluded. The predicates use current model data,
 so dog, customer, activity, and enrolment changes refresh the corresponding panels while the filter remains active.
-Each `Enrolment` stores its occurrence date. `filtera` with a date therefore shows only dogs enrolled on that
-specific occurrence, and shows their owners only when those dogs are visible. `filterd` shows a schedule when a
+Each `Enrolment` stores its occurrence date. `searcha` with a date therefore shows only dogs enrolled on that
+specific occurrence, and shows their owners only when those dogs are visible. `searchd` shows a schedule when a
 matching dog is enrolled on a valid occurrence of that schedule.
+Successful executions use the `Successfully searched dogs by` prefix and report only supplied fields. Invalid
+IDs and sizes use the `Error in searching dogs:` prefix with their specific validation messages.
 
 <puml src="diagrams/FilterDogSequenceDiagram.puml" alt="Filtering dogs and related owners and activities" />
 
-### Customer filtering
+### Customer search
 
-`AddressBookParser` routes `filterc` to `FilterCustomerCommandParser`. The parser accepts the optional
-lowercase fields `n/`, `p/`, `e/`, `d/`, and `bc/`. Names are normalised for case-insensitive substring
+`AddressBookParser` routes `searchc` to `FilterCustomerCommandParser`. The parser accepts the optional
+lowercase fields `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/`. Names are normalised for case-insensitive substring
 matching, while contact numbers and email addresses use exact matching. Multiple dog IDs are parsed from
-the `d/` field and are retained as a set.
+the `d/` field and are retained as a set. The optional customer ID is parsed as a nonnegative integer and
+matched exactly against existing customer IDs.
 
-`FilterCustomerCommand` validates that every requested dog ID exists, then applies `CustomerFilterPredicate`
-to the filtered customer list. The predicate derives ownership from each dog's stored `ownerId`; a customer
+`FilterCustomerCommand` validates that the requested customer ID and every requested dog ID exist, then applies
+the customer ID criterion together with `CustomerFilterPredicate` to the filtered customer list. The predicate
+derives ownership from each dog's stored `ownerId`; a customer
 matches a multi-dog filter only when they own every requested dog. After customer filtering, the command derives
 the matching customer IDs and applies a second predicate to the dog list, showing only dogs owned by those
-customers. Dog IDs in the success message are sorted numerically.
+customers. Dog IDs in the success message are sorted numerically, and customer ID is reported only when supplied.
+Invalid or nonexistent dog and customer IDs produce specific errors under the `Error in searching customers:` prefix.
 The parser stops field values at any field-like prefix, including unsupported prefixes, so inputs such as
-`filterc n/Anna x/value` are rejected rather than treating `x/value` as part of the name. `ModelManager`
+`searchc n/Anna x/value` are rejected rather than treating `x/value` as part of the name. `ModelManager`
 reapplies active customer and dog predicates after customer edits, dog edits, and relationship changes so
 both filtered views remain consistent.
-### Activity filtering
 
-`AddressBookParser` routes `filtera` to `FilterActivityCommandParser`. The parser accepts at least one
+<puml src="diagrams/FilterCustomerSequenceDiagram.puml" alt="Searching customers and their owned dogs" />
+### Activity search
+
+`AddressBookParser` routes `searcha` to `FilterActivityCommandParser`. The parser accepts at least one
 of the lowercase fields `n/`, `d/`, `t/`, and `r/`, rejects duplicate or unknown fields, and validates dates
 and times using strict `YYYY-MM-DD` and `HH:mm` formats. Recurrence is restricted to `Once`, `Weekly`,
 or `Daily`. Names are trimmed, internal whitespace is normalised, and matching is case-insensitive.
 
-`FilterActivityCommand` applies an `ActivityFilterPredicate` to the model's filtered activity list.
+`FilterActivityCommand` (invoked by `searcha`) applies an `ActivityFilterPredicate` to the model's filtered activity list.
 Name matching uses a case-insensitive substring, date matching delegates to `Activity.occursOn(date)`
 so recurring activities are handled correctly, and time matching includes both endpoints. Multiple
 recurrence matching compares the activity's stored recurrence. Multiple fields are combined with AND semantics.
@@ -395,20 +372,25 @@ recurrence matching compares the activity's stored recurrence. Multiple fields a
 underlying stored schedules remain unchanged. The success message reports only the supplied fields, in the
 order name, time, date, and recurrence.
 The activity predicate is reapplied after activity additions and activity state or enrolment changes, so the
-activity display remains filtered without requiring the user to repeat the command.
+activity display remains filtered without requiring the user to repeat the command. Successful executions return
+`Successfully searched activities by` with only the supplied fields; invalid date, time, or recurrence values
+use the `Error in searching activities:` prefix. Invalid command shapes retain the existing invalid-format response
+with the command usage.
 The command also derives the dog panel from enrolments in matching activities and the customer panel from those
 dogs' owners. These predicates inspect current model data, so relationship changes refresh all three displays.
 When the filter contains a date, dog visibility additionally requires an enrolment on that exact occurrence date;
 the owners panel is derived from those dogs. When no date is supplied, enrolments from any occurrence may match.
 Gradle test execution enables Java assertions so internal model invariants are checked during verification.
 
-<puml src="diagrams/FilterActivitySequenceDiagram.puml" alt="Filtering activities and related dogs and owners" />
+<puml src="diagrams/FilterActivitySequenceDiagram.puml" alt="Searching activities and related dogs and owners" />
 ### Unlinked filtering
 
 `AddressBookParser` routes `filterun` to `FilterUnlinkedCommandParser`, which accepts only the lowercase
 categories `dog` and `customer`, with arbitrary surrounding whitespace. `FilterUnlinkedCommand` filters dogs
 whose `ownerId` is absent or customers with no owned dogs, and clears the related panel. Its predicates are
 stored by `ModelManager`, so the results refresh after later record or relationship changes.
+
+<puml src="diagrams/FilterUnlinkedSequenceDiagram.puml" alt="Filtering unlinked dogs or customers" />
 
 ### Activity enrolment
 

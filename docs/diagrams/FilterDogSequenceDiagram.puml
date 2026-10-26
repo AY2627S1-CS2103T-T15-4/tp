@@ -10,7 +10,7 @@ participant "command:FilterDogCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
 participant ":AddressBook" as Book MODEL_COLOR
 
-User -> Logic : execute("filterd n/Waffle")
+User -> Logic : execute("searchd n/Waffle")
 Logic -> Router : parseCommand(...)
 Router -> Parser : parse(" n/Waffle")
 Parser -> Command : new FilterDogCommand(...)

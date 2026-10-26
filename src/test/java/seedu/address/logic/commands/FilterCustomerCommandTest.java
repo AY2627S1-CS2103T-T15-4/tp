@@ -25,7 +25,7 @@ public class FilterCustomerCommandTest {
         CommandResult result = new FilterCustomerCommand(
                 "anna", "91234567", "anna@example.com", "98765432", Set.of(1, 2)).execute(model);
 
-        assertEquals("Successfully filtered customers by name: anna, phone: 91234567, "
+        assertEquals("Successfully searched customers by name: anna, phone: 91234567, "
                 + "email: anna@example.com, dog ids: 1 2, backup contact: 98765432",
                 result.getFeedbackToUser());
         assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
@@ -57,8 +57,27 @@ public class FilterCustomerCommandTest {
     public void execute_unknownDogId_throwsCommandException() throws Exception {
         ModelManager model = modelWithCustomersAndDogs();
 
-        assertThrows(CommandException.class, () ->
+        assertThrows(CommandException.class, FilterCustomerCommand.MESSAGE_INVALID_DOG_ID, () ->
                 new FilterCustomerCommand(null, null, null, null, Set.of(100)).execute(model));
+    }
+
+    @Test
+    public void execute_customerId_filtersCustomerAndLinkedDogs() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+
+        CommandResult result = new FilterCustomerCommand(null, null, null, null, null, 2).execute(model);
+
+        assertEquals("Successfully searched customers by customer id: 2", result.getFeedbackToUser());
+        assertEquals(List.of(model.getCustomerList().get(1)), model.getFilteredCustomerList());
+        assertEquals(List.of(model.getDogList().get(2)), model.getFilteredDogList());
+    }
+
+    @Test
+    public void execute_unknownCustomerId_throwsCommandException() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+
+        assertThrows(CommandException.class, FilterCustomerCommand.MESSAGE_INVALID_CUSTOMER_ID, () ->
+                new FilterCustomerCommand(null, null, null, null, null, 99).execute(model));
     }
 
     @Test
@@ -100,7 +119,7 @@ public class FilterCustomerCommandTest {
     @Test
     public void equals_differentFields_returnsFalse() {
         FilterCustomerCommand command = new FilterCustomerCommand(
-                "anna", "91234567", "anna@example.com", "98765432", Set.of(1));
+                "anna", "91234567", "anna@example.com", "98765432", Set.of(1), 1);
 
         assertEquals(command, command);
         assertTrue(!command.equals(null));
@@ -115,6 +134,8 @@ public class FilterCustomerCommandTest {
                 "anna", "91234567", "anna@example.com", "99999999", Set.of(1))));
         assertTrue(!command.equals(new FilterCustomerCommand(
                 "anna", "91234567", "anna@example.com", "98765432", Set.of(2))));
+        assertTrue(!command.equals(new FilterCustomerCommand(
+                "anna", "91234567", "anna@example.com", "98765432", Set.of(1), 2)));
     }
 
     private ModelManager modelWithCustomersAndDogs() throws Exception {

@@ -31,7 +31,7 @@ public class FilterDogCommandTest {
 
         CommandResult result = new FilterDogCommand("waffle", "golden retriever", "medium", 1).execute(model);
 
-        assertEquals("Successfully filtered dogs by name: waffle, breed: golden retriever, size: medium, id: 1",
+        assertEquals("Successfully searched dogs by name: waffle, breed: golden retriever, size: medium, id: 1",
                 result.getFeedbackToUser());
         assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
         assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
@@ -55,7 +55,7 @@ public class FilterDogCommandTest {
 
         CommandResult result = new FilterDogCommand(null, null, null, null).execute(model);
 
-        assertEquals("Successfully filtered dogs by ", result.getFeedbackToUser());
+        assertEquals("Successfully searched dogs by ", result.getFeedbackToUser());
         assertEquals(3, model.getFilteredDogList().size());
         assertEquals(1, model.getFilteredCustomerList().size());
         assertTrue(model.getFilteredActivityList().isEmpty());
@@ -130,8 +130,10 @@ public class FilterDogCommandTest {
     @Test
     public void execute_unknownId_throwsCommandException() {
         ModelManager model = new ModelManager();
+        FilterDogCommand command = new FilterDogCommand(null, null, null, 99);
 
-        assertThrows(CommandException.class, () -> new FilterDogCommand(null, null, null, 99).execute(model));
+        assertThrows(CommandException.class, FilterDogCommand.MESSAGE_INVALID_ID, () ->
+                command.execute(model));
     }
 
     @Test

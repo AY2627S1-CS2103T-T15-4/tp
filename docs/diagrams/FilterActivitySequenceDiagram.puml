@@ -10,7 +10,7 @@ participant "command:FilterActivityCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
 participant ":AddressBook" as Book MODEL_COLOR
 
-User -> Logic : execute("filtera n/Walk d/2026-10-28")
+User -> Logic : execute("searcha n/Walk d/2026-10-28")
 Logic -> Router : parseCommand(...)
 Router -> Parser : parse(...)
 Parser -> Command : new FilterActivityCommand(...)
@@ -23,6 +23,6 @@ Model -> Book : get enrolments for matching occurrence
 Book --> Model : activity, dog and date records
 Command -> Model : updateFilteredCustomerList(owners of visible dogs)
 Model --> Command : refresh filtered views
-Command --> Logic : CommandResult
+Command --> Logic : CommandResult("Successfully searched activities by ...")
 Logic --> User : display success message and views
 @enduml

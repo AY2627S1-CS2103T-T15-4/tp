@@ -8,14 +8,14 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.dog.DogFilterPredicate;
 
-/** Filters dogs by name, breed, size, and ID. */
+/** Searches dogs by name, breed, size, and ID. */
 public class FilterDogCommand extends Command {
-    public static final String COMMAND_WORD = "filterd";
+    public static final String COMMAND_WORD = "searchd";
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + " [n/NAME] [b/BREED] [s/SIZE] [i/ID]";
-    public static final String MESSAGE_INVALID_ID = "Error in filtering dogs:\n"
-            + "Info is in the wrong format. Input in the correct format";
-    private static final String MESSAGE_SUCCESS_PREFIX = "Successfully filtered dogs by ";
+    public static final String MESSAGE_INVALID_ID = "Error in searching dogs:\n"
+            + "Invalid dog id. Please input a valid dog id.";
+    private static final String MESSAGE_SUCCESS_PREFIX = "Successfully searched dogs by ";
 
     private final String name;
     private final String breed;
@@ -34,8 +34,7 @@ public class FilterDogCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         if (id != null && model.getDogList().stream().noneMatch(dog -> dog.getId() == id)) {
-            throw new CommandException("Error in filtering dogs:\n"
-                    + "Invalid dog id. Please input a valid dog id.");
+            throw new CommandException(MESSAGE_INVALID_ID);
         }
         DogFilterPredicate dogPredicate = new DogFilterPredicate(name, breed, size, id);
         model.updateFilteredDogList(dogPredicate);
