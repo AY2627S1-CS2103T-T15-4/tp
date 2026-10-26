@@ -68,9 +68,9 @@ public class AddressBookParserTest {
     }
 
     @Test
-    public void parseCommand_select_isRejected() {
-        for (String input : new String[] {"select", "select dog 1", "select customer 1"}) {
-            assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
+    public void parseCommand_selectWithoutCategoryIsRejected() {
+        for (String input : new String[] {"select", "select rabbit 1"}) {
+            assertThrows(ParseException.class, () -> parser.parseCommand(input));
         }
     }
 

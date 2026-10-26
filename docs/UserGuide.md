@@ -187,19 +187,6 @@ Format: `list dog`
 
 If there are no dogs, WatchDog displays `There are no dogs to display.`
 
-### Selecting a customer: `select customer`
-
-Shows one customer, all dogs currently linked to that customer, and activities in which those dogs
-are enrolled today or on a future date. Past enrolments are not shown.
-
-Format: `select customer CUSTOMER_ID`
-
-Example: `select customer 1`
-
-Use an existing customer ID starting at 1. The selection stays current when dogs are linked or
-unlinked or their enrolments change. A missing ID produces an error and leaves the current view unchanged.
-Another command that sets a filter or selection replaces this view.
-
 ### Resetting the display: `resetdisplay`
 
 Shows all stored customers and dogs, plus activities with an occurrence today or later according to
@@ -551,7 +538,6 @@ Action     | Format, Examples
 **List dogs** | `list dog`
 **Delete dog** | `delete dog ID`<br>e.g., `delete dog 0`
 **Delete customer** | `delete customer ID`<br>e.g., `delete customer 21`
-**Select customer** | `select customer CUSTOMER_ID`<br>e.g., `select customer 1`
 **Undo** | `undo`
 **Redo** | `redo`
 **Help**   | `help`

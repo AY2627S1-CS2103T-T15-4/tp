@@ -254,7 +254,9 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 ### Selecting a dog
 
-`AddressBookParser` routes `select` to `SelectCommandParser`, which accepts the lowercase categories
+The former `select` implementation is retained under `unused/@its-shoutime/` for attribution only;
+the active `AddressBookParser` does not route this command. The archived `SelectCommandParser`
+accepted the lowercase categories
 `dog` and `customer` with an ID starting at 1. `SelectDogCommand` looks up that ID in the
 complete dog list. A missing dog leaves every filter unchanged.
 
@@ -267,7 +269,6 @@ Another command that sets its own filter, such as `list` or `search`, leaves thi
 `ModelManager` keeps this filtered activity list separately from `getActivityList()`, which continues
 to expose every stored schedule.
 
-<puml src="diagrams/SelectDogSequenceDiagram.puml" alt="Selecting a dog and its related owner and activities" />
 
 ### Selecting a customer
 
@@ -281,7 +282,6 @@ dogs; a past enrolment is excluded, even when its activity schedule still exists
 dog, or enrolling one of those dogs, updates the columns without running
 `select customer` again.
 
-<puml src="diagrams/SelectCustomerSequenceDiagram.puml" alt="Selecting a customer and their dogs and activities" />
 
 ### Undo and redo
 
