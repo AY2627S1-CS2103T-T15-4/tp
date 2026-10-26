@@ -277,10 +277,43 @@ a previous customer selection.
 
 On success the dog column shows every dog currently linked to that customer. The customer column shows
 that customer. The activity column shows activities with dated enrolments today or later for those
-dogs. Linking another dog, or enrolling one of those dogs, updates the columns without running
+dogs; a past enrolment is excluded, even when its activity schedule still exists. Linking another
+dog, or enrolling one of those dogs, updates the columns without running
 `select customer` again.
 
 <puml src="diagrams/SelectCustomerSequenceDiagram.puml" alt="Selecting a customer and their dogs and activities" />
+
+### Undo and redo
+
+`AddressBookParser` accepts `undo` and `redo` only without arguments. `LogicManager` handles these
+commands before ordinary command execution; `UndoCommand.execute` and `RedoCommand.execute` alone
+cannot restore history. `LogicManager` keeps one undo snapshot and one redo snapshot, each paired
+with the original command text for feedback. A successful undoable command replaces the undo
+snapshot with the state captured before its execution and clears the redo snapshot. View-changing
+commands are undoable. `help`, `summary`, and `exit` preserve both slots, as do parse errors and
+commands rejected during execution. `clear` discards both snapshots and cannot itself be undone.
+
+`Model.createState()` copies the `AddressBook`, including its records and all three next-ID counters, and captures
+the active customer, dog and activity predicates and the selected record IDs. `Model.restoreState()`
+resets the existing address book and reapplies the saved display state. Reusing the existing model
+and observable lists lets UI listeners continue to see updates after a restoration. It refreshes
+predicates twice: the first pass installs source filters, and the second re-evaluates dependent filters.
+This handles both dog filters whose customer predicate reads filtered dogs and customer filters whose
+dog predicate reads filtered customers.
+
+On `undo`, `LogicManager` captures the current state for redo, restores the undo snapshot, moves
+the history slots, then saves the address book. `redo` symmetrically captures the current state for
+undo, restores the redo snapshot, moves the slots, and saves. An ordinary command updates history
+immediately after successful execution and before saving. This ordering matches the existing policy
+of retaining in-memory changes when a save fails: the corresponding inverse remains available,
+and `clear` still invalidates history. The disk may contain an older state, or a partially written
+state if an actual write had started. Missing history produces a `CommandException`; save failures
+are reported as command errors. History is held only in memory and is unavailable after a restart.
+
+`LogicManagerTest` and `LogicManagerHistoryTest` cover the undo/redo cycle, neutral commands,
+invalidated history, `clear`, failed commands, dependent filters, and save failures.
+`ModelManagerTest` checks restoration of data, ID counters, relationships, filters, and selection, while
+`AddressBookParserTest` checks argument validation.
 
 ### Daycare summary
 
@@ -302,8 +335,8 @@ The query takes time proportional to the number of enrolments plus dogs and stor
 
 Feedback follows the existing `CommandResult` and `ResultDisplay` path. No records, filters or
 selection are mutated, and no storage schema changes are needed. `LogicManager` still attempts
-to save after successful execution, preserving its existing save-error handling. When undo/redo
-is integrated, summary must neither create an undo entry nor discard redo history.
+to save after successful execution, preserving its existing save-error handling. Summary neither
+creates an undo entry nor discards redo history.
 
 ### Activity creation and storage
 
@@ -920,8 +953,20 @@ Use a disposable data folder for this test. Substitute the computer's current lo
 1. At the minimum window size and normal/larger display scaling, verify that all three feedback
    lines can be read, scrolling within the result area if needed. Repeat with larger counts.
 
-After undo/redo is integrated, also verify mutation → undo → summary → redo: summary must preserve
-the redo operation and must not appear as an undoable mutation.
+Also verify mutation → undo → summary → redo: summary preserves the redo operation and does not
+appear as an undoable mutation.
+
+### Undo and redo
+
+1. Add a dog, run `help`, then `undo`. The dog disappears; `help` is not the undone command.
+1. Run `help`, then `redo`. The dog returns. Repeat with `summary` instead of `help`.
+1. Undo again, then add another dog. `redo` reports no command to redo and does not replace the new dog.
+1. Link two dogs to different customers. Run `filterd n/Buddy`, `resetdisplay`, then `undo`.
+   Only Buddy and Buddy's owner appear. Repeat using `filterc n/Alice`; only Alice and her dog appear.
+1. With disposable data, make the data file unwritable after a successful add, then run `undo`.
+   The save reports an error, but the dog disappears from memory. Restore write access and run `redo`;
+   the dog returns and saves. Repeat for a failed `redo`, a new add after `undo`, and `clear`.
+   A failed `clear` leaves memory empty and neither history operation available.
 
 ### Deleting a dog
 

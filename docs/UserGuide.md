@@ -187,6 +187,19 @@ Format: `list dog`
 
 If there are no dogs, WatchDog displays `There are no dogs to display.`
 
+### Selecting a customer: `select customer`
+
+Shows one customer, all dogs currently linked to that customer, and activities in which those dogs
+are enrolled today or on a future date. Past enrolments are not shown.
+
+Format: `select customer CUSTOMER_ID`
+
+Example: `select customer 1`
+
+Use an existing customer ID starting at 1. The selection stays current when dogs are linked or
+unlinked or their enrolments change. A missing ID produces an error and leaves the current view unchanged.
+Another command that sets a filter or selection replaces this view.
+
 ### Resetting the display: `resetdisplay`
 
 Shows all stored customers and dogs, plus activities with an occurrence today or later according to
@@ -440,6 +453,33 @@ Clears all entries from the address book.
 
 Format: `clear`
 
+Clearing also discards the undo and redo history, so `clear` cannot be undone. This remains true
+if the command changes memory but its save fails.
+
+### Undoing and redoing a command: `undo`, `redo`
+
+`undo` restores the stored records and displayed view from before the most recent undoable command.
+`redo` restores the records and view from just before that undo. Both commands attempt to save the
+restored records automatically.
+
+Formats: `undo` or `redo`
+
+For example, after `adddog n/Cookie b/Chihuahua s/Small`, enter `undo` to remove Cookie,
+then `redo` to bring Cookie back. You can undo the redone command again.
+
+Only one command can be undone at a time. A later successful undoable command replaces that history
+and makes `redo` unavailable. View-changing commands such as search, filter, selection, and
+`resetdisplay` are undoable too. `help`, `summary`, and `exit` preserve both undo and redo history;
+parse errors and commands rejected before execution also leave history unchanged. The history is
+cleared by `clear` and is not retained when WatchDog restarts. Surrounding whitespace is accepted,
+but neither command accepts arguments.
+If no command is available, WatchDog displays `There is no command to undo.` or
+`There is no command to redo.`
+
+A save error can occur after an undoable command, `undo`, `redo`, or `clear` has changed memory.
+The change remains visible in the current session, with the corresponding undo or redo operation
+available where applicable, but the data file may not contain that change.
+
 ### Exiting the program: `exit`
 
 Exits the program.
@@ -505,4 +545,7 @@ Action     | Format, Examples
 **List dogs** | `list dog`
 **Delete dog** | `delete dog ID`<br>e.g., `delete dog 0`
 **Delete customer** | `delete customer ID`<br>e.g., `delete customer 21`
+**Select customer** | `select customer CUSTOMER_ID`<br>e.g., `select customer 1`
+**Undo** | `undo`
+**Redo** | `redo`
 **Help**   | `help`

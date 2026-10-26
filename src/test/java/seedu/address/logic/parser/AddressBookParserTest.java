@@ -23,10 +23,12 @@ import seedu.address.logic.commands.FilterDogCommand;
 import seedu.address.logic.commands.FilterUnlinkedCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.SelectCustomerCommand;
 import seedu.address.logic.commands.SelectDogCommand;
 import seedu.address.logic.commands.SummaryCommand;
+import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.dog.Breed;
@@ -154,6 +156,16 @@ public class AddressBookParserTest {
     public void parseCommand_help() throws Exception {
         assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD) instanceof HelpCommand);
         assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD + " 3") instanceof HelpCommand);
+    }
+
+    @Test
+    public void parseCommand_undoRedo_acceptOnlyCommandWord() throws Exception {
+        assertTrue(parser.parseCommand("  undo  ") instanceof UndoCommand);
+        assertTrue(parser.parseCommand("  redo  ") instanceof RedoCommand);
+        String undoError = String.format(MESSAGE_INVALID_COMMAND_FORMAT, UndoCommand.COMMAND_WORD);
+        String redoError = String.format(MESSAGE_INVALID_COMMAND_FORMAT, RedoCommand.COMMAND_WORD);
+        assertThrows(ParseException.class, undoError, () -> parser.parseCommand("undo 1"));
+        assertThrows(ParseException.class, redoError, () -> parser.parseCommand("redo 1"));
     }
 
     @Test
