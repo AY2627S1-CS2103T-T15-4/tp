@@ -20,7 +20,7 @@ import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
 
-public class FilterActivityCommandTest {
+public class SearchActivityCommandTest {
     private static final LocalDate DATE = LocalDate.of(2026, 10, 20);
     private static final LocalDate ENROL_DATE = LocalDate.now().plusDays(7);
 
@@ -28,7 +28,7 @@ public class FilterActivityCommandTest {
     public void execute_combinedFields_filtersWithAndLogic() throws Exception {
         ModelManager model = modelWithActivities();
 
-        CommandResult result = new FilterActivityCommand("dog run", DATE, LocalTime.of(16, 0)).execute(model);
+        CommandResult result = new SearchActivityCommand("dog run", DATE, LocalTime.of(16, 0)).execute(model);
 
         assertEquals("Successfully searched activities by name: dog run, time: 16:00, date: 2026-10-20",
                 result.getFeedbackToUser());
@@ -39,17 +39,17 @@ public class FilterActivityCommandTest {
     public void execute_dateAndTime_handleRecurrenceAndInclusiveBoundaries() throws Exception {
         ModelManager model = modelWithActivities();
 
-        new FilterActivityCommand(null, DATE.plusDays(7), LocalTime.of(8, 30)).execute(model);
+        new SearchActivityCommand(null, DATE.plusDays(7), LocalTime.of(8, 30)).execute(model);
 
         assertEquals(List.of(model.getActivityList().get(1)), model.getFilteredActivityList());
-        CommandResult timeResult = new FilterActivityCommand(null, null, LocalTime.of(8, 30)).execute(model);
+        CommandResult timeResult = new SearchActivityCommand(null, null, LocalTime.of(8, 30)).execute(model);
         assertEquals("Successfully searched activities by time: 08:30", timeResult.getFeedbackToUser());
 
-        CommandResult dateResult = new FilterActivityCommand(null, DATE, null).execute(model);
+        CommandResult dateResult = new SearchActivityCommand(null, DATE, null).execute(model);
         assertEquals("Successfully searched activities by date: 2026-10-20", dateResult.getFeedbackToUser());
 
-        new FilterActivityCommand(null, DATE, LocalTime.of(16, 30)).execute(model);
-        new FilterActivityCommand(null, DATE, LocalTime.of(17, 0)).execute(model);
+        new SearchActivityCommand(null, DATE, LocalTime.of(16, 30)).execute(model);
+        new SearchActivityCommand(null, DATE, LocalTime.of(17, 0)).execute(model);
         assertFalse(model.getFilteredActivityList().isEmpty());
     }
 
@@ -57,7 +57,7 @@ public class FilterActivityCommandTest {
     public void execute_noMatches_returnsEmptyFilteredList() throws Exception {
         ModelManager model = modelWithActivities();
 
-        new FilterActivityCommand("unknown", null, null).execute(model);
+        new SearchActivityCommand("unknown", null, null).execute(model);
 
         assertTrue(model.getFilteredActivityList().isEmpty());
     }
@@ -66,7 +66,7 @@ public class FilterActivityCommandTest {
     public void execute_nameMatching_isCaseInsensitive() throws Exception {
         ModelManager model = modelWithActivities();
 
-        new FilterActivityCommand("RUN", null, null).execute(model);
+        new SearchActivityCommand("RUN", null, null).execute(model);
 
         assertEquals(List.of(model.getActivityList().get(0)), model.getFilteredActivityList());
     }
@@ -87,7 +87,7 @@ public class FilterActivityCommandTest {
                 Recurrence.ONCE);
         model.enrolDogs(matchingActivity.getId(), ENROL_DATE, List.of(firstDog.getId(), secondDog.getId()));
 
-        new FilterActivityCommand("group", null, null).execute(model);
+        new SearchActivityCommand("group", null, null).execute(model);
 
         assertEquals(List.of(matchingActivity), model.getFilteredActivityList());
         assertEquals(List.of(model.getDogList().get(0), model.getDogList().get(1)), model.getFilteredDogList());
@@ -104,7 +104,7 @@ public class FilterActivityCommandTest {
                 LocalTime.of(13, 0), Recurrence.ONCE);
         model.enrolDogs(activity.getId(), ENROL_DATE, List.of(dog.getId()));
 
-        new FilterActivityCommand("unknown", null, null).execute(model);
+        new SearchActivityCommand("unknown", null, null).execute(model);
 
         assertTrue(model.getFilteredActivityList().isEmpty());
         assertTrue(model.getFilteredDogList().isEmpty());
@@ -120,7 +120,7 @@ public class FilterActivityCommandTest {
         var activity = model.addActivity(new ActivityName("Walk"), ENROL_DATE, LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
 
-        new FilterActivityCommand("walk", null, null).execute(model);
+        new SearchActivityCommand("walk", null, null).execute(model);
         assertTrue(model.getFilteredDogList().isEmpty());
         assertTrue(model.getFilteredCustomerList().isEmpty());
 
@@ -140,7 +140,7 @@ public class FilterActivityCommandTest {
                 LocalTime.of(13, 0), Recurrence.ONCE);
         model.enrolDogs(activity.getId(), ENROL_DATE, List.of(dog.getId()));
 
-        new FilterActivityCommand("walk", null, null).execute(model);
+        new SearchActivityCommand("walk", null, null).execute(model);
         assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
         assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
 
@@ -161,7 +161,7 @@ public class FilterActivityCommandTest {
                 LocalTime.of(13, 0), Recurrence.DAILY);
         model.enrolDogs(activity.getId(), ENROL_DATE, List.of(dog.getId()));
 
-        new FilterActivityCommand("daily", ENROL_DATE.plusDays(1), null).execute(model);
+        new SearchActivityCommand("daily", ENROL_DATE.plusDays(1), null).execute(model);
 
         assertEquals(List.of(activity), model.getFilteredActivityList());
         assertTrue(model.getFilteredDogList().isEmpty());
@@ -186,7 +186,7 @@ public class FilterActivityCommandTest {
         model.enrolDogs(unrelatedActivity.getId(), ENROL_DATE, List.of(dog.getId()));
         model.enrolDogs(matchingActivity.getId(), ENROL_DATE, List.of(dog.getId()));
 
-        new FilterActivityCommand("group", null, null).execute(model);
+        new SearchActivityCommand("group", null, null).execute(model);
 
         assertEquals(List.of(matchingActivity), model.getFilteredActivityList());
         assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
@@ -197,7 +197,7 @@ public class FilterActivityCommandTest {
     public void execute_recurrenceMatching_isCaseInsensitiveAndIncludedInMessage() throws Exception {
         ModelManager model = modelWithActivities();
 
-        CommandResult result = new FilterActivityCommand(null, null, null, Recurrence.DAILY).execute(model);
+        CommandResult result = new SearchActivityCommand(null, null, null, Recurrence.DAILY).execute(model);
 
         assertEquals("Successfully searched activities by recurrence: Daily", result.getFeedbackToUser());
         assertEquals(List.of(model.getActivityList().get(1)), model.getFilteredActivityList());
@@ -207,7 +207,7 @@ public class FilterActivityCommandTest {
     public void execute_combinedRecurrenceAndName_filtersOnlyMatchingActivity() throws Exception {
         ModelManager model = modelWithActivities();
 
-        CommandResult result = new FilterActivityCommand("WALK", null, null, Recurrence.DAILY).execute(model);
+        CommandResult result = new SearchActivityCommand("WALK", null, null, Recurrence.DAILY).execute(model);
 
         assertEquals("Successfully searched activities by name: WALK, recurrence: Daily",
                 result.getFeedbackToUser());
@@ -218,7 +218,7 @@ public class FilterActivityCommandTest {
     public void execute_recurrenceWithNoMatches_returnsEmptyFilteredList() throws Exception {
         ModelManager model = modelWithActivities();
 
-        new FilterActivityCommand("walk", null, null, Recurrence.WEEKLY).execute(model);
+        new SearchActivityCommand("walk", null, null, Recurrence.WEEKLY).execute(model);
 
         assertTrue(model.getFilteredActivityList().isEmpty());
     }
@@ -226,7 +226,7 @@ public class FilterActivityCommandTest {
     @Test
     public void execute_keepsNewMatchingActivityAfterFilterIsActive() throws Exception {
         ModelManager model = modelWithActivities();
-        new FilterActivityCommand("run", null, null).execute(model);
+        new SearchActivityCommand("run", null, null).execute(model);
         model.addActivity(new ActivityName("Evening Run"), DATE, LocalTime.of(18, 0),
                 LocalTime.of(19, 0), Recurrence.ONCE);
 
@@ -236,22 +236,22 @@ public class FilterActivityCommandTest {
     @Test
     public void execute_nullModel_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () ->
-                new FilterActivityCommand("run", null, null).execute(null));
+                new SearchActivityCommand("run", null, null).execute(null));
     }
 
     @Test
     public void equals_sameFieldsAndOtherTypes_returnsExpectedResult() {
-        FilterActivityCommand command = new FilterActivityCommand("run", DATE, LocalTime.NOON, Recurrence.ONCE);
+        SearchActivityCommand command = new SearchActivityCommand("run", DATE, LocalTime.NOON, Recurrence.ONCE);
 
         assertEquals(command, command);
-        assertEquals(command, new FilterActivityCommand("run", DATE, LocalTime.NOON, Recurrence.ONCE));
-        assertFalse(command.equals(new FilterActivityCommand("run", DATE, LocalTime.NOON, Recurrence.DAILY)));
+        assertEquals(command, new SearchActivityCommand("run", DATE, LocalTime.NOON, Recurrence.ONCE));
+        assertFalse(command.equals(new SearchActivityCommand("run", DATE, LocalTime.NOON, Recurrence.DAILY)));
         assertFalse(command.equals(null));
         assertFalse(command.equals("command"));
-        assertFalse(command.equals(new FilterActivityCommand("other", DATE, LocalTime.NOON, Recurrence.ONCE)));
-        assertFalse(command.equals(new FilterActivityCommand("run", DATE.plusDays(1), LocalTime.NOON,
+        assertFalse(command.equals(new SearchActivityCommand("other", DATE, LocalTime.NOON, Recurrence.ONCE)));
+        assertFalse(command.equals(new SearchActivityCommand("run", DATE.plusDays(1), LocalTime.NOON,
                 Recurrence.ONCE)));
-        assertFalse(command.equals(new FilterActivityCommand("run", DATE, LocalTime.MIDNIGHT,
+        assertFalse(command.equals(new SearchActivityCommand("run", DATE, LocalTime.MIDNIGHT,
                 Recurrence.ONCE)));
     }
 

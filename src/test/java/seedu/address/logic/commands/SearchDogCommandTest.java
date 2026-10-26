@@ -1,101 +1,160 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.testutil.Assert.assertThrows;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.logic.parser.AddressBookParser;
-import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.AddressBook;
-import seedu.address.model.Model;
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.ModelManager;
-import seedu.address.model.UserPrefs;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
+import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
-import seedu.address.model.dog.DogSearchPredicate;
 import seedu.address.model.dog.Size;
 
-/** Exercises search parsing and execution against the real model. */
 public class SearchDogCommandTest {
-    private final AddressBookParser parser = new AddressBookParser();
-    private final Model model = new ModelManager(new AddressBook(), new UserPrefs());
+    private static final LocalDate ENROL_DATE = LocalDate.now().plusDays(7);
 
     @Test
-    public void execute_nameSearch_filtersMatchingDogsWithoutChangingRecords() throws Exception {
-        Dog first = model.addDog(dog("Buddy"));
-        Dog second = model.addDog(dog("Buddy"));
-        Dog third = model.addDog(dog("Little Bud"));
-        model.addDog(dog("Max"));
-        AddressBook before = new AddressBook(model.getAddressBook());
+    public void execute_combinedFields_filtersDogsAndLinkedCustomers() throws Exception {
+        ModelManager model = modelWithDogs();
 
-        assertEquals("3 dogs found.",
-                execute("search dog n/bUd"));
-        assertEquals(List.of(first, second, third), model.getFilteredDogList());
-        assertEquals("1 dogs found.", execute("search dog n/little bud"));
-        assertEquals(List.of(third), model.getFilteredDogList());
-        assertEquals("0 dogs found.", execute("search dog n/little  bud"));
-        assertEquals(List.of(), model.getFilteredDogList());
-        assertEquals(before, model.getAddressBook());
+        CommandResult result = new SearchDogCommand("waffle", "golden retriever", "medium", 1).execute(model);
+
+        assertEquals("Successfully searched dogs by name: waffle, breed: golden retriever, size: medium, id: 1",
+                result.getFeedbackToUser());
+        assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
+        assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
+        assertTrue(model.getFilteredActivityList().isEmpty());
     }
 
     @Test
-    public void execute_idSearch_usesPersistentIdAndDoesNotRetainPreviousSearch() throws Exception {
-        Dog first = model.addDog(dog("Buddy"));
-        Dog second = model.addDog(dog("Max"));
-        assertEquals("1 dogs found.", execute("search dog n/Max"));
-        assertEquals("1 dogs found.", execute("search dog id/" + first.getId()));
-        assertEquals(List.of(first), model.getFilteredDogList());
-        assertEquals("1 dogs found.", execute("search dog id/" + second.getId()));
-        assertEquals(List.of(second), model.getFilteredDogList());
-        assertEquals("0 dogs found.", execute("search dog id/2147483647"));
+    public void execute_noMatchingDogs_clearsBothFilteredLists() throws Exception {
+        ModelManager model = modelWithDogs();
+
+        new SearchDogCommand("missing", null, null, null).execute(model);
+
+        assertTrue(model.getFilteredDogList().isEmpty());
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+        assertTrue(model.getFilteredActivityList().isEmpty());
     }
 
     @Test
-    public void execute_nonSequentialStoredId_doesNotUseListPosition() throws Exception {
-        AddressBook storedBook = new AddressBook();
-        Dog storedDog = new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small"));
-        storedBook.addDogFromStorage(storedDog);
-        model.setAddressBook(storedBook);
-        assertEquals("1 dogs found.", execute("search dog id/42"));
-        assertEquals("0 dogs found.", execute("search dog id/0"));
-        assertEquals("0 dogs found.", execute("search dog id/1"));
+    public void execute_withoutFields_showsAllDogsAndOwners() throws Exception {
+        ModelManager model = modelWithDogs();
+
+        CommandResult result = new SearchDogCommand(null, null, null, null).execute(model);
+
+        assertEquals("Successfully searched dogs by ", result.getFeedbackToUser());
+        assertEquals(3, model.getFilteredDogList().size());
+        assertEquals(1, model.getFilteredCustomerList().size());
+        assertTrue(model.getFilteredActivityList().isEmpty());
     }
 
     @Test
-    public void execute_emptyBook_returnsNoMatches() throws Exception {
-        assertEquals("0 dogs found.", execute("search dog n/Buddy"));
-        assertEquals("0 dogs found.", execute("search dog id/0"));
+    public void execute_unownedDog_doesNotDisplayCustomers() throws Exception {
+        ModelManager model = modelWithDogs();
+
+        new SearchDogCommand(null, null, null, 3).execute(model);
+
+        assertEquals(1, model.getFilteredDogList().size());
+        assertTrue(model.getFilteredCustomerList().isEmpty());
     }
 
     @Test
-    public void parse_invalidInput_doesNotChangeRecords() {
-        model.addDog(dog("Buddy"));
-        AddressBook before = new AddressBook(model.getAddressBook());
-        assertThrows(ParseException.class, () -> parser.parseCommand("search dog id/-1"));
-        assertEquals(before, model.getAddressBook());
+    public void execute_refreshesRelatedCustomersAfterDogRelationshipChange() throws Exception {
+        ModelManager model = modelWithDogs();
+        new SearchDogCommand(null, "poodle", null, null).execute(model);
+        model.unlinkDogs(List.of(2));
+
+        assertEquals(2, model.getFilteredDogList().size());
+        assertTrue(model.getFilteredCustomerList().isEmpty());
     }
 
     @Test
-    public void equals_sameSearchPredicateOnly() {
-        SearchDogCommand command = new SearchDogCommand(new DogSearchPredicate("Buddy"));
-        assertEquals(command, command);
-        assertEquals(command, new SearchDogCommand(new DogSearchPredicate("Buddy")));
-        assertNotEquals(command, new SearchDogCommand(new DogSearchPredicate("Max")));
-        assertNotEquals(command, new SearchDogCommand(new DogSearchPredicate(42)));
-        assertNotEquals(command, null);
-        assertNotEquals(command, new Object());
+    public void execute_keepsNewMatchingDogAfterFilterIsActive() throws Exception {
+        ModelManager model = modelWithDogs();
+        new SearchDogCommand("waffle", null, null, null).execute(model);
+        model.addDog(new Dog(new DogName("Waffle Puppy"), new Breed("Poodle"), new Size("Small")));
+
+        assertEquals(2, model.getFilteredDogList().size());
     }
 
-    private String execute(String input) throws Exception {
-        return parser.parseCommand(input).execute(model).getFeedbackToUser();
+    @Test
+    public void execute_filtersActivitiesToThoseWithMatchingDogsAndReplacesActivityFilter() throws Exception {
+        ModelManager model = modelWithDogs();
+        Activity matchingActivity = model.addActivity(new ActivityName("Waffle walk"), ENROL_DATE,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        Activity unrelatedActivity = model.addActivity(new ActivityName("Bow Wow training"), ENROL_DATE,
+                LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.ONCE);
+        Activity noEnrolmentActivity = model.addActivity(new ActivityName("Empty activity"), ENROL_DATE,
+                LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
+        model.enrolDogs(matchingActivity.getId(), ENROL_DATE, List.of(model.getDogList().get(0).getId()));
+        model.enrolDogs(unrelatedActivity.getId(), ENROL_DATE, List.of(model.getDogList().get(1).getId()));
+
+        new SearchActivityCommand("empty", null, null).execute(model);
+        new SearchDogCommand("waffle", null, null, null).execute(model);
+
+        assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
+        assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
+        assertEquals(List.of(matchingActivity), model.getFilteredActivityList());
     }
 
-    private Dog dog(String name) {
-        return new Dog(new DogName(name), new Breed("Poodle"), new Size("small"));
+    @Test
+    public void execute_activeFilter_refreshesActivitiesAfterEnrolmentChanges() throws Exception {
+        ModelManager model = modelWithDogs();
+        Activity activity = model.addActivity(new ActivityName("Waffle walk"), ENROL_DATE,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+
+        new SearchDogCommand("waffle", null, null, null).execute(model);
+        assertTrue(model.getFilteredActivityList().isEmpty());
+
+        int waffleId = model.getDogList().get(0).getId();
+        model.enrolDogs(activity.getId(), ENROL_DATE, List.of(waffleId));
+        assertEquals(List.of(activity), model.getFilteredActivityList());
+
+        model.unenrolDogs(activity.getId(), ENROL_DATE, List.of(waffleId));
+        assertTrue(model.getFilteredActivityList().isEmpty());
+    }
+
+    @Test
+    public void execute_unknownId_throwsCommandException() {
+        ModelManager model = new ModelManager();
+        SearchDogCommand command = new SearchDogCommand(null, null, null, 99);
+
+        assertThrows(CommandException.class, SearchDogCommand.MESSAGE_INVALID_ID, () ->
+                command.execute(model));
+    }
+
+    @Test
+    public void equals_sameFields_returnsExpected() {
+        SearchDogCommand command = new SearchDogCommand("waffle", "poodle", "small", 1);
+
+        assertTrue(command.equals(command));
+        assertTrue(command.equals(new SearchDogCommand("waffle", "poodle", "small", 1)));
+        assertFalse(command.equals(new SearchDogCommand("milo", "poodle", "small", 1)));
+        assertFalse(command.equals(null));
+        assertFalse(command.equals("not a filter command"));
+    }
+
+    private ModelManager modelWithDogs() throws Exception {
+        ModelManager model = new ModelManager();
+        model.addCustomer(new Customer(1, "Anna Lee", "91234567", "anna@example.com", "98765432"));
+        Dog waffle = model.addDog(new Dog(new DogName("Waffle Boy"), new Breed("Golden Retriever"),
+                new Size("Medium")));
+        Dog bowWow = model.addDog(new Dog(new DogName("Bow Wow"), new Breed("Poodle"), new Size("Small")));
+        model.addDog(new Dog(new DogName("Milo"), new Breed("Poodle"), new Size("Large")));
+        model.linkDogs(1, List.of(waffle.getId(), bowWow.getId()));
+        return model;
     }
 }

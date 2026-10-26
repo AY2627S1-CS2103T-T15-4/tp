@@ -22,12 +22,19 @@ public class SearchCommand extends Command {
 
     /** Creates a case-insensitive substring search across both categories. */
     public SearchCommand(String nameQuery) {
+        requireNonNull(nameQuery);
+        if (nameQuery.isBlank()) {
+            throw new IllegalArgumentException("Search query cannot be blank");
+        }
         customerPredicate = new CustomerSearchPredicate(nameQuery);
         dogPredicate = new DogSearchPredicate(nameQuery);
     }
 
     /** Creates an exact ID search in both independent ID namespaces. */
     public SearchCommand(int id) {
+        if (id < 0) {
+            throw new IllegalArgumentException("Search ID cannot be negative");
+        }
         customerPredicate = new CustomerSearchPredicate(id);
         dogPredicate = new DogSearchPredicate(id);
     }

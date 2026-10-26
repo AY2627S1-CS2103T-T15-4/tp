@@ -6,14 +6,14 @@ import java.util.Locale;
 import java.util.function.Predicate;
 
 /** Filters activities by the supplied name, date, time, and recurrence criteria. */
-public class ActivityFilterPredicate implements Predicate<Activity> {
+public class ActivitySearchPredicate implements Predicate<Activity> {
     private final String nameQuery;
     private final LocalDate date;
     private final LocalTime time;
     private final Recurrence recurrence;
 
     /** Creates a predicate from any combination of supported filter fields. */
-    public ActivityFilterPredicate(String nameQuery, LocalDate date, LocalTime time, Recurrence recurrence) {
+    public ActivitySearchPredicate(String nameQuery, LocalDate date, LocalTime time, Recurrence recurrence) {
         this.nameQuery = nameQuery == null ? null : normalize(nameQuery);
         this.date = date;
         this.time = time;

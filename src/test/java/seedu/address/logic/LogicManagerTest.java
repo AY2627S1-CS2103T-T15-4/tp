@@ -92,7 +92,7 @@ public class LogicManagerTest {
         Dog max = model.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("small")));
         ObservableList<Dog> displayedDogs = logic.getFilteredDogList();
 
-        assertEquals("1 dogs found.", logic.execute("search dog n/bud").getFeedbackToUser());
+        assertEquals("Successfully searched dogs by name: bud", logic.execute("search dog n/bud").getFeedbackToUser());
         assertEquals(List.of(buddy), displayedDogs);
         assertThrows(UnsupportedOperationException.class, () -> displayedDogs.remove(0));
         assertThrows(ParseException.class, () -> logic.execute("search dog id/-1"));

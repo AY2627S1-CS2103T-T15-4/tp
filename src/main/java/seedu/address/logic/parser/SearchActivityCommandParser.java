@@ -11,12 +11,12 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import seedu.address.logic.commands.FilterActivityCommand;
+import seedu.address.logic.commands.SearchActivityCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.Recurrence;
 
 /** Parses arguments for the {@code searcha} command. */
-public class FilterActivityCommandParser implements Parser<FilterActivityCommand> {
+public class SearchActivityCommandParser implements Parser<SearchActivityCommand> {
     private static final String MESSAGE_SEARCH_ERROR_PREFIX = "Error in searching activities:\n";
     private static final Pattern FIELD_FORMAT = Pattern.compile(
             "(?<prefix>[A-Za-z]+)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
@@ -25,7 +25,7 @@ public class FilterActivityCommandParser implements Parser<FilterActivityCommand
             .withResolverStyle(ResolverStyle.STRICT);
 
     @Override
-    public FilterActivityCommand parse(String args) throws ParseException {
+    public SearchActivityCommand parse(String args) throws ParseException {
         String input = args.trim();
         if (input.isEmpty()) {
             throw invalidFormat();
@@ -77,7 +77,7 @@ public class FilterActivityCommandParser implements Parser<FilterActivityCommand
         if (end == 0 || !input.substring(end).isBlank()) {
             throw invalidFormat();
         }
-        return new FilterActivityCommand(name, date, time, recurrence);
+        return new SearchActivityCommand(name, date, time, recurrence);
     }
 
     private static String normalizeName(String value) {
@@ -113,6 +113,6 @@ public class FilterActivityCommandParser implements Parser<FilterActivityCommand
 
     private static ParseException invalidFormat() {
         return new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
-                FilterActivityCommand.MESSAGE_USAGE));
+                SearchActivityCommand.MESSAGE_USAGE));
     }
 }

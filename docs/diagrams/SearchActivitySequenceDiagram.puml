@@ -5,15 +5,15 @@ skinparam arrowColor LOGIC_COLOR_T4
 actor User
 participant ":LogicManager" as Logic LOGIC_COLOR
 participant ":AddressBookParser" as Router LOGIC_COLOR
-participant ":FilterActivityCommandParser" as Parser LOGIC_COLOR
-participant "command:FilterActivityCommand" as Command LOGIC_COLOR
+participant ":SearchActivityCommandParser" as Parser LOGIC_COLOR
+participant "command:SearchActivityCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
 participant ":AddressBook" as Book MODEL_COLOR
 
 User -> Logic : execute("searcha n/Walk d/2026-10-28")
 Logic -> Router : parseCommand(...)
 Router -> Parser : parse(...)
-Parser -> Command : new FilterActivityCommand(...)
+Parser -> Command : new SearchActivityCommand(...)
 Parser --> Router : command
 Router --> Logic : command
 Logic -> Command : execute(Model)

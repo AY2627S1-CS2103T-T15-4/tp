@@ -8,11 +8,11 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 import seedu.address.model.Model;
-import seedu.address.model.activity.ActivityFilterPredicate;
+import seedu.address.model.activity.ActivitySearchPredicate;
 import seedu.address.model.activity.Recurrence;
 
 /** Searches activities by name, date, time, and/or recurrence. */
-public class FilterActivityCommand extends Command {
+public class SearchActivityCommand extends Command {
     public static final String COMMAND_WORD = "searcha";
     private static final String MESSAGE_SUCCESS_PREFIX = "Successfully searched activities by ";
     public static final String MESSAGE_USAGE = COMMAND_WORD
@@ -24,12 +24,12 @@ public class FilterActivityCommand extends Command {
     private final Recurrence recurrence;
 
     /** Creates a command containing any combination of activity filter fields. */
-    public FilterActivityCommand(String name, LocalDate date, LocalTime time) {
+    public SearchActivityCommand(String name, LocalDate date, LocalTime time) {
         this(name, date, time, null);
     }
 
     /** Creates a command containing any combination of activity filter fields. */
-    public FilterActivityCommand(String name, LocalDate date, LocalTime time, Recurrence recurrence) {
+    public SearchActivityCommand(String name, LocalDate date, LocalTime time, Recurrence recurrence) {
         this.name = name;
         this.date = date;
         this.time = time;
@@ -39,7 +39,7 @@ public class FilterActivityCommand extends Command {
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
-        ActivityFilterPredicate predicate = new ActivityFilterPredicate(name, date, time, recurrence);
+        ActivitySearchPredicate predicate = new ActivitySearchPredicate(name, date, time, recurrence);
         model.updateFilteredActivityList(predicate);
         model.updateFilteredDogList(dog -> isEnrolledInMatchingActivity(model, dog.getId(), predicate, date));
         model.updateFilteredCustomerList(customer -> model.getDogList().stream()
@@ -49,7 +49,7 @@ public class FilterActivityCommand extends Command {
     }
 
     private static boolean isEnrolledInMatchingActivity(Model model, int dogId,
-            ActivityFilterPredicate predicate, LocalDate date) {
+            ActivitySearchPredicate predicate, LocalDate date) {
         assert dogId >= 0 : "Stored dog IDs must be nonnegative.";
         return model.getAddressBook().getEnrolmentList().stream().anyMatch(enrolment ->
                 enrolment.getDogId() == dogId && (date == null || enrolment.getDate().equals(date))
@@ -85,7 +85,7 @@ public class FilterActivityCommand extends Command {
         if (other == this) {
             return true;
         }
-        if (!(other instanceof FilterActivityCommand otherCommand)) {
+        if (!(other instanceof SearchActivityCommand otherCommand)) {
             return false;
         }
         return Objects.equals(name, otherCommand.name)
@@ -96,7 +96,7 @@ public class FilterActivityCommand extends Command {
 
     @Override
     public String toString() {
-        return String.format("FilterActivityCommand{name=%s, date=%s, time=%s, recurrence=%s}",
+        return String.format("SearchActivityCommand{name=%s, date=%s, time=%s, recurrence=%s}",
                 name, date, time, recurrence);
     }
 }

@@ -17,13 +17,13 @@ import seedu.address.logic.commands.EditActivityCommand.EditActivityDescriptor;
 import seedu.address.logic.commands.EditDogCommand;
 import seedu.address.logic.commands.EditDogCommand.EditDogDescriptor;
 import seedu.address.logic.commands.ExitCommand;
-import seedu.address.logic.commands.FilterActivityCommand;
-import seedu.address.logic.commands.FilterCustomerCommand;
-import seedu.address.logic.commands.FilterDogCommand;
 import seedu.address.logic.commands.FilterUnlinkedCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
+import seedu.address.logic.commands.SearchActivityCommand;
+import seedu.address.logic.commands.SearchCustomerCommand;
+import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.dog.Breed;
@@ -100,13 +100,13 @@ public class AddressBookParserTest {
 
     @Test
     public void parseCommand_searchCustomer() throws Exception {
-        assertEquals(new FilterCustomerCommand("anna", null, null, null, null, 1),
+        assertEquals(new SearchCustomerCommand("anna", null, null, null, null, 1),
                 parser.parseCommand("searchc n/anna i/1"));
     }
 
     @Test
     public void parseCommand_searchDog() throws Exception {
-        assertEquals(new FilterDogCommand("lala", null, null, null),
+        assertEquals(new SearchDogCommand("lala", null, null, null),
                 parser.parseCommand("searchd n/lala"));
     }
 
@@ -118,7 +118,7 @@ public class AddressBookParserTest {
 
     @Test
     public void parseCommand_searchActivity() throws Exception {
-        assertEquals(new FilterActivityCommand("walk", null, null),
+        assertEquals(new SearchActivityCommand("walk", null, null),
                 parser.parseCommand("searcha n/walk"));
     }
 

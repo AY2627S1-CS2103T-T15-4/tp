@@ -15,10 +15,10 @@ public class SearchCommandParser implements Parser<Command> {
     public Command parse(String args) throws ParseException {
         String category = args.strip().split("\\s+", 2)[0];
         if (category.equals("dog")) {
-            return new SearchDogCommandParser().parse(args);
+            return new SearchDogCommandParser().parse(args.strip().substring(category.length()).strip());
         }
         if (category.equals("customer")) {
-            return new SearchCustomerCommandParser().parse(args);
+            return new SearchCustomerCommandParser().parse(args.strip().substring(category.length()).strip());
         }
         return SearchFieldParser.parse(args, SEARCH_FORMAT, SearchCommand.MESSAGE_USAGE,
                 SearchCommand::new, SearchCommand::new);

@@ -8,20 +8,20 @@ import java.time.LocalTime;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.logic.commands.FilterActivityCommand;
+import seedu.address.logic.commands.SearchActivityCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.Recurrence;
 
-public class FilterActivityCommandParserTest {
-    private final FilterActivityCommandParser parser = new FilterActivityCommandParser();
+public class SearchActivityCommandParserTest {
+    private final SearchActivityCommandParser parser = new SearchActivityCommandParser();
 
     @Test
     public void parse_validFields_success() throws Exception {
-        FilterActivityCommand expected = new FilterActivityCommand(
+        SearchActivityCommand expected = new SearchActivityCommand(
                 "dog run", LocalDate.of(2026, 10, 20), LocalTime.of(16, 0), Recurrence.WEEKLY);
 
         assertEquals(expected, parser.parse(" n/Dog    run  d/2026-10-20 t/16:00 r/wEeKlY "));
-        assertEquals(new FilterActivityCommand(null, null, LocalTime.MIDNIGHT),
+        assertEquals(new SearchActivityCommand(null, null, LocalTime.MIDNIGHT),
                 parser.parse("t/00:00"));
     }
 
@@ -80,18 +80,18 @@ public class FilterActivityCommandParserTest {
 
     @Test
     public void parse_eachSupportedRecurrence_isAcceptedCaseInsensitively() throws Exception {
-        assertEquals(new FilterActivityCommand(null, null, null, Recurrence.ONCE),
+        assertEquals(new SearchActivityCommand(null, null, null, Recurrence.ONCE),
                 parser.parse("r/once"));
-        assertEquals(new FilterActivityCommand(null, null, null, Recurrence.WEEKLY),
+        assertEquals(new SearchActivityCommand(null, null, null, Recurrence.WEEKLY),
                 parser.parse("r/WEEKLY"));
-        assertEquals(new FilterActivityCommand(null, null, null, Recurrence.DAILY),
+        assertEquals(new SearchActivityCommand(null, null, null, Recurrence.DAILY),
                 parser.parse("r/ Daily "));
     }
 
     @Test
     public void parse_fieldsWithLeadingAndTrailingWhitespace_success() throws Exception {
-        assertEquals(new FilterActivityCommand("walk", null, null), parser.parse("  n/  Walk  "));
-        assertEquals(new FilterActivityCommand(null, LocalDate.of(2026, 10, 20), null),
+        assertEquals(new SearchActivityCommand("walk", null, null), parser.parse("  n/  Walk  "));
+        assertEquals(new SearchActivityCommand(null, LocalDate.of(2026, 10, 20), null),
                 parser.parse(" d/2026-10-20 "));
     }
 }
