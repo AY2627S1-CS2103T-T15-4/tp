@@ -1,5 +1,4 @@
 package seedu.address.logic.commands;
-
 //@@author its-shoutime-unused
 // Archived because select dog is not part of the final product.
 

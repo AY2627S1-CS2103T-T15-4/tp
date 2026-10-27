@@ -252,36 +252,11 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 <puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog through the application layers" />
 
-### Selecting a dog
+### Retired select commands
 
-The former `select` implementation is retained under `unused/@its-shoutime/` for attribution only;
-the active `AddressBookParser` does not route this command. The archived `SelectCommandParser`
-accepted the lowercase categories
-`dog` and `customer` with an ID starting at 1. `SelectDogCommand` looks up that ID in the
-complete dog list. A missing dog leaves every filter unchanged.
-
-On success the command asks `ModelManager` to follow that dog id. The three filters read the current
-records whenever dogs, customers, activities, links, or enrolments change, so the columns stay current
-after later commands. The dog list shows the selected dog. The customer list shows that dog's current
-owner, or nothing when the dog is unlinked. The activity list shows activities with a dated enrolment
-for that dog today or on a future date.
-Another command that sets its own filter, such as `list` or `search`, leaves this view.
-`ModelManager` keeps this filtered activity list separately from `getActivityList()`, which continues
-to expose every stored schedule.
-
-
-### Selecting a customer
-
-`SelectCustomerCommand` looks up the ID in the complete customer list. A missing customer leaves every
-filter unchanged. Selecting a customer replaces a previous dog selection, and selecting a dog replaces
-a previous customer selection.
-
-On success the dog column shows every dog currently linked to that customer. The customer column shows
-that customer. The activity column shows activities with dated enrolments today or later for those
-dogs; a past enrolment is excluded, even when its activity schedule still exists. Linking another
-dog, or enrolling one of those dogs, updates the columns without running
-`select customer` again.
-
+The former select dog and select customer implementations are retained under
+unused/@its-shoutime/ for authorship reference only. They are not routed by the active
+AddressBookParser and are not supported by the final product.
 
 ### Undo and redo
 
@@ -557,7 +532,7 @@ The existing `RecordListPanel` renders customers first, then dogs; feedback repo
 The three search parsers delegate shared name/ID validation to `SearchFieldParser` while retaining
 their own category grammar, command creation and usage messages.
 For dog searches, `SearchDogCommandParser` accepts
-`dog n/NAME_QUERY` or `dog id/ID`. It rejects empty values, additional prefixes, unsupported
+`searchd n/NAME_QUERY` or `searchd i/ID`. It rejects empty values, additional prefixes, unsupported
 categories and invalid IDs before command execution. IDs are nonnegative Java integers;
 they are not AB3's one-based list indices.
 
@@ -565,8 +540,8 @@ they are not AB3's one-based list indices.
 and compares IDs directly with `Dog.getId()`. A name query is one literal substring,
 including internal spaces. `SearchDogCommand` updates the model's filtered dog list and hides
 customer cards using the customer filter. `Logic.getFilteredDogList()` supplies the observable
-list to `RecordListPanel`, so matching dogs appear as cards. `CommandResult` contains only the
-match count. Each new predicate applies to all stored dogs, without changing stored records.
+list to `RecordListPanel`, so matching dogs appear as cards. `CommandResult` reports the searched
+fields. Each new predicate applies to all stored dogs, without changing stored records.
 `list dog` resets the dog filter so all dogs can be displayed again after a search.
 
 `SearchDogCommandParserTest` covers command routing, whitespace, prefix misuse and ID boundaries.
@@ -973,8 +948,8 @@ appear as an undoable mutation.
 1. Add a dog, run `help`, then `undo`. The dog disappears; `help` is not the undone command.
 1. Run `help`, then `redo`. The dog returns. Repeat with `summary` instead of `help`.
 1. Undo again, then add another dog. `redo` reports no command to redo and does not replace the new dog.
-1. Link two dogs to different customers. Run `filterd n/Buddy`, `resetdisplay`, then `undo`.
-   Only Buddy and Buddy's owner appear. Repeat using `filterc n/Alice`; only Alice and her dog appear.
+1. Link two dogs to different customers. Run `searchd n/Buddy`, `resetdisplay`, then `undo`.
+   Only Buddy and Buddy's owner appear. Repeat using `searchc n/Alice`; only Alice and her dog appear.
 1. With disposable data, make the data file unwritable after a successful add, then run `undo`.
    The save reports an error, but the dog disappears from memory. Restore write access and run `redo`;
    the dog returns and saves. Repeat for a failed `redo`, a new add after `undo`, and `clear`.

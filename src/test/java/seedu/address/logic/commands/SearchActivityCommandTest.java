@@ -79,6 +79,7 @@ public class SearchActivityCommandTest {
         Dog firstDog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
         Dog secondDog = model.addDog(new Dog(new DogName("Max"), new Breed("Labrador"), new Size("Large")));
         Dog unrelatedDog = model.addDog(new Dog(new DogName("Luna"), new Breed("Beagle"), new Size("Medium")));
+        model.addDog(new Dog(new DogName("Unowned"), new Breed("Beagle"), new Size("Small")));
         model.linkDogs(0, List.of(firstDog.getId(), secondDog.getId()));
         model.linkDogs(1, List.of(unrelatedDog.getId()));
         var matchingActivity = model.addActivity(new ActivityName("Group walk"), ENROL_DATE, LocalTime.NOON,
