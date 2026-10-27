@@ -32,6 +32,7 @@ import seedu.address.logic.commands.SearchCommand;
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.commands.SummaryCommand;
+import seedu.address.logic.commands.TodayCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.UnenrolDogCommand;
 import seedu.address.logic.commands.UnlinkCommand;
@@ -110,6 +111,7 @@ public class AddressBookParser {
                 }
                 yield new SummaryCommand();
             }
+            case TodayCommand.COMMAND_WORD -> new TodayCommandParser().parse(arguments);
             case ResetDisplayCommand.COMMAND_WORD -> {
                 if (!arguments.isBlank()) {
                     throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,

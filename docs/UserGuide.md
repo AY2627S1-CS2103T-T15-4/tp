@@ -37,6 +37,8 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 
    * `summary` : Shows overall counts and today's activities and distinct enrolled dogs.
 
+   * `today` : Shows today's activities, enrolled dogs, and their owners.
+
    * `clear` : Deletes all customers, dogs, and activities.
 
    * `exit` : Exits the app.
@@ -144,6 +146,22 @@ Example: `searcha n/Dog run t/16:00`
   occurrence date are included. The customer panel shows owners of those dogs.
 * Invalid date, time, or recurrence input displays `Error in searching activities:` followed by the applicable error message.
  * The filter remains active while activities are added or their state, enrolments, or details are changed.
+
+### Showing today's activities: `today`
+
+Shows activities occurring today, the dogs enrolled in today's occurrences, and their owners.
+
+Format: `today`
+
+Example: `today`
+
+* The command is case-sensitive and accepts no additional fields.
+* Recurring activities are included when they occur today.
+* Dogs are shown only when they are enrolled in today's occurrence of an activity.
+* The command replaces the current activity, dog, and customer displays.
+* If there are no matching records, the relevant panels are empty.
+* Extra input produces `Error in showing today:` followed by
+  `Info is in the wrong format. Input in the correct format`.
 
 ### Adding a dog: `adddog`
 
@@ -487,6 +505,7 @@ Action     | Format, Examples
 **Unenrol dogs** | `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2`<br>Removes only the specified dated enrolments.
 **Delete activity** | `deleteactivity ACTIVITY_ID`<br>e.g., `deleteactivity 21`
 **Search activities** | `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`<br>e.g., `searcha n/Dog run t/16:00`
+**Today** | `today`<br>Shows today's activities and the enrolled dogs and owners involved.
 **Search customers by fields** | `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`<br>e.g., `searchc n/Anna i/21`
 **Add dog** | `adddog n/NAME b/BREED s/SIZE`<br>e.g., `adddog n/Cookie b/Chihuahua s/Small`
 **Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`

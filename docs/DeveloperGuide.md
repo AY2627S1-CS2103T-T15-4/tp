@@ -444,6 +444,15 @@ the owners panel is derived from those dogs. When no date is supplied, enrolment
 Gradle test execution enables Java assertions so internal model invariants are checked during verification.
 
 <puml src="diagrams/SearchActivitySequenceDiagram.puml" alt="Searching activities and related dogs and owners" />
+### Today command
+
+`AddressBookParser` routes the exact lowercase command `today` to `TodayCommandParser`, which rejects
+any additional arguments. `TodayCommand` delegates the filtering behavior to `SearchActivityCommand`
+with `LocalDate.now()` as the date criterion. This reuses the existing recurrence-aware activity
+matching and derives dogs from enrolments on today's exact occurrence, followed by their owners.
+The command replaces the active activity, dog, and customer displays and returns
+`Successfully displayed today's activities, as well as the dogs and customers involved for the day`.
+
 ### Unlinked filtering
 
 `AddressBookParser` routes `filterun` to `FilterUnlinkedCommandParser`, which accepts only the lowercase

@@ -39,7 +39,22 @@ public class JsonUtilTest {
         assertEquals(serializableTestClass.getMapOfIntegerToString(), SerializableTestClass.getHashMapTestValues());
     }
 
-    //TODO: @Test jsonUtil_readJsonStringToObjectInstance_correctObject()
+    @Test
+    public void fromJsonString_validJson_returnsObject() throws IOException {
+        SerializableTestClass result = JsonUtil.fromJsonString(
+                SerializableTestClass.JSON_STRING_REPRESENTATION, SerializableTestClass.class);
 
-    //TODO: @Test jsonUtil_writeThenReadObjectToJson_correctObject()
+        assertEquals(SerializableTestClass.getNameTestValue(), result.getName());
+        assertEquals(SerializableTestClass.getListTestValues(), result.getListOfLocalDateTimes());
+        assertEquals(SerializableTestClass.getHashMapTestValues(), result.getMapOfIntegerToString());
+    }
+
+    @Test
+    public void toJsonString_object_returnsExpectedJson() throws IOException {
+        SerializableTestClass serializableTestClass = new SerializableTestClass();
+        serializableTestClass.setTestValues();
+
+        assertEquals(SerializableTestClass.JSON_STRING_REPRESENTATION,
+                JsonUtil.toJsonString(serializableTestClass));
+    }
 }
