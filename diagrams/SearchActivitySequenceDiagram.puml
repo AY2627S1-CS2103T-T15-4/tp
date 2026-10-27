@@ -5,15 +5,15 @@ skinparam arrowColor LOGIC_COLOR_T4
 actor User
 participant ":LogicManager" as Logic LOGIC_COLOR
 participant ":AddressBookParser" as Router LOGIC_COLOR
-participant ":FilterActivityCommandParser" as Parser LOGIC_COLOR
-participant "command:FilterActivityCommand" as Command LOGIC_COLOR
+participant ":SearchActivityCommandParser" as Parser LOGIC_COLOR
+participant "command:SearchActivityCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
 participant ":AddressBook" as Book MODEL_COLOR
 
-User -> Logic : execute("filtera n/Walk d/2026-10-28")
+User -> Logic : execute("searcha n/Walk d/2026-10-28")
 Logic -> Router : parseCommand(...)
 Router -> Parser : parse(...)
-Parser -> Command : new FilterActivityCommand(...)
+Parser -> Command : new SearchActivityCommand(...)
 Parser --> Router : command
 Router --> Logic : command
 Logic -> Command : execute(Model)
@@ -23,6 +23,6 @@ Model -> Book : get enrolments for matching occurrence
 Book --> Model : activity, dog and date records
 Command -> Model : updateFilteredCustomerList(owners of visible dogs)
 Model --> Command : refresh filtered views
-Command --> Logic : CommandResult
+Command --> Logic : CommandResult("Successfully searched activities by ...")
 Logic --> User : display success message and views
 @enduml

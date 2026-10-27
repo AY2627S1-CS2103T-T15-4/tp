@@ -1,0 +1,28 @@
+@startuml
+!include style.puml
+skinparam arrowColor LOGIC_COLOR_T4
+
+actor User
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":SearchCustomerCommandParser" as Parser LOGIC_COLOR
+participant "command:SearchCustomerCommand" as Command LOGIC_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+participant ":AddressBook" as Book MODEL_COLOR
+
+User -> Logic : execute("searchc n/Anna i/21")
+Logic -> Router : parseCommand(...)
+Router -> Parser : parse(...)
+Parser -> Command : new SearchCustomerCommand(...)
+Parser --> Router : command
+Router --> Logic : command
+Logic -> Command : execute(Model)
+Command -> Model : validate customer and dog IDs
+Command -> Model : updateFilteredCustomerList(customer predicate)
+Model -> Book : read current customers and dogs
+Book --> Model : customer and ownership records
+Command -> Model : updateFilteredDogList(owners of matching customers)
+Model --> Command : refresh filtered views
+Command --> Logic : CommandResult("Successfully searched customers by ...")
+Logic --> User : display success message and views
+@enduml

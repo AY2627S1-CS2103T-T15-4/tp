@@ -1,0 +1,23 @@
+@startuml
+!include style.puml
+skinparam arrowColor LOGIC_COLOR_T4
+
+actor User
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":FilterUnlinkedCommandParser" as Parser LOGIC_COLOR
+participant "command:FilterUnlinkedCommand" as Command LOGIC_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+
+User -> Logic : execute("filterun dog")
+Logic -> Router : parseCommand(...)
+Router -> Parser : parse(...)
+Parser -> Command : new FilterUnlinkedCommand(...)
+Parser --> Router : command
+Router --> Logic : command
+Logic -> Command : execute(Model)
+Command -> Model : update filtered unlinked list
+Model --> Command : refresh related panel
+Command --> Logic : success message
+Logic --> User : display filtered records
+@enduml
