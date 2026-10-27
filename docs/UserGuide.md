@@ -122,14 +122,14 @@ Example: `deleteactivity 21`
 The ID must be a nonnegative integer belonging to an existing activity. Invalid or missing IDs
 leave the activity and enrolments unchanged.
 
-### Filtering activities: `filtera`
+### Searching activities: `searcha`
 
-Filters activities by name, date, time, and/or recurrence. At least one field must be provided, and all supplied
+Searches activities by name, date, time, and/or recurrence. At least one field must be provided, and all supplied
 fields must match.
 
-Format: `filtera [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`
+Format: `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`
 
-Example: `filtera n/Dog run t/16:00`
+Example: `searcha n/Dog run t/16:00`
 
 * Name matching is case-insensitive (`run` and `RUN` are equivalent) and treats repeated internal spaces as one space.
 * Date matching includes activities that occur on the specified date, including daily and weekly recurrences.
@@ -137,12 +137,12 @@ Example: `filtera n/Dog run t/16:00`
 * Recurrence matching accepts `Once`, `Weekly`, or `Daily`, and is case-insensitive.
 * Dates must use `YYYY-MM-DD`, and times must use 24-hour `HH:mm` format.
 * Only lowercase `n/`, `d/`, `t/`, and `r/` field prefixes are accepted.
-* A successful command displays `Successfully filtered activities by` followed by the supplied values, in the form
+* A successful command displays `Successfully searched activities by` followed by the supplied values, in the form
   `name: NAME`, `time: HH:mm`, `date: YYYY-MM-DD`, and `recurrence: Once|Weekly|Daily`. Unused fields are omitted.
   If there are no matches, the activity panel is empty.
 * The dog panel shows dogs enrolled in the matching activities; when a date is supplied, only enrolments on that
   occurrence date are included. The customer panel shows owners of those dogs.
-* Invalid input displays `Error in filtering activities:` followed by the applicable error message.
+* Invalid date, time, or recurrence input displays `Error in searching activities:` followed by the applicable error message.
  * The filter remains active while activities are added or their state, enrolments, or details are changed.
 
 ### Adding a dog: `adddog`
@@ -187,19 +187,6 @@ Format: `list dog`
 
 If there are no dogs, WatchDog displays `There are no dogs to display.`
 
-### Selecting a customer: `select customer`
-
-Shows one customer, all dogs currently linked to that customer, and activities in which those dogs
-are enrolled today or on a future date. Past enrolments are not shown.
-
-Format: `select customer CUSTOMER_ID`
-
-Example: `select customer 1`
-
-Use an existing customer ID starting at 1. The selection stays current when dogs are linked or
-unlinked or their enrolments change. A missing ID produces an error and leaves the current view unchanged.
-Another command that sets a filter or selection replaces this view.
-
 ### Resetting the display: `resetdisplay`
 
 Shows all stored customers and dogs, plus activities with an occurrence today or later according to
@@ -213,7 +200,7 @@ Format: `resetdisplay`
 ### Viewing daycare statistics: `summary`
 
 Shows six statistics using all stored records, including records hidden by search or filters.
-The command preserves your records, filters and selection.
+The command preserves your records and filters.
 
 Format: `summary` (no parameters; surrounding whitespace is accepted)
 
@@ -306,17 +293,21 @@ Examples:
   showing `Dog IDs: None` when none remain. Existing search filters stay active.
 * Changes are saved automatically and survive restarting the application.
 
-### Filtering dogs: `filterd`
+### Searching dogs: `searchd`
 
-Filters dogs by one or more fields. All supplied fields must match.
+Searches dogs by one or more fields. All supplied fields must match.
 
-Format: `filterd [n/NAME] [b/BREED] [s/SIZE] [i/ID]`
+Format: `searchd [n/NAME] [b/BREED] [s/SIZE] [i/ID]`
 
-Example: `filterd b/Golden Retriever s/Medium`
+Example: `searchd b/Golden Retriever s/Medium`
 
 * Name and breed matching are case-insensitive substring searches.
 * Size must be `small`, `medium`, `large`, or `giant`, ignoring letter case.
 * ID matching is exact, and the ID must belong to a dog in the database.
+* A successful command displays `Successfully searched dogs by` followed by only the supplied fields.
+* Invalid input displays `Error in searching dogs:` followed by the applicable error message. Invalid or nonexistent
+  dog IDs display `Invalid dog id. Please input a valid dog id.`
+* Invalid sizes display `Invalid dog size. Please input small/medium/large/giant only.`
 * The customer panel is also filtered to customers linked to the matching dogs.
 * The activity panel shows activities in which a matching dog is enrolled.
 * Unowned matching dogs remain visible, but the customer panel is empty.
@@ -332,22 +323,23 @@ Format: `filterun dog` or `filterun customer`
 * The category must be lowercase. Multiple spaces between `filterun` and the category are accepted.
 * The filter remains active while records are added, edited, deleted, linked, or unlinked.
 
-### Filtering customers: `filterc`
+### Searching customers: `searchc`
 
-Filters customers by one or more fields. All supplied fields must match.
+Searches customers by one or more fields. All supplied fields must match.
 
-Format: `filterc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT]`
+Format: `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`
 
-Example: `filterc n/Anna d/12 34`
+Example: `searchc n/Anna d/12 34`
 
 * Name matching is case-insensitive, uses a substring search, and treats repeated spaces as one space.
 * Phone and backup contact numbers require exactly eight digits and use exact matching.
 * Email matching is case-insensitive and exact.
 * Dog IDs must exist. A customer must own all specified dog IDs to match.
+* Customer ID must be a nonnegative ID belonging to an existing customer; it matches that customer exactly.
 * The dog panel is also filtered to show only dogs owned by the matching customers.
-* Dog IDs in the success message are displayed in ascending numeric order.
-* Only lowercase `n/`, `p/`, `e/`, `d/`, and `bc/` prefixes are accepted.
-* Invalid field values display `Error in filtering customers:` followed by the applicable error message.
+* Dog IDs and customer ID appear in the success message only when supplied; dog IDs are displayed in ascending numeric order.
+* Only lowercase `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/` prefixes are accepted.
+* Invalid field values display `Error in searching customers:` followed by the applicable error message. Invalid or nonexistent dog and customer IDs have specific messages.
 * Unsupported field prefixes are rejected as invalid command formats.
 * If no customers match, the customer panel is empty.
 * The filter remains active while customers or their linked dogs are added, edited, deleted, linked, or unlinked.
@@ -362,51 +354,9 @@ Format: `search n/NAME_QUERY` or `search id/ID`
 * Matching customer cards appear first, followed by matching dog cards. The result bar shows both counts.
 * Customer and dog IDs are independent. `search id/0` can show both a customer and a dog with ID 0.
 * Each search replaces both displayed filters without changing stored records. No matches clears the panel.
-* Use `search customer ...` or `search dog ...` to narrow the next search to a category.
+* Use `searchc ...` or `searchd ...` to narrow the next search to a category.
 
 Examples: `search n/alex`, `search id/42`.
-
-### Searching dogs: `search dog`
-
-Shows matching dogs as cards in the main panel, including their persistent IDs.
-The result bar shows the number of matches.
-
-Format: `search dog n/NAME_QUERY` or `search dog id/ID`
-
-* Use exactly one field: `n/` for a name or `id/` for an ID. Blank values, repeated fields,
-  unknown prefixes, and combining both fields are rejected with usage instructions.
-* Name matching ignores case and accepts partial names. For example, `search dog n/bud`
-  matches both `Buddy` and `Little Bud`. Dogs with the same name are all returned.
-* Multiple words form one substring, not separate keywords: `n/little bud` matches
-  `Little Buddy`. Spaces inside the query are matched literally; surrounding whitespace is ignored.
-* IDs are persistent record IDs, not positions in a displayed list. Use a whole number from
-  `0` to `2147483647`, without a sign. Leading zeros are accepted.
-* A valid search with no matches reports `0 dogs found.` and clears the card panel.
-* Each search examines all stored dogs and displays only matching dog cards. Stored records are unchanged.
-* Use `list dog` to show all dogs again.
-
-Examples:
-
-* `search dog n/bud`
-* `search dog n/Little Buddy`
-* `search dog id/0`
-
-### Searching customers: `search customer`
-
-Shows matching customers as cards in the main panel. The result bar shows the match count.
-
-Format: `search customer n/NAME_QUERY` or `search customer id/ID`
-
-* Use exactly one field. Blank values, repeated fields, unknown prefixes and combined fields are rejected.
-* Names match a case-insensitive substring. Multiple words form one phrase, with internal spaces matched literally.
-  For example, `search customer n/alex` matches both `Alex Tan` and `Alexandra Lim`.
-* All customers with matching names are shown, even when they share a name.
-* IDs are persistent customer IDs, not card positions. Use an integer from `0` to `2147483647`.
-* Each search considers all stored customers. No matches clears the panel and reports `0 customers found.`.
-* Search hides dog cards without deleting records. Use `list customer` to restore all customer cards,
-  or `search dog` / `list dog` to display dogs again.
-
-Examples: `search customer n/Alex Tan`, `search customer id/42`.
 
 ### Deleting a dog: `delete dog`
 
@@ -530,13 +480,14 @@ Action     | Format, Examples
 **Search all** | `search n/NAME_QUERY` or `search id/ID`<br> e.g., `search n/alex`
 **Link dogs** | `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`<br> e.g., `link c/1 d/2 d/3`
 **Unlink dogs** | `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`<br> e.g., `unlink d/2 d/3` or `unlink c/1`
-**Search customers** | `search customer n/NAME_QUERY` or `search customer id/ID`<br> e.g., `search customer n/alex`
-**Search dogs** | `search dog n/NAME_QUERY` or `search dog id/ID`<br> e.g., `search dog n/bud`
+**Search customers** | `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`<br> e.g., `searchc n/alex i/42`
+**Search dogs** | `searchd [n/NAME] [b/BREED] [s/SIZE] [i/DOG_ID]`<br> e.g., `searchd n/bud s/small`
 **Add activity** | `addactivity n/NAME date/YYYY-MM-DD start/HH:mm end/HH:mm r/once`<br>Use `r/daily` or `r/weekly` for recurrence.
 **Enrol dogs** | `enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2`<br>Date must be today or a future occurrence; overlapping activities for the same dog are rejected.
 **Unenrol dogs** | `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2`<br>Removes only the specified dated enrolments.
 **Delete activity** | `deleteactivity ACTIVITY_ID`<br>e.g., `deleteactivity 21`
-**Filter activities** | `filtera [n/NAME] [d/YYYY-MM-DD] [t/HH:mm]`<br>e.g., `filtera n/Dog run t/16:00`
+**Search activities** | `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`<br>e.g., `searcha n/Dog run t/16:00`
+**Search customers by fields** | `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`<br>e.g., `searchc n/Anna i/21`
 **Add dog** | `adddog n/NAME b/BREED s/SIZE`<br>e.g., `adddog n/Cookie b/Chihuahua s/Small`
 **Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 **Edit dog** | `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`<br>e.g., `editdog 1 s/Large`
@@ -545,7 +496,6 @@ Action     | Format, Examples
 **List dogs** | `list dog`
 **Delete dog** | `delete dog ID`<br>e.g., `delete dog 0`
 **Delete customer** | `delete customer ID`<br>e.g., `delete customer 21`
-**Select customer** | `select customer CUSTOMER_ID`<br>e.g., `select customer 1`
 **Undo** | `undo`
 **Redo** | `redo`
 **Help**   | `help`

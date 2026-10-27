@@ -17,16 +17,14 @@ import seedu.address.logic.commands.EditActivityCommand.EditActivityDescriptor;
 import seedu.address.logic.commands.EditDogCommand;
 import seedu.address.logic.commands.EditDogCommand.EditDogDescriptor;
 import seedu.address.logic.commands.ExitCommand;
-import seedu.address.logic.commands.FilterActivityCommand;
-import seedu.address.logic.commands.FilterCustomerCommand;
-import seedu.address.logic.commands.FilterDogCommand;
 import seedu.address.logic.commands.FilterUnlinkedCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
-import seedu.address.logic.commands.SelectCustomerCommand;
-import seedu.address.logic.commands.SelectDogCommand;
+import seedu.address.logic.commands.SearchActivityCommand;
+import seedu.address.logic.commands.SearchCustomerCommand;
+import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.commands.SummaryCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -70,15 +68,10 @@ public class AddressBookParserTest {
     }
 
     @Test
-    public void parseCommand_selectCustomer() throws Exception {
-        SelectCustomerCommand command = (SelectCustomerCommand) parser.parseCommand("select customer 21");
-        assertEquals(new SelectCustomerCommand(21), command);
-    }
-
-    @Test
-    public void parseCommand_selectDog() throws Exception {
-        SelectDogCommand command = (SelectDogCommand) parser.parseCommand("select dog 21");
-        assertEquals(new SelectDogCommand(21), command);
+    public void parseCommand_selectWithoutCategoryIsRejected() {
+        for (String input : new String[] {"select", "select rabbit 1"}) {
+            assertThrows(ParseException.class, () -> parser.parseCommand(input));
+        }
     }
 
     @Test
@@ -123,27 +116,35 @@ public class AddressBookParserTest {
     }
 
     @Test
-    public void parseCommand_filterCustomer() throws Exception {
-        assertEquals(new FilterCustomerCommand("anna", null, null, null, null),
-                parser.parseCommand("filterc n/anna"));
+    public void parseCommand_searchCustomer() throws Exception {
+        assertEquals(new SearchCustomerCommand("anna", null, null, null, null, 1),
+                parser.parseCommand("searchc n/anna i/1"));
     }
 
     @Test
-    public void parseCommand_filterDog() throws Exception {
-        assertEquals(new FilterDogCommand("lala", null, null, null),
-                parser.parseCommand("filterd n/lala"));
+    public void parseCommand_searchDog() throws Exception {
+        assertEquals(new SearchDogCommand("lala", null, null, null),
+                parser.parseCommand("searchd n/lala"));
     }
 
     @Test
-    public void parseCommand_filterUnlinked() throws Exception {
+    public void parseCommand_searchUnlinked() throws Exception {
         assertEquals(new FilterUnlinkedCommand(true), parser.parseCommand("filterun   dog"));
         assertEquals(new FilterUnlinkedCommand(false), parser.parseCommand("filterun customer"));
     }
 
     @Test
-    public void parseCommand_filterActivity() throws Exception {
-        assertEquals(new FilterActivityCommand("walk", null, null),
-                parser.parseCommand("filtera n/walk"));
+    public void parseCommand_searchActivity() throws Exception {
+        assertEquals(new SearchActivityCommand("walk", null, null),
+                parser.parseCommand("searcha n/walk"));
+    }
+
+    @Test
+    public void parseCommand_oldSearchNames_throwUnknownCommand() {
+        for (String input : new String[] {"filtera n/walk", "filterc n/anna", "filterd n/lala",
+            "searchun dog"}) {
+            assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
+        }
     }
 
     @Test

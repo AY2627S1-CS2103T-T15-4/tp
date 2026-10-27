@@ -1,0 +1,30 @@
+@startuml
+'' Archived because select dog is not part of the final product.
+!include style.puml
+skinparam arrowColor LOGIC_COLOR_T4
+
+actor User
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":SelectDogCommandParser" as Parser LOGIC_COLOR
+participant "command:SelectDogCommand" as Command LOGIC_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+participant ":AddressBook" as Book MODEL_COLOR
+
+User -> Logic : execute("select dog 21")
+Logic -> Router : parseCommand(...)
+Router -> Parser : parse(" dog 21")
+Parser -> Parser : validate "dog" and nonnegative ID
+Parser -> Command : new SelectDogCommand(21)
+Parser --> Router : command
+Router --> Logic : command
+Logic -> Command : execute(Model)
+Command -> Model : getDogList()
+Model --> Command : dogs
+Command -> Model : selectDog(21)
+Model -> Book : read current dog, owner and enrolments
+Book --> Model : current records
+Model -> Model : filter dog, owner and future/current enrolments
+Command --> Logic : CommandResult
+Logic --> User : display result
+@enduml

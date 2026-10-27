@@ -2,36 +2,90 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Objects;
+
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.dog.DogSearchPredicate;
 
-/** Shows matching dog cards without changing stored records. */
+/** Searches dogs by name, breed, size, and ID. */
 public class SearchDogCommand extends Command {
-    public static final String COMMAND_WORD = "search";
-    public static final String MESSAGE_USAGE = "search dog: Searches dogs by name substring or persistent ID.\n"
-            + "Parameters: dog n/NAME_QUERY OR dog id/ID (use exactly one field)\n"
-            + "ID must be an integer from 0 to 2147483647.\n"
-            + "Examples: search dog n/bud | search dog id/0";
-    public static final String MESSAGE_RESULT = "%d dogs found.";
+    public static final String COMMAND_WORD = "searchd";
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + " [n/NAME] [b/BREED] [s/SIZE] [i/ID]";
+    public static final String MESSAGE_INVALID_ID = "Error in searching dogs:\n"
+            + "Invalid dog id. Please input a valid dog id.";
+    private static final String MESSAGE_SUCCESS_PREFIX = "Successfully searched dogs by ";
 
+    private final String name;
+    private final String breed;
+    private final String size;
+    private final Integer id;
     private final DogSearchPredicate predicate;
 
-    /** Creates a dog search with the given matching rule. */
+    /** Creates a dog filter with any combination of supported fields. */
+    public SearchDogCommand(String name, String breed, String size, Integer id) {
+        this.name = name;
+        this.breed = breed;
+        this.size = size;
+        this.id = id;
+        this.predicate = null;
+    }
+
+    /** Creates a dog search from a prepared predicate. */
     public SearchDogCommand(DogSearchPredicate predicate) {
+        this.name = null;
+        this.breed = null;
+        this.size = null;
+        this.id = null;
         this.predicate = requireNonNull(predicate);
     }
 
     @Override
-    public CommandResult execute(Model model) {
+    public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        model.updateFilteredCustomerList(customer -> false);
-        model.updateFilteredDogList(predicate);
-        return new CommandResult(String.format(MESSAGE_RESULT, model.getFilteredDogList().size()));
+        if (id != null && model.getDogList().stream().noneMatch(dog -> dog.getId() == id)) {
+            throw new CommandException(MESSAGE_INVALID_ID);
+        }
+        DogSearchPredicate dogPredicate = predicate == null
+                ? new DogSearchPredicate(name, breed, size, id) : predicate;
+        model.updateFilteredDogList(dogPredicate);
+        model.updateFilteredCustomerList(customer -> model.getFilteredDogList().stream()
+                .anyMatch(dog -> dog.getOwnerId()
+                        .map(ownerId -> ownerId == customer.getId())
+                        .orElse(false)));
+        model.updateFilteredActivityList(activity -> model.getAddressBook().getEnrolmentList().stream()
+                .filter(enrolment -> enrolment.getActivityId() == activity.getId())
+                .anyMatch(enrolment -> model.getDogList().stream()
+                        .filter(dog -> dog.getId() == enrolment.getDogId())
+                        .anyMatch(dogPredicate)));
+        return new CommandResult(createSuccessMessage());
+    }
+
+    private String createSuccessMessage() {
+        StringBuilder fields = new StringBuilder(MESSAGE_SUCCESS_PREFIX);
+        appendField(fields, "name", name);
+        appendField(fields, "breed", breed);
+        appendField(fields, "size", size);
+        appendField(fields, "id", id);
+        return fields.toString();
+    }
+
+    private static void appendField(StringBuilder fields, String label, Object value) {
+        if (value != null) {
+            if (fields.length() > MESSAGE_SUCCESS_PREFIX.length()) {
+                fields.append(", ");
+            }
+            fields.append(label).append(": ").append(value);
+        }
     }
 
     @Override
     public boolean equals(Object other) {
         return other == this || other instanceof SearchDogCommand otherCommand
-                && predicate.equals(otherCommand.predicate);
+                && Objects.equals(name, otherCommand.name)
+                && Objects.equals(breed, otherCommand.breed)
+                && Objects.equals(size, otherCommand.size)
+                && Objects.equals(id, otherCommand.id);
     }
 }

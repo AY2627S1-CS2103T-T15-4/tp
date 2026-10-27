@@ -1,49 +1,77 @@
 package seedu.address.model.dog;
 
-import static java.util.Objects.requireNonNull;
-import static seedu.address.commons.util.AppUtil.checkArgument;
-
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import seedu.address.commons.util.StringUtil;
-
-/** Matches a dog's name substring or its exact persistent ID. */
+/** Filters dogs by name, breed, size, and ID. */
 public class DogSearchPredicate implements Predicate<Dog> {
     private final String nameQuery;
+    private final String breedQuery;
+    private final String sizeQuery;
     private final Integer id;
 
-    /** Creates a case-insensitive name substring search. */
+    /** Creates a predicate that searches dog names by substring. */
     public DogSearchPredicate(String nameQuery) {
-        this.nameQuery = requireNonNull(nameQuery).strip();
-        checkArgument(!this.nameQuery.isEmpty(), "Name query cannot be blank");
-        this.id = null;
+        this(validateName(nameQuery), null, null, null);
     }
 
-    /** Creates a search for a nonnegative persistent ID, not a displayed list index. */
+    /** Creates a predicate that searches for one dog ID. */
     public DogSearchPredicate(int id) {
-        checkArgument(id >= 0, "Dog ID must be nonnegative");
+        this(null, null, null, validateId(id));
+    }
+
+    /** Creates a predicate from any combination of supported dog fields. */
+    public DogSearchPredicate(String nameQuery, String breedQuery, String sizeQuery, Integer id) {
+        this.nameQuery = normalize(nameQuery);
+        this.breedQuery = normalize(breedQuery);
+        this.sizeQuery = normalize(sizeQuery);
         this.id = id;
-        this.nameQuery = null;
     }
 
     @Override
     public boolean test(Dog dog) {
-        requireNonNull(dog);
-        return id == null
-                ? StringUtil.containsSubstringIgnoreCase(dog.getName().fullName, nameQuery)
-                : dog.getId() == id;
+        return (nameQuery == null || normalize(dog.getName().fullName).contains(nameQuery))
+                && (breedQuery == null || normalize(dog.getBreed().breed).contains(breedQuery))
+                && (sizeQuery == null || normalize(dog.getSize().size).equals(sizeQuery))
+                && (id == null || dog.getId() == id);
+    }
+
+    private static String normalize(String value) {
+        return value == null ? null : value.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
+    }
+
+    private static String validateName(String value) {
+        Objects.requireNonNull(value);
+        if (value.isBlank()) {
+            throw new IllegalArgumentException("Dog search query cannot be blank");
+        }
+        return value;
+    }
+
+    private static int validateId(int value) {
+        if (value < 0) {
+            throw new IllegalArgumentException("Dog search ID cannot be negative");
+        }
+        return value;
     }
 
     @Override
     public boolean equals(Object other) {
-        return other == this || other instanceof DogSearchPredicate otherPredicate
-                && Objects.equals(nameQuery, otherPredicate.nameQuery)
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof DogSearchPredicate otherPredicate)) {
+            return false;
+        }
+        return Objects.equals(nameQuery, otherPredicate.nameQuery)
+                && Objects.equals(breedQuery, otherPredicate.breedQuery)
+                && Objects.equals(sizeQuery, otherPredicate.sizeQuery)
                 && Objects.equals(id, otherPredicate.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nameQuery, id);
+        return Objects.hash(nameQuery, breedQuery, sizeQuery, id);
     }
 }

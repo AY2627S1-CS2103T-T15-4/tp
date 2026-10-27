@@ -1,53 +1,50 @@
 package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static seedu.address.testutil.Assert.assertThrows;
+
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.customer.CustomerSearchPredicate;
 
 public class SearchCustomerCommandParserTest {
-    private final AddressBookParser parser = new AddressBookParser();
+    private final SearchCustomerCommandParser parser = new SearchCustomerCommandParser();
 
     @Test
-    public void parse_validInput_createsExpectedCommand() throws Exception {
-        assertEquals(new SearchCustomerCommand(new CustomerSearchPredicate("Little Bud")),
-                parser.parseCommand("  search\tcustomer\t n/ Little Bud  "));
-        assertEquals(new SearchCustomerCommand(new CustomerSearchPredicate(0)),
-                parser.parseCommand("search customer id/0"));
-        assertEquals(new SearchCustomerCommand(new CustomerSearchPredicate(12)),
-                parser.parseCommand("search customer id/0012"));
-        assertEquals(new SearchCustomerCommand(new CustomerSearchPredicate(Integer.MAX_VALUE)),
-                parser.parseCommand("search customer id/2147483647"));
+    public void parse_validFields_normalizesValues() throws Exception {
+        SearchCustomerCommand expected = new SearchCustomerCommand(
+                "Anna Lee", "91234567", "anna@example.com", "98765432", Set.of(12, 34), 7);
+
+        assertEquals(expected, parser.parse(
+                " n/Anna   Lee p/91234567 e/ANNA@example.com d/12 34 bc/98765432 i/7 "));
+        assertEquals(new SearchCustomerCommand(null, null, null, null, null, 21), parser.parse("i/21"));
     }
 
     @Test
-    public void parse_invalidInput_throwsParseException() {
-        String[] invalidInputs = {"search customer", "search customer Buddy",
-            "search customer n/", "search customer n/   ", "search customer id/", "search customer id/-1",
-            "search customer id/+1",
-            "search customer id/1.5", "search customer id/2147483648", "search customer id/one",
-            "search customer id/1 2",
-            "search customer n/Buddy id/0", "search customer id/0 n/Buddy", "search customer n/Buddy n/Max",
-            "search customer id/0 id/1", "search customer b/Poodle", "search customer n/Buddy b/Poodle",
-            "search customer extra n/Buddy"};
-        for (String input : invalidInputs) {
-            ParseException exception = assertThrows(ParseException.class, () -> parser.parseCommand(input), input);
-            assertEquals(String.format(seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT,
-                    SearchCustomerCommand.MESSAGE_USAGE), exception.getMessage());
+    public void parse_invalidFormatOrDuplicateFields_throwsParseException() {
+        String[] invalidInputs = {"", " ", "customer", "x/value", "N/Anna", "n/Anna n/Beth",
+            "n/Anna x/value", "n/Anna p/1234567", "n/Anna p/91234567 p/92345678", "n/Anna e/a@b.com e/c@d.com",
+            "n/Anna bc/91234567 bc/92345678", "n/Anna d/12 d/13", "i/12 i/13", "extra n/Anna", "n/"};
+
+        for (String invalidInput : invalidInputs) {
+            assertThrows(ParseException.class, () -> parser.parse(invalidInput));
         }
     }
 
     @Test
-    public void parse_blankNameValue_rejectedByCustomerParser() {
-        ParseException exception = assertThrows(ParseException.class, () ->
-                new SearchCustomerCommandParser().parse("customer n/   "));
-        assertThrows(ParseException.class, () ->
-                new SearchCustomerCommandParser().parse("customer n/\u2003"));
-        assertEquals(String.format(seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT,
-                SearchCustomerCommand.MESSAGE_USAGE), exception.getMessage());
+    public void parse_invalidPhoneBackupOrId_throwsParseException() {
+        for (String input : new String[]{"p/9123456", "bc/912345678", "d/-1", "d/abc", "i/-1", "i/abc"}) {
+            assertThrows(ParseException.class, () -> parser.parse(input));
+        }
+    }
+
+    @Test
+    public void parse_invalidDogOrCustomerId_includesSearchingErrorPrefix() {
+        String expectedMessage = "Error in searching customers:\n"
+                + "Info is in the wrong format. Input in the correct format";
+        assertThrows(ParseException.class, expectedMessage, () -> parser.parse("i/not-a-number"));
     }
 }

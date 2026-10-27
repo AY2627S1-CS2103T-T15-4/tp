@@ -20,6 +20,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
+import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ListDogCommand;
 import seedu.address.logic.commands.SearchCommand;
@@ -207,19 +208,19 @@ public class RecordListPanelTest {
             ModelManager model = new ModelManager(book, new UserPrefs());
             var list = listView(new RecordListPanel(model.getFilteredCustomerList(), model.getFilteredDogList()));
 
-            new SearchDogCommand(new DogSearchPredicate("bud")).execute(model);
+            executeCommand(new SearchDogCommand(new DogSearchPredicate("bud")), model);
             assertEquals(1, list.getItems().size());
             assertEquals("Buddy", label(list.getItems().get(0).get(), "name"));
             assertEquals("42. ", label(list.getItems().get(0).get(), "id"));
 
-            new SearchDogCommand(new DogSearchPredicate("missing")).execute(model);
+            executeCommand(new SearchDogCommand(new DogSearchPredicate("missing")), model);
             assertTrue(list.getItems().isEmpty());
             new ListDogCommand().execute(model);
             assertEquals(2, list.getItems().size());
             assertEquals("Buddy", label(list.getItems().get(0).get(), "name"));
             assertEquals("Max", label(list.getItems().get(1).get(), "name"));
 
-            new SearchDogCommand(new DogSearchPredicate(43)).execute(model);
+            executeCommand(new SearchDogCommand(new DogSearchPredicate(43)), model);
             assertEquals(1, list.getItems().size());
             assertEquals("Max", label(list.getItems().get(0).get(), "name"));
             assertEquals(book, model.getAddressBook());
@@ -236,14 +237,14 @@ public class RecordListPanelTest {
             ModelManager model = new ModelManager(book, new UserPrefs());
             var list = listView(new RecordListPanel(model.getFilteredCustomerList(), model.getFilteredDogList()));
 
-            new SearchDogCommand(new DogSearchPredicate("bud")).execute(model);
-            new SearchCustomerCommand(new CustomerSearchPredicate("alex")).execute(model);
+            executeCommand(new SearchDogCommand(new DogSearchPredicate("bud")), model);
+            executeCommand(new SearchCustomerCommand(new CustomerSearchPredicate("alex")), model);
             assertEquals(1, list.getItems().size());
             assertEquals("Alex", label(list.getItems().get(0).get(), "name"));
-            new SearchCustomerCommand(new CustomerSearchPredicate(42)).execute(model);
+            executeCommand(new SearchCustomerCommand(new CustomerSearchPredicate(42)), model);
             assertEquals(1, list.getItems().size());
             assertEquals("Beth", label(list.getItems().get(0).get(), "name"));
-            new SearchCustomerCommand(new CustomerSearchPredicate("missing")).execute(model);
+            executeCommand(new SearchCustomerCommand(new CustomerSearchPredicate("missing")), model);
             assertTrue(list.getItems().isEmpty());
             new ListCommand().execute(model);
             assertEquals(2, list.getItems().size());
@@ -267,12 +268,12 @@ public class RecordListPanelTest {
             assertEquals(2, list.getItems().size());
             assertEquals("Buddy Tan", label(list.getItems().get(0).get(), "name"));
             assertEquals("Buddy", label(list.getItems().get(1).get(), "name"));
-            new SearchCustomerCommand(new CustomerSearchPredicate("bud")).execute(model);
+            executeCommand(new SearchCustomerCommand(new CustomerSearchPredicate("bud")), model);
             assertEquals(1, list.getItems().size());
             assertEquals("Buddy Tan", label(list.getItems().get(0).get(), "name"));
             new SearchCommand(42).execute(model);
             assertEquals(2, list.getItems().size());
-            new SearchDogCommand(new DogSearchPredicate(42)).execute(model);
+            executeCommand(new SearchDogCommand(new DogSearchPredicate(42)), model);
             assertEquals(1, list.getItems().size());
             assertEquals("Buddy", label(list.getItems().get(0).get(), "name"));
             new SearchCommand("missing").execute(model);
@@ -283,6 +284,14 @@ public class RecordListPanelTest {
 
     private static String label(Region card, String id) {
         return ((Label) card.lookup("#" + id)).getText();
+    }
+
+    private static void executeCommand(Command command, ModelManager model) {
+        try {
+            command.execute(model);
+        } catch (CommandException exception) {
+            throw new AssertionError(exception);
+        }
     }
 
     @SuppressWarnings("unchecked")

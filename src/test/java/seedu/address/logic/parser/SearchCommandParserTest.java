@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.SearchCommand;
+import seedu.address.logic.commands.SearchCustomerCommand;
+import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
 public class SearchCommandParserTest {
@@ -21,6 +23,10 @@ public class SearchCommandParserTest {
                 parser.parseCommand("search id/0012"));
         assertEquals(new SearchCommand(Integer.MAX_VALUE),
                 parser.parseCommand("search id/2147483647"));
+        assertEquals(new SearchDogCommand("Buddy", null, null, null),
+                parser.parseCommand("search dog n/Buddy"));
+        assertEquals(new SearchCustomerCommand("Alex", null, null, null, null),
+                parser.parseCommand("search customer n/Alex"));
     }
 
     @Test

@@ -166,12 +166,6 @@ public class AddCustomerCommandTest {
         @Override public void updateFilteredCustomerList(Predicate<Customer> predicate) {
             throw unused();
         }
-        @Override public void selectDog(int dogId) {
-            throw unused();
-        }
-        @Override public void selectCustomer(int customerId) {
-            throw unused();
-        }
         @Override public Dog addDog(Dog dog) {
             throw unused();
         }
@@ -179,6 +173,12 @@ public class AddCustomerCommandTest {
             throw unused();
         }
         @Override public void deleteDog(Dog dog) {
+            throw unused();
+        }
+        @Override public void selectDog(int dogId) {
+            throw unused();
+        }
+        @Override public void selectCustomer(int customerId) {
             throw unused();
         }
         @Override public void setDog(Dog target, Dog editedDog) {

@@ -147,7 +147,7 @@ public class LogicManagerHistoryTest {
 
     @Test
     public void execute_restoredDependentFilters_showOnlyRelatedRecords() throws Exception {
-        for (String filter : List.of("filterd n/Buddy", "filterc n/Alice")) {
+        for (String filter : List.of("searchd n/Buddy", "searchc n/Alice")) {
             Harness afterReset = linkedHarness();
             afterReset.logic.execute(filter);
             afterReset.assertFilteredPair();

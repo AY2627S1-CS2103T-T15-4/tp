@@ -54,12 +54,12 @@ public class ListCommandTest {
         assertEquals(List.of(LILY), model.getFilteredCustomerList());
         assertEquals(List.of(), model.getFilteredDogList());
 
-        assertEquals("1 dogs found.",
+        assertEquals("Successfully searched dogs by ",
                 new SearchDogCommand(new DogSearchPredicate("Cookie")).execute(model).getFeedbackToUser());
         assertEquals(List.of(cookie), model.getFilteredDogList());
         assertEquals(List.of(), model.getFilteredCustomerList());
 
-        assertEquals("1 customers found.",
+        assertEquals("Successfully searched customers by ",
                 new SearchCustomerCommand(new CustomerSearchPredicate("Lily")).execute(model).getFeedbackToUser());
         assertEquals(List.of(LILY), model.getFilteredCustomerList());
         assertEquals(List.of(), model.getFilteredDogList());
