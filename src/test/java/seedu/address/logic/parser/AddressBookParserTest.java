@@ -39,6 +39,14 @@ public class AddressBookParserTest {
     private final AddressBookParser parser = new AddressBookParser();
 
     @Test
+    public void parseCommand_retiredSearch_throwsUnknownCommand() {
+        for (String input : new String[] {"search", "search n/Alex", "search id/0",
+            "search dog n/Buddy", "search customer n/Alex", "  search id/42  "}) {
+            assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
+        }
+    }
+
+    @Test
     public void parseCommand_summary_acceptsSurroundingWhitespace() throws Exception {
         assertEquals(new SummaryCommand(), parser.parseCommand("summary"));
         assertEquals(new SummaryCommand(), parser.parseCommand(" \t summary \t "));

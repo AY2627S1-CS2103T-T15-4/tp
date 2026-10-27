@@ -344,20 +344,6 @@ Example: `searchc n/Anna d/12 34`
 * If no customers match, the customer panel is empty.
 * The filter remains active while customers or their linked dogs are added, edited, deleted, linked, or unlinked.
 
-### Searching customers and dogs together: `search`
-
-Format: `search n/NAME_QUERY` or `search id/ID`
-
-* Searches all customers and dogs using the same name and ID rules as category-specific searches below.
-* Use exactly one field. Names match a case-insensitive substring; IDs must be integers from
-  `0` to `2147483647`. Blank, repeated, combined and unknown fields are rejected.
-* Matching customer cards appear first, followed by matching dog cards. The result bar shows both counts.
-* Customer and dog IDs are independent. `search id/0` can show both a customer and a dog with ID 0.
-* Each search replaces both displayed filters without changing stored records. No matches clears the panel.
-* Use `searchc ...` or `searchd ...` to narrow the next search to a category.
-
-Examples: `search n/alex`, `search id/42`.
-
 ### Deleting a dog: `delete dog`
 
 Deletes a dog using its persistent dog ID and removes all of that dog's activity enrolments, including past
@@ -477,7 +463,6 @@ Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Clear**  | `clear`
 **Daycare summary** | `summary`<br>Overall dogs/customers, total/upcoming schedules, and today's activities/distinct enrolled dogs.
-**Search all** | `search n/NAME_QUERY` or `search id/ID`<br> e.g., `search n/alex`
 **Link dogs** | `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`<br> e.g., `link c/1 d/2 d/3`
 **Unlink dogs** | `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`<br> e.g., `unlink d/2 d/3` or `unlink c/1`
 **Search customers** | `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`<br> e.g., `searchc n/alex i/42`

@@ -130,10 +130,10 @@ public class LogicManagerTest {
         Dog max = model.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("small")));
         ObservableList<Dog> displayedDogs = logic.getFilteredDogList();
 
-        assertEquals("Successfully searched dogs by name: bud", logic.execute("search dog n/bud").getFeedbackToUser());
+        assertEquals("Successfully searched dogs by name: bud", logic.execute("searchd n/bud").getFeedbackToUser());
         assertEquals(List.of(buddy), displayedDogs);
         assertThrows(UnsupportedOperationException.class, () -> displayedDogs.remove(0));
-        assertThrows(ParseException.class, () -> logic.execute("search dog id/-1"));
+        assertThrows(ParseException.class, () -> logic.execute("searchd i/-1"));
         assertEquals(List.of(buddy), displayedDogs);
 
         logic.execute("list dog");
@@ -219,6 +219,29 @@ public class LogicManagerTest {
             assertHistoryStorageFailure(failure, true);
             assertHistoryStorageFailure(failure, false);
         }
+    }
+
+    @Test
+    public void execute_retiredSearch_preservesRecordsFiltersAndRedoHistory() throws Exception {
+        logic.execute("adddog n/Buddy b/Poodle s/small");
+        logic.execute("undo");
+        AddressBook before = new AddressBook(model.getAddressBook());
+        for (String input : List.of("search n/Buddy", "search id/1", "search dog n/Buddy",
+                "search customer n/Alex")) {
+            assertParseException(input, MESSAGE_UNKNOWN_COMMAND);
+            assertEquals(before, model.getAddressBook());
+            assertEquals(List.of(), logic.getFilteredDogList());
+        }
+        logic.execute("redo");
+        Dog buddy = logic.getDogList().get(0);
+        logic.execute("searchd i/" + buddy.getId());
+        assertEquals(List.of(buddy), logic.getFilteredDogList());
+        logic.execute("resetdisplay");
+        logic.execute("undo");
+        assertEquals(List.of(buddy), logic.getDogList());
+        assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
+        logic.execute("redo");
+        assertEquals(List.of(buddy), logic.getDogList());
     }
 
     private void assertHistoryStorageFailure(IOException failure, boolean undo) throws Exception {

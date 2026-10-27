@@ -1,3 +1,5 @@
+//@@author Kenneth-Chia-unused
+// Retired global search in v1.5 in favour of field-based searchc/searchd/searcha.
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
