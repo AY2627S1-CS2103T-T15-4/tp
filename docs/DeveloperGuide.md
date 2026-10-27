@@ -521,41 +521,15 @@ misleading error logs for routine input mistakes.
 `ActivityStorageTest` cover parser failures, unchanged state, observable access, identity boundaries,
 all recurrence modes, old files and command-to-disk round trips using temporary files.
 
-### Dog and customer search
+### Search commands
 
-Without a category, `SearchCommandParser` accepts one name or ID field and creates a `SearchCommand`.
-It reuses `CustomerSearchPredicate` and `DogSearchPredicate` to update both observable lists.
-Customer and dog IDs are independent, so an ID search can match both categories.
-The existing `RecordListPanel` renders customers first, then dogs; feedback reports both counts.
+The active category searches are `searcha`, `searchc`, and `searchd`. Each parser accepts its documented field prefixes and constructs the corresponding field-based command. The commands replace the relevant filtered observable list and keep related dogs, customers, and activities consistent.
 
-`AddressBookParser` routes `search` to `SearchCommandParser`, which dispatches explicit categories.
-The three search parsers delegate shared name/ID validation to `SearchFieldParser` while retaining
-their own category grammar, command creation and usage messages.
-For dog searches, `SearchDogCommandParser` accepts
-`searchd n/NAME_QUERY` or `searchd i/ID`. It rejects empty values, additional prefixes, unsupported
-categories and invalid IDs before command execution. IDs are nonnegative Java integers;
-they are not AB3's one-based list indices.
+`SearchDogCommandParser` accepts `n/`, `b/`, `s/`, and `i/`; `SearchCustomerCommandParser` accepts `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/`; and `SearchActivityCommandParser` accepts `n/`, `d/`, `t/`, and `r/`. Unsupported prefixes, duplicate fields, invalid IDs, invalid sizes, and malformed values are rejected before execution.
 
-`DogSearchPredicate` delegates name matching to `StringUtil.containsSubstringIgnoreCase`
-and compares IDs directly with `Dog.getId()`. A name query is one literal substring,
-including internal spaces. `SearchDogCommand` updates the model's filtered dog list and hides
-customer cards using the customer filter. `Logic.getFilteredDogList()` supplies the observable
-list to `RecordListPanel`, so matching dogs appear as cards. `CommandResult` reports the searched
-fields. Each new predicate applies to all stored dogs, without changing stored records.
-`list dog` resets the dog filter so all dogs can be displayed again after a search.
+The global `search` command remains active for one name or ID field across customers and dogs. Its category compatibility routes delegate to the field parsers. The retired category-search implementations replaced by `searchc` and `searchd` are preserved under `unused/@Kenneth-Chia/` for authorship reference.
 
-`SearchDogCommandParserTest` covers command routing, whitespace, prefix misuse and ID boundaries.
-`DogSearchPredicateTest` covers field selection and matching. `SearchDogCommandTest` exercises
-the real model, including duplicate names, consecutive searches and unchanged stored records.
-`RecordListPanelTest` checks that search and list commands update the displayed cards.
-
-Customer search follows the same command/parser/predicate structure through
-`SearchCustomerCommandParser`, `SearchCustomerCommand` and `CustomerSearchPredicate`.
-`SearchCommandParser` dispatches the `customer` category to its parser and retains dog parsing.
-The command updates the existing customer filter and hides dogs using the dog filter.
-Customer names use `StringUtil.containsSubstringIgnoreCase`; IDs use `Customer.getId()`.
-Search does not depend on an add-customer command: any customers loaded into the model can be searched.
-Tests populate the model directly and verify filtering, persistent IDs, unchanged records and card updates.
+Search command tests cover parser validation, field combinations, related-record updates, persistent IDs, and unchanged stored records.
 
 --------------------------------------------------------------------------------------------------------------------
 

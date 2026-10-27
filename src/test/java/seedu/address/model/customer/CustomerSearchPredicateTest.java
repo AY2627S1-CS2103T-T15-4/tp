@@ -43,6 +43,19 @@ public class CustomerSearchPredicateTest {
     }
 
     @Test
+    public void test_dogMatchingRequiresOwnership() {
+        Dog sameIdWrongOwner = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"))
+                .withOwner(99);
+        Dog differentIdOwnedByCustomer = new Dog(8, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"))
+                .withOwner(42);
+
+        assertFalse(new CustomerSearchPredicate(null, null, null, null, Set.of(7),
+                List.of(sameIdWrongOwner)).test(customer));
+        assertFalse(new CustomerSearchPredicate(null, null, null, null, Set.of(7),
+                List.of(differentIdOwnedByCustomer)).test(customer));
+    }
+
+    @Test
     public void constructor_invalidQuery_throwsException() {
         assertThrows(NullPointerException.class, () -> new CustomerSearchPredicate(null));
         assertThrows(IllegalArgumentException.class, () -> new CustomerSearchPredicate("  "));

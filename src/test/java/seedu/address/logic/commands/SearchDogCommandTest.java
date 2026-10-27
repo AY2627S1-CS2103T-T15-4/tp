@@ -20,6 +20,7 @@ import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
+import seedu.address.model.dog.DogSearchPredicate;
 import seedu.address.model.dog.Size;
 
 public class SearchDogCommandTest {
@@ -36,6 +37,16 @@ public class SearchDogCommandTest {
         assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
         assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
         assertTrue(model.getFilteredActivityList().isEmpty());
+    }
+
+    @Test
+    public void execute_preparedPredicate_filtersDogsAndOwners() throws Exception {
+        ModelManager model = modelWithDogs();
+
+        new SearchDogCommand(new DogSearchPredicate("waffle")).execute(model);
+
+        assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
+        assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
     }
 
     @Test
