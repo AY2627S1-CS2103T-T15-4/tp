@@ -10,9 +10,9 @@ import java.util.regex.Pattern;
 import seedu.address.logic.commands.UnlinkCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
-/** Parses either one customer prefix or one or more dog prefixes. */
+/** Parses either one customer field or one space-separated dog ID field. */
 public class UnlinkCommandParser implements Parser<UnlinkCommand> {
-    private static final Pattern UNLINK_FORMAT = Pattern.compile("(?:c/[0-9]+|d/[0-9]+(?:\\s+d/[0-9]+)*)");
+    private static final Pattern UNLINK_FORMAT = Pattern.compile("(?:c/[0-9]+|d/[0-9]+(?:\\s+[0-9]+)*)");
 
     @Override
     public UnlinkCommand parse(String args) throws ParseException {
@@ -27,7 +27,7 @@ public class UnlinkCommandParser implements Parser<UnlinkCommand> {
             }
             List<Integer> dogIds = new ArrayList<>();
             for (int i = 0; i < fields.length; i++) {
-                dogIds.add(Integer.parseInt(fields[i].substring(2)));
+                dogIds.add(Integer.parseInt(i == 0 ? fields[i].substring(2) : fields[i]));
             }
             if (new HashSet<>(dogIds).size() != dogIds.size()) {
                 throw invalidFormat();

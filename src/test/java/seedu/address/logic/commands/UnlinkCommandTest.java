@@ -47,13 +47,13 @@ public class UnlinkCommandTest {
         var beforeCustomers = List.copyOf(model.getCustomerList());
         model.updateFilteredCustomerList(customer -> false);
         model.updateFilteredDogList(dog -> dog.getId() == 43);
-        assertEquals("Unlinked dog IDs [42, 43] from their owners.", execute("unlink d/42 d/43"));
+        assertEquals("Unlinked dog IDs [42, 43] from their owners.", execute("unlink d/42 43"));
         assertEquals(List.of(beforeDogs.get(0).withoutOwner(), beforeDogs.get(1).withoutOwner(),
                 beforeDogs.get(2), beforeDogs.get(3)), model.getDogList());
         assertEquals(beforeCustomers, model.getCustomerList());
         assertTrue(model.getFilteredCustomerList().isEmpty());
         assertEquals(List.of(model.getDogList().get(1)), model.getFilteredDogList());
-        execute("link c/8 d/42 d/43");
+        execute("link c/8 d/42 43");
         assertEquals(Optional.of(8), model.getDogList().get(0).getOwnerId());
         assertEquals(Optional.of(8), model.getDogList().get(1).getOwnerId());
     }
@@ -96,9 +96,9 @@ public class UnlinkCommandTest {
     @Test
     public void execute_missingOrUnownedDog_rejectsEntireBatch() {
         assertRejected("unlink c/99", "Customer ID 99 does not exist.");
-        assertRejected("unlink d/42 d/99", "Dog ID 99 does not exist.");
-        assertRejected("unlink d/99 d/42", "Dog ID 99 does not exist.");
-        assertRejected("unlink d/42 d/45", "Dog ID 45 has no owner.");
+        assertRejected("unlink d/42 99", "Dog ID 99 does not exist.");
+        assertRejected("unlink d/99 42", "Dog ID 99 does not exist.");
+        assertRejected("unlink d/42 45", "Dog ID 45 has no owner.");
     }
 
     @Test
@@ -129,7 +129,7 @@ public class UnlinkCommandTest {
 
     @Test
     public void execute_dogsWithDifferentOwners_unlinksBoth() throws Exception {
-        execute("unlink d/42 d/44");
+        execute("unlink d/42 44");
         assertTrue(model.getDogList().get(0).getOwnerId().isEmpty());
         assertTrue(model.getDogList().get(2).getOwnerId().isEmpty());
         assertEquals(Optional.of(7), model.getDogList().get(1).getOwnerId());

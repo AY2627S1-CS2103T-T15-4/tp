@@ -34,7 +34,8 @@ relationships to refer to a record reliably even when the visible list changes.
 
 ### Customer–dog ownership
 
-`LinkCommandParser` accepts one customer ID followed by one or more distinct dog IDs.
+`LinkCommandParser` accepts `c/CUSTOMER_ID d/DOG_ID [DOG_ID]...`: one customer field followed by
+one dog field containing distinct, whitespace-separated IDs. Repeated `d/` prefixes are rejected.
 `LinkCommand` delegates the batch to `Model.linkDogs`; `ModelManager` forwards to `AddressBook`.
 The address book looks up persistent IDs in the complete lists and validates every endpoint and ownership
 constraint before publishing one replacement dog list. A rejected batch throws `LinkException` without
@@ -48,7 +49,8 @@ customers do not store a duplicate dog-ID list. A dog may be unlinked or have on
 may own any number of dogs. Linking an already-owned dog is rejected, including links to the same owner.
 Dog equality includes ownership, while identity remains the persistent dog ID.
 
-`UnlinkCommandParser` accepts either one customer ID or one or more distinct dog IDs; mixed prefixes
+`UnlinkCommandParser` accepts either `c/CUSTOMER_ID` or `d/DOG_ID [DOG_ID]...` with distinct,
+whitespace-separated dog IDs in one field; repeated dog prefixes and mixed prefixes
 are rejected. `UnlinkCommand` delegates to `Model.unlinkCustomerDogs` or `Model.unlinkDogs` and translates
 `UnlinkException` into command feedback. `AddressBook` validates every selected dog exists and has an owner
 before publishing one replacement list of unowned copies. Dogs may belong to different customers.
