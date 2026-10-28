@@ -23,6 +23,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
@@ -63,6 +64,32 @@ public class ListPanelsTest {
             assertEquals("Date: 2028-02-29", label(card, "date"));
             assertEquals("Time: 09:00 - 10:00", label(card, "time"));
             assertEquals("Recurrence: WEEKLY", label(card, "recurrence"));
+        });
+    }
+
+    @Test
+    public void activityCard_displaysEnrolmentSummaryWhenProvided() throws Exception {
+        runOnFxThread(() -> {
+            Region card = new ActivityCard(ACTIVITY, "2. Buddy: 2028-03-01").getRoot();
+            assertEquals("2. Buddy: 2028-03-01", label(card, "enrolments"));
+            assertEquals("Schedule starts: 2028-02-29", label(card, "date"));
+        });
+    }
+
+    @Test
+    public void activityListPanel_refreshesEnrolmentSummaryWhenRecordsChange() throws Exception {
+        runOnFxThread(() -> {
+            ObservableList<Activity> activities = FXCollections.observableArrayList(ACTIVITY);
+            ObservableList<Enrolment> enrolments = FXCollections.observableArrayList();
+            ActivityListPanel panel = new ActivityListPanel(activities, enrolments,
+                    activity -> enrolments.isEmpty() ? "" : "2. Buddy: 2028-03-01");
+            ListView<Supplier<Region>> list = listView(panel);
+
+            assertEquals("Date: 2028-02-29", label(list.getItems().get(0).get(), "date"));
+            enrolments.add(new Enrolment(ACTIVITY.getId(), DOG.getId(), LocalDate.of(2028, 3, 1)));
+            assertEquals("2. Buddy: 2028-03-01", label(list.getItems().get(0).get(), "enrolments"));
+            enrolments.clear();
+            assertEquals("", label(list.getItems().get(0).get(), "enrolments"));
         });
     }
 

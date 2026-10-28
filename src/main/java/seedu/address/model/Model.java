@@ -1,5 +1,7 @@
 package seedu.address.model;
 
+import static java.util.Objects.requireNonNull;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -28,7 +30,7 @@ public interface Model {
     /** Captures the complete model state needed to restore a previous command. */
     record ModelState(ReadOnlyAddressBook addressBook, Predicate<Customer> customerPredicate,
             Predicate<Dog> dogPredicate, Predicate<Activity> activityPredicate,
-            Integer selectedDogId, Integer selectedCustomerId) {
+            Integer selectedDogId, Integer selectedCustomerId, Predicate<Dog> enrolmentDogPredicate) {
     }
 
     /** Returns a snapshot of the current data and display state. */
@@ -144,6 +146,17 @@ public interface Model {
 
     /** Updates the activity filter; the predicate must not be null. */
     void updateFilteredActivityList(Predicate<Activity> predicate);
+
+    /** Sets the dog context whose enrolment dates should be shown on activity cards. */
+    default void setActivityEnrolmentDogPredicate(Predicate<Dog> predicate) {
+        requireNonNull(predicate);
+    }
+
+    /** Returns the enrolment-date summary for an activity in the current search context. */
+    default String getActivityEnrolmentSummary(Activity activity) {
+        requireNonNull(activity);
+        return "";
+    }
 
     /** Shows activities with an occurrence on or after the given date. */
     void showActivitiesOnOrAfter(LocalDate date);

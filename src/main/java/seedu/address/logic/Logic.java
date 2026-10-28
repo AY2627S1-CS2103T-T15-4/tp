@@ -6,6 +6,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 
@@ -36,6 +37,12 @@ public interface Logic {
 
     /** Returns an unmodifiable observable view of filtered activities. */
     ObservableList<Activity> getFilteredActivityList();
+
+    /** Returns all enrolment records for refreshing activity-card details. */
+    ObservableList<Enrolment> getEnrolmentList();
+
+    /** Returns the current search-specific enrolment summary for an activity. */
+    String getActivityEnrolmentSummary(Activity activity);
 
     /**
      * Returns the user prefs' GUI settings.

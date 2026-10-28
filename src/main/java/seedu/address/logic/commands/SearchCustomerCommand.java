@@ -80,6 +80,18 @@ public class SearchCustomerCommand extends Command {
                 .map(ownerId -> model.getFilteredCustomerList().stream()
                         .anyMatch(customer -> customer.getId() == ownerId))
                 .orElse(false));
+        model.updateFilteredActivityList(activity -> model.getAddressBook().getEnrolmentList().stream()
+                .filter(enrolment -> enrolment.getActivityId() == activity.getId())
+                .anyMatch(enrolment -> model.getDogList().stream()
+                        .filter(dog -> dog.getId() == enrolment.getDogId())
+                        .anyMatch(dog -> dog.getOwnerId()
+                                .map(ownerId -> model.getFilteredCustomerList().stream()
+                                        .anyMatch(customer -> customer.getId() == ownerId))
+                                .orElse(false))));
+        model.setActivityEnrolmentDogPredicate(dog -> dog.getOwnerId()
+                .map(ownerId -> model.getFilteredCustomerList().stream()
+                        .anyMatch(customer -> customer.getId() == ownerId))
+                .orElse(false));
         return new CommandResult(createSuccessMessage());
     }
 
