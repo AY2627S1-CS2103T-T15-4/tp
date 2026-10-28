@@ -46,9 +46,7 @@ public interface Logic {
     String getActivityEnrolmentSummary(Activity activity);
 
     /** Returns an observable signal for changes to the activity-card enrolment context. */
-    default Observable getActivityEnrolmentContextChanges() {
-        return new javafx.beans.property.SimpleIntegerProperty();
-    }
+    Observable getActivityEnrolmentContextChanges();
 
     /**
      * Returns the user prefs' GUI settings.

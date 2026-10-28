@@ -1,14 +1,11 @@
 package seedu.address.model;
 
-import static java.util.Objects.requireNonNull;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.function.Predicate;
 
 import javafx.beans.Observable;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.activity.Activity;
@@ -150,20 +147,13 @@ public interface Model {
     void updateFilteredActivityList(Predicate<Activity> predicate);
 
     /** Sets the dog context whose enrolment dates should be shown on activity cards. */
-    default void setActivityEnrolmentDogPredicate(Predicate<Dog> predicate) {
-        requireNonNull(predicate);
-    }
+    void setActivityEnrolmentDogPredicate(Predicate<Dog> predicate);
 
     /** Returns the enrolment-date summary for an activity in the current search context. */
-    default String getActivityEnrolmentSummary(Activity activity) {
-        requireNonNull(activity);
-        return "";
-    }
+    String getActivityEnrolmentSummary(Activity activity);
 
     /** Returns an observable signal for changes to the activity-card enrolment context. */
-    default Observable getActivityEnrolmentContextChanges() {
-        return new SimpleIntegerProperty();
-    }
+    Observable getActivityEnrolmentContextChanges();
 
     /** Shows activities with an occurrence on or after the given date. */
     void showActivitiesOnOrAfter(LocalDate date);

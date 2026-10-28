@@ -6,11 +6,15 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.CustomerSearchPredicate;
+import seedu.address.model.dog.Dog;
 
 /** Searches customers by name, contact details, owned dogs, and customer ID. */
 public class SearchCustomerCommand extends Command {
@@ -74,25 +78,27 @@ public class SearchCustomerCommand extends Command {
         CustomerSearchPredicate customerPredicate = predicate == null
                 ? new CustomerSearchPredicate(name, phone, email, backupContact, dogIds, model.getDogList())
                 : predicate;
-        model.updateFilteredCustomerList(customer -> (customerId == null || customer.getId() == customerId)
-                && customerPredicate.test(customer));
-        model.updateFilteredDogList(dog -> dog.getOwnerId()
-                .map(ownerId -> model.getFilteredCustomerList().stream()
-                        .anyMatch(customer -> customer.getId() == ownerId))
-                .orElse(false));
-        model.updateFilteredActivityList(activity -> model.getAddressBook().getEnrolmentList().stream()
+        Predicate<Customer> matchingCustomer = customer -> customerPredicate.test(customer)
+                && (customerId == null || customer.getId() == customerId);
+        model.updateFilteredCustomerList(matchingCustomer);
+        model.updateFilteredDogList(dog -> ownsMatchingCustomer(model, dog, matchingCustomer));
+        model.updateFilteredActivityList(activity -> hasMatchingEnrolment(model, activity, matchingCustomer));
+        model.setActivityEnrolmentDogPredicate(dog -> ownsMatchingCustomer(model, dog, matchingCustomer));
+        return new CommandResult(createSuccessMessage());
+    }
+
+    private static boolean ownsMatchingCustomer(Model model, Dog dog, Predicate<Customer> matchingCustomer) {
+        return dog.getOwnerId().map(ownerId -> model.getCustomerList().stream()
+                .anyMatch(customer -> customer.getId() == ownerId && matchingCustomer.test(customer))).orElse(false);
+    }
+
+    private static boolean hasMatchingEnrolment(Model model, Activity activity,
+                                                Predicate<Customer> matchingCustomer) {
+        return model.getAddressBook().getEnrolmentList().stream()
                 .filter(enrolment -> enrolment.getActivityId() == activity.getId())
                 .anyMatch(enrolment -> model.getDogList().stream()
                         .filter(dog -> dog.getId() == enrolment.getDogId())
-                        .anyMatch(dog -> dog.getOwnerId()
-                                .map(ownerId -> model.getFilteredCustomerList().stream()
-                                        .anyMatch(customer -> customer.getId() == ownerId))
-                                .orElse(false))));
-        model.setActivityEnrolmentDogPredicate(dog -> dog.getOwnerId()
-                .map(ownerId -> model.getFilteredCustomerList().stream()
-                        .anyMatch(customer -> customer.getId() == ownerId))
-                .orElse(false));
-        return new CommandResult(createSuccessMessage());
+                        .anyMatch(dog -> ownsMatchingCustomer(model, dog, matchingCustomer)));
     }
 
     private String createSuccessMessage() {
