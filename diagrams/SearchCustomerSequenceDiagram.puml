@@ -22,7 +22,10 @@ Command -> Model : updateFilteredCustomerList(customer predicate)
 Model -> Book : read current customers and dogs
 Book --> Model : customer and ownership records
 Command -> Model : updateFilteredDogList(owners of matching customers)
-Model --> Command : refresh filtered views
+Command -> Model : updateFilteredActivityList(has enrolments for matching customers)
+Command -> Model : set matching-owner display context
+Model --> Command : refresh filtered views and enrolment summaries
+Model --> Logic : activity cards show each matching dog and sorted stored dates
 Command --> Logic : CommandResult("Successfully searched customers by ...")
 Logic --> User : display success message and views
 @enduml
