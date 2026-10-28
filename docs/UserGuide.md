@@ -328,6 +328,9 @@ Example: `searchd b/Golden Retriever s/Medium`
 * Invalid sizes display `Invalid dog size. Please input small/medium/large/giant only.`
 * The customer panel is also filtered to customers linked to the matching dogs.
 * The activity panel shows activities in which a matching dog is enrolled.
+  For each displayed activity, an `Enrolments` section lists every matching dog as
+  `[DOG_ID]. [DOG_NAME]: DATE, DATE, ...`. Dates include past, present, and future enrolments
+  and are sorted chronologically. The activity's normal date, time, and recurrence fields remain unchanged.
 * Unowned matching dogs remain visible, but the customer panel is empty.
 * The filter remains active while dogs or customers are added, edited, deleted, linked, or unlinked.
   Matching activities refresh when enrolments change.
@@ -361,6 +364,8 @@ Example: `searchc n/Anna d/12 34`
 * Unsupported field prefixes are rejected as invalid command formats.
 * If no customers match, the customer panel is empty.
 * The filter remains active while customers or their linked dogs are added, edited, deleted, linked, or unlinked.
+  The activity panel shows only activities with enrolments belonging to the matching customers. Each activity
+  includes an `Enrolments` section containing only their dogs and those dogs' stored enrolment dates.
 
 ### Deleting a dog: `delete dog`
 

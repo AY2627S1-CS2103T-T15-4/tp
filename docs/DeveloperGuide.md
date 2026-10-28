@@ -399,6 +399,10 @@ so dog, customer, activity, and enrolment changes refresh the corresponding pane
 Each `Enrolment` stores its occurrence date. `searcha` with a date therefore shows only dogs enrolled on that
 specific occurrence, and shows their owners only when those dogs are visible. `searchd` shows a schedule when a
 matching dog is enrolled on a valid occurrence of that schedule.
+For `searchd`, the activity panel additionally receives a derived enrolment summary. It groups matching stored
+enrolments by dog ID, removes duplicate dates, sorts both dogs and dates deterministically, and displays the
+dates in ISO format. The summary includes past, present, and future dates; recurrence is never expanded into
+unstored dates. Other activity-card contexts retain the normal card format.
 Successful executions use the `Successfully searched dogs by` prefix and report only supplied fields. Invalid
 IDs and sizes use the `Error in searching dogs:` prefix with their specific validation messages.
 
@@ -418,6 +422,9 @@ derives ownership from each dog's stored `ownerId`; a customer
 matches a multi-dog filter only when they own every requested dog. After customer filtering, the command derives
 the matching customer IDs and applies a second predicate to the dog list, showing only dogs owned by those
 customers. Dog IDs in the success message are sorted numerically, and customer ID is reported only when supplied.
+It also filters the activity panel to activities with enrolments belonging to the matching customers and supplies
+the same per-dog enrolment summary used by `searchd`. An activity with no matching enrolment is omitted, so the
+activity panel cannot show unrelated cards or cards with misleading empty enrolment details.
 Invalid or nonexistent dog and customer IDs produce specific errors under the `Error in searching customers:` prefix.
 The parser stops field values at any field-like prefix, including unsupported prefixes, so inputs such as
 `searchc n/Anna x/value` are rejected rather than treating `x/value` as part of the name. `ModelManager`

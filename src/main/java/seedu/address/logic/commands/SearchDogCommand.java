@@ -59,6 +59,7 @@ public class SearchDogCommand extends Command {
                 .anyMatch(enrolment -> model.getDogList().stream()
                         .filter(dog -> dog.getId() == enrolment.getDogId())
                         .anyMatch(dogPredicate)));
+        model.setActivityEnrolmentDogPredicate(dogPredicate);
         return new CommandResult(createSuccessMessage());
     }
 

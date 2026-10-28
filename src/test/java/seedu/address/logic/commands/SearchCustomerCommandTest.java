@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
@@ -11,6 +13,9 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.ModelManager;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
@@ -114,6 +119,50 @@ public class SearchCustomerCommandTest {
 
         assertEquals(2, model.getFilteredCustomerList().size());
         assertEquals(1, model.getFilteredDogList().size());
+    }
+
+    @Test
+    public void execute_searchThenListAndEdit_keepsMatchingActivityVisible() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        Activity activity = model.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        model.enrolDogs(activity.getId(), activity.getStartDate(), List.of(1));
+
+        new SearchCustomerCommand("anna", null, null, null, null).execute(model);
+        new ListDogCommand().execute(model);
+        EditDogCommand.EditDogDescriptor descriptor = new EditDogCommand.EditDogDescriptor();
+        descriptor.setName(new DogName("Buddy Updated"));
+        new EditDogCommand(1, descriptor).execute(model);
+
+        assertEquals(List.of(activity), model.getFilteredActivityList());
+        assertTrue(model.getActivityEnrolmentSummary(activity).contains("Buddy Updated"));
+    }
+
+    @Test
+    public void execute_customerSearch_ignoresUnownedEnrolments() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        Dog unowned = model.addDog(new Dog(new DogName("Unowned"), new Breed("Poodle"), new Size("small")));
+        Activity activity = model.addActivity(new ActivityName("Unowned walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        model.enrolDogs(activity.getId(), activity.getStartDate(), List.of(unowned.getId()));
+
+        new SearchCustomerCommand("anna", null, null, null, null).execute(model);
+
+        assertTrue(model.getFilteredActivityList().isEmpty());
+        assertEquals("", model.getActivityEnrolmentSummary(activity));
+    }
+
+    @Test
+    public void execute_customerSearch_filtersActivitiesAndShowsMatchingDogDates() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        Activity activity = model.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.WEEKLY);
+        model.enrolDogs(activity.getId(), LocalDate.of(2028, 3, 7), List.of(1));
+
+        new SearchCustomerCommand("anna", null, null, null, null).execute(model);
+
+        assertEquals(List.of(activity), model.getFilteredActivityList());
+        assertEquals("Enrolments:\n1. Buddy: 2028-03-07", model.getActivityEnrolmentSummary(activity));
     }
 
     @Test

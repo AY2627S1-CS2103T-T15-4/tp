@@ -1,11 +1,13 @@
 package seedu.address.logic;
 
+import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 
@@ -36,6 +38,15 @@ public interface Logic {
 
     /** Returns an unmodifiable observable view of filtered activities. */
     ObservableList<Activity> getFilteredActivityList();
+
+    /** Returns all enrolment records for refreshing activity-card details. */
+    ObservableList<Enrolment> getEnrolmentList();
+
+    /** Returns the current search-specific enrolment summary for an activity. */
+    String getActivityEnrolmentSummary(Activity activity);
+
+    /** Returns an observable signal for changes to the activity-card enrolment context. */
+    Observable getActivityEnrolmentContextChanges();
 
     /**
      * Returns the user prefs' GUI settings.
