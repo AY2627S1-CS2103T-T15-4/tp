@@ -41,6 +41,17 @@ public class AddCustomerCommandTest {
     }
 
     @Test
+    public void modelDefaultEnrolmentDisplayMethods_validateArgumentsAndReturnEmptySummary() {
+        Model model = new ModelStubAcceptingCustomerAdded();
+        Activity activity = new Activity(1, new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+
+        model.setActivityEnrolmentDogPredicate(dog -> true);
+        assertEquals("", model.getActivityEnrolmentSummary(activity));
+        assertThrows(NullPointerException.class, () -> model.getActivityEnrolmentSummary(null));
+    }
+
+    @Test
     public void execute_customerAcceptedByModel_addsCustomerAndReportsSuccess() throws CommandException {
         ModelStubAcceptingCustomerAdded model = new ModelStubAcceptingCustomerAdded();
 

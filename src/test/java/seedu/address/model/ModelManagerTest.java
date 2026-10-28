@@ -166,6 +166,16 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void activityEnrolmentSummary_matchingDogWithoutEnrolment_returnsEmpty() {
+        Activity activity = modelManager.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        modelManager.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        modelManager.setActivityEnrolmentDogPredicate(dog -> true);
+
+        assertEquals("", modelManager.getActivityEnrolmentSummary(activity));
+    }
+
+    @Test
     public void activityEnrolmentSummary_replacedSearch_doesNotShowStaleDates() throws Exception {
         Activity activity = modelManager.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
