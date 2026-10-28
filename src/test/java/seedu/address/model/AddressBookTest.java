@@ -150,22 +150,22 @@ public class AddressBookTest {
     }
 
     @Test
-    public void setActivity_withEnrolmentForAnotherActivity_stillRejectsTarget() throws Exception {
+    public void setActivity_withEnrolmentOnlyForAnotherActivity_editsTargetAndPreservesEnrolment() throws Exception {
         Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
         addressBook.addDogFromStorage(dog);
         Activity target = addressBook.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         Activity other = addressBook.addActivity(new ActivityName("Training"), LocalDate.of(2028, 2, 29),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
-        addressBook.enrolDogs(target.getId(), target.getStartDate(), List.of(dog.getId()));
         addressBook.enrolDogs(other.getId(), other.getStartDate(), List.of(dog.getId()));
         Activity edited = target.withSchedule(target.getStartDate(), LocalTime.of(12, 0),
                 LocalTime.of(13, 0), target.getRecurrence());
 
-        assertThrows(IllegalArgumentException.class, () -> addressBook.setActivity(target, edited));
-        assertEquals(target, addressBook.getActivityList().get(0));
-        assertEquals(List.of(new Enrolment(target.getId(), dog.getId(), target.getStartDate()),
-                new Enrolment(other.getId(), dog.getId(), other.getStartDate())), addressBook.getEnrolmentList());
+        addressBook.setActivity(target, edited);
+
+        assertEquals(List.of(edited, other), addressBook.getActivityList());
+        assertEquals(List.of(new Enrolment(other.getId(), dog.getId(), other.getStartDate())),
+                addressBook.getEnrolmentList());
     }
 
     @Test

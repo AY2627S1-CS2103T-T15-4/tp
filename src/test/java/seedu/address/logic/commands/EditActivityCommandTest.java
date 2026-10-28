@@ -106,6 +106,21 @@ public class EditActivityCommandTest {
     }
 
     @Test
+    public void execute_onlyOtherActivityHasEnrolments_editsTargetAndPreservesEnrolments() throws Exception {
+        model.unenrolDogs(1, INITIAL_DATE, List.of(7));
+        EditActivityDescriptor descriptor = new EditActivityDescriptor();
+        descriptor.setRecurrence(Recurrence.DAILY);
+        descriptor.setDate(INITIAL_DATE.plusDays(1));
+
+        CommandResult result = new EditActivityCommand(1, descriptor).execute(model);
+
+        assertEquals("Edited activity ID 1.", result.getFeedbackToUser());
+        assertEquals(INITIAL_DATE.plusDays(1), model.getActivityList().get(0).getStartDate());
+        assertEquals(Recurrence.DAILY, model.getActivityList().get(0).getRecurrence());
+        assertEquals(List.of(new Enrolment(2, 7, INITIAL_DATE)), model.getAddressBook().getEnrolmentList());
+    }
+
+    @Test
     public void execute_noFieldsOrUnknownId_rejectsWithoutChangingData() {
         EditActivityDescriptor empty = new EditActivityDescriptor();
         EditActivityDescriptor renamed = new EditActivityDescriptor();
