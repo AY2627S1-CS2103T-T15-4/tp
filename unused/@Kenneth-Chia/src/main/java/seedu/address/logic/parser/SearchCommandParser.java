@@ -1,3 +1,5 @@
+//@@author Kenneth-Chia-unused
+// Retired global search in v1.5 in favour of field-based searchc/searchd/searcha.
 package seedu.address.logic.parser;
 
 import java.util.regex.Pattern;

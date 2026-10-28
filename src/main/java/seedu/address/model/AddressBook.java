@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javafx.collections.FXCollections;
@@ -62,20 +63,24 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     /**
      * Resets the existing data of this {@code AddressBook} with {@code newData}.
+     * Rejects dog owners missing from the incoming customers before changing any records.
      */
     public void resetData(ReadOnlyAddressBook newData) {
         requireNonNull(newData);
 
         List<Activity> restored = List.copyOf(newData.getActivityList());
         List<Enrolment> restoredEnrolments = List.copyOf(newData.getEnrolmentList());
+        List<Dog> restoredDogs = List.copyOf(newData.getDogList());
+        List<Customer> restoredCustomers = List.copyOf(newData.getCustomerList());
+        validateDogOwners(restoredDogs, restoredCustomers);
         long minimumId = restored.stream().mapToLong(Activity::getId).max().orElse(0) + 1;
         long nextId = newData.getNextActivityId();
         if (restored.stream().map(Activity::getId).distinct().count() != restored.size()
                 || nextId < minimumId || nextId > (long) Integer.MAX_VALUE + 1) {
             throw new IllegalArgumentException("Invalid activity IDs or next activity ID.");
         }
-        dogs.setDogs(newData.getDogList());
-        setCustomers(newData.getCustomerList());
+        dogs.setDogs(restoredDogs);
+        customers.setCustomers(restoredCustomers);
         nextActivityId = nextId;
 
         int restoredNextDogId = newData.getNextDogId();
@@ -132,8 +137,11 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
     }
 
+    /** Replaces customers only if every existing dog owner remains present. */
     public void setCustomers(List<Customer> customers) {
-        this.customers.setCustomers(customers);
+        List<Customer> replacements = List.copyOf(customers);
+        validateDogOwners(getDogList(), replacements);
+        this.customers.setCustomers(replacements);
     }
 
     /**
@@ -377,6 +385,8 @@ public class AddressBook implements ReadOnlyAddressBook {
             replacements.put(dogId, dog.withOwner(customerId));
         }
         dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
+        // All endpoints were validated; a mismatch here means the internal update is defective.
+        assert hasExpectedOwners(dogIds, customerId) : "Linked dogs must exist and belong to the requested customer.";
     }
 
     /**
@@ -402,6 +412,25 @@ public class AddressBook implements ReadOnlyAddressBook {
             replacements.put(dogId, dog.withoutOwner());
         }
         dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
+        assert hasExpectedOwners(dogIds, null) : "Unlinked dogs must exist and have no owner.";
+    }
+
+    /** Checks stored endpoints as well as ownership, so missing dogs cannot satisfy the postcondition. */
+    private boolean hasExpectedOwners(List<Integer> dogIds, Integer customerId) {
+        return dogIds.stream().allMatch(dogId -> getDogList().stream()
+                .anyMatch(dog -> dog.getId() == dogId
+                        && Objects.equals(dog.getOwnerId().orElse(null), customerId)));
+    }
+
+    /** Rejects dangling ownership references before publishing replacements or restored records. */
+    private static void validateDogOwners(List<Dog> dogs, List<Customer> customers) {
+        Set<Integer> customerIds = new HashSet<>();
+        customers.forEach(customer -> customerIds.add(customer.getId()));
+        for (Dog dog : dogs) {
+            if (dog.getOwnerId().filter(ownerId -> !customerIds.contains(ownerId)).isPresent()) {
+                throw new IllegalArgumentException("Dog owner must refer to an existing customer.");
+            }
+        }
     }
 
     /**
@@ -443,10 +472,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      */
     public Dog addDogFromStorage(Dog identified) {
         requireNonNull(identified);
-        if (identified.getOwnerId().isPresent() && getCustomerList().stream()
-                .noneMatch(customer -> customer.getId() == identified.getOwnerId().get())) {
-            throw new IllegalArgumentException("Dog owner must refer to an existing customer.");
-        }
+        validateDogOwners(List.of(identified), getCustomerList());
         dogs.add(identified);
         nextDogId = Math.max(nextDogId, identified.getId() + 1);
         return identified;
@@ -510,8 +536,9 @@ public class AddressBook implements ReadOnlyAddressBook {
         logger.fine("Deleted dog ID " + dogId + " and removed " + removedEnrolmentCount + " enrolments.");
     }
 
-    /** Replaces an existing dog with its edited version. */
+    /** Replaces an existing dog after validating that any owner refers to an existing customer. */
     public void setDog(Dog target, Dog editedDog) {
+        validateDogOwners(List.of(editedDog), getCustomerList());
         dogs.setDog(target, editedDog);
     }
 

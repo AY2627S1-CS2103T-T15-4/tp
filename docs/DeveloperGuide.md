@@ -39,6 +39,9 @@ relationships to refer to a record reliably even when the visible list changes.
 The address book looks up persistent IDs in the complete lists and validates every endpoint and ownership
 constraint before publishing one replacement dog list. A rejected batch throws `LinkException` without
 changing records or filters; the command translates it to `CommandException` for user feedback.
+After successful link or unlink publication, an internal assertion checks that every requested dog ID
+still exists and has the intended owner, or no owner for unlink. These checks do not mutate records or
+replace the ordinary validation of command input.
 
 Each immutable `Dog` stores an optional owner customer ID. This is the single source of truth;
 customers do not store a duplicate dog-ID list. A dog may be unlinked or have one owner, while a customer
@@ -64,6 +67,10 @@ as well as visible records, so these IDs remain accurate when dog cards are filt
 `JsonAdaptedDog` persists `ownerId`. A missing or null field means unlinked, preserving compatibility
 with older files. Negative owner IDs and references to missing customers are rejected on load;
 customers are restored before dogs. Copies of the address book retain ownership through immutable dogs.
+The shared model boundaries also reject dangling owner IDs: `setDog` validates the replacement,
+`setCustomers` checks that existing owners remain present, and `resetData` validates ownership against
+snapshots of the incoming dogs and customers before changing records. Customer deletion uses its explicit
+unlinking path instead of removing a referenced customer through `setCustomers`.
 `EditDogCommand` preserves the current owner ID when constructing a replacement dog, so editing details
 does not unlink the dog. Ownership changes remain explicit through linking, unlinking, or customer deletion.
 Deleting a dog also removes its enrolment records in the same address-book operation, including past
@@ -515,7 +522,8 @@ reacts to activity-list changes through the shared observable list.
 ### Defensive programming, logging, and assertions
 
 Command arguments and model invariants are validated explicitly and produce domain or parser exceptions;
-Java assertions are reserved for internal postconditions, never for user-input validation. Enrolment,
+Java assertions are reserved for internal postconditions, never for user-input validation. Ownership
+updates assert that all requested dog endpoints exist with the expected owner after publication. Enrolment,
 unenrolment, and dog deletion assert that the expected dated records are present or absent after a successful
 mutation. The Gradle `run` and `test` tasks enable assertions so these checks are active during development
 and automated testing.
@@ -536,7 +544,7 @@ The active category searches are `searcha`, `searchc`, and `searchd`. Each parse
 
 `SearchDogCommandParser` accepts `n/`, `b/`, `s/`, and `i/`; `SearchCustomerCommandParser` accepts `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/`; and `SearchActivityCommandParser` accepts `n/`, `d/`, `t/`, and `r/`. Unsupported prefixes, duplicate fields, invalid IDs, invalid sizes, and malformed values are rejected before execution.
 
-The global `search` command remains active for one name or ID field across customers and dogs. Its category compatibility routes delegate to the field parsers. The retired category-search implementations replaced by `searchc` and `searchd` are preserved under `unused/@Kenneth-Chia/` for authorship reference.
+The global search command and its category compatibility routes have been retired. Use the field-based searchc, searchd, and searcha commands (i/ for persistent IDs). Retired global search code, tests, and orphaned helpers are preserved under unused/@Kenneth-Chia/. The list commands and resetdisplay remain available.
 
 Search command tests cover parser validation, field combinations, related-record updates, persistent IDs, and unchanged stored records.
 
