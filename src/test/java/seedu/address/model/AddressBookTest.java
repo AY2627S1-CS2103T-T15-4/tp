@@ -141,9 +141,10 @@ public class AddressBookTest {
         Activity edited = target.withSchedule(date, LocalTime.of(8, 0),
                 LocalTime.of(9, 0), target.getRecurrence());
 
-        assertThrows(IllegalArgumentException.class,
-                "Activity ID " + target.getId() + " has enrolments and cannot be edited. Create a new activity instead.",
-                () -> addressBook.setActivity(target, edited));
+        String expectedMessage = "Activity ID " + target.getId()
+                + " has enrolments and cannot be edited. Create a new activity instead.";
+        assertThrows(IllegalArgumentException.class, expectedMessage, () ->
+                addressBook.setActivity(target, edited));
         assertEquals(target, addressBook.getActivityList().get(0));
         assertEquals(List.of(new Enrolment(target.getId(), dog.getId(), date)), addressBook.getEnrolmentList());
     }

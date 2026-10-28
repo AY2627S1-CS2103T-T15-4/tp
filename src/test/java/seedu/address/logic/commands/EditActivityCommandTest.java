@@ -53,8 +53,9 @@ public class EditActivityCommandTest {
         Activity original = model.getActivityList().get(0);
         List<Enrolment> originalEnrolments = List.copyOf(model.getAddressBook().getEnrolmentList());
 
-        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_ACTIVITY_HAS_ENROLMENTS.formatted(1),
-                () -> new EditActivityCommand(1, descriptor).execute(model));
+        String expectedMessage = EditActivityCommand.MESSAGE_ACTIVITY_HAS_ENROLMENTS.formatted(1);
+        assertThrows(CommandException.class, expectedMessage, () ->
+                new EditActivityCommand(1, descriptor).execute(model));
 
         assertEquals(original, model.getActivityList().get(0));
         assertEquals(originalEnrolments, model.getAddressBook().getEnrolmentList());
@@ -67,18 +68,19 @@ public class EditActivityCommandTest {
         EditActivityDescriptor timeChange = new EditActivityDescriptor();
         timeChange.setStartTime(LocalTime.of(8, 0));
 
-        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_ACTIVITY_HAS_ENROLMENTS.formatted(1),
-                () -> new EditActivityCommand(1, rename).execute(model));
-        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_ACTIVITY_HAS_ENROLMENTS.formatted(1),
-                () -> new EditActivityCommand(1, timeChange).execute(model));
+        String expectedMessage = EditActivityCommand.MESSAGE_ACTIVITY_HAS_ENROLMENTS.formatted(1);
+        assertThrows(CommandException.class, expectedMessage, () ->
+                new EditActivityCommand(1, rename).execute(model));
+        assertThrows(CommandException.class, expectedMessage, () ->
+                new EditActivityCommand(1, timeChange).execute(model));
     }
 
     @Test
     public void parseAndExecute_enrolledActivity_suggestsCreatingNewActivity() throws Exception {
         Command command = new AddressBookParser().parseCommand("editactivity 1 start/08:00");
 
-        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_ACTIVITY_HAS_ENROLMENTS.formatted(1),
-                () -> command.execute(model));
+        String expectedMessage = EditActivityCommand.MESSAGE_ACTIVITY_HAS_ENROLMENTS.formatted(1);
+        assertThrows(CommandException.class, expectedMessage, () -> command.execute(model));
     }
 
     @Test
@@ -110,10 +112,10 @@ public class EditActivityCommandTest {
         renamed.setName(new ActivityName("Training"));
         List<Activity> originalActivities = List.copyOf(model.getActivityList());
 
-        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_NOT_EDITED,
-                () -> new EditActivityCommand(1, empty).execute(model));
-        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_INVALID_ACTIVITY_ID,
-                () -> new EditActivityCommand(99, renamed).execute(model));
+        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_NOT_EDITED, () ->
+                new EditActivityCommand(1, empty).execute(model));
+        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_INVALID_ACTIVITY_ID, () ->
+                new EditActivityCommand(99, renamed).execute(model));
         assertEquals(originalActivities, model.getActivityList());
     }
 
