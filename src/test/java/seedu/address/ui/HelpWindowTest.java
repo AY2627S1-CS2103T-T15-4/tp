@@ -1,9 +1,9 @@
 package seedu.address.ui;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -34,28 +34,52 @@ public class HelpWindowTest {
 
     @Test
     public void focus_minimizedWindow_restoresWindow() throws Exception {
-        FutureTask<Void> task = new FutureTask<>(() -> {
-            Stage stage = new Stage();
-            HelpWindow window = new HelpWindow(stage);
-            try {
+        HelpWindow window = runOnFxThread(() -> new HelpWindow(new Stage()));
+        try {
+            runOnFxThread(() -> {
                 window.show();
-                stage.setIconified(true);
-                assertTrue(window.isShowing());
-                assertTrue(stage.isIconified());
-
+                return null;
+            });
+            awaitState(() -> window.isShowing() && window.getRoot().isFocused(), "Help window shown and focused");
+            runOnFxThread(() -> {
+                window.getRoot().setIconified(true);
+                return null;
+            });
+            awaitState(() -> window.isShowing() && window.getRoot().isIconified(), "Help window minimized");
+            runOnFxThread(() -> {
                 window.focus();
-
-                assertTrue(window.isShowing());
-                assertFalse(stage.isIconified());
-
+                return null;
+            });
+            awaitState(() -> window.isShowing() && !window.getRoot().isIconified()
+                    && window.getRoot().isFocused(), "Help window restored and focused");
+            runOnFxThread(() -> {
                 window.focus();
-                assertFalse(stage.isIconified());
-            } finally {
+                return null;
+            });
+            awaitState(() -> window.isShowing() && !window.getRoot().isIconified(), "Help window remains restored");
+        } finally {
+            runOnFxThread(() -> {
                 window.hide();
+                return null;
+            });
+        }
+    }
+
+    private static void awaitState(Callable<Boolean> condition, String description) throws Exception {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (System.nanoTime() < deadline) {
+            if (runOnFxThread(condition)) {
+                return;
             }
-            return null;
-        });
+            // Wait on the test thread so native window events can run on the FX thread.
+            Thread.sleep(25);
+        }
+        assertTrue(runOnFxThread(condition), "Timed out waiting for: " + description);
+    }
+
+    private static <T> T runOnFxThread(Callable<T> action) throws Exception {
+        FutureTask<T> task = new FutureTask<>(action);
         Platform.runLater(task);
-        task.get(10, TimeUnit.SECONDS);
+        return task.get(10, TimeUnit.SECONDS);
     }
 }
