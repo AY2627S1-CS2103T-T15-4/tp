@@ -22,7 +22,8 @@ public class Customer {
 
     /**
      * Every field must be present and not null. {@code id} must be nonnegative.
-     * Name, phone, email, and backup contact are stored as given, including internal spaces and letter case.
+     * Name and email values are preserved as supplied. Phone and backup contact values are normalized
+     * by their respective value objects, which remove spaces between digits before storage.
      */
     public Customer(int id, Name name, Phone phone, Email email, BackupContact backupContact) {
         requireAllNonNull(name, phone, email, backupContact);
