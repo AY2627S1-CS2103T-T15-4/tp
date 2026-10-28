@@ -6,7 +6,8 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 
 /**
- * Clears the address book.
+ * Clears all customers, dogs, activities and enrolments from the address book.
+ * The logic manager obtains confirmation before executing this command and discards undo/redo history afterwards.
  */
 public class ClearCommand extends Command {
 
@@ -18,6 +19,12 @@ public class ClearCommand extends Command {
     public static final String MESSAGE_INVALID_CONFIRMATION = "Please enter Y or N. " + MESSAGE_CONFIRMATION;
 
 
+    /**
+     * Replaces the address book with an empty one. The caller is responsible for obtaining confirmation.
+     *
+     * @param model The model whose address book is cleared.
+     * @return The success message after clearing the address book.
+     */
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
