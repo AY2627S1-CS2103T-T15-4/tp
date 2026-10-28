@@ -16,39 +16,108 @@ public class UnenrolDogCommandParserTest {
     private final UnenrolDogCommandParser parser = new UnenrolDogCommandParser();
 
     @Test
-    public void parse_validIds_acceptsCommaSeparatedDogs() throws Exception {
+    public void parse_validFields_acceptsAnyOrderAndWhitespaceSeparatedDogs() throws Exception {
+        UnenrolDogCommand expected = new UnenrolDogCommand(1, LocalDate.of(2028, 2, 29), List.of(2, 3, 5));
+
         assertEquals(new UnenrolDogCommand(1, LocalDate.of(2028, 2, 29), List.of(2)),
                 parser.parse(" a/1 date/2028-02-29 d/2 "));
-        assertEquals(new UnenrolDogCommand(1, LocalDate.of(2028, 2, 29), List.of(2, 3, 5)),
-                parser.parse("a/1 date/2028-02-29 d/2, 3,5"));
+        assertEquals(expected, parser.parse("a/1 date/2028-02-29 d/2  3\t5"));
+        assertEquals(expected, parser.parse("d/2 3 5 a/1 date/2028-02-29"));
+        assertEquals(expected, parser.parse("date/2028-02-29 d/2 3 5 a/1"));
     }
 
     @Test
-    public void parse_invalidInput_rejectsMalformedOrRepeatedIds() {
-        for (String input : List.of("", "a/1", "d/2", "a/ d/2", "a/1 d/", "a/1 d/2,2",
-                "a/1 d/2,", "a/-1 d/2", "a/1 d/-2", "a/1 d/2.0", "a/x d/2", "a/1 d/x",
-                "a/999999999999 d/2", "a/1 date/2028-02-29 d/", "a/1 date/2028-02-29 d/2,2",
-                "a/-1 date/2028-02-29 d/2", "a/1 date/2028-02-29 d/-2",
-                "a/999999999999 date/2028-02-29 d/2")) {
-            assertThrows(ParseException.class, () -> parser.parse(input), input);
+    public void parse_missingOrEmptyActivityId_returnsSpecificMessageWithGuidance() {
+        String expected = expected("Please enter an activity ID.");
+
+        assertMessage("", expected);
+        assertMessage("date/2028-02-29 d/2", expected);
+        assertMessage("a/ date/2028-02-29 d/2", expected);
+    }
+
+    @Test
+    public void parse_missingOrEmptyDate_returnsSpecificMessageWithGuidance() {
+        String expected = expected("Please enter a date.");
+
+        assertMessage("a/1 d/2", expected);
+        assertMessage("a/1 date/ d/2", expected);
+    }
+
+    @Test
+    public void parse_missingOrEmptyDogIds_returnsSpecificMessageWithGuidance() {
+        String expected = expected("Please enter at least one dog ID.");
+
+        assertMessage("a/1 date/2028-02-29", expected);
+        assertMessage("a/1 date/2028-02-29 d/", expected);
+    }
+
+    @Test
+    public void parse_invalidActivityId_returnsSpecificMessageWithGuidance() {
+        String expected = expected("Please provide a positive, valid activity ID.");
+
+        for (String activityId : List.of("0", "-1", "x", "1.5", "999999999999")) {
+            assertMessage("a/" + activityId + " date/2028-02-29 d/2", expected);
         }
     }
 
     @Test
-    public void parse_malformedDatedInput_reportsExpectedFormat() {
-        ParseException exception = assertThrows(ParseException.class, () -> parser.parse("a/1 d/2"));
+    public void parse_invalidDate_returnsSpecificMessageWithGuidance() {
+        String expected = expected("Date must be a real calendar date in YYYY-MM-DD format.");
 
-        assertEquals("Invalid unenrol format. Use: unenrol a/ACTIVITY_ID date/YYYY-MM-DD "
-                + "d/DOG_ID[,DOG_ID...]. Example: unenrol a/1 date/2026-10-27 d/2,3", exception.getMessage());
+        for (String date : List.of("2028-02-30", "29-02-2028", "tomorrow")) {
+            assertMessage("a/1 date/" + date + " d/2", expected);
+        }
     }
 
     @Test
-    public void parse_invalidDate_returnsSpecificMessage() {
-        assertEquals("Date must be a real calendar date in YYYY-MM-DD format.",
-                parseException("a/1 date/2028-02-30 d/2").getMessage());
+    public void parse_invalidDogIds_returnsSpecificMessageWithGuidance() {
+        String expected = expected("Please provide positive, valid dog IDs separated by spaces.");
+
+        for (String dogIds : List.of("0", "-2", "x", "2.0", "2,3", "2, 3", "999999999999")) {
+            assertMessage("a/1 date/2028-02-29 d/" + dogIds, expected);
+        }
     }
 
-    private ParseException parseException(String input) {
-        return org.junit.jupiter.api.Assertions.assertThrows(ParseException.class, () -> parser.parse(input));
+    @Test
+    public void parse_duplicateDogIds_returnsSpecificMessageWithGuidance() {
+        String expected = expected("Dog ID 2 is listed more than once. Please provide each dog ID only once.");
+
+        assertMessage("a/1 date/2028-02-29 d/2 2", expected);
+        assertMessage("a/1 date/2028-02-29 d/2 02", expected);
+    }
+
+    @Test
+    public void parse_repeatedPrefix_returnsSpecificMessageWithGuidance() {
+        assertMessage("a/1 a/2 date/2028-02-29 d/3",
+                expected("Multiple values specified for the following single-valued field(s): a/"));
+        assertMessage("a/1 date/2028-02-29 date/2028-03-01 d/3",
+                expected("Multiple values specified for the following single-valued field(s): date/"));
+        assertMessage("a/1 date/2028-02-29 d/2 d/3",
+                expected("Multiple values specified for the following single-valued field(s): d/"));
+    }
+
+    @Test
+    public void parse_invalidOverallStructure_returnsInvalidFormatWithGuidance() {
+        String expected = expected("Invalid command format!");
+
+        assertMessage("hello a/1 date/2028-02-29 d/2", expected);
+        assertMessage("x/hello a/1 date/2028-02-29 d/2", expected);
+    }
+
+    @Test
+    public void command_nonPositiveId_rejectsInvalidId() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new UnenrolDogCommand(0, LocalDate.of(2028, 2, 29), List.of(2)));
+        assertThrows(IllegalArgumentException.class, () ->
+                new UnenrolDogCommand(1, LocalDate.of(2028, 2, 29), List.of(0)));
+    }
+
+    private String expected(String specificMessage) {
+        return specificMessage + UnenrolDogCommand.MESSAGE_FORMAT_GUIDANCE;
+    }
+
+    private void assertMessage(String input, String expectedMessage) {
+        ParseException exception = assertThrows(ParseException.class, () -> parser.parse(input));
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }

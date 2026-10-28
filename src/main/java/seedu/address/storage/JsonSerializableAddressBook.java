@@ -112,7 +112,7 @@ class JsonSerializableAddressBook {
             }
         }
 
-        if (nextDogId != null && nextDogId >= 0) {
+        if (nextDogId != null && nextDogId >= 1) {
             addressBook.setNextDogId(nextDogId);
         }
         if (nextCustomerId != null && nextCustomerId >= 1) {

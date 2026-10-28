@@ -28,8 +28,13 @@ public class LinkCommandParserTest {
                 "c/1 d/2 d/02", "c/1 c/2 d/3", "c/1 d/2 x/3", "prefix c/1 d/2", "c/1 d/2 extra",
                 "d/2 c/1", "C/1 d/2", "c/1 D/2", "c/1d/2", "c/ 1 d/2", "c/1 d/ 2",
                 "c/-1 d/2", "c/1 d/-2", "c/+1 d/2", "c/1 d/2.0", "c/a d/2", "c/1 d/a",
-                "c/2147483648 d/2", "c/1 d/2147483648", "c/1 d/999999999999999999999")) {
+                "c/2147483648 d/2", "c/1 d/0", "c/1 d/2147483648", "c/1 d/999999999999999999999")) {
             assertThrows(ParseException.class, () -> parser.parse(input), input);
         }
+    }
+
+    @Test
+    public void command_zeroDogId_rejectsInvalidDogId() {
+        assertThrows(IllegalArgumentException.class, () -> new LinkCommand(1, List.of(0)));
     }
 }

@@ -282,7 +282,9 @@ public class ModelManager implements Model {
 
     @Override
     public void selectDog(int dogId) {
-        assert dogId >= 1 : "Dog ID must be positive";
+        if (dogId < 1) {
+            throw new IllegalArgumentException("Dog ID must be positive.");
+        }
         selectedCustomerId = null;
         selectedDogId = dogId;
         applySelectedDog();

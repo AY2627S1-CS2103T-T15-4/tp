@@ -26,7 +26,7 @@ public class DogSearchPredicate implements Predicate<Dog> {
         this.nameQuery = normalize(nameQuery);
         this.breedQuery = normalize(breedQuery);
         this.sizeQuery = normalize(sizeQuery);
-        this.id = id;
+        this.id = id == null ? null : validateId(id);
     }
 
     @Override
@@ -50,8 +50,8 @@ public class DogSearchPredicate implements Predicate<Dog> {
     }
 
     private static int validateId(int value) {
-        if (value < 0) {
-            throw new IllegalArgumentException("Dog search ID cannot be negative");
+        if (value < 1) {
+            throw new IllegalArgumentException("Dog search ID must be positive");
         }
         return value;
     }

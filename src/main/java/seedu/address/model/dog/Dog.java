@@ -6,10 +6,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 import seedu.address.commons.util.ToStringBuilder;
-
+//@@author Umaiza-15
 /**
  * Represents a dog in the address book.
- * Guarantees: details are present and not null, field values are validated, immutable.
+ * Guarantees: stored dogs have positive IDs; details are present and not null, field values are validated, immutable.
  */
 public class Dog {
 
@@ -30,11 +30,11 @@ public class Dog {
         this(id, name, breed, size, null);
     }
 
-    /** Creates a stored dog with an optional nonnegative owner ID. */
+    /** Creates a stored dog with a positive dog ID and an optional nonnegative owner ID. */
     public Dog(int id, DogName name, Breed breed, Size size, Integer ownerId) {
         requireAllNonNull(name, breed, size);
-        if (id < 0) {
-            throw new IllegalArgumentException("Dog id must be nonnegative.");
+        if (id < 1) {
+            throw new IllegalArgumentException("Dog id must be positive.");
         }
         this.id = id;
         this.name = name;

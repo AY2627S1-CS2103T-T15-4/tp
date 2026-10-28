@@ -85,7 +85,7 @@ public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand
         for (String token : value.split("\\s+")) {
             try {
                 int id = Integer.parseInt(token);
-                if (id < 0) {
+                if (id < 1) {
                     throw new NumberFormatException();
                 }
                 dogIds.add(id);

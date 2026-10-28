@@ -15,10 +15,12 @@ import seedu.address.model.dog.exceptions.EnrolException;
 public class EnrolDogCommand extends Command {
     public static final String COMMAND_WORD = "enrol";
     public static final String MESSAGE_USAGE = "enrol: Enrols one or more dogs to an activity.\n"
-            + "Parameters: a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1, DOG_ID2...\n"
-            + "IDs must be integers from 0 to 2147483647; dog IDs must not repeat.\n"
-            //"The entire batch is rejected if any record is missing or any dog already has t.\n"
-            + "Example: enrol a/1 date/2026-10-27 d/2,3";
+            + "Parameters (in any order): a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]\n"
+            + "Activity and dog IDs must be positive; dog IDs must not repeat.\n"
+            + "Example: enrol a/1 date/2028-02-29 d/2 3";
+    public static final String MESSAGE_FORMAT_GUIDANCE = "\nFormat: enrol a/ACTIVITY_ID "
+            + "date/YYYY-MM-DD d/DOG_ID [DOG_ID...]"
+            + "\nExample: enrol a/1 date/2028-02-29 d/2 3";
     public static final String MESSAGE_SUCCESS = "Enrolled dog IDs %s to activity ID %d on %s.";
 
     private final int activityId;
@@ -26,12 +28,12 @@ public class EnrolDogCommand extends Command {
     private final List<Integer> dogIds;
 
     /**
-     * Creates a link request containing distinct nonnegative dog IDs and a nonnegative activity ID.
+     * Creates an enrol request containing a positive activity ID and distinct positive dog IDs.
      */
     public EnrolDogCommand(int activityId, LocalDate date, List<Integer> dogIds) {
         this.dogIds = List.copyOf(dogIds);
-        checkArgument(activityId >= 0 && date != null && !dogIds.isEmpty()
-                && dogIds.stream().allMatch(id -> id >= 0)
+        checkArgument(activityId >= 1 && date != null && !dogIds.isEmpty()
+                && dogIds.stream().allMatch(id -> id >= 1)
                 && new HashSet<>(dogIds).size() == dogIds.size(), "Invalid enrol IDs.");
         this.activityId = activityId;
         this.date = date;
@@ -43,7 +45,7 @@ public class EnrolDogCommand extends Command {
         try {
             model.enrolDogs(activityId, date, dogIds);
         } catch (EnrolException e) {
-            throw new CommandException(e.getMessage(), e);
+            throw new CommandException(e.getMessage() + MESSAGE_FORMAT_GUIDANCE, e);
         }
         return new CommandResult(String.format(MESSAGE_SUCCESS, dogIds, activityId, date));
     }

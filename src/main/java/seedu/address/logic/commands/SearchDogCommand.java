@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.AppUtil.checkArgument;
 
 import java.util.Objects;
 
@@ -23,8 +24,13 @@ public class SearchDogCommand extends Command {
     private final Integer id;
     private final DogSearchPredicate predicate;
 
-    /** Creates a dog filter with any combination of supported fields. */
+    /**
+     * Creates a dog filter with any combination of supported fields.
+     *
+     * @throws IllegalArgumentException if {@code id} is present but not positive
+     */
     public SearchDogCommand(String name, String breed, String size, Integer id) {
+        checkArgument(id == null || id >= 1, "Dog search ID must be positive.");
         this.name = name;
         this.breed = breed;
         this.size = size;

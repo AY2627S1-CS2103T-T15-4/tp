@@ -42,7 +42,7 @@ XYZCommand -up-|> Command
 EnrolDogCommand -up-|> Command
 UnenrolDogCommand -up-|> Command
 note right of EnrolDogCommandParser
-  enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2
-  unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2
+  enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]
+  unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]
 end note
 @enduml

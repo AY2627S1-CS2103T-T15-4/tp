@@ -36,6 +36,11 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void selectDog_zeroId_rejectsInvalidDogId() {
+        assertThrows(IllegalArgumentException.class, "Dog ID must be positive.", () -> modelManager.selectDog(0));
+    }
+
+    @Test
     public void constructor_validUserPrefs_copiesUserPrefs() {
         UserPrefs userPrefs = new UserPrefs();
         userPrefs.setGuiSettings(new GuiSettings(1, 2, 3, 4));

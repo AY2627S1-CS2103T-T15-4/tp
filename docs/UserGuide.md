@@ -174,7 +174,8 @@ Example:
 * `adddog n/Cookie b/Chihuahua s/Small`
 
 Valid sizes are `small`, `medium`, `large`, and `giant`. Size input is case-insensitive.
-Dog names and breeds may contain letters, numbers, spaces, and must not be blank. Leading and trailing
+Dog names may contain letters, numbers, spaces, hyphens, and apostrophes, and must not be blank. Breeds may contain
+letters, numbers, spaces, and hyphens, and must not be blank. Leading and trailing
 spaces in field values are ignored.
 
 ### Adding a customer: `addcustomer`
@@ -273,12 +274,13 @@ Format: `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`
 
 Example: `link c/1 d/2 d/3` links dogs 2 and 3 to customer 1.
 
-* Use persistent record IDs, including records hidden by a search. IDs range from 0 to 2147483647.
+* Use persistent record IDs, including records hidden by a search. Dog IDs start at 1.
 * Put exactly one `c/` field first, followed by one or more `d/` fields, separated by whitespace.
   Prefixes are lowercase, and there must be no space between a prefix and its ID.
 * Each customer can own multiple dogs; each dog can have only one owner. Unlinked records are allowed.
 * Editing a dog's name, breed, or size preserves its owner. Use `unlink` to remove ownership.
-* Dog IDs must not repeat. Unknown fields, missing IDs, negative IDs and non-integer IDs are rejected.
+* Dog IDs must be positive integers and must not repeat. Unknown fields, missing IDs, zero or negative IDs,
+  and non-integer IDs are rejected.
 * If the customer or any dog does not exist, or any dog already has an owner (even the same customer),
   the entire command fails and no records change. Linking does not reassign dogs.
 * A successful command reports the linked IDs. Dog cards show `Owner ID: CUSTOMER_ID`, or `Owner ID: None`.
@@ -299,7 +301,7 @@ Examples:
 * `unlink d/1 d/2 d/3` removes ownership from dogs 1, 2 and 3, even if they have different owners.
 * `unlink c/1` removes ownership from every dog belonging to customer 1, including hidden dogs.
 
-* Use persistent IDs from `0` to `2147483647`, lowercase prefixes, and whitespace between fields.
+* Dog IDs are positive integers; customer IDs use their own ID field. Use lowercase prefixes and whitespace between fields.
   Do not put whitespace after the slash. Repeated dog IDs (including `d/2 d/02`) are rejected.
 * Do not mix customer and dog prefixes. The customer form accepts exactly one customer ID.
 * For the dog form, every dog must exist and have an owner. If any dog is missing or unowned,
@@ -321,7 +323,7 @@ Example: `searchd b/Golden Retriever s/Medium`
 
 * Name and breed matching are case-insensitive substring searches.
 * Size must be `small`, `medium`, `large`, or `giant`, ignoring letter case.
-* ID matching is exact, and the ID must belong to a dog in the database.
+* ID matching is exact; dog IDs are positive integers and must belong to a dog in the database.
 * A successful command displays `Successfully searched dogs by` followed by only the supplied fields.
 * Invalid input displays `Error in searching dogs:` followed by the applicable error message. Invalid or nonexistent
   dog IDs display `Invalid dog id. Please input a valid dog id.`
@@ -331,6 +333,19 @@ Example: `searchd b/Golden Retriever s/Medium`
 * Unowned matching dogs remain visible, but the customer panel is empty.
 * The filter remains active while dogs or customers are added, edited, deleted, linked, or unlinked.
   Matching activities refresh when enrolments change.
+
+### Enrolling dogs in activities: `enrol` and `unenrol`
+
+Formats: `enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]` and
+`unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]`.
+
+The `a/`, `date/`, and `d/` fields may appear in any order and must each appear exactly once. Dog IDs are separated
+by one or more spaces, must be positive integers, and must not repeat; commas and `d/0` are rejected. Activity IDs
+must also be positive integers and are supplied separately using `a/`.
+
+Invalid input reports the specific field or formatting problem, followed by the complete command format and an
+example. `enrol` rejects past dates and states that the date must be today or later. `unenrol` permits past dates so
+that a historical enrolment can be corrected, provided the activity occurred and the dog was enrolled on that date.
 
 ### Filtering unlinked records: `filterun`
 
@@ -352,7 +367,7 @@ Example: `searchc n/Anna d/12 34`
 * Name matching is case-insensitive, uses a substring search, and treats repeated spaces as one space.
 * Phone and backup contact numbers require exactly eight digits and use exact matching.
 * Email matching is case-insensitive and exact.
-* Dog IDs must exist. A customer must own all specified dog IDs to match.
+* Dog IDs must be positive and exist. A customer must own all specified dog IDs to match.
 * Customer ID must be a nonnegative ID belonging to an existing customer; it matches that customer exactly.
 * The dog panel is also filtered to show only dogs owned by the matching customers.
 * Dog IDs and customer ID appear in the success message only when supplied; dog IDs are displayed in ascending numeric order.
@@ -371,8 +386,8 @@ Format: `delete dog ID`
 
 Examples:
 
-* `delete dog 0`
-* `delete  dog   0`
+* `delete dog 1`
+* `delete  dog   1`
 
 Multiple spaces between the command components are accepted.
 
@@ -486,8 +501,8 @@ Action     | Format, Examples
 **Search customers** | `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`<br> e.g., `searchc n/alex i/42`
 **Search dogs** | `searchd [n/NAME] [b/BREED] [s/SIZE] [i/DOG_ID]`<br> e.g., `searchd n/bud s/small`
 **Add activity** | `addactivity n/NAME date/YYYY-MM-DD start/HH:mm end/HH:mm r/once`<br>Use `r/daily` or `r/weekly` for recurrence.
-**Enrol dogs** | `enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2`<br>Date must be today or a future occurrence; overlapping activities for the same dog are rejected.
-**Unenrol dogs** | `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2`<br>Removes only the specified dated enrolments.
+**Enrol dogs** | `enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]`<br>Fields may appear in any order. Date must be today or a future occurrence; overlapping activities for the same dog are rejected.
+**Unenrol dogs** | `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]`<br>Fields may appear in any order. Removes only the specified dated enrolments.
 **Delete activity** | `deleteactivity ACTIVITY_ID`<br>e.g., `deleteactivity 21`
 **Search activities** | `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`<br>e.g., `searcha n/Dog run t/16:00`
 **Today** | `today`<br>Shows today's activities and the enrolled dogs and owners involved.
@@ -498,7 +513,7 @@ Action     | Format, Examples
 **Edit customer** | `editcustomer CUSTOMER_ID [n/NAME] [p/PHONE] [e/EMAIL] [bc/BACKUP_CONTACT]`<br>e.g., `editcustomer 1 p/91234567`
 **List customers** | `list customer`
 **List dogs** | `list dog`
-**Delete dog** | `delete dog ID`<br>e.g., `delete dog 0`
+**Delete dog** | `delete dog ID`<br>e.g., `delete dog 1`
 **Delete customer** | `delete customer ID`<br>e.g., `delete customer 21`
 **Undo** | `undo`
 **Redo** | `redo`

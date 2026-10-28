@@ -388,7 +388,7 @@ of removed enrolments appears in the command feedback. `LogicManager` then saves
 
 `AddressBookParser` routes `searchd` to `SearchDogCommandParser`. The parser accepts the lowercase fields
 `n/`, `b/`, `s/`, and `i/`, rejects duplicate or unknown fields, normalises whitespace, and validates sizes
-and nonnegative IDs. `DogSearchPredicate` performs case-insensitive substring matching for names and breeds,
+and positive dog IDs. `DogSearchPredicate` performs case-insensitive substring matching for names and breeds,
 case-insensitive exact matching for sizes, and exact matching for IDs.
 
 `SearchDogCommand` rejects IDs that are not present in the database before changing filtered lists. It applies
@@ -478,11 +478,14 @@ storing dog objects directly inside the reusable activity schedule.
 Users can enrol or unenrol one or more dogs using:
 
 ```text
-enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2
-unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2
+enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]
+unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]
 ```
 
-The parser converts the activity ID, occurrence date, and comma-separated dog IDs into a command.
+The parsers accept the three required fields in any order and convert the activity ID, occurrence date, and
+whitespace-separated dog IDs into a command. Each field must appear exactly once, and activity and dog IDs must
+be positive. Parser errors identify the missing, invalid, repeated, or malformed field and append the command's
+complete format and example. Execution errors append the same guidance.
 The command delegates through `Model` and `ModelManager` to `AddressBook`, which verifies that the
 activity and dogs exist, the date is a valid occurrence and is today or later, and the requested
 enrolments are valid before updating the enrolment list. A dog cannot be enrolled in another activity

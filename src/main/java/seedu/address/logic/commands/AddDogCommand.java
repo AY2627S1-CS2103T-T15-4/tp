@@ -24,7 +24,14 @@ public class AddDogCommand extends Command {
             + "Example: " + COMMAND_WORD + " "
             + PREFIX_NAME + "Cookie "
             + PREFIX_BREED + "Golden Retriever "
-            + PREFIX_SIZE + "Large";
+            + PREFIX_SIZE + "Large\n"
+            + "Valid sizes: small, medium, large, giant.";
+
+    public static final String MESSAGE_FORMAT_GUIDANCE = "\nFormat: " + COMMAND_WORD + " "
+            + PREFIX_NAME + "NAME " + PREFIX_BREED + "BREED " + PREFIX_SIZE + "SIZE"
+            + "\nExample: " + COMMAND_WORD + " " + PREFIX_NAME + "Cookie "
+            + PREFIX_BREED + "Golden Retriever " + PREFIX_SIZE + "Large"
+            + "\nValid sizes: small, medium, large, giant.";
 
     public static final String MESSAGE_SUCCESS = "New dog added: %1$s";
     public static final String MESSAGE_DUPLICATE_DOG = "This dog already exists.";

@@ -138,27 +138,27 @@ public class AddressBookOwnershipTest {
     }
 
     @Test
-    public void linkAndUnlink_zeroAndLargeOwnerIds_preserveRecordsAndCounters() throws Exception {
+    public void linkAndUnlink_positiveDogIdsAndZeroCustomerId_preserveRecordsAndCounters() throws Exception {
         AddressBook book = new AddressBook();
         Customer zeroOwner = new Customer(0, "Alex", "91234567", "alex@example.com", "98765432");
         Customer largeOwner = new Customer(128, "Sam", "92345678", "sam@example.com", "98765432");
         book.addCustomer(zeroOwner);
         book.addCustomer(largeOwner);
-        book.addDogFromStorage(dog(0));
+        book.addDogFromStorage(dog(1));
         book.addDogFromStorage(dog(127));
         book.addDogFromStorage(dog(128));
         int nextDogId = book.getNextDogId();
         int nextCustomerId = book.getNextCustomerId();
 
-        book.linkDogs(0, List.of(0));
+        book.linkDogs(0, List.of(1));
         book.linkDogs(128, List.of(127, 128));
 
-        assertEquals(List.of(dog(0).withOwner(0), dog(127).withOwner(128), dog(128).withOwner(128)),
+        assertEquals(List.of(dog(1).withOwner(0), dog(127).withOwner(128), dog(128).withOwner(128)),
                 book.getDogList());
-        book.unlinkDogs(List.of(0, 128));
-        assertEquals(List.of(dog(0), dog(127).withOwner(128), dog(128)), book.getDogList());
+        book.unlinkDogs(List.of(1, 128));
+        assertEquals(List.of(dog(1), dog(127).withOwner(128), dog(128)), book.getDogList());
         book.unlinkCustomerDogs(128);
-        assertEquals(List.of(dog(0), dog(127), dog(128)), book.getDogList());
+        assertEquals(List.of(dog(1), dog(127), dog(128)), book.getDogList());
         assertEquals(List.of(zeroOwner, largeOwner), book.getCustomerList());
         assertEquals(nextDogId, book.getNextDogId());
         assertEquals(nextCustomerId, book.getNextCustomerId());
@@ -169,6 +169,18 @@ public class AddressBookOwnershipTest {
         AddressBook before = new AddressBook(addressBook);
 
         assertThrows(LinkException.class, () -> addressBook.linkDogs(7, Arrays.asList(44, null)));
+
+        assertSameState(before, addressBook);
+    }
+
+    @Test
+    public void linkAndUnlink_zeroDogId_rejectWithoutMutation() {
+        AddressBook before = new AddressBook(addressBook);
+
+        assertThrows(LinkException.class, "Dog IDs must be positive.", () ->
+                addressBook.linkDogs(FIRST_OWNER.getId(), List.of(0)));
+        assertThrows(UnlinkException.class, "Dog IDs must be positive.", () ->
+                addressBook.unlinkDogs(List.of(0)));
 
         assertSameState(before, addressBook);
     }

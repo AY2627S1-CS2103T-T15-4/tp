@@ -50,7 +50,9 @@ public class SearchActivityCommand extends Command {
 
     private static boolean isEnrolledInMatchingActivity(Model model, int dogId,
             ActivitySearchPredicate predicate, LocalDate date) {
-        assert dogId >= 0 : "Stored dog IDs must be nonnegative.";
+        if (dogId < 1) {
+            throw new IllegalArgumentException("Stored dog IDs must be positive.");
+        }
         return model.getAddressBook().getEnrolmentList().stream().anyMatch(enrolment ->
                 enrolment.getDogId() == dogId && (date == null || enrolment.getDate().equals(date))
                         && model.getActivityList().stream()

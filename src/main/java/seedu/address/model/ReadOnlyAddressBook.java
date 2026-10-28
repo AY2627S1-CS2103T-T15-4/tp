@@ -16,7 +16,7 @@ public interface ReadOnlyAddressBook {
         return FXCollections.emptyObservableList();
     }
 
-    /** Returns the next unused dog ID, or {@code -1} when unavailable. */
+    /** Returns the next unused positive dog ID, or {@code -1} when unavailable. */
     default int getNextDogId() {
         return -1;
     }

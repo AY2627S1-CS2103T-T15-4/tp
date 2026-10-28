@@ -5,8 +5,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_BREED;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_SIZE;
 
-import java.util.stream.Stream;
-
 import seedu.address.logic.commands.AddDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.dog.Breed;
@@ -26,26 +24,58 @@ public class AddDogCommandParser implements Parser<AddDogCommand> {
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_BREED, PREFIX_SIZE);
 
-        if (!arePrefixesPresent(argMultimap, PREFIX_NAME, PREFIX_BREED, PREFIX_SIZE)
-                || !argMultimap.getPreamble().isEmpty()) {
+        if (!argMultimap.getPreamble().isEmpty()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddDogCommand.MESSAGE_USAGE));
         }
 
-        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_BREED, PREFIX_SIZE);
-        DogName name = ParserUtil.parseDogName(argMultimap.getValue(PREFIX_NAME).get());
-        Breed breed = ParserUtil.parseBreed(argMultimap.getValue(PREFIX_BREED).get());
-        Size size = ParserUtil.parseSize(argMultimap.getValue(PREFIX_SIZE).get());
+        try {
+            argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_BREED, PREFIX_SIZE);
+        } catch (ParseException e) {
+            throw new ParseException(e.getMessage() + AddDogCommand.MESSAGE_FORMAT_GUIDANCE);
+        }
+
+        String nameValue = argMultimap.getValue(PREFIX_NAME).orElse("").trim();
+        String breedValue = argMultimap.getValue(PREFIX_BREED).orElse("").trim();
+        String sizeValue = argMultimap.getValue(PREFIX_SIZE).orElse("").trim();
+
+        if (nameValue.isEmpty()) {
+            throw missingFieldMessage("name");
+        }
+        if (breedValue.isEmpty()) {
+            throw missingFieldMessage("breed");
+        }
+        if (sizeValue.isEmpty()) {
+            throw missingFieldMessage("size");
+        }
+
+        DogName name;
+        try {
+            name = ParserUtil.parseDogName(nameValue);
+        } catch (ParseException e) {
+            throw new ParseException(e.getMessage() + AddDogCommand.MESSAGE_FORMAT_GUIDANCE);
+        }
+
+        Breed breed;
+        try {
+            breed = ParserUtil.parseBreed(breedValue);
+        } catch (ParseException e) {
+            throw new ParseException(e.getMessage() + AddDogCommand.MESSAGE_FORMAT_GUIDANCE);
+        }
+
+        Size size;
+        try {
+            size = ParserUtil.parseSize(sizeValue);
+        } catch (ParseException e) {
+            throw new ParseException(e.getMessage() + AddDogCommand.MESSAGE_FORMAT_GUIDANCE);
+        }
 
         Dog dog = new Dog(name, breed, size);
 
         return new AddDogCommand(dog);
     }
 
-    /**
-     * Returns true if all specified prefixes have values in the given {@code ArgumentMultimap}.
-     */
-    private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
-        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isPresent());
+    private static ParseException missingFieldMessage(String field) {
+        return new ParseException("Please enter a " + field + "." + AddDogCommand.MESSAGE_FORMAT_GUIDANCE);
     }
 
 }

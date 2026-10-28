@@ -218,6 +218,12 @@ public class AddressBookTest {
     }
 
     @Test
+    public void constructor_zeroId_rejectsDog() {
+        assertThrows(IllegalArgumentException.class, "Dog id must be positive.", () ->
+                new Dog(0, new DogName("Cookie"), new Breed("Poodle"), new Size("Small")));
+    }
+
+    @Test
     public void addDogFromStorage_preservesIdAndAdvancesCounter() {
         Dog storedDog = new Dog(7, new DogName("Cookie"),
                 new Breed("Golden Retriever"), new Size("Large"));
@@ -231,8 +237,43 @@ public class AddressBookTest {
     }
 
     @Test
+    public void enrolDogs_zeroDogId_rejectsInvalidId() throws Exception {
+        LocalDate date = LocalDate.of(2028, 2, 29);
+        Activity activity = addressBook.addActivity(new ActivityName("Walk"), date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+
+        assertThrows(seedu.address.model.dog.exceptions.EnrolException.class,
+                "Dog IDs must be positive whole numbers.", () ->
+                        addressBook.enrolDogs(activity.getId(), date, List.of(0)));
+        assertThrows(seedu.address.model.dog.exceptions.EnrolException.class,
+                "Dog IDs must be positive whole numbers.", () ->
+                        addressBook.unenrolDogs(activity.getId(), date, List.of(0)));
+    }
+
+    @Test
     public void setNextDogId_negativeId_throwsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> addressBook.setNextDogId(-1));
+        assertThrows(IllegalArgumentException.class, "Next dog ID must be positive.", () ->
+                addressBook.setNextDogId(0));
+    }
+
+    @Test
+    public void resetData_emptyBookWithZeroCounter_startsAtOne() {
+        ReadOnlyAddressBook legacyData = new ReadOnlyAddressBook() {
+            @Override
+            public ObservableList<Customer> getCustomerList() {
+                return FXCollections.observableArrayList();
+            }
+
+            @Override
+            public int getNextDogId() {
+                return 0;
+            }
+        };
+
+        addressBook.resetData(legacyData);
+
+        assertEquals(1, addressBook.getNextDogId());
     }
 
     @Test

@@ -27,14 +27,18 @@ public class JsonAdaptedEnrolmentTest {
     }
 
     @Test
-    public void toModelType_missingOrNegativeFields_throwsException() {
+    public void toModelType_missingOrNonPositiveFields_throwsException() {
         assertThrows(IllegalValueException.class, () ->
                 new JsonAdaptedEnrolment(null, 7, LocalDate.of(2028, 2, 29)).toModelType());
         assertThrows(IllegalValueException.class, () ->
                 new JsonAdaptedEnrolment(3, null, LocalDate.of(2028, 2, 29)).toModelType());
         assertThrows(IllegalValueException.class, () ->
                 new JsonAdaptedEnrolment(-1, 7, LocalDate.of(2028, 2, 29)).toModelType());
+        assertThrows(IllegalValueException.class, "Activity and dog IDs must be positive.", () ->
+                new JsonAdaptedEnrolment(0, 7, LocalDate.of(2028, 2, 29)).toModelType());
         assertThrows(IllegalValueException.class, () ->
                 new JsonAdaptedEnrolment(3, -1, LocalDate.of(2028, 2, 29)).toModelType());
+        assertThrows(IllegalValueException.class, "Activity and dog IDs must be positive.", () ->
+                new JsonAdaptedEnrolment(3, 0, LocalDate.of(2028, 2, 29)).toModelType());
     }
 }

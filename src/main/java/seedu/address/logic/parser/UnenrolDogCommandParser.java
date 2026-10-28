@@ -7,65 +7,119 @@ import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import seedu.address.logic.commands.UnenrolDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
-/** Parses an activity prefix followed by a comma-separated list of dog IDs. */
+/** Parses one activity ID, one occurrence date, and a whitespace-separated list of dog IDs in any field order. */
 public class UnenrolDogCommandParser implements Parser<UnenrolDogCommand> {
-    private static final Pattern UNENROL_FORMAT = Pattern.compile(
-            "a/-?[0-9]+\\s+date/[^\\s]+\\s+d/(?:-?[0-9]+(?:\\s*,\\s*-?[0-9]+)*)?");
+    private static final Pattern FIELD_FORMAT = Pattern.compile(
+            "(?<prefix>a|date|d)/(?<value>.*?)(?=\\s+(?:a|date|d)/|$)");
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("uuuu-MM-dd")
             .withResolverStyle(ResolverStyle.STRICT);
     private static final String MESSAGE_INVALID_DATE =
             "Date must be a real calendar date in YYYY-MM-DD format.";
-    private static final String MESSAGE_INVALID_IDS =
-            "Activity and dog IDs must be whole numbers from 0 to 2147483647.";
+    private static final String MESSAGE_INVALID_ACTIVITY_ID =
+            "Please provide a positive, valid activity ID.";
+    private static final String MESSAGE_INVALID_DOG_IDS =
+            "Please provide positive, valid dog IDs separated by spaces.";
 
     @Override
     public UnenrolDogCommand parse(String args) throws ParseException {
         String input = args.strip();
-        if (!UNENROL_FORMAT.matcher(input).matches()) {
-            throw invalidFormat();
-        }
+        ParsedFields fields = parseFields(input);
+
+        int activityId;
         try {
-            String[] fields = input.split("\\s+d/", -1);
-            String[] activityFields = activityIdAndDate(fields[0]);
-            int activityId = Integer.parseInt(activityFields[0]);
-            LocalDate date = LocalDate.parse(activityFields[1], DATE_FORMAT);
-            if (fields[1].isBlank()) {
-                throw new ParseException("Provide at least one dog ID.");
-            }
-            List<Integer> dogIds = new ArrayList<>();
-            for (String dogId : fields[1].split("\\s*,\\s*")) {
+            activityId = Integer.parseInt(fields.activityId());
+        } catch (NumberFormatException e) {
+            throw error(MESSAGE_INVALID_ACTIVITY_ID, e);
+        }
+        if (activityId < 1) {
+            throw error(MESSAGE_INVALID_ACTIVITY_ID);
+        }
+
+        LocalDate date;
+        try {
+            date = LocalDate.parse(fields.date(), DATE_FORMAT);
+        } catch (DateTimeException e) {
+            throw error(MESSAGE_INVALID_DATE, e);
+        }
+
+        List<Integer> dogIds = new ArrayList<>();
+        try {
+            for (String dogId : fields.dogIds().split("\\s+")) {
                 dogIds.add(Integer.parseInt(dogId));
             }
-            if (activityId < 0 || dogIds.stream().anyMatch(dogId -> dogId < 0)) {
-                throw new ParseException(MESSAGE_INVALID_IDS);
-            }
-            HashSet<Integer> seenDogIds = new HashSet<>();
-            for (int dogId : dogIds) {
-                if (!seenDogIds.add(dogId)) {
-                    throw new ParseException("Dog ID " + dogId
-                            + " is listed more than once. Provide each dog ID only once.");
-                }
-            }
-            return new UnenrolDogCommand(activityId, date, dogIds);
         } catch (NumberFormatException e) {
-            throw new ParseException(MESSAGE_INVALID_IDS, e);
-        } catch (DateTimeException e) {
-            throw new ParseException(MESSAGE_INVALID_DATE, e);
+            throw error(MESSAGE_INVALID_DOG_IDS, e);
         }
+        if (dogIds.stream().anyMatch(dogId -> dogId < 1)) {
+            throw error(MESSAGE_INVALID_DOG_IDS);
+        }
+        HashSet<Integer> seenDogIds = new HashSet<>();
+        for (int dogId : dogIds) {
+            if (!seenDogIds.add(dogId)) {
+                throw error("Dog ID " + dogId
+                        + " is listed more than once. Please provide each dog ID only once.");
+            }
+        }
+        return new UnenrolDogCommand(activityId, date, dogIds);
     }
 
     private ParseException invalidFormat() {
-        return new ParseException("Invalid unenrol format. Use: unenrol a/ACTIVITY_ID date/YYYY-MM-DD "
-                + "d/DOG_ID[,DOG_ID...]. Example: unenrol a/1 date/2026-10-27 d/2,3");
+        return error("Invalid command format!");
     }
 
-    private String[] activityIdAndDate(String activityField) {
-        String[] fields = activityField.split("\\s+date/");
-        return new String[] {fields[0].substring(2), fields[1]};
+    private ParseException error(String message) {
+        return new ParseException(message + UnenrolDogCommand.MESSAGE_FORMAT_GUIDANCE);
     }
+
+    private ParseException error(String message, Exception cause) {
+        return new ParseException(message + UnenrolDogCommand.MESSAGE_FORMAT_GUIDANCE, cause);
+    }
+
+    private ParsedFields parseFields(String input) throws ParseException {
+        String activityId = null;
+        String date = null;
+        String dogIds = null;
+        Set<String> prefixes = new HashSet<>();
+        int end = 0;
+        Matcher matcher = FIELD_FORMAT.matcher(input);
+        while (matcher.find()) {
+            if (!input.substring(end, matcher.start()).isBlank()) {
+                throw invalidFormat();
+            }
+            String prefix = matcher.group("prefix");
+            if (!prefixes.add(prefix)) {
+                throw error("Multiple values specified for the following single-valued field(s): " + prefix + "/");
+            }
+            String value = matcher.group("value").trim();
+            switch (prefix) {
+                case "a" -> activityId = value;
+                case "date" -> date = value;
+                case "d" -> dogIds = value;
+                default -> throw invalidFormat();
+            }
+            end = matcher.end();
+        }
+        if ((end == 0 && !input.isBlank()) || !input.substring(end).isBlank()) {
+            throw invalidFormat();
+        }
+        if (activityId == null || activityId.isBlank()) {
+            throw error("Please enter an activity ID.");
+        }
+        if (date == null || date.isBlank()) {
+            throw error("Please enter a date.");
+        }
+        if (dogIds == null || dogIds.isBlank()) {
+            throw error("Please enter at least one dog ID.");
+        }
+        return new ParsedFields(activityId, date, dogIds);
+    }
+
+    private record ParsedFields(String activityId, String date, String dogIds) {}
 }

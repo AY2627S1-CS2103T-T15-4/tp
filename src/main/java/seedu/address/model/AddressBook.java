@@ -84,10 +84,10 @@ public class AddressBook implements ReadOnlyAddressBook {
         nextActivityId = nextId;
 
         int restoredNextDogId = newData.getNextDogId();
-        this.nextDogId = restoredNextDogId >= 0
+        this.nextDogId = restoredNextDogId >= 1
                 ? restoredNextDogId
                 : dogs.asUnmodifiableObservableList().stream()
-                        .mapToInt(Dog::getId).max().orElse(-1) + 1;
+                        .mapToInt(Dog::getId).max().orElse(0) + 1;
 
         int restoredNextCustomerId = newData.getNextCustomerId();
         this.nextCustomerId = restoredNextCustomerId >= 0
@@ -304,7 +304,8 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Enrols a batch of existing dogs into one occurrence of an existing activity atomically.
+     * Enrols a batch of existing dogs identified by distinct positive IDs into one occurrence of an existing
+     * activity atomically.
      *
      * @throws EnrolException if the date, IDs, recurrence, duplicate, or time-conflict checks fail
      */
@@ -332,7 +333,8 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Removes a batch of existing dogs from one occurrence of an existing activity atomically.
+     * Removes a batch of existing dogs identified by distinct positive IDs from one occurrence of an existing
+     * activity atomically.
      *
      * @throws EnrolException if the date, IDs, recurrence, or enrolment checks fail
      */
@@ -360,7 +362,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Links all requested dogs to an existing customer, regardless of display filters.
+     * Links dogs identified by distinct positive IDs to an existing customer, regardless of display filters.
      * Validates the entire batch before replacing the dog list. Rejected batches change nothing.
      *
      * @throws LinkException if IDs repeat, endpoints are missing, or any dog already has an owner.
@@ -370,6 +372,9 @@ public class AddressBook implements ReadOnlyAddressBook {
         if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
                 || new HashSet<>(dogIds).size() != dogIds.size()) {
             throw new LinkException("Specify at least one dog ID, with no repeated IDs.");
+        }
+        if (dogIds.stream().anyMatch(dogId -> dogId < 1)) {
+            throw new LinkException("Dog IDs must be positive.");
         }
         if (getCustomerList().stream().noneMatch(customer -> customer.getId() == customerId)) {
             throw new LinkException("Customer ID " + customerId + " does not exist.");
@@ -390,7 +395,8 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Unlinks a batch from their current owners without deleting records or changing filters.
+     * Unlinks dogs identified by distinct positive IDs from their current owners without deleting records or
+     * changing filters.
      * Validates every endpoint and ownership before publishing the updated dog list.
      *
      * @throws UnlinkException if the batch is empty, IDs repeat, dogs are missing,
@@ -401,6 +407,9 @@ public class AddressBook implements ReadOnlyAddressBook {
         if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
                 || new HashSet<>(dogIds).size() != dogIds.size()) {
             throw new UnlinkException("Specify at least one dog ID, with no repeated IDs.");
+        }
+        if (dogIds.stream().anyMatch(dogId -> dogId < 1)) {
+            throw new UnlinkException("Dog IDs must be positive.");
         }
         Map<Integer, Dog> replacements = new HashMap<>();
         for (int dogId : dogIds) {
@@ -467,8 +476,9 @@ public class AddressBook implements ReadOnlyAddressBook {
     /**
      * Adds a dog loaded from storage without assigning it a new ID.
      *
-     * @param identified dog with its persisted ID
+     * @param identified dog with its positive persisted ID
      * @return the stored dog
+     * @throws IllegalArgumentException if the dog does not have a positive persistent ID
      */
     public Dog addDogFromStorage(Dog identified) {
         requireNonNull(identified);
@@ -488,10 +498,14 @@ public class AddressBook implements ReadOnlyAddressBook {
         return nextCustomerId;
     }
 
-    /** Restores the next unused dog ID from persistent storage. */
+    /**
+     * Restores the next unused positive dog ID from persistent storage.
+     *
+     * @throws IllegalArgumentException if {@code nextDogId} is not positive
+     */
     public void setNextDogId(int nextDogId) {
-        if (nextDogId < 0) {
-            throw new IllegalArgumentException("Next dog ID must be nonnegative.");
+        if (nextDogId < 1) {
+            throw new IllegalArgumentException("Next dog ID must be positive.");
         }
         this.nextDogId = nextDogId;
     }
@@ -583,15 +597,15 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     private Activity getActivity(int activityId) throws EnrolException {
-        if (activityId < 0) {
-            throw new EnrolException("Activity IDs must be whole numbers from 0 to 2147483647.");
+        if (activityId < 1) {
+            throw new EnrolException("Activity IDs must be positive whole numbers.");
         }
         return getActivityList().stream().filter(activity -> activity.getId() == activityId).findFirst()
                 .orElseThrow(() -> new EnrolException("Activity ID " + activityId + " does not exist."));
     }
 
     private void validateDogExists(int dogId) throws EnrolException {
-        if (getDogList().stream().noneMatch(dog -> dog.getId() == dogId)) {
+        if (dogId < 1 || getDogList().stream().noneMatch(dog -> dog.getId() == dogId)) {
             throw new EnrolException("Dog ID " + dogId + " does not exist.");
         }
     }
@@ -605,8 +619,8 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
         HashSet<Integer> seen = new HashSet<>();
         for (int dogId : dogIds) {
-            if (dogId < 0) {
-                throw new EnrolException("Dog IDs must be whole numbers from 0 to 2147483647.");
+            if (dogId < 1) {
+                throw new EnrolException("Dog IDs must be positive whole numbers.");
             }
             if (!seen.add(dogId)) {
                 throw new EnrolException("Dog ID " + dogId
