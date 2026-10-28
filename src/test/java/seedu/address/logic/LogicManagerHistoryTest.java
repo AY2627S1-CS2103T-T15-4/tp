@@ -133,7 +133,8 @@ public class LogicManagerHistoryTest {
                 List<String> savedBeforeClear = harness.savedDogNames();
                 harness.storage.failure = failure;
 
-                harness.assertSaveFailure("clear", failure);
+                harness.logic.execute("clear");
+                harness.assertSaveFailure("y", failure);
                 assertEquals(List.of(), harness.dogNames());
                 assertEquals(savedBeforeClear, harness.savedDogNames());
                 harness.storage.failure = null;

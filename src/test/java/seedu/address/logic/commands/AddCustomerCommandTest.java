@@ -107,7 +107,7 @@ public class AddCustomerCommandTest {
         }
 
         @Override
-        public int setActivity(Activity target, Activity editedActivity) {
+        public void setActivity(Activity target, Activity editedActivity) {
             throw unused();
         }
 
