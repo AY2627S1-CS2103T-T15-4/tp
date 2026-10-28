@@ -124,6 +124,13 @@ Example: `deleteactivity 21`
 The ID must be a nonnegative integer belonging to an existing activity. Invalid or missing IDs
 leave the activity and enrolments unchanged.
 
+### Editing an activity: `editactivity`
+
+Edits an activity with the specified persistent ID. An activity can be edited only when it has no enrolments.
+If dogs are enrolled, the command leaves the activity unchanged and suggests creating a new activity instead.
+
+Format: `editactivity ACTIVITY_ID [n/NAME] [date/YYYY-MM-DD] [start/HH:mm] [end/HH:mm] [r/once|daily|weekly]`
+
 ### Searching activities: `searcha`
 
 Searches activities by name, date, time, and/or recurrence. At least one field must be provided, and all supplied

@@ -378,13 +378,14 @@ success message, `LogicManager` saves the updated address book.
 
 `AddressBookParser` routes `editactivity` to `EditActivityCommandParser`. The parser requires a
 persistent activity ID and at least one replacement field. `EditActivityCommand` finds the stored
-activity by ID, builds an immutable replacement with the same ID, and calls
-`Model.setActivity`. Fields omitted from the command retain their stored values.
+activity by ID and rejects the edit if any enrolment references that activity, suggesting that the
+user create a new activity instead. Fields omitted from a permitted edit retain their stored values.
+For an activity with no enrolments, the command builds an immutable replacement with the same ID and
+calls `Model.setActivity`.
 
-`ModelManager` delegates the replacement to `AddressBook`. If the start date or recurrence changes,
-the address book removes that activity's enrolments. Otherwise it retains them after checking that
-the edited schedule does not overlap another activity attended by the same dog. The returned count
-of removed enrolments appears in the command feedback. `LogicManager` then saves the address book.
+`ModelManager` delegates the replacement to `AddressBook`, which checks that the activity is still
+stored and that the edited schedule does not overlap another activity attended by the same dog.
+Enrolments are never removed by editing. `LogicManager` then saves the address book.
 
 <puml src="diagrams/EditActivitySequenceDiagram.puml" alt="Parsing, executing and saving an editactivity command" />
 

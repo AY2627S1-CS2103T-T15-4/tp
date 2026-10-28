@@ -160,8 +160,8 @@ public class AddressBook implements ReadOnlyAddressBook {
         return activity;
     }
 
-    /** Replaces a schedule after checking retained enrolments for conflicts. */
-    public int setActivity(Activity target, Activity editedActivity) {
+    /** Replaces an activity only when it has no enrolments, after checking for schedule conflicts. */
+    public void setActivity(Activity target, Activity editedActivity) {
         requireNonNull(target);
         requireNonNull(editedActivity);
         if (target.getId() != editedActivity.getId()) {
@@ -177,19 +177,12 @@ public class AddressBook implements ReadOnlyAddressBook {
         if (index < 0 || !activities.get(index).equals(target)) {
             throw new IllegalArgumentException("Activity to edit does not match a stored activity.");
         }
-        boolean occurrenceDatesChanged = !target.getStartDate().equals(editedActivity.getStartDate())
-                || target.getRecurrence() != editedActivity.getRecurrence();
-        if (!occurrenceDatesChanged) {
-            validateNoActivityConflict(editedActivity);
+        if (enrolments.stream().anyMatch(enrolment -> enrolment.getActivityId() == target.getId())) {
+            throw new IllegalArgumentException("Activity ID " + target.getId()
+                    + " has enrolments and cannot be edited. Create a new activity instead.");
         }
-        int removedEnrolments = occurrenceDatesChanged
-                ? (int) enrolments.stream().filter(enrolment -> enrolment.getActivityId() == target.getId()).count()
-                : 0;
+        validateNoActivityConflict(editedActivity);
         activities.set(index, editedActivity);
-        if (occurrenceDatesChanged) {
-            enrolments.removeIf(enrolment -> enrolment.getActivityId() == target.getId());
-        }
-        return removedEnrolments;
     }
 
     /** Rejects an edited schedule that would overlap another activity attended by the same dog. */

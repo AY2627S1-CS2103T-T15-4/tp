@@ -132,8 +132,8 @@ public class ModelManager implements Model {
     }
 
     @Override
-    public int setActivity(Activity target, Activity editedActivity) {
-        return addressBook.setActivity(target, editedActivity);
+    public void setActivity(Activity target, Activity editedActivity) {
+        addressBook.setActivity(target, editedActivity);
     }
 
     @Override
