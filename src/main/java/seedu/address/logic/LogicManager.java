@@ -175,6 +175,11 @@ public class LogicManager implements Logic {
     }
 
     @Override
+    public javafx.beans.Observable getActivityEnrolmentContextChanges() {
+        return model.getActivityEnrolmentContextChanges();
+    }
+
+    @Override
     public GuiSettings getGuiSettings() {
         return model.getGuiSettings();
     }

@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import seedu.address.commons.core.GuiSettings;
@@ -45,6 +46,7 @@ public class ModelManager implements Model {
     private Integer selectedDogId;
     private Integer selectedCustomerId;
     private Predicate<Dog> enrolmentDogPredicate;
+    private final SimpleIntegerProperty enrolmentContextVersion = new SimpleIntegerProperty();
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
@@ -81,6 +83,7 @@ public class ModelManager implements Model {
         selectedDogId = state.selectedDogId();
         selectedCustomerId = state.selectedCustomerId();
         enrolmentDogPredicate = state.enrolmentDogPredicate();
+        signalEnrolmentContextChanged();
         filteredCustomers.setPredicate(null);
         filteredDogs.setPredicate(null);
         filteredActivities.setPredicate(null);
@@ -283,11 +286,22 @@ public class ModelManager implements Model {
         activeActivityPredicate = predicate;
         filteredActivities.setPredicate(predicate);
         enrolmentDogPredicate = null;
+        signalEnrolmentContextChanged();
     }
 
     @Override
     public void setActivityEnrolmentDogPredicate(Predicate<Dog> predicate) {
         enrolmentDogPredicate = predicate;
+        signalEnrolmentContextChanged();
+    }
+
+    @Override
+    public javafx.beans.Observable getActivityEnrolmentContextChanges() {
+        return enrolmentContextVersion;
+    }
+
+    private void signalEnrolmentContextChanged() {
+        enrolmentContextVersion.set(enrolmentContextVersion.get() + 1);
     }
 
     @Override

@@ -7,6 +7,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.function.Predicate;
 
+import javafx.beans.Observable;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.activity.Activity;
@@ -156,6 +158,11 @@ public interface Model {
     default String getActivityEnrolmentSummary(Activity activity) {
         requireNonNull(activity);
         return "";
+    }
+
+    /** Returns an observable signal for changes to the activity-card enrolment context. */
+    default Observable getActivityEnrolmentContextChanges() {
+        return new SimpleIntegerProperty();
     }
 
     /** Shows activities with an occurrence on or after the given date. */

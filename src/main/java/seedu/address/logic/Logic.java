@@ -1,5 +1,6 @@
 package seedu.address.logic;
 
+import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.CommandResult;
@@ -43,6 +44,11 @@ public interface Logic {
 
     /** Returns the current search-specific enrolment summary for an activity. */
     String getActivityEnrolmentSummary(Activity activity);
+
+    /** Returns an observable signal for changes to the activity-card enrolment context. */
+    default Observable getActivityEnrolmentContextChanges() {
+        return new javafx.beans.property.SimpleIntegerProperty();
+    }
 
     /**
      * Returns the user prefs' GUI settings.

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -89,6 +90,23 @@ public class ListPanelsTest {
             enrolments.add(new Enrolment(ACTIVITY.getId(), DOG.getId(), LocalDate.of(2028, 3, 1)));
             assertEquals("2. Buddy: 2028-03-01", label(list.getItems().get(0).get(), "enrolments"));
             enrolments.clear();
+            assertEquals("", label(list.getItems().get(0).get(), "enrolments"));
+        });
+    }
+
+    @Test
+    public void activityListPanel_refreshesRenderedCardWhenContextChanges() throws Exception {
+        runOnFxThread(() -> {
+            ObservableList<Activity> activities = FXCollections.observableArrayList(ACTIVITY);
+            SimpleIntegerProperty contextVersion = new SimpleIntegerProperty();
+            ActivityListPanel panel = new ActivityListPanel(activities, null, contextVersion,
+                    activity -> contextVersion.get() == 1 ? "2. Buddy: 2028-03-01" : "");
+            ListView<Supplier<Region>> list = listView(panel);
+
+            assertEquals("", label(list.getItems().get(0).get(), "enrolments"));
+            contextVersion.set(1);
+            assertEquals("2. Buddy: 2028-03-01", label(list.getItems().get(0).get(), "enrolments"));
+            contextVersion.set(2);
             assertEquals("", label(list.getItems().get(0).get(), "enrolments"));
         });
     }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -32,6 +33,12 @@ public class ActivityListPanel extends UiPart<Region> {
     /** Creates a panel with a dynamic activity-specific enrolment summary. */
     public ActivityListPanel(ObservableList<Activity> activities, ObservableList<Enrolment> enrolments,
             Function<Activity, String> enrolmentSummary) {
+        this(activities, enrolments, null, enrolmentSummary);
+    }
+
+    /** Creates a panel that also refreshes when the search enrolment context changes. */
+    public ActivityListPanel(ObservableList<Activity> activities, ObservableList<Enrolment> enrolments,
+            Observable contextChanges, Function<Activity, String> enrolmentSummary) {
         super(FXML);
         this.activities = activities;
         this.enrolmentSummary = enrolmentSummary;
@@ -39,6 +46,9 @@ public class ActivityListPanel extends UiPart<Region> {
         activities.addListener((ListChangeListener<Activity>) change -> updateActivities());
         if (enrolments != null) {
             enrolments.addListener((ListChangeListener<Enrolment>) change -> updateActivities());
+        }
+        if (contextChanges != null) {
+            contextChanges.addListener(observable -> updateActivities());
         }
         updateActivities();
     }
