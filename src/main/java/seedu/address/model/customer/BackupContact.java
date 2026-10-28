@@ -11,8 +11,8 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
  */
 public class BackupContact {
     public static final String MESSAGE_CONSTRAINTS =
-            "Phone numbers should only contain digits, and should be at least 3 digits long";
-    public static final String VALIDATION_REGEX = "\\d{3,}";
+            "Backup contact numbers should contain exactly 8 digits";
+    public static final String VALIDATION_REGEX = "\\d{8}";
     public final String value;
 
     /**
