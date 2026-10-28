@@ -9,6 +9,7 @@ import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
@@ -137,6 +138,15 @@ public interface Model {
     /** Returns all schedules, independently of dog/customer filters. */
     default ObservableList<Activity> getActivityList() {
         return getAddressBook().getActivityList();
+    }
+
+    /**
+     * Returns all dated enrolments as a live unmodifiable observable view.
+     *
+     * @return all dated enrolments
+     */
+    default ObservableList<Enrolment> getEnrolmentList() {
+        return getAddressBook().getEnrolmentList();
     }
 
     /** Returns an unmodifiable observable view of filtered activities. */

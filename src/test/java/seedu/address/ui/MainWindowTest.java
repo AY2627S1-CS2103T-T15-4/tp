@@ -6,8 +6,11 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -28,9 +31,12 @@ import javafx.scene.shape.Ellipse;
 import javafx.stage.Stage;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
+import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
+import seedu.address.model.UserPrefs;
 import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
@@ -43,6 +49,9 @@ import seedu.address.storage.StorageManager;
 
 public class MainWindowTest {
     private static final Customer LILY = new Customer(1, "Lily Koh", "91234567", "lily@gmail.com", "98765432");
+    private static final LocalDate FIXED_TODAY = LocalDate.of(2026, 10, 28);
+    private static final LocalDate FAR_FUTURE = LocalDate.of(9999, 12, 31);
+    private static final Clock FIXED_CLOCK = Clock.fixed(Instant.parse("2026-10-28T04:00:00Z"), ZoneOffset.UTC);
 
     @BeforeAll
     public static void startJavaFx() throws Exception {
@@ -148,6 +157,75 @@ public class MainWindowTest {
             assertEquals("Daily walk", label(activities.getItems().get(0).get(), "name"));
             assertEquals("Today walk", label(activities.getItems().get(1).get(), "name"));
             assertEquals("Future walk", label(activities.getItems().get(2).get(), "name"));
+        });
+    }
+
+    @Test
+    public void activityBookingSummaries_ignoreDogFilterAndRefreshAcrossCommands() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-bookings");
+        AddressBook book = new AddressBook();
+        book.addDogFromStorage(new Dog(1, new DogName("Cookie"), new Breed("Chihuahua"), new Size("Small")));
+        book.addDogFromStorage(new Dog(2, new DogName("Milo"), new Breed("Poodle"), new Size("Medium")));
+        book.addActivity(new ActivityName("Today walk"), FIXED_TODAY,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        book.addActivity(new ActivityName("Future walk"), FAR_FUTURE,
+                LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
+        book.addEnrolmentFromStorage(new Enrolment(1, 1, FIXED_TODAY));
+        Model model = new ModelManager(book, new UserPrefs());
+        model.updateFilteredDogList(unused -> false);
+        Logic logic = new LogicManager(model, new StorageManager(
+                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"), FIXED_CLOCK);
+            window.fillInnerParts();
+            ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
+            ListView<Supplier<Region>> activities = listView(window.getActivityListPanel());
+            StackPane todayPlaceholder = (StackPane) window.getPrimaryStage().getScene()
+                    .lookup("#todayActivityListPanelPlaceholder");
+            @SuppressWarnings("unchecked")
+            ListView<Supplier<Region>> todayActivities = (ListView<Supplier<Region>>) todayPlaceholder
+                    .lookup("#recordListView");
+
+            assertTrue(dogs.getItems().isEmpty());
+            assertEquals("Dogs with upcoming bookings: 1",
+                    label(activities.getItems().get(0).get(), "dogSummary"));
+            assertEquals("Dogs enrolled on " + FIXED_TODAY + ": 1",
+                    label(todayActivities.getItems().get(0).get(), "dogSummary"));
+            assertEquals("Today · 28 Oct 2026", ((Label) window.getPrimaryStage().getScene()
+                    .lookup("#todayActivitiesHeader")).getText());
+            assertEquals("Dogs with upcoming bookings: None",
+                    label(activities.getItems().get(1).get(), "dogSummary"));
+
+            window.executeCommand("enrol a/2 date/" + FAR_FUTURE + " d/2");
+            assertEquals("Dogs with upcoming bookings: 2",
+                    label(activities.getItems().get(1).get(), "dogSummary"));
+            window.executeCommand("unenrol a/2 date/" + FAR_FUTURE + " d/2");
+            assertEquals("Dogs with upcoming bookings: None",
+                    label(activities.getItems().get(1).get(), "dogSummary"));
+
+            window.executeCommand("unenrol a/1 date/" + FIXED_TODAY + " d/1");
+            assertEquals("Dogs with upcoming bookings: None",
+                    label(activities.getItems().get(0).get(), "dogSummary"));
+            assertEquals("Dogs enrolled on " + FIXED_TODAY + ": None",
+                    label(todayActivities.getItems().get(0).get(), "dogSummary"));
+
+            window.executeCommand("undo");
+            assertEquals("Dogs with upcoming bookings: 1",
+                    label(activities.getItems().get(0).get(), "dogSummary"));
+            window.executeCommand("redo");
+            assertEquals("Dogs with upcoming bookings: None",
+                    label(activities.getItems().get(0).get(), "dogSummary"));
+
+            window.executeCommand("undo");
+            window.executeCommand("delete dog 1");
+            assertEquals("Dogs with upcoming bookings: None",
+                    label(activities.getItems().get(0).get(), "dogSummary"));
+
+            window.executeCommand("clear");
+            assertTrue(activities.getItems().isEmpty());
+            assertTrue(todayActivities.getItems().isEmpty());
         });
     }
 

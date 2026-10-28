@@ -31,6 +31,11 @@ public interface ReadOnlyAddressBook {
         return FXCollections.emptyObservableList();
     }
 
+    /**
+     * Returns a live unmodifiable observable collection of dated enrolments.
+     *
+     * @return the dated enrolments
+     */
     default ObservableList<Enrolment> getEnrolmentList() {
         return FXCollections.emptyObservableList();
     }

@@ -6,6 +6,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 
@@ -33,6 +34,13 @@ public interface Logic {
 
     /** Returns an unmodifiable observable view of all activities. */
     ObservableList<Activity> getActivityList();
+
+    /**
+     * Returns a live unmodifiable observable view of all dated enrolments.
+     *
+     * @return all dated enrolments
+     */
+    ObservableList<Enrolment> getEnrolmentList();
 
     /** Returns an unmodifiable observable view of filtered activities. */
     ObservableList<Activity> getFilteredActivityList();

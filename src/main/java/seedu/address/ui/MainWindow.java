@@ -1,8 +1,10 @@
 package seedu.address.ui;
 
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -41,6 +43,7 @@ public class MainWindow extends UiPart<Stage> {
 
     private Stage primaryStage;
     private Logic logic;
+    private final Clock clock;
 
     // Independent Ui parts residing in this Ui container
     private CustomerListPanel customerListPanel;
@@ -82,11 +85,17 @@ public class MainWindow extends UiPart<Stage> {
      * and the data file path to show in the status bar.
      */
     public MainWindow(Stage primaryStage, Logic logic, Path dataFilePath) {
+        this(primaryStage, logic, dataFilePath, Clock.systemDefaultZone());
+    }
+
+    /** Creates a main window with an injectable clock for deterministic date-sensitive views. */
+    MainWindow(Stage primaryStage, Logic logic, Path dataFilePath, Clock clock) {
         super(FXML, primaryStage);
 
         // Set dependencies
         this.primaryStage = primaryStage;
         this.logic = logic;
+        this.clock = Objects.requireNonNull(clock);
         // Configure the UI
         setWindowDefaultSize(logic.getGuiSettings());
 
@@ -146,12 +155,13 @@ public class MainWindow extends UiPart<Stage> {
         dogListPanel = new DogListPanel(logic.getFilteredDogList());
         dogListPanelPlaceholder.getChildren().add(dogListPanel.getRoot());
 
-        activityListPanel = new ActivityListPanel(logic.getFilteredActivityList());
+        activityListPanel = new ActivityListPanel(logic.getFilteredActivityList(), logic.getEnrolmentList(),
+                clock, false);
         activityListPanelPlaceholder.getChildren().add(activityListPanel.getRoot());
 
-        todayActivityListPanel = new TodayActivityListPanel(logic.getActivityList());
+        todayActivityListPanel = new TodayActivityListPanel(logic.getActivityList(), logic.getEnrolmentList(), clock);
         todayActivityListPanelPlaceholder.getChildren().add(todayActivityListPanel.getRoot());
-        todayActivitiesHeader.setText("Today · " + LocalDate.now().format(TODAY_HEADER_FORMAT));
+        refreshActivityPanels();
 
         resultDisplay = new ResultDisplay();
         resultDisplayPlaceholder.getChildren().add(resultDisplay.getRoot());
@@ -282,6 +292,7 @@ public class MainWindow extends UiPart<Stage> {
     CommandResult executeCommand(String commandText) throws CommandException, ParseException {
         try {
             CommandResult commandResult = logic.execute(commandText);
+            refreshActivityPanels();
             logger.info("Result: " + commandResult.getFeedbackToUser());
             resultDisplay.setFeedbackToUser(commandResult.getFeedbackToUser());
 
@@ -299,5 +310,12 @@ public class MainWindow extends UiPart<Stage> {
             resultDisplay.setFeedbackToUser(e.getMessage());
             throw e;
         }
+    }
+
+    private void refreshActivityPanels() {
+        LocalDate today = LocalDate.now(clock);
+        activityListPanel.refresh(today);
+        todayActivityListPanel.refresh(today);
+        todayActivitiesHeader.setText("Today · " + today.format(TODAY_HEADER_FORMAT));
     }
 }

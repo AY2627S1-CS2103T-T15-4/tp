@@ -28,6 +28,7 @@
       <Label fx:id="date" styleClass="cell_small_label" />
       <Label fx:id="time" styleClass="cell_small_label" />
       <Label fx:id="recurrence" styleClass="cell_small_label" />
+      <Label fx:id="dogSummary" styleClass="cell_small_label" wrapText="true" maxWidth="Infinity" />
     </VBox>
   </GridPane>
 </HBox>

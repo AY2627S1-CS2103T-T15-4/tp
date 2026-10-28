@@ -4,12 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -23,6 +27,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
@@ -37,6 +42,8 @@ public class ListPanelsTest {
     private static final Dog DOG = new Dog(2, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
     private static final Activity ACTIVITY = new Activity(3, new ActivityName("Walk"),
             LocalDate.of(2028, 2, 29), LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.WEEKLY);
+    private static final Clock CLOCK = Clock.fixed(Instant.parse("2026-10-28T04:00:00Z"), ZoneOffset.UTC);
+    private static final LocalDate TODAY = LocalDate.of(2026, 10, 28);
 
     @BeforeAll
     public static void startJavaFx() throws Exception {
@@ -57,12 +64,30 @@ public class ListPanelsTest {
     @Test
     public void activityCard_displaysAllFields() throws Exception {
         runOnFxThread(() -> {
-            Region card = new ActivityCard(ACTIVITY).getRoot();
+            Region card = new ActivityCard(ACTIVITY, "Dogs with upcoming bookings: 2, 10").getRoot();
             assertEquals("3. ", label(card, "id"));
             assertEquals("Walk", label(card, "name"));
-            assertEquals("Date: 2028-02-29", label(card, "date"));
+            assertEquals("Schedule starts: 2028-02-29", label(card, "date"));
             assertEquals("Time: 09:00 - 10:00", label(card, "time"));
             assertEquals("Recurrence: WEEKLY", label(card, "recurrence"));
+            assertEquals("Dogs with upcoming bookings: 2, 10", label(card, "dogSummary"));
+            assertTrue(((Label) card.lookup("#dogSummary")).isWrapText());
+        });
+    }
+
+    @Test
+    public void activityCard_manyDogIds_wrapsWithoutClippingInNarrowCard() throws Exception {
+        runOnFxThread(() -> {
+            String dogIds = String.join(", ", IntStream.rangeClosed(1, 30).mapToObj(String::valueOf).toList());
+            Region card = new ActivityCard(ACTIVITY, "Dogs with upcoming bookings: " + dogIds).getRoot();
+            Scene scene = new Scene(card, 190, 300);
+            scene.getRoot().applyCss();
+            scene.getRoot().layout();
+            Label summary = (Label) card.lookup("#dogSummary");
+
+            assertTrue(summary.isWrapText());
+            assertTrue(summary.getHeight() > 20);
+            assertTrue(summary.getBoundsInParent().getMaxY() <= card.getBoundsInLocal().getMaxY());
         });
     }
 
@@ -108,11 +133,14 @@ public class ListPanelsTest {
     public void activityListPanel_displaysAndRefreshesActivities() throws Exception {
         runOnFxThread(() -> {
             ObservableList<Activity> activities = FXCollections.observableArrayList(ACTIVITY);
-            ActivityListPanel panel = new ActivityListPanel(activities);
+            ActivityListPanel panel = new ActivityListPanel(activities, FXCollections.observableArrayList(),
+                    CLOCK, false);
             ListView<Supplier<Region>> list = listView(panel);
 
             assertEquals(1, list.getItems().size());
             assertEquals("Walk", label(list.getItems().get(0).get(), "name"));
+            assertEquals("Dogs with upcoming bookings: None",
+                    label(list.getItems().get(0).get(), "dogSummary"));
             show(panel);
             activities.add(new Activity(4, new ActivityName("Training"), ACTIVITY.getStartDate(),
                     ACTIVITY.getStartTime(), ACTIVITY.getEndTime(), Recurrence.ONCE));
@@ -124,23 +152,60 @@ public class ListPanelsTest {
     @Test
     public void todayActivityListPanel_showsOnlyTodaysActivitiesAndRefreshes() throws Exception {
         runOnFxThread(() -> {
-            LocalDate today = LocalDate.now();
-            Activity todayActivity = new Activity(5, new ActivityName("Today walk"), today,
+            Activity todayActivity = new Activity(5, new ActivityName("Today walk"), TODAY,
                     LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
             ObservableList<Activity> activities = javafx.collections.FXCollections.observableArrayList(
                     todayActivity,
-                    new Activity(6, new ActivityName("Upcoming"), today.plusDays(1),
+                    new Activity(6, new ActivityName("Upcoming"), TODAY.plusDays(1),
                             LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE));
-            TodayActivityListPanel panel = new TodayActivityListPanel(activities);
+            ObservableList<Enrolment> enrolments = FXCollections.observableArrayList(
+                    new Enrolment(5, 2, TODAY), new Enrolment(5, 10, TODAY.plusDays(1)));
+            TodayActivityListPanel panel = new TodayActivityListPanel(activities, enrolments, CLOCK);
             ListView<Supplier<Region>> list = listView(panel);
 
             assertEquals(1, list.getItems().size());
             assertEquals("Today walk", label(list.getItems().get(0).get(), "name"));
+            assertEquals("Dogs enrolled on 2026-10-28: 2", label(list.getItems().get(0).get(), "dogSummary"));
 
-            activities.add(new Activity(7, new ActivityName("Today training"), today,
+            activities.add(new Activity(7, new ActivityName("Today training"), TODAY,
                     LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.WEEKLY));
             assertEquals(2, list.getItems().size());
             assertEquals("Today training", label(list.getItems().get(1).get(), "name"));
+            assertEquals("Dogs enrolled on 2026-10-28: None",
+                    label(list.getItems().get(1).get(), "dogSummary"));
+        });
+    }
+
+    @Test
+    public void activityListPanel_summariesUseDatedEnrolmentsForEveryRecurrenceAndRefresh() throws Exception {
+        runOnFxThread(() -> {
+            ObservableList<Activity> activities = FXCollections.observableArrayList(
+                    new Activity(1, new ActivityName("Once"), TODAY,
+                            LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE),
+                    new Activity(2, new ActivityName("Daily"), TODAY.minusDays(5),
+                            LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.DAILY),
+                    new Activity(3, new ActivityName("Weekly"), TODAY.minusWeeks(1),
+                            LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.WEEKLY));
+            ObservableList<Enrolment> enrolments = FXCollections.observableArrayList(
+                    new Enrolment(1, 10, TODAY),
+                    new Enrolment(2, 2, TODAY.plusDays(1)),
+                    new Enrolment(2, 2, TODAY.plusDays(2)),
+                    new Enrolment(3, 7, TODAY.minusDays(1)));
+            ActivityListPanel panel = new ActivityListPanel(activities, enrolments, CLOCK, false);
+            ListView<Supplier<Region>> list = listView(panel);
+
+            assertEquals("Dogs with upcoming bookings: 10", label(list.getItems().get(0).get(), "dogSummary"));
+            assertEquals("Dogs with upcoming bookings: 2", label(list.getItems().get(1).get(), "dogSummary"));
+            assertEquals("Dogs with upcoming bookings: None", label(list.getItems().get(2).get(), "dogSummary"));
+
+            enrolments.add(new Enrolment(3, 7, TODAY));
+            assertEquals("Dogs with upcoming bookings: 7", label(list.getItems().get(2).get(), "dogSummary"));
+            enrolments.removeIf(enrolment -> enrolment.getActivityId() == 3);
+            assertEquals("Dogs with upcoming bookings: None", label(list.getItems().get(2).get(), "dogSummary"));
+
+            activities.set(0, new Activity(1, new ActivityName("Renamed"), TODAY,
+                    LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE));
+            assertEquals("Renamed", label(list.getItems().get(0).get(), "name"));
         });
     }
 
@@ -150,7 +215,8 @@ public class ListPanelsTest {
             CustomerListPanel customers = new CustomerListPanel(FXCollections.observableArrayList(),
                     FXCollections.observableArrayList());
             DogListPanel dogs = new DogListPanel(FXCollections.observableArrayList());
-            ActivityListPanel activities = new ActivityListPanel(FXCollections.observableArrayList());
+            ActivityListPanel activities = new ActivityListPanel(FXCollections.observableArrayList(),
+                    FXCollections.observableArrayList());
 
             show(customers);
             show(dogs);

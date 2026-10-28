@@ -1,5 +1,9 @@
 package seedu.address.ui;
 
+import static java.util.Objects.requireNonNull;
+
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -11,6 +15,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
 import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.Enrolment;
 
 /** Displays activity cards in a list. */
 public class ActivityListPanel extends UiPart<Region> {
@@ -20,19 +25,62 @@ public class ActivityListPanel extends UiPart<Region> {
     private ListView<Supplier<Region>> recordListView;
 
     private final ObservableList<Activity> activities;
+    private final ObservableList<Enrolment> enrolments;
+    private final Clock clock;
+    private final boolean todayPanel;
 
-    /** Creates a panel that displays the supplied activities. */
-    public ActivityListPanel(ObservableList<Activity> activities) {
-        super(FXML);
-        this.activities = activities;
-        recordListView.setCellFactory(listView -> new RecordListViewCell());
-        activities.addListener((ListChangeListener<Activity>) change -> updateActivities());
-        updateActivities();
+    /**
+     * Creates a general panel showing upcoming dog bookings for the supplied activities.
+     *
+     * @param activities schedules permitted by the current activity filter
+     * @param enrolments all stored dated enrolments
+     */
+    public ActivityListPanel(ObservableList<Activity> activities, ObservableList<Enrolment> enrolments) {
+        this(activities, enrolments, Clock.systemDefaultZone(), false);
     }
 
-    private void updateActivities() {
+    /**
+     * Creates a date-sensitive panel with an injectable clock.
+     *
+     * @param activities schedules available to the panel
+     * @param enrolments all stored dated enrolments
+     * @param clock local-date source
+     * @param todayPanel whether to show only today's schedules and bookings
+     */
+    protected ActivityListPanel(ObservableList<Activity> activities, ObservableList<Enrolment> enrolments,
+            Clock clock, boolean todayPanel) {
+        super(FXML);
+        this.activities = requireNonNull(activities);
+        this.enrolments = requireNonNull(enrolments);
+        this.clock = requireNonNull(clock);
+        this.todayPanel = todayPanel;
+        recordListView.setCellFactory(listView -> new RecordListViewCell());
+        activities.addListener((ListChangeListener<Activity>) change -> refresh());
+        enrolments.addListener((ListChangeListener<Enrolment>) change -> refresh());
+        refresh();
+    }
+
+    /** Rebuilds cards using one captured current date for this update. */
+    public void refresh() {
+        refresh(LocalDate.now(clock));
+    }
+
+    /**
+     * Rebuilds cards using the supplied current date.
+     *
+     * @param today current local date shared across the coordinated panel refresh
+     */
+    public void refresh(LocalDate today) {
+        requireNonNull(today);
         List<Supplier<Region>> cards = new ArrayList<>();
-        activities.forEach(activity -> cards.add(() -> new ActivityCard(activity).getRoot()));
+        activities.stream()
+                .filter(activity -> !todayPanel || activity.occursOn(today))
+                .forEach(activity -> {
+                    String summary = todayPanel
+                            ? ActivityBookingSummary.bookingsOn(enrolments, activity.getId(), today)
+                            : ActivityBookingSummary.upcomingBookings(enrolments, activity.getId(), today);
+                    cards.add(() -> new ActivityCard(activity, summary).getRoot());
+                });
         recordListView.getItems().setAll(cards);
     }
 

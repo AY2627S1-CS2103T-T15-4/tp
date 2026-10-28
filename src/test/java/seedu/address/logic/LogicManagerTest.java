@@ -1,6 +1,7 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.testutil.Assert.assertThrows;
 
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +30,9 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
@@ -152,6 +157,38 @@ public class LogicManagerTest {
         assertEquals(List.of(new Dog(1, new DogName("Buddy"), new Breed("Poodle"), new Size("small"))), dogs);
         assertEquals(1, notifications[0]);
         assertThrows(UnsupportedOperationException.class, () -> dogs.remove(0));
+    }
+
+    @Test
+    public void getEnrolmentList_unenrolUndoRedoAndClear_updateExistingUnmodifiableView() throws Exception {
+        LocalDate date = LocalDate.of(2026, 10, 28);
+        AddressBook book = new AddressBook();
+        book.addActivity(new ActivityName("Walk"), date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        book.addDogFromStorage(new Dog(1, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        Enrolment booking = new Enrolment(1, 1, date);
+        book.addEnrolmentFromStorage(booking);
+        model = new ModelManager(book, new UserPrefs());
+        logic = new LogicManager(model, new StorageManager(
+                new JsonAddressBookStorage(temporaryFolder.resolve("enrolmentHistory.json")),
+                new JsonUserPrefsStorage(temporaryFolder.resolve("enrolmentHistoryPrefs.json"))));
+        ObservableList<Enrolment> enrolments = logic.getEnrolmentList();
+        int[] notifications = {0};
+        enrolments.addListener((ListChangeListener<Enrolment>) change -> notifications[0]++);
+
+        assertEquals(List.of(booking), enrolments);
+        assertThrows(UnsupportedOperationException.class, () -> enrolments.clear());
+
+        logic.execute("unenrol a/1 date/2026-10-28 d/1");
+        assertEquals(List.of(), enrolments);
+        logic.execute("undo");
+        assertEquals(List.of(booking), enrolments);
+        logic.execute("redo");
+        assertEquals(List.of(), enrolments);
+        logic.execute("undo");
+        logic.execute("clear");
+        assertEquals(List.of(), enrolments);
+        assertTrue(notifications[0] >= 5);
     }
 
     @Test

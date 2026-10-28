@@ -493,6 +493,25 @@ with an overlapping time on the same date; adjacent activities are allowed. Batc
 atomic. Successful mutations are logged at `FINE` and guarded by postcondition assertions. Enrolment
 changes are persisted with the address book.
 
+The activity-card overview follows a view policy rather than changing the schedule model. `Logic` exposes
+`getEnrolmentList()` as the same live unmodifiable observable view supplied by `AddressBook`; no dog IDs are
+stored redundantly in `Activity`. `MainWindow` passes that view to both activity panels. The general panel
+formats distinct, numerically sorted dog IDs from enrolments whose date is today or later, while the Today
+panel uses only enrolments whose date equals the captured local date. Existing address-book invariants ensure
+that these enrolments refer to stored activities and dogs.
+
+`ActivityBookingSummary` performs the date query and formatting without JavaFX. `ActivityListPanel` captures
+`LocalDate.now(clock)` once per refresh, rebuilds cards when either the displayed activities or enrolments
+change, and accepts an injectable clock for deterministic tests. The Today variant additionally displays only
+schedules that occur on that captured date. Because reset, clear, undo and redo update the existing observable
+lists, listeners remain attached. `MainWindow` also requests a refresh after each successful command, so date
+rollover is reflected on the next successful command; no midnight scheduler is installed.
+
+`ActivityCard(Activity, String)` receives the complete overview label. It presents `Schedule starts` separately
+from the booking summary and never substitutes an enrolment date for `Activity.startDate`. Xander's search-context
+work can extend the supplied presentation text or add per-dog date lines without changing the baseline live-list
+plumbing or storing view state in `Activity`.
+
 <puml src="diagrams/EnrolDogSequenceDiagram.puml" alt="Enrolling dogs into an activity" />
 
 Unenrolment follows the same parser and model delegation path. After validating the activity, date,
@@ -506,7 +525,8 @@ removal is logged and checked with a postcondition assertion.
 the enrol and unenrol command/parser tests cover command construction and malformed or impossible dates.
 `EnrolmentStorageTest` covers persisted and legacy records. `DeleteDogCommandTest` checks that deleting a dog
 removes both past and future enrolments without affecting other dogs. `ListPanelsTest` and `MainWindowTest`
-cover the today-only activity filter and its UI integration.
+cover the today-only activity filter and its UI integration. `ActivityBookingSummaryTest` covers empty summaries,
+date boundaries, activity isolation, deduplication and numeric sorting with fixed dates.
 
 The sequence diagrams focus on interactions between application layers. Low-level list operations
 and exception propagation are omitted where they do not affect the overall design.

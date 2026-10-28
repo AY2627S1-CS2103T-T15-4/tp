@@ -111,6 +111,23 @@ Invalid dates, times, recurrence values, missing or repeated fields produce an e
 Creation does not book any dogs, so overlapping empty schedules are allowed. Dog booking commands
 and activity cards are separate features; this contribution reports creation in the command feedback.
 
+### Reading activity cards
+
+An activity card describes a reusable schedule, not a single booking. `Schedule starts: YYYY-MM-DD`
+is the schedule's first occurrence; daily and weekly schedules can continue after that date.
+
+In the general activity panel, `Dogs with upcoming bookings: ...` lists the distinct dog IDs that have
+dated bookings for that activity today or later. Today remains included even after the activity's end time.
+IDs are sorted numerically and a dog booked on several upcoming dates appears once. The label shows `None`
+when there are no upcoming bookings, without hiding the activity.
+
+The separate Today panel uses `Dogs enrolled on YYYY-MM-DD: ...` and includes only bookings on that exact
+local date. It reads all stored enrolments independently of dog and customer search filters. These labels do
+not change the activity's start date, recurrence, or other schedule details.
+
+The date is captured from the computer's local timezone whenever the panels refresh. There is no midnight
+timer; after midnight, the next successful command or activity/enrolment refresh updates the labels.
+
 ### Deleting an activity: `deleteactivity`
 
 Deletes the activity with the specified persistent ID. For a recurring activity, this deletes the
