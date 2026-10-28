@@ -176,11 +176,11 @@ public class AddressBookParserTest {
     }
 
     @Test
-    public void parseCommand_resetDisplay_acceptsOnlyCommandWord() throws Exception {
-        assertTrue(parser.parseCommand("resetdisplay") instanceof ResetDisplayCommand);
-        assertTrue(parser.parseCommand("  resetdisplay  ") instanceof ResetDisplayCommand);
+    public void parseCommand_reset_acceptsOnlyCommandWord() throws Exception {
+        assertTrue(parser.parseCommand("reset") instanceof ResetDisplayCommand);
+        assertTrue(parser.parseCommand("  reset  ") instanceof ResetDisplayCommand);
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, ResetDisplayCommand.MESSAGE_USAGE);
-        assertThrows(ParseException.class, expectedMessage, () -> parser.parseCommand("resetdisplay tomorrow"));
+        assertThrows(ParseException.class, expectedMessage, () -> parser.parseCommand("reset tomorrow"));
     }
 
     @Test

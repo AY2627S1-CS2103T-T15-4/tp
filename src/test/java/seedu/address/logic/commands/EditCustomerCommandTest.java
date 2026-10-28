@@ -7,7 +7,6 @@ import static seedu.address.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.EditCustomerCommand.EditCustomerDescriptor;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -32,8 +31,8 @@ public class EditCustomerCommandTest {
 
         Customer expected = customer(1, "Alice Tan", "98765432");
         assertEquals(expected, model.getFilteredCustomerList().get(0));
-        assertEquals(String.format(EditCustomerCommand.MESSAGE_EDIT_CUSTOMER_SUCCESS, Messages.format(expected)),
-                result.getFeedbackToUser());
+        assertEquals("Edited customer: 1; Name: Alice Tan; Phone: 98765432; Email: test@example.com; "
+                + "Backup Contact: 98765432", result.getFeedbackToUser());
     }
 
     @Test

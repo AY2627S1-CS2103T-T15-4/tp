@@ -151,12 +151,12 @@ public class LogicManagerHistoryTest {
             Harness afterReset = linkedHarness();
             afterReset.logic.execute(filter);
             afterReset.assertFilteredPair();
-            afterReset.logic.execute("resetdisplay");
+            afterReset.logic.execute("reset");
             afterReset.logic.execute("undo");
             afterReset.assertFilteredPair();
 
             Harness afterRedo = linkedHarness();
-            afterRedo.logic.execute("resetdisplay");
+            afterRedo.logic.execute("reset");
             afterRedo.logic.execute(filter);
             afterRedo.logic.execute("undo");
             assertEquals(2, afterRedo.model.getFilteredCustomerList().size());

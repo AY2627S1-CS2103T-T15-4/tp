@@ -922,7 +922,7 @@ appear as an undoable mutation.
 1. Add a dog, run `help`, then `undo`. The dog disappears; `help` is not the undone command.
 1. Run `help`, then `redo`. The dog returns. Repeat with `summary` instead of `help`.
 1. Undo again, then add another dog. `redo` reports no command to redo and does not replace the new dog.
-1. Link two dogs to different customers. Run `searchd n/Buddy`, `resetdisplay`, then `undo`.
+1. Link two dogs to different customers. Run `searchd n/Buddy`, `reset`, then `undo`.
    Only Buddy and Buddy's owner appear. Repeat using `searchc n/Alice`; only Alice and her dog appear.
 1. With disposable data, make the data file unwritable after a successful add, then run `undo`.
    The save reports an error, but the dog disappears from memory. Restore write access and run `redo`;

@@ -30,6 +30,15 @@ public class AddCustomerCommandParserTest {
     }
 
     @Test
+    public void parse_apostrophesAndSpacedPhoneNumbers_success() throws Exception {
+        Customer customer = new Customer(new Name("O'Neil"), new Phone("91234567"),
+                new Email("o'neil@example.com"), new BackupContact("98765432"));
+
+        assertParseSuccess(parser, " n/O'Neil p/9 1 2 3 4 5 6 7 e/o'neil@example.com bc/9 8 7 6 5 4 3 2",
+                new AddCustomerCommand(customer));
+    }
+
+    @Test
     public void parse_missingRequiredField_failure() {
         String usage = AddCustomerCommand.MESSAGE_USAGE;
 
@@ -41,6 +50,8 @@ public class AddCustomerCommandParserTest {
                 "Missing required field(s): email.\n" + usage);
         assertParseFailure(parser, " n/Alice Tan p/91234567 e/alice@example.com",
                 "Missing required field(s): backup contact.\n" + usage);
+        assertParseFailure(parser, " n/Alice Tan",
+                "Missing required field(s): phone, email, backup contact.\n" + usage);
         assertParseFailure(parser, "unexpected" + validArguments,
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, usage));
     }
@@ -50,6 +61,10 @@ public class AddCustomerCommandParserTest {
         assertParseFailure(parser, validArguments + " n/Bob", "Multiple values specified for the following "
                 + "single-valued field(s): n/");
         assertParseFailure(parser, " n/Alice Tan p/12 e/alice@example.com bc/98765432",
+                "Invalid phone: " + Phone.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " n/Bad@Name p/12 e/invalid bc/12",
+                "Invalid name: " + Name.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " n/Alice Tan p/12 e/invalid bc/12",
                 "Invalid phone: " + Phone.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, " n/Alice Tan p/91234567 e/invalid bc/98765432",
                 "Invalid email: " + Email.MESSAGE_CONSTRAINTS);
