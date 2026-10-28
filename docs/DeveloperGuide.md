@@ -273,7 +273,11 @@ cannot restore history. `LogicManager` keeps one undo snapshot and one redo snap
 with the original command text for feedback. A successful undoable command replaces the undo
 snapshot with the state captured before its execution and clears the redo snapshot. View-changing
 commands are undoable. `help`, `summary`, and `exit` preserve both slots, as do parse errors and
-commands rejected during execution. `clear` discards both snapshots and cannot itself be undone.
+commands rejected during execution. `clear` first puts `LogicManager` into a pending confirmation
+state and returns a warning without saving or changing history. The next input must be `Y` or `N`
+(case-insensitive, with surrounding whitespace accepted). Invalid answers leave confirmation pending;
+`N` cancels without changing data or history. `Y` executes `ClearCommand`, discards both snapshots,
+and cannot itself be undone. Confirmation is consumed even if saving the cleared data fails.
 
 `Model.createState()` copies the `AddressBook`, including its records and all three next-ID counters, and captures
 the active customer, dog and activity predicates and the selected record IDs. `Model.restoreState()`

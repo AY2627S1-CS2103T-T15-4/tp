@@ -39,7 +39,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 
    * `today` : Shows today's activities, enrolled dogs, and their owners.
 
-   * `clear` : Deletes all customers, dogs, and activities.
+   * `clear` : Asks for Y/N confirmation before deleting all customers, dogs, activities, and enrolments. This action cannot be undone.
 
    * `exit` : Exits the app.
 
@@ -408,9 +408,19 @@ Dog and customer IDs belong to separate categories and may overlap.
 
 ### Clearing all entries: `clear`
 
-Clears all entries from the address book.
+Clears all customers, dogs, activities, and enrolments from the address book after confirmation.
 
 Format: `clear`
+
+The app warns that this action cannot be undone and asks for confirmation (Y/N).
+Enter `Y` to clear all entries or `N` to cancel in the command box. Both answers are
+case-insensitive and accept surrounding whitespace. Any other input asks for Y/N again;
+enter `N` before running another command. No data or history changes until you confirm.
+
+Examples:
+
+* Enter `clear`, then enter `y` to permanently delete all entries.
+* Enter `clear`, then enter `n` to cancel and keep all entries and undo/redo history.
 
 Clearing also discards the undo and redo history, so `clear` cannot be undone. This remains true
 if the command changes memory but its save fails.
@@ -430,7 +440,7 @@ Only one command can be undone at a time. A later successful undoable command re
 and makes `redo` unavailable. View-changing commands such as search, filter, selection, and
 `resetdisplay` are undoable too. `help`, `summary`, and `exit` preserve both undo and redo history;
 parse errors and commands rejected before execution also leave history unchanged. The history is
-cleared by `clear` and is not retained when WatchDog restarts. Surrounding whitespace is accepted,
+cleared after confirming `clear` with `Y` and is not retained when WatchDog restarts. Surrounding whitespace is accepted,
 but neither command accepts arguments.
 If no command is available, WatchDog displays `There is no command to undo.` or
 `There is no command to redo.`
@@ -484,7 +494,7 @@ _Details coming soon ..._
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Clear**  | `clear`
+**Clear**  | `clear`, then `Y` to confirm or `N` to cancel (case-insensitive). Cannot be undone.
 **Daycare summary** | `summary`<br>Overall dogs/customers, total/upcoming schedules, and today's activities/distinct enrolled dogs.
 **Link dogs** | `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`<br> e.g., `link c/1 d/2 d/3`
 **Unlink dogs** | `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`<br> e.g., `unlink d/2 d/3` or `unlink c/1`
