@@ -551,7 +551,7 @@ The active category searches are `searcha`, `searchc`, and `searchd`. Each parse
 
 `SearchDogCommandParser` accepts `n/`, `b/`, `s/`, and `i/`; `SearchCustomerCommandParser` accepts `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/`; and `SearchActivityCommandParser` accepts `n/`, `d/`, `t/`, and `r/`. Unsupported prefixes, duplicate fields, invalid IDs, invalid sizes, and malformed values are rejected before execution.
 
-The global search command and its category compatibility routes have been retired. Use the field-based searchc, searchd, and searcha commands (i/ for persistent IDs). Retired global search code, tests, and orphaned helpers are preserved under unused/@Kenneth-Chia/. The list commands and resetdisplay remain available.
+The global search command and its category compatibility routes have been retired. Use the field-based searchc, searchd, and searcha commands (i/ for persistent IDs). Retired global search code, tests, and orphaned helpers are preserved under unused/@Kenneth-Chia/. The list commands and reset remain available.
 
 Search command tests cover parser validation, field combinations, related-record updates, persistent IDs, and unchanged stored records.
 

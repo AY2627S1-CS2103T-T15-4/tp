@@ -236,7 +236,7 @@ public class LogicManagerTest {
         Dog buddy = logic.getDogList().get(0);
         logic.execute("searchd i/" + buddy.getId());
         assertEquals(List.of(buddy), logic.getFilteredDogList());
-        logic.execute("resetdisplay");
+        logic.execute("reset");
         logic.execute("undo");
         assertEquals(List.of(buddy), logic.getDogList());
         assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
