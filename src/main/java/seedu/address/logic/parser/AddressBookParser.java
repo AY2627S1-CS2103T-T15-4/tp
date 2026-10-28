@@ -28,10 +28,10 @@ import seedu.address.logic.commands.ListDogCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.SearchActivityCommand;
-import seedu.address.logic.commands.SearchCommand;
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.commands.SummaryCommand;
+import seedu.address.logic.commands.TodayCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.UnenrolDogCommand;
 import seedu.address.logic.commands.UnlinkCommand;
@@ -97,7 +97,6 @@ public class AddressBookParser {
             case SearchCustomerCommand.COMMAND_WORD -> new SearchCustomerCommandParser().parse(arguments);
             case FilterUnlinkedCommand.COMMAND_WORD -> new FilterUnlinkedCommandParser().parse(arguments);
             case ClearCommand.COMMAND_WORD -> new ClearCommand();
-            case SearchCommand.COMMAND_WORD -> new SearchCommandParser().parse(arguments);
             case LinkCommand.COMMAND_WORD -> new LinkCommandParser().parse(arguments);
             case UnlinkCommand.COMMAND_WORD -> new UnlinkCommandParser().parse(arguments);
             case EnrolDogCommand.COMMAND_WORD -> new EnrolDogCommandParser().parse(arguments);
@@ -110,6 +109,7 @@ public class AddressBookParser {
                 }
                 yield new SummaryCommand();
             }
+            case TodayCommand.COMMAND_WORD -> new TodayCommandParser().parse(arguments);
             case ResetDisplayCommand.COMMAND_WORD -> {
                 if (!arguments.isBlank()) {
                     throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,

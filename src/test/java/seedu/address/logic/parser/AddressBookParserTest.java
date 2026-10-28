@@ -26,6 +26,7 @@ import seedu.address.logic.commands.SearchActivityCommand;
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.commands.SummaryCommand;
+import seedu.address.logic.commands.TodayCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.ActivityName;
@@ -39,6 +40,14 @@ public class AddressBookParserTest {
     private final AddressBookParser parser = new AddressBookParser();
 
     @Test
+    public void parseCommand_retiredSearch_throwsUnknownCommand() {
+        for (String input : new String[] {"search", "search n/Alex", "search id/0",
+            "search dog n/Buddy", "search customer n/Alex", "  search id/42  "}) {
+            assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
+        }
+    }
+
+    @Test
     public void parseCommand_summary_acceptsSurroundingWhitespace() throws Exception {
         assertEquals(new SummaryCommand(), parser.parseCommand("summary"));
         assertEquals(new SummaryCommand(), parser.parseCommand(" \t summary \t "));
@@ -50,6 +59,14 @@ public class AddressBookParserTest {
         for (String input : new String[] {"summary today", "summary 1", "summary date/2026-10-24"}) {
             assertThrows(ParseException.class, expectedMessage, () -> parser.parseCommand(input));
         }
+    }
+
+    @Test
+    public void parseCommand_today_acceptsOnlyCommandWord() throws Exception {
+        assertEquals(new TodayCommand(), parser.parseCommand("today"));
+        assertEquals(new TodayCommand(), parser.parseCommand("  today  "));
+        assertThrows(ParseException.class, () -> parser.parseCommand("today tomorrow"));
+        assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand("Today"));
     }
 
     @Test

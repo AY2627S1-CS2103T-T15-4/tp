@@ -37,6 +37,8 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 
    * `summary` : Shows overall counts and today's activities and distinct enrolled dogs.
 
+   * `today` : Shows today's activities, enrolled dogs, and their owners.
+
    * `clear` : Deletes all customers, dogs, and activities.
 
    * `exit` : Exits the app.
@@ -144,6 +146,22 @@ Example: `searcha n/Dog run t/16:00`
   occurrence date are included. The customer panel shows owners of those dogs.
 * Invalid date, time, or recurrence input displays `Error in searching activities:` followed by the applicable error message.
  * The filter remains active while activities are added or their state, enrolments, or details are changed.
+
+### Showing today's activities: `today`
+
+Shows activities occurring today, the dogs enrolled in today's occurrences, and their owners.
+
+Format: `today`
+
+Example: `today`
+
+* The command is case-sensitive and accepts no additional fields.
+* Recurring activities are included when they occur today.
+* Dogs are shown only when they are enrolled in today's occurrence of an activity.
+* The command replaces the current activity, dog, and customer displays.
+* If there are no matching records, the relevant panels are empty.
+* Extra input produces `Error in showing today:` followed by
+  `Info is in the wrong format. Input in the correct format`.
 
 ### Adding a dog: `adddog`
 
@@ -322,6 +340,9 @@ Example: `searchd b/Golden Retriever s/Medium`
 * Invalid sizes display `Invalid dog size. Please input small/medium/large/giant only.`
 * The customer panel is also filtered to customers linked to the matching dogs.
 * The activity panel shows activities in which a matching dog is enrolled.
+  For each displayed activity, an `Enrolments` section lists every matching dog as
+  `[DOG_ID]. [DOG_NAME]: DATE, DATE, ...`. Dates include past, present, and future enrolments
+  and are sorted chronologically. The activity's normal date, time, and recurrence fields remain unchanged.
 * Unowned matching dogs remain visible, but the customer panel is empty.
 * The filter remains active while dogs or customers are added, edited, deleted, linked, or unlinked.
   Matching activities refresh when enrolments change.
@@ -355,20 +376,8 @@ Example: `searchc n/Anna d/12 34`
 * Unsupported field prefixes are rejected as invalid command formats.
 * If no customers match, the customer panel is empty.
 * The filter remains active while customers or their linked dogs are added, edited, deleted, linked, or unlinked.
-
-### Searching customers and dogs together: `search`
-
-Format: `search n/NAME_QUERY` or `search id/ID`
-
-* Searches all customers and dogs using the same name and ID rules as category-specific searches below.
-* Use exactly one field. Names match a case-insensitive substring; IDs must be integers from
-  `0` to `2147483647`. Blank, repeated, combined and unknown fields are rejected.
-* Matching customer cards appear first, followed by matching dog cards. The result bar shows both counts.
-* Customer and dog IDs are independent. `search id/0` can show both a customer and a dog with ID 0.
-* Each search replaces both displayed filters without changing stored records. No matches clears the panel.
-* Use `searchc ...` or `searchd ...` to narrow the next search to a category.
-
-Examples: `search n/alex`, `search id/42`.
+  The activity panel shows only activities with enrolments belonging to the matching customers. Each activity
+  includes an `Enrolments` section containing only their dogs and those dogs' stored enrolment dates.
 
 ### Deleting a dog: `delete dog`
 
@@ -489,7 +498,6 @@ Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Clear**  | `clear`
 **Daycare summary** | `summary`<br>Overall dogs/customers, total/upcoming schedules, and today's activities/distinct enrolled dogs.
-**Search all** | `search n/NAME_QUERY` or `search id/ID`<br> e.g., `search n/alex`
 **Link dogs** | `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`<br> e.g., `link c/1 d/2 d/3`
 **Unlink dogs** | `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`<br> e.g., `unlink d/2 d/3` or `unlink c/1`
 **Search customers** | `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`<br> e.g., `searchc n/alex i/42`
@@ -499,6 +507,7 @@ Action     | Format, Examples
 **Unenrol dogs** | `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2`<br>Removes only the specified dated enrolments.
 **Delete activity** | `deleteactivity ACTIVITY_ID`<br>e.g., `deleteactivity 21`
 **Search activities** | `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`<br>e.g., `searcha n/Dog run t/16:00`
+**Today** | `today`<br>Shows today's activities and the enrolled dogs and owners involved.
 **Search customers by fields** | `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`<br>e.g., `searchc n/Anna i/21`
 **Add dog** | `adddog n/NAME b/BREED s/SIZE`<br>e.g., `adddog n/Cookie b/Chihuahua s/Small`
 **Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`

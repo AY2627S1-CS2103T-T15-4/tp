@@ -22,7 +22,9 @@ Command -> Model : updateFilteredCustomerList(owner of matching dog)
 Command -> Model : updateFilteredActivityList(has matching enrolled dog)
 Model -> Book : get enrolment records
 Book --> Model : activity ID and dog ID pairs
-Model --> Command : refresh filtered views
+Command -> Model : set matching-dog display context
+Model --> Command : refresh filtered views and enrolment summaries
+Model --> Logic : activity cards show each matching dog and sorted stored dates
 Command --> Logic : CommandResult
 Logic --> User : display success message and views
 @enduml

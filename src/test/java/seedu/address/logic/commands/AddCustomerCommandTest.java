@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
+import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -138,6 +139,17 @@ public class AddCustomerCommandTest {
         @Override public void updateFilteredActivityList(Predicate<Activity> predicate) {
             throw unused();
         }
+
+        @Override public void setActivityEnrolmentDogPredicate(Predicate<Dog> predicate) {
+            throw unused();
+        }
+        @Override public String getActivityEnrolmentSummary(Activity activity) {
+            throw unused();
+        }
+        @Override public Observable getActivityEnrolmentContextChanges() {
+            throw unused();
+        }
+
 
         @Override public ReadOnlyUserPrefs getUserPrefs() {
             throw unused();

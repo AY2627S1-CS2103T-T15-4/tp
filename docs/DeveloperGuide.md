@@ -39,6 +39,9 @@ relationships to refer to a record reliably even when the visible list changes.
 The address book looks up persistent IDs in the complete lists and validates every endpoint and ownership
 constraint before publishing one replacement dog list. A rejected batch throws `LinkException` without
 changing records or filters; the command translates it to `CommandException` for user feedback.
+After successful link or unlink publication, an internal assertion checks that every requested dog ID
+still exists and has the intended owner, or no owner for unlink. These checks do not mutate records or
+replace the ordinary validation of command input.
 
 Each immutable `Dog` stores an optional owner customer ID. This is the single source of truth;
 customers do not store a duplicate dog-ID list. A dog may be unlinked or have one owner, while a customer
@@ -64,6 +67,10 @@ as well as visible records, so these IDs remain accurate when dog cards are filt
 `JsonAdaptedDog` persists `ownerId`. A missing or null field means unlinked, preserving compatibility
 with older files. Negative owner IDs and references to missing customers are rejected on load;
 customers are restored before dogs. Copies of the address book retain ownership through immutable dogs.
+The shared model boundaries also reject dangling owner IDs: `setDog` validates the replacement,
+`setCustomers` checks that existing owners remain present, and `resetData` validates ownership against
+snapshots of the incoming dogs and customers before changing records. Customer deletion uses its explicit
+unlinking path instead of removing a referenced customer through `setCustomers`.
 `EditDogCommand` preserves the current owner ID when constructing a replacement dog, so editing details
 does not unlink the dog. Ownership changes remain explicit through linking, unlinking, or customer deletion.
 Deleting a dog also removes its enrolment records in the same address-book operation, including past
@@ -392,6 +399,10 @@ so dog, customer, activity, and enrolment changes refresh the corresponding pane
 Each `Enrolment` stores its occurrence date. `searcha` with a date therefore shows only dogs enrolled on that
 specific occurrence, and shows their owners only when those dogs are visible. `searchd` shows a schedule when a
 matching dog is enrolled on a valid occurrence of that schedule.
+For `searchd`, the activity panel additionally receives a derived enrolment summary. It groups matching stored
+enrolments by dog ID, removes duplicate dates, sorts both dogs and dates deterministically, and displays the
+dates in ISO format. The summary includes past, present, and future dates; recurrence is never expanded into
+unstored dates. Other activity-card contexts retain the normal card format.
 Successful executions use the `Successfully searched dogs by` prefix and report only supplied fields. Invalid
 IDs and sizes use the `Error in searching dogs:` prefix with their specific validation messages.
 
@@ -411,6 +422,9 @@ derives ownership from each dog's stored `ownerId`; a customer
 matches a multi-dog filter only when they own every requested dog. After customer filtering, the command derives
 the matching customer IDs and applies a second predicate to the dog list, showing only dogs owned by those
 customers. Dog IDs in the success message are sorted numerically, and customer ID is reported only when supplied.
+It also filters the activity panel to activities with enrolments belonging to the matching customers and supplies
+the same per-dog enrolment summary used by `searchd`. An activity with no matching enrolment is omitted, so the
+activity panel cannot show unrelated cards or cards with misleading empty enrolment details.
 Invalid or nonexistent dog and customer IDs produce specific errors under the `Error in searching customers:` prefix.
 The parser stops field values at any field-like prefix, including unsupported prefixes, so inputs such as
 `searchc n/Anna x/value` are rejected rather than treating `x/value` as part of the name. `ModelManager`
@@ -444,6 +458,15 @@ the owners panel is derived from those dogs. When no date is supplied, enrolment
 Gradle test execution enables Java assertions so internal model invariants are checked during verification.
 
 <puml src="diagrams/SearchActivitySequenceDiagram.puml" alt="Searching activities and related dogs and owners" />
+### Today command
+
+`AddressBookParser` routes the exact lowercase command `today` to `TodayCommandParser`, which rejects
+any additional arguments. `TodayCommand` delegates the filtering behavior to `SearchActivityCommand`
+with `LocalDate.now()` as the date criterion. This reuses the existing recurrence-aware activity
+matching and derives dogs from enrolments on today's exact occurrence, followed by their owners.
+The command replaces the active activity, dog, and customer displays and returns
+`Successfully displayed today's activities, as well as the dogs and customers involved for the day`.
+
 ### Unlinked filtering
 
 `AddressBookParser` routes `filterun` to `FilterUnlinkedCommandParser`, which accepts only the lowercase
@@ -506,7 +529,8 @@ reacts to activity-list changes through the shared observable list.
 ### Defensive programming, logging, and assertions
 
 Command arguments and model invariants are validated explicitly and produce domain or parser exceptions;
-Java assertions are reserved for internal postconditions, never for user-input validation. Enrolment,
+Java assertions are reserved for internal postconditions, never for user-input validation. Ownership
+updates assert that all requested dog endpoints exist with the expected owner after publication. Enrolment,
 unenrolment, and dog deletion assert that the expected dated records are present or absent after a successful
 mutation. The Gradle `run` and `test` tasks enable assertions so these checks are active during development
 and automated testing.
@@ -527,7 +551,7 @@ The active category searches are `searcha`, `searchc`, and `searchd`. Each parse
 
 `SearchDogCommandParser` accepts `n/`, `b/`, `s/`, and `i/`; `SearchCustomerCommandParser` accepts `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/`; and `SearchActivityCommandParser` accepts `n/`, `d/`, `t/`, and `r/`. Unsupported prefixes, duplicate fields, invalid IDs, invalid sizes, and malformed values are rejected before execution.
 
-The global `search` command remains active for one name or ID field across customers and dogs. Its category compatibility routes delegate to the field parsers. The retired category-search implementations replaced by `searchc` and `searchd` are preserved under `unused/@Kenneth-Chia/` for authorship reference.
+The global search command and its category compatibility routes have been retired. Use the field-based searchc, searchd, and searcha commands (i/ for persistent IDs). Retired global search code, tests, and orphaned helpers are preserved under unused/@Kenneth-Chia/. The list commands and resetdisplay remain available.
 
 Search command tests cover parser validation, field combinations, related-record updates, persistent IDs, and unchanged stored records.
 

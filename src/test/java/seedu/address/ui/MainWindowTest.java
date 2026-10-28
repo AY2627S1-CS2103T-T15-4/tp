@@ -98,11 +98,11 @@ public class MainWindowTest {
             assertEquals(1, customers.getItems().size());
             assertEquals("Lily Koh", label(customers.getItems().get(0).get(), "name"));
 
-            window.executeCommand("search dog n/Cookie");
+            window.executeCommand("searchd n/Cookie");
             assertEquals(1, dogs.getItems().size());
             assertEquals("Cookie", label(dogs.getItems().get(0).get(), "name"));
 
-            window.executeCommand("search customer n/Lily");
+            window.executeCommand("searchc n/Lily");
             assertEquals(1, customers.getItems().size());
             assertEquals("Lily Koh", label(customers.getItems().get(0).get(), "name"));
 

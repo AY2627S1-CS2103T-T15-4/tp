@@ -9,16 +9,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
@@ -42,6 +45,8 @@ public class ModelManager implements Model {
     private Predicate<Activity> activeActivityPredicate;
     private Integer selectedDogId;
     private Integer selectedCustomerId;
+    private Predicate<Dog> enrolmentDogPredicate;
+    private final SimpleIntegerProperty enrolmentContextVersion = new SimpleIntegerProperty();
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
@@ -65,7 +70,7 @@ public class ModelManager implements Model {
     @Override
     public ModelState createState() {
         return new ModelState(new AddressBook(addressBook), activeCustomerPredicate, activeDogPredicate,
-                activeActivityPredicate, selectedDogId, selectedCustomerId);
+                activeActivityPredicate, selectedDogId, selectedCustomerId, enrolmentDogPredicate);
     }
 
     @Override
@@ -77,6 +82,8 @@ public class ModelManager implements Model {
         activeActivityPredicate = state.activityPredicate();
         selectedDogId = state.selectedDogId();
         selectedCustomerId = state.selectedCustomerId();
+        enrolmentDogPredicate = state.enrolmentDogPredicate();
+        signalEnrolmentContextChanged();
         filteredCustomers.setPredicate(null);
         filteredDogs.setPredicate(null);
         filteredActivities.setPredicate(null);
@@ -278,6 +285,50 @@ public class ModelManager implements Model {
         clearSelection();
         activeActivityPredicate = predicate;
         filteredActivities.setPredicate(predicate);
+        enrolmentDogPredicate = null;
+        signalEnrolmentContextChanged();
+    }
+
+    @Override
+    public void setActivityEnrolmentDogPredicate(Predicate<Dog> predicate) {
+        enrolmentDogPredicate = predicate;
+        signalEnrolmentContextChanged();
+    }
+
+    @Override
+    public javafx.beans.Observable getActivityEnrolmentContextChanges() {
+        return enrolmentContextVersion;
+    }
+
+    private void signalEnrolmentContextChanged() {
+        enrolmentContextVersion.set(enrolmentContextVersion.get() + 1);
+    }
+
+    @Override
+    public String getActivityEnrolmentSummary(Activity activity) {
+        requireNonNull(activity);
+        if (enrolmentDogPredicate == null) {
+            return "";
+        }
+        List<Dog> matchingDogs = addressBook.getDogList().stream()
+                .filter(enrolmentDogPredicate)
+                .sorted(java.util.Comparator.comparingInt(Dog::getId))
+                .toList();
+        StringJoiner summary = new StringJoiner("\n", "Enrolments:\n", "");
+        matchingDogs.forEach(dog -> {
+            List<LocalDate> dates = addressBook.getEnrolmentList().stream()
+                    .filter(enrolment -> enrolment.getActivityId() == activity.getId()
+                            && enrolment.getDogId() == dog.getId())
+                    .map(Enrolment::getDate)
+                    .distinct()
+                    .sorted()
+                    .toList();
+            if (!dates.isEmpty()) {
+                summary.add(dog.getId() + ". " + dog.getName().fullName + ": "
+                        + dates.stream().map(LocalDate::toString).collect(Collectors.joining(", ")));
+            }
+        });
+        return summary.toString().equals("Enrolments:\n") ? "" : summary.toString();
     }
 
     @Override

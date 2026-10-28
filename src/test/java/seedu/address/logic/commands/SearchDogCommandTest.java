@@ -139,6 +139,21 @@ public class SearchDogCommandTest {
     }
 
     @Test
+    public void execute_dogSearchActivitySummary_groupsSortedEnrolmentDatesByDog() throws Exception {
+        ModelManager model = modelWithDogs();
+        Activity activity = model.addActivity(new ActivityName("Waffle walk"), ENROL_DATE,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.WEEKLY);
+        int waffleId = model.getDogList().get(0).getId();
+        model.enrolDogs(activity.getId(), ENROL_DATE.plusDays(7), List.of(waffleId));
+        model.enrolDogs(activity.getId(), ENROL_DATE, List.of(waffleId));
+
+        new SearchDogCommand("waffle", null, null, null).execute(model);
+
+        assertEquals("Enrolments:\n1. Waffle Boy: " + ENROL_DATE + ", " + ENROL_DATE.plusDays(7),
+                model.getActivityEnrolmentSummary(activity));
+    }
+
+    @Test
     public void execute_unknownId_throwsCommandException() {
         ModelManager model = new ModelManager();
         SearchDogCommand command = new SearchDogCommand(null, null, null, 99);
