@@ -583,8 +583,8 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     private Activity getActivity(int activityId) throws EnrolException {
-        if (activityId < 0) {
-            throw new EnrolException("Activity IDs must be whole numbers from 0 to 2147483647.");
+        if (activityId <= 0) {
+            throw new EnrolException("Activity IDs must be whole numbers from 1 to 2147483647.");
         }
         return getActivityList().stream().filter(activity -> activity.getId() == activityId).findFirst()
                 .orElseThrow(() -> new EnrolException("Activity ID " + activityId + " does not exist."));

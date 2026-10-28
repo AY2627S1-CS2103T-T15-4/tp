@@ -71,7 +71,7 @@ public class EditActivityCommandParser implements Parser<EditActivityCommand> {
     private static int parseActivityId(String value) throws ParseException {
         try {
             int activityId = Integer.parseInt(value.trim());
-            if (activityId < 0) {
+            if (activityId <= 0) {
                 throw new NumberFormatException();
             }
             return activityId;

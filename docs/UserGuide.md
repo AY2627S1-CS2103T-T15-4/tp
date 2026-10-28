@@ -53,6 +53,8 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 
 **Notes about the command format:**<br>
 
+* Activity IDs are persistent positive integers from `1` to `2147483647`. Activity ID `0` is invalid.
+
 * Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
   For example, in `adddog n/NAME b/BREED s/SIZE`, replace `NAME` with a value such as `John Doe`.
 
@@ -121,7 +123,7 @@ Format: `deleteactivity ACTIVITY_ID`
 
 Example: `deleteactivity 21`
 
-The ID must be a nonnegative integer belonging to an existing activity. Invalid or missing IDs
+The ID must be a positive integer (1 to 2147483647) belonging to an existing activity. Invalid or missing IDs
 leave the activity and enrolments unchanged.
 
 ### Searching activities: `searcha`

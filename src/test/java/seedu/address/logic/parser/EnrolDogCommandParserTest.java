@@ -26,7 +26,8 @@ public class EnrolDogCommandParserTest {
     @Test
     public void parse_invalidInput_rejectsMalformedOrRepeatedIds() {
         for (String input : List.of("", "a/1", "d/2", "a/ d/2", "a/1 d/", "a/1 date/2028-02-29 d/2,2",
-                "a/1 date/2028-02-29 d/2,", "a/-1 date/2028-02-29 d/2", "a/1 date/2028-02-29 d/-2",
+                "a/1 date/2028-02-29 d/2,", "a/0 date/2028-02-29 d/2", "a/-1 date/2028-02-29 d/2",
+                "a/1 date/2028-02-29 d/-2",
                 "a/1 date/2028-02-29 d/2.0", "a/x date/2028-02-29 d/2", "a/1 date/2028-02-29 d/x",
                 "a/1 date/2028-02-30 d/2", "a/999999999999 date/2028-02-29 d/2",
                 "a/1 date/2028-02-29 d/", "a/-1 date/2028-02-29 d/2")) {

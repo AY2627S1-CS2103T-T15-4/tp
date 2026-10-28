@@ -48,6 +48,12 @@ public class EditActivityCommandTest {
     }
 
     @Test
+    public void constructor_zeroActivityId_rejected() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new EditActivityCommand(0, new EditActivityCommand.EditActivityDescriptor()));
+    }
+
+    @Test
     public void execute_dateChange_removesOnlyTargetActivityEnrolments() throws Exception {
         EditActivityDescriptor descriptor = new EditActivityDescriptor();
         descriptor.setDate(LocalDate.of(2028, 3, 1));

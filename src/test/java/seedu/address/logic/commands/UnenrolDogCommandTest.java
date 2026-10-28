@@ -33,6 +33,12 @@ public class UnenrolDogCommandTest {
     }
 
     @Test
+    public void constructor_zeroActivityId_rejected() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new UnenrolDogCommand(0, LocalDate.of(2028, 1, 1), List.of(1)));
+    }
+
+    @Test
     public void execute_validEnrolment_removesEnrolment() throws Exception {
         ModelManager model = modelWithEnrolment();
 

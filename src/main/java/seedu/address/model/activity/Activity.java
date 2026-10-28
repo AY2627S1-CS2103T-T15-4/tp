@@ -12,7 +12,7 @@ import java.util.Optional;
 import seedu.address.commons.util.ToStringBuilder;
 
 /**
- * An immutable activity schedule with a persistent, nonnegative ID.
+ * An immutable activity schedule with a persistent, positive ID.
  * Times are local daycare times on the same date; the end must be later than the start.
  * Dogs participate through separately stored, dated occurrence enrolments.
  * This class does not allocate IDs, validate booking conflicts, or access the clock.
@@ -33,12 +33,12 @@ public final class Activity {
      * Past dates are permitted; booking policies belong to the model.
      *
      * @throws NullPointerException if any detail is null.
-     * @throws IllegalArgumentException if the ID is negative or the time range is invalid.
+     * @throws IllegalArgumentException if the ID is not positive or the time range is invalid.
      */
     public Activity(int id, ActivityName name, LocalDate startDate, LocalTime startTime,
             LocalTime endTime, Recurrence recurrence) {
         requireAllNonNull(name, startDate, startTime, endTime, recurrence);
-        checkArgument(id >= 0, "Activity ID must be nonnegative.");
+        checkArgument(id > 0, "Activity ID must be positive.");
         checkArgument(endTime.isAfter(startTime), MESSAGE_TIME_CONSTRAINTS);
         this.id = id;
         this.name = name;

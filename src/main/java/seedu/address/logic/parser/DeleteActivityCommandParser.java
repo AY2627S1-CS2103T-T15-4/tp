@@ -11,7 +11,7 @@ public class DeleteActivityCommandParser implements Parser<DeleteActivityCommand
     public DeleteActivityCommand parse(String args) throws ParseException {
         try {
             int activityId = Integer.parseInt(args.trim());
-            if (activityId < 0) {
+            if (activityId <= 0) {
                 throw new NumberFormatException();
             }
             return new DeleteActivityCommand(activityId);

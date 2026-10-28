@@ -53,7 +53,7 @@ public class EditActivityCommandParserTest {
         EditActivityDescriptor daily = new EditActivityDescriptor();
         daily.setRecurrence(Recurrence.DAILY);
 
-        assertEquals(new EditActivityCommand(0, name), parser.parse(" 0 n/Training"));
+        assertEquals(new EditActivityCommand(1, name), parser.parse(" 1 n/Training"));
         assertEquals(new EditActivityCommand(3, date), parser.parse(" 3 date/2028-03-01"));
         assertEquals(new EditActivityCommand(3, start), parser.parse(" 3 start/08:30"));
         assertEquals(new EditActivityCommand(3, once), parser.parse(" 3 r/once"));
@@ -62,7 +62,7 @@ public class EditActivityCommandParserTest {
 
     @Test
     public void parse_missingInvalidAndRepeatedFields_failure() {
-        for (String input : new String[]{"", " 3", " -1 n/Training", " abc n/Training",
+        for (String input : new String[]{"", " 0 n/Training", " 3", " -1 n/Training", " abc n/Training",
             " 2147483648 n/Training", " 3 n/", " 3 date/2027-02-29", " 3 date/2028/03/01",
             " 3 start/24:00", " 3 start/8:00", " 3 end/9:00", " 3 end/25:00",
             " 3 r/Weekly", " 3 n/Training n/Walk", " 3 d/7", " 3 n/Training x/unused"}) {
