@@ -29,9 +29,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
    Some example commands you can try:
 
-   * `list customer` : Lists all customers.
 
-   * `list dog` : Lists all dogs.
 
    * `resetdisplay` : Shows all customers and dogs, plus activities occurring today or later.
 
@@ -191,22 +189,6 @@ Example:
 
 The contact number and backup contact number must be eight-digit numbers.
 
-### Listing all customers: `list customer`
-
-Shows a list of all customers in the address book.
-
-Format: `list customer`
-
-If there are no customers, WatchDog displays `There are no customers to display.`
-
-### Listing all dogs: `list dog`
-
-Shows a list of all dogs in the address book.
-
-Format: `list dog`
-
-If there are no dogs, WatchDog displays `There are no dogs to display.`
-
 ### Resetting the display: `resetdisplay`
 
 Shows all stored customers and dogs, plus activities with an occurrence today or later according to
@@ -286,7 +268,7 @@ Example: `link c/1 d/2 3` links dogs 2 and 3 to customer 1.
 * A successful command reports the linked IDs. Dog cards show `Owner ID: CUSTOMER_ID`, or `Owner ID: None`.
   Customer cards show `Dog IDs: 2, 3` below backup contact, or `Dog IDs: None` if no dogs are linked.
   This field includes all owned dogs, even when search filters hide their cards.
-  Existing search filters stay active; use `list dog` to see all dogs.
+  Existing search filters stay active; use `resetdisplay` to see all dogs and customers, plus upcoming activities.
 * Links are saved automatically and survive restarting the application.
 * **Deleting a customer unlinks their dogs without deleting them**, including dogs hidden by a search.
   These dogs keep their IDs and details, show `Owner ID: None`, and can be linked to another customer.
@@ -504,8 +486,6 @@ Action     | Format, Examples
 **Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 **Edit dog** | `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`<br>e.g., `editdog 1 s/Large`
 **Edit customer** | `editcustomer CUSTOMER_ID [n/NAME] [p/PHONE] [e/EMAIL] [bc/BACKUP_CONTACT]`<br>e.g., `editcustomer 1 p/91234567`
-**List customers** | `list customer`
-**List dogs** | `list dog`
 **Delete dog** | `delete dog ID`<br>e.g., `delete dog 0`
 **Delete customer** | `delete customer ID`<br>e.g., `delete customer 21`
 **Undo** | `undo`

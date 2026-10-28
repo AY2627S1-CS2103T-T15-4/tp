@@ -1,3 +1,5 @@
+//@@author its-shoutime-unused
+// Retired in v1.5: resetdisplay restores records; field-based searches narrow the display.
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;

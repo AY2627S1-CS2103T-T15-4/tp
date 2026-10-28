@@ -261,6 +261,14 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 <puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog through the application layers" />
 
+### Retired list commands
+
+The former list dog and list customer commands are no longer routed by AddressBookParser.
+Use resetdisplay to restore all customers and dogs and upcoming activities, or searchc/searchd
+to narrow the display. Retired list-dog source and tests are preserved under unused/@xandergoh/;
+list-customer source, parser, and tests are under unused/@its-shoutime/. These archives are
+excluded from Gradle source and test sets and retain authorship annotations.
+
 ### Retired select commands
 
 The former select dog and select customer implementations are retained under
@@ -665,8 +673,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  User requests to list dogs.
-2.  System shows a list of dogs.
+1.  User requests to restore the display using `resetdisplay`.
+2.  System shows all dogs and customers, plus upcoming activities.
 
     Use case ends.
 
@@ -770,8 +778,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  User requests to list customers.
-2.  System shows a list of customers.
+1.  User requests to restore the display using `resetdisplay`.
+2.  System shows all customers and dogs, plus upcoming activities.
 
     Use case ends.
 

@@ -1,3 +1,5 @@
+//@@author its-shoutime-unused
+// Retired in v1.5: resetdisplay restores records; field-based searches narrow the display.
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
@@ -18,9 +20,11 @@ public class ListCommandParser implements Parser<ListCommand> {
      * @throws ParseException if the user input does not conform to the expected format
      */
     public ListCommand parse(String args) throws ParseException {
+        //@@author xandergoh-unused
         if (args.trim().isEmpty()) {
             throw new ParseException(ListCommand.MESSAGE_MISSING_CATEGORY);
         }
+        //@@author its-shoutime-unused
         if (!CUSTOMER_CATEGORY.equals(args.trim())) {
             throw new ParseException(
                     String.format(MESSAGE_INVALID_COMMAND_FORMAT, ListCommand.MESSAGE_USAGE));

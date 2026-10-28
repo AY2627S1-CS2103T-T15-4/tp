@@ -122,14 +122,14 @@ public class SearchCustomerCommandTest {
     }
 
     @Test
-    public void execute_searchThenListAndEdit_keepsMatchingActivityVisible() throws Exception {
+    public void execute_customerThenDogSearchAndEdit_keepsMatchingActivityVisible() throws Exception {
         ModelManager model = modelWithCustomersAndDogs();
         Activity activity = model.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         model.enrolDogs(activity.getId(), activity.getStartDate(), List.of(1));
 
         new SearchCustomerCommand("anna", null, null, null, null).execute(model);
-        new ListDogCommand().execute(model);
+        new SearchDogCommand(null, null, null, 1).execute(model);
         EditDogCommand.EditDogDescriptor descriptor = new EditDogCommand.EditDogDescriptor();
         descriptor.setName(new DogName("Buddy Updated"));
         new EditDogCommand(1, descriptor).execute(model);
