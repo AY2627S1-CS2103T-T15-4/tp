@@ -412,6 +412,11 @@ Clears all entries from the address book.
 
 Format: `clear`
 
+The app warns that this action cannot be undone and asks for confirmation (Y/N).
+Enter `Y` to clear all entries or `N` to cancel in the command box. Both answers are
+case-insensitive and accept surrounding whitespace. Any other input asks for Y/N again;
+enter `N` before running another command. No data or history changes until you confirm.
+
 Clearing also discards the undo and redo history, so `clear` cannot be undone. This remains true
 if the command changes memory but its save fails.
 

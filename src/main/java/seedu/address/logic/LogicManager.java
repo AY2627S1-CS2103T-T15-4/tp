@@ -44,6 +44,7 @@ public class LogicManager implements Logic {
     private String undoCommandText;
     private ModelState redoState;
     private String redoCommandText;
+    private boolean awaitingClearConfirmation;
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
@@ -59,7 +60,25 @@ public class LogicManager implements Logic {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
         CommandResult commandResult;
-        Command command = addressBookParser.parseCommand(commandText);
+        Command command;
+        if (awaitingClearConfirmation) {
+            String response = commandText.trim();
+            if (response.equalsIgnoreCase("n")) {
+                awaitingClearConfirmation = false;
+                return new CommandResult(ClearCommand.MESSAGE_CANCELLED);
+            }
+            if (!response.equalsIgnoreCase("y")) {
+                throw new CommandException(ClearCommand.MESSAGE_INVALID_CONFIRMATION);
+            }
+            awaitingClearConfirmation = false;
+            command = new ClearCommand();
+        } else {
+            command = addressBookParser.parseCommand(commandText);
+            if (command instanceof ClearCommand) {
+                awaitingClearConfirmation = true;
+                return new CommandResult(ClearCommand.MESSAGE_CONFIRMATION);
+            }
+        }
 
         if (command instanceof UndoCommand) {
             if (undoState == null) {

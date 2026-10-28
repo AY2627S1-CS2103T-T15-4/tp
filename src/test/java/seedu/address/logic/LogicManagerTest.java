@@ -1,11 +1,13 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteDogCommand;
 import seedu.address.logic.commands.ListCommand;
@@ -196,12 +199,105 @@ public class LogicManagerTest {
         logic.execute("adddog n/Buddy b/Poodle s/small");
         logic.execute("undo");
         logic.execute("clear");
+        logic.execute("Y");
         assertCommandException("redo", RedoCommand.MESSAGE_NO_COMMAND);
         assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
 
         logic.execute("adddog n/Max b/Poodle s/large");
         logic.execute("clear");
+        logic.execute("y");
         assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
+    }
+
+    @Test
+    public void execute_clear_requestsConfirmationWithoutChangingOrSavingData() throws Exception {
+        model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        model.updateFilteredDogList(unused -> false);
+        AddressBook before = new AddressBook(model.getAddressBook());
+
+        assertEquals(ClearCommand.MESSAGE_CONFIRMATION, logic.execute("clear").getFeedbackToUser());
+
+        assertEquals(before, model.getAddressBook());
+        assertEquals(List.of(), model.getFilteredDogList());
+        assertFalse(Files.exists(temporaryFolder.resolve("addressBook.json")));
+    }
+
+    @Test
+    public void execute_clearConfirmation_acceptsEitherCaseAndSurroundingWhitespace() throws Exception {
+        for (String response : List.of("Y", "y", "  Y  ")) {
+            logic.execute("adddog n/Buddy b/Poodle s/small");
+            logic.execute("clear");
+
+            assertEquals(ClearCommand.MESSAGE_SUCCESS, logic.execute(response).getFeedbackToUser());
+            assertEquals(new AddressBook(), model.getAddressBook());
+            assertEquals(new AddressBook(), new AddressBook(
+                    new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"))
+                            .readAddressBook().orElseThrow()));
+            assertParseException("y", MESSAGE_UNKNOWN_COMMAND);
+        }
+    }
+
+    @Test
+    public void execute_clearCancellation_preservesDataAndUndoHistory() throws Exception {
+        for (String response : List.of("N", "n", "  n  ")) {
+            logic.execute("adddog n/Buddy b/Poodle s/small");
+            AddressBook before = new AddressBook(model.getAddressBook());
+            logic.execute("clear");
+
+            assertEquals(ClearCommand.MESSAGE_CANCELLED, logic.execute(response).getFeedbackToUser());
+            assertEquals(before, model.getAddressBook());
+            logic.execute("undo");
+            assertEquals(List.of(), logic.getDogList());
+        }
+    }
+
+    @Test
+    public void execute_clearCancellation_preservesRedoHistory() throws Exception {
+        logic.execute("adddog n/Buddy b/Poodle s/small");
+        logic.execute("undo");
+        logic.execute("clear");
+        logic.execute("n");
+
+        logic.execute("redo");
+        assertEquals("Buddy", logic.getDogList().get(0).getName().toString());
+    }
+
+    @Test
+    public void execute_invalidClearConfirmation_waitsForExplicitAnswer() throws Exception {
+        logic.execute("adddog n/Buddy b/Poodle s/small");
+        logic.execute("clear");
+        for (String response : List.of("yes", "no", "", " ", "clear", "undo", "adddog n/Max b/Poodle s/large")) {
+            assertCommandException(response, ClearCommand.MESSAGE_INVALID_CONFIRMATION);
+        }
+
+        assertEquals(ClearCommand.MESSAGE_SUCCESS, logic.execute("y").getFeedbackToUser());
+        assertEquals(new AddressBook(), model.getAddressBook());
+    }
+
+    @Test
+    public void execute_confirmedClearSaveFailure_discardsHistoryAndConsumesConfirmation() throws Exception {
+        for (IOException failure : List.of(DUMMY_IO_EXCEPTION, DUMMY_AD_EXCEPTION)) {
+            setUp();
+            logic.execute("adddog n/Buddy b/Poodle s/small");
+            JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("clear.json")) {
+                @Override
+                public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
+                    throw failure;
+                }
+            };
+            logic = new LogicManager(model, new StorageManager(storage,
+                    new JsonUserPrefsStorage(temporaryFolder.resolve("clearPrefs.json"))));
+            String expected = failure instanceof AccessDeniedException
+                    ? String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, failure.getMessage())
+                    : String.format(LogicManager.FILE_OPS_ERROR_FORMAT, failure.getMessage());
+
+            assertEquals(ClearCommand.MESSAGE_CONFIRMATION, logic.execute("clear").getFeedbackToUser());
+            assertThrows(CommandException.class, expected, () -> logic.execute("y"));
+            assertEquals(new AddressBook(), model.getAddressBook());
+            assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
+            assertCommandException("redo", RedoCommand.MESSAGE_NO_COMMAND);
+            assertParseException("y", MESSAGE_UNKNOWN_COMMAND);
+        }
     }
 
     @Test
