@@ -31,13 +31,18 @@ public class AddCustomerCommandParserTest {
 
     @Test
     public void parse_missingRequiredField_failure() {
-        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCustomerCommand.MESSAGE_USAGE);
+        String usage = AddCustomerCommand.MESSAGE_USAGE;
 
-        assertParseFailure(parser, " p/91234567 e/alice@example.com bc/98765432", expectedMessage);
-        assertParseFailure(parser, " n/Alice Tan e/alice@example.com bc/98765432", expectedMessage);
-        assertParseFailure(parser, " n/Alice Tan p/91234567 bc/98765432", expectedMessage);
-        assertParseFailure(parser, " n/Alice Tan p/91234567 e/alice@example.com", expectedMessage);
-        assertParseFailure(parser, "unexpected" + validArguments, expectedMessage);
+        assertParseFailure(parser, " p/91234567 e/alice@example.com bc/98765432",
+                "Missing required field(s): name.\n" + usage);
+        assertParseFailure(parser, " n/Alice Tan e/alice@example.com bc/98765432",
+                "Missing required field(s): phone.\n" + usage);
+        assertParseFailure(parser, " n/Alice Tan p/91234567 bc/98765432",
+                "Missing required field(s): email.\n" + usage);
+        assertParseFailure(parser, " n/Alice Tan p/91234567 e/alice@example.com",
+                "Missing required field(s): backup contact.\n" + usage);
+        assertParseFailure(parser, "unexpected" + validArguments,
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT, usage));
     }
 
     @Test
@@ -45,10 +50,10 @@ public class AddCustomerCommandParserTest {
         assertParseFailure(parser, validArguments + " n/Bob", "Multiple values specified for the following "
                 + "single-valued field(s): n/");
         assertParseFailure(parser, " n/Alice Tan p/12 e/alice@example.com bc/98765432",
-                Phone.MESSAGE_CONSTRAINTS);
+                "Invalid phone: " + Phone.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, " n/Alice Tan p/91234567 e/invalid bc/98765432",
-                Email.MESSAGE_CONSTRAINTS);
+                "Invalid email: " + Email.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, " n/Alice Tan p/91234567 e/alice@example.com bc/12",
-                BackupContact.MESSAGE_CONSTRAINTS);
+                "Invalid backup contact: " + BackupContact.MESSAGE_CONSTRAINTS);
     }
 }

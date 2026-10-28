@@ -6,7 +6,8 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
 
 import seedu.address.logic.commands.AddCustomerCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -28,28 +29,52 @@ public class AddCustomerCommandParser implements Parser<AddCustomerCommand> {
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_BACKUP_CONTACT);
 
-        if (!arePrefixesPresent(argMultimap, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_BACKUP_CONTACT)
-                || !argMultimap.getPreamble().isEmpty()) {
+        if (!argMultimap.getPreamble().isEmpty()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCustomerCommand.MESSAGE_USAGE));
         }
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_BACKUP_CONTACT);
-        Name name = ParserUtil.parseCustomerName(argMultimap.getValue(PREFIX_NAME).get());
-        Phone phone = ParserUtil.parseCustomerPhone(argMultimap.getValue(PREFIX_PHONE).get());
-        Email email = ParserUtil.parseCustomerEmail(argMultimap.getValue(PREFIX_EMAIL).get());
-        BackupContact backupContact =
-                ParserUtil.parseCustomerBackupContact(argMultimap.getValue(PREFIX_BACKUP_CONTACT).get());
+        List<String> missingFields = new ArrayList<>();
+        if (argMultimap.getValue(PREFIX_NAME).isEmpty()) {
+            missingFields.add("name");
+        }
+        if (argMultimap.getValue(PREFIX_PHONE).isEmpty()) {
+            missingFields.add("phone");
+        }
+        if (argMultimap.getValue(PREFIX_EMAIL).isEmpty()) {
+            missingFields.add("email");
+        }
+        if (argMultimap.getValue(PREFIX_BACKUP_CONTACT).isEmpty()) {
+            missingFields.add("backup contact");
+        }
+        if (!missingFields.isEmpty()) {
+            throw new ParseException("Missing required field(s): " + String.join(", ", missingFields) + ".\n"
+                    + AddCustomerCommand.MESSAGE_USAGE);
+        }
+
+        Name name = parseField("name", ParserUtil::parseCustomerName, argMultimap.getValue(PREFIX_NAME).get());
+        Phone phone = parseField("phone", ParserUtil::parseCustomerPhone, argMultimap.getValue(PREFIX_PHONE).get());
+        Email email = parseField("email", ParserUtil::parseCustomerEmail, argMultimap.getValue(PREFIX_EMAIL).get());
+        BackupContact backupContact = parseField("backup contact", ParserUtil::parseCustomerBackupContact,
+                argMultimap.getValue(PREFIX_BACKUP_CONTACT).get());
 
         Customer customer = new Customer(name, phone, email, backupContact);
 
         return new AddCustomerCommand(customer);
     }
 
-    /**
-     * Returns true if all specified prefixes have values in the given {@code ArgumentMultimap}.
-     */
-    private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
-        return Stream.of(prefixes).allMatch(prefix -> argumentMultimap.getValue(prefix).isPresent());
+    /** Parses a field and identifies it in any validation error. */
+    private static <T> T parseField(String fieldName, FieldParser<T> parser, String value) throws ParseException {
+        try {
+            return parser.parse(value);
+        } catch (ParseException e) {
+            throw new ParseException("Invalid " + fieldName + ": " + e.getMessage());
+        }
+    }
+
+    @FunctionalInterface
+    private interface FieldParser<T> {
+        T parse(String value) throws ParseException;
     }
 
 }

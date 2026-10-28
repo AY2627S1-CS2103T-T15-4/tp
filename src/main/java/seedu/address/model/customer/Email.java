@@ -1,3 +1,4 @@
+//@@author lilosy
 package seedu.address.model.customer;
 
 import static java.util.Objects.requireNonNull;
