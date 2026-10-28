@@ -126,12 +126,12 @@ public class AddressBookTest {
         Activity edited = original.withSchedule(original.getStartDate(), LocalTime.of(8, 0),
                 LocalTime.of(9, 0), original.getRecurrence());
 
-        assertEquals(0, addressBook.setActivity(original, edited));
+        addressBook.setActivity(original, edited);
         assertEquals(List.of(edited), addressBook.getActivityList());
     }
 
     @Test
-    public void setActivity_withOnlyItsOwnEnrolment_allowsScheduleChange() throws Exception {
+    public void setActivity_withEnrolment_rejectsAndRetainsActivityAndEnrolment() throws Exception {
         LocalDate date = LocalDate.of(2028, 2, 29);
         Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
         addressBook.addDogFromStorage(dog);
@@ -141,12 +141,15 @@ public class AddressBookTest {
         Activity edited = target.withSchedule(date, LocalTime.of(8, 0),
                 LocalTime.of(9, 0), target.getRecurrence());
 
-        assertEquals(0, addressBook.setActivity(target, edited));
-        assertEquals(edited, addressBook.getActivityList().get(0));
+        assertThrows(IllegalArgumentException.class,
+                "Activity ID " + target.getId() + " has enrolments and cannot be edited. Create a new activity instead.",
+                () -> addressBook.setActivity(target, edited));
+        assertEquals(target, addressBook.getActivityList().get(0));
+        assertEquals(List.of(new Enrolment(target.getId(), dog.getId(), date)), addressBook.getEnrolmentList());
     }
 
     @Test
-    public void setActivity_backToBackWithOtherEnrolledActivity_allowsScheduleChange() throws Exception {
+    public void setActivity_withEnrolmentForAnotherActivity_stillRejectsTarget() throws Exception {
         Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
         addressBook.addDogFromStorage(dog);
         Activity target = addressBook.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
@@ -158,12 +161,14 @@ public class AddressBookTest {
         Activity edited = target.withSchedule(target.getStartDate(), LocalTime.of(12, 0),
                 LocalTime.of(13, 0), target.getRecurrence());
 
-        assertEquals(0, addressBook.setActivity(target, edited));
-        assertEquals(edited, addressBook.getActivityList().get(0));
+        assertThrows(IllegalArgumentException.class, () -> addressBook.setActivity(target, edited));
+        assertEquals(target, addressBook.getActivityList().get(0));
+        assertEquals(List.of(new Enrolment(target.getId(), dog.getId(), target.getStartDate()),
+                new Enrolment(other.getId(), dog.getId(), other.getStartDate())), addressBook.getEnrolmentList());
     }
 
     @Test
-    public void setActivity_atMaximumDate_doesNotOverflowOccurrenceCheck() throws Exception {
+    public void setActivity_atMaximumDateWithEnrolment_rejectsWithoutChangingData() throws Exception {
         Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
         addressBook.addDogFromStorage(dog);
         Activity target = addressBook.addActivity(new ActivityName("Walk"), LocalDate.MAX,
@@ -176,8 +181,12 @@ public class AddressBookTest {
         Activity edited = target.withSchedule(target.getStartDate(), LocalTime.of(8, 0),
                 LocalTime.of(10, 0), target.getRecurrence());
 
-        assertEquals(0, addressBook.setActivity(target, edited));
-        assertEquals(edited, addressBook.getActivityList().get(0));
+        List<Activity> originalActivities = List.copyOf(addressBook.getActivityList());
+        List<Enrolment> originalEnrolments = List.copyOf(addressBook.getEnrolmentList());
+
+        assertThrows(IllegalArgumentException.class, () -> addressBook.setActivity(target, edited));
+        assertEquals(originalActivities, addressBook.getActivityList());
+        assertEquals(originalEnrolments, addressBook.getEnrolmentList());
     }
 
     @Test
