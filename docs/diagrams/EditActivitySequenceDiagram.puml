@@ -43,33 +43,35 @@ activate Model
 Model -> Book : setActivity(target, editedActivity)
 activate Book
 Book -> Book : verify target and matching ID
-alt start date or recurrence changed
-  Book -> Book : count enrolments for this activity
-  Book -> Book : replace activity and remove its enrolments
-else start date and recurrence unchanged
+alt activity has enrolments
+  Book --> Model : IllegalArgumentException: cannot edit; create a new activity
+  Model --> Command : exception
+  Command --> Logic : CommandException
+  deactivate Command
+  Logic --> User : display error
+else activity has no enrolments
   Book -> Book : validateNoActivityConflict(editedActivity)
-  Book -> Book : replace activity; retain enrolments
+  Book -> Book : replace activity
+  Book --> Model : success
+  Model --> Command : success
+  Command --> Logic : CommandResult with activity ID
+  deactivate Command
+  Logic -> Model : getAddressBook()
+  activate Model
+  Model --> Logic : addressBook
+  deactivate Model
+  Logic -> Storage : saveAddressBook(addressBook)
+  activate Storage
+  Storage --> Logic
+  deactivate Storage
+  Logic --> User : display result
 end
-Book --> Model : removedEnrolments
 deactivate Book
-Model --> Command : removedEnrolments
 deactivate Model
-Command --> Logic : CommandResult with activity ID and removed count
-deactivate Command
-
-Logic -> Model : getAddressBook()
-activate Model
-Model --> Logic : addressBook
-deactivate Model
-Logic -> Storage : saveAddressBook(addressBook)
-activate Storage
-Storage --> Logic
-deactivate Storage
-Logic --> User : display result
 deactivate Logic
 
 legend bottom
-  Successful edit is shown. Invalid input, missing IDs,
-  booking conflicts, and storage errors are omitted.
+  Successful edit and rejection due to enrolments are shown.
+  Invalid input, missing IDs, booking conflicts, and storage errors are omitted.
 endlegend
 @enduml

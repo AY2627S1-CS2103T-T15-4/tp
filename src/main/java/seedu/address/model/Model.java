@@ -132,8 +132,8 @@ public interface Model {
     /** Deletes the given activity. The activity must exist in the address book. */
     void deleteActivity(Activity activity);
 
-    /** Replaces an activity and returns the number of enrolments removed by a date or recurrence change. */
-    int setActivity(Activity target, Activity editedActivity);
+    /** Replaces an activity with no enrolments. */
+    void setActivity(Activity target, Activity editedActivity);
 
     /** Returns all schedules, independently of dog/customer filters. */
     default ObservableList<Activity> getActivityList() {
