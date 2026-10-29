@@ -353,7 +353,8 @@ state and returns a warning without saving or changing history. The next input m
 and cannot itself be undone. Confirmation is consumed even if saving the cleared data fails.
 
 `Model.createState()` copies the `WatchDog`, including its records and all three next-ID counters, and captures
-the active customer, dog and activity predicates and the enrolment-summary dog predicate. `Model.restoreState()`
+the active customer, dog and activity predicates and the dog predicate used for activity enrolment summaries.
+`Model.restoreState()`
 resets the existing WatchDog and reapplies the saved display state. Reusing the existing model
 and observable lists lets UI listeners continue to see updates after a restoration. It refreshes
 predicates twice: the first pass installs source filters, and the second re-evaluates dependent filters.
