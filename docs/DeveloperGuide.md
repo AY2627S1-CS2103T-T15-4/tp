@@ -131,8 +131,8 @@ The *Sequence Diagram* below shows how the components interact with each other f
 
 <puml src="diagrams/ArchitectureSequenceDiagram.puml" alt="Successful dog deletion and saving at component boundaries" />
 
-This is a component-level view: calls made by commands inside `Logic` are represented at the
-`LogicManager` boundary. Observable-list notifications are omitted. For this undoable deletion,
+This view separates `LogicManager` orchestration from `DeleteDogCommand`, which looks up and deletes
+the dog through `Model`. Parsing is summarised; observable-list notifications are omitted. For this undoable deletion,
 `LogicManager` captures a model snapshot before execution and updates history before saving.
 Ordinary successful commands, including queries, use the same save path; a save failure is reported
 as a command error. History-neutral `help`, `summary`, and `exit` still return their results if saving fails.

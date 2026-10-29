@@ -7,16 +7,25 @@ skinparam maxMessageSize 180
 actor User USER_COLOR
 participant ":MainWindow" as UI UI_COLOR
 participant ":LogicManager" as Logic LOGIC_COLOR
+participant "command:DeleteDogCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
 participant ":StorageManager" as Storage STORAGE_COLOR
 
 User -> UI : deletedog 1
 UI -> Logic : execute("deletedog 1")
+ref over Logic, Command
+  Parse deletedog 1 and return command
+end ref
 Logic -> Model : createState()
 Model --> Logic : stateBeforeCommand
-Logic -> Model : getDogList()
-Model --> Logic : dogs
-Logic -> Model : deleteDog(dog)
+Logic -> Command : execute(model)
+Command -> Model : getDogList()
+Model --> Command : dogs
+note over Command
+  Finds dog with persistent ID 1.
+end note
+Command -> Model : deleteDog(dog)
+Command --> Logic : commandResult
 note right of Logic
   Keeps the pre-command state for undo
   and clears redo before saving.
@@ -28,8 +37,8 @@ Logic --> UI : commandResult
 UI --> User : feedback displayed
 
 legend bottom
-  Successful deletion at component boundaries; internal calls are omitted.
-  Calls made by DeleteDogCommand are represented by its Logic component.
+  Successful deletion and saving; model and storage internals are omitted.
+  Parser construction is expanded in the Logic sequence.
   Observable-list updates refresh the UI; notifications are omitted.
 endlegend
 @enduml
