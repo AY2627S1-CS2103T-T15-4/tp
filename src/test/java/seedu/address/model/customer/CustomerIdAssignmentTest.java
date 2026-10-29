@@ -79,6 +79,31 @@ public class CustomerIdAssignmentTest {
     }
 
     @Test
+    public void setNextCustomerId_aboveExhaustedCounter_rejectsWithoutChangingCounter() {
+        AddressBook addressBook = new AddressBook();
+        long exhaustedCounter = (long) Integer.MAX_VALUE + 1;
+        addressBook.setNextCustomerId(exhaustedCounter);
+
+        assertThrows(IllegalArgumentException.class, "Invalid next customer ID.", () ->
+                addressBook.setNextCustomerId(exhaustedCounter + 1));
+
+        assertEquals(exhaustedCounter, addressBook.getNextCustomerId());
+        assertThrows(IllegalStateException.class, "No more customer IDs are available", () ->
+                addressBook.addCustomer(customer("Alice")));
+    }
+
+    @Test
+    public void setNextCustomerId_existingCustomerId_rejectsWithoutChangingCounter() {
+        AddressBook addressBook = new AddressBook();
+        Customer firstCustomer = addressBook.addCustomer(customer("Alice"));
+
+        assertThrows(IllegalArgumentException.class, "Invalid next customer ID.", () ->
+                addressBook.setNextCustomerId(firstCustomer.getId()));
+
+        assertEquals(2, addressBook.addCustomer(customer("Bob")).getId());
+    }
+
+    @Test
     public void setNextCustomerId_rejectsNonPositiveId() {
         AddressBook addressBook = new AddressBook();
 

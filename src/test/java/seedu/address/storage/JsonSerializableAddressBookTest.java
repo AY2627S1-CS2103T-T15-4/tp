@@ -149,6 +149,14 @@ public class JsonSerializableAddressBookTest {
     }
 
     @Test
+    public void toModelType_nextCustomerIdAboveExhaustedCounter_throwsIllegalValueException() throws Exception {
+        String json = "{\"nextCustomerId\":2147483649}";
+        JsonSerializableAddressBook data = JsonUtil.fromJsonString(json, JsonSerializableAddressBook.class);
+
+        assertThrows(IllegalValueException.class, "Invalid next customer ID.", data::toModelType);
+    }
+
+    @Test
     public void toModelType_missingNextCustomerId_derivesIdFromStoredCustomers() throws Exception {
         JsonSerializableAddressBook data = new JsonSerializableAddressBook(
                 List.of(new JsonAdaptedCustomer(customer(7, "Alice Tan"))), null, null, null, null, null);
