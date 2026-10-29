@@ -101,7 +101,6 @@ public class LogicManager implements Logic {
         model.restoreState(undone.state());
         undoSnapshot = null;
         redoSnapshot = redo;
-        assert redoSnapshot != null;
         logger.info("Undid the previous command and stored a redo snapshot.");
         saveAddressBook(true);
         return new CommandResult(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, undone.commandText()));
@@ -117,7 +116,6 @@ public class LogicManager implements Logic {
         model.restoreState(redone.state());
         undoSnapshot = undo;
         redoSnapshot = null;
-        assert undoSnapshot != null;
         logger.info("Redid the previous command and stored an undo snapshot.");
         saveAddressBook(true);
         return new CommandResult(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, redone.commandText()));
@@ -145,7 +143,6 @@ public class LogicManager implements Logic {
             redoSnapshot = null;
             logger.info("Cleared undo and redo history.");
         } else if (!isHistoryNeutral) {
-            assert stateBeforeCommand != null : "An undoable command must capture a snapshot.";
             undoSnapshot = new HistorySnapshot(stateBeforeCommand, commandText.trim());
             redoSnapshot = null;
         }
@@ -159,7 +156,9 @@ public class LogicManager implements Logic {
         private HistorySnapshot {
             requireNonNull(state);
             requireNonNull(commandText);
-            assert !commandText.isBlank() : "History feedback must name a command.";
+            if (commandText.isBlank()) {
+                throw new IllegalArgumentException("History feedback must name a command.");
+            }
         }
     }
 

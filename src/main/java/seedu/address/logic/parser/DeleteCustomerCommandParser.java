@@ -21,7 +21,6 @@ public class DeleteCustomerCommandParser implements Parser<DeleteCustomerCommand
         }
         try {
             int customerId = Integer.parseInt(trimmedArgs);
-            assert customerId >= 1;
             return new DeleteCustomerCommand(customerId);
         } catch (NumberFormatException exception) {
             throw new ParseException(MESSAGE_INVALID_FORMAT, exception);

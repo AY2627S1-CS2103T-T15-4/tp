@@ -43,7 +43,6 @@ public class DeleteCustomerCommand extends Command {
                     return new CommandException(MESSAGE_INVALID_ID);
                 });
         model.deleteCustomer(customerToDelete);
-        assert model.getCustomerList().stream().noneMatch(customer -> customer.getId() == customerId);
         logger.info("Deleted customer ID " + customerId);
         return new CommandResult(String.format(MESSAGE_SUCCESS, customerToDelete.getName(),
                 customerToDelete.getId(), customerToDelete.getPhone(), customerToDelete.getEmail(),

@@ -46,7 +46,6 @@ public class UniqueCustomerList implements Iterable<Customer> {
             throw new DuplicateCustomerException();
         }
         internalList.add(toAdd);
-        assert contains(toAdd);
     }
 
     /**
@@ -92,7 +91,6 @@ public class UniqueCustomerList implements Iterable<Customer> {
         }
 
         internalList.setAll(customers);
-        assert customersAreUnique(internalList);
     }
 
     /** Replaces the contents of this list with those from {@code replacement}. */

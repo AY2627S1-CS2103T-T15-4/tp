@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
 import java.util.List;
@@ -16,6 +18,7 @@ import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.customer.Customer;
@@ -165,6 +168,20 @@ public class LogicManagerHistoryTest {
             afterRedo.logic.execute("redo");
             afterRedo.assertFilteredPair();
         }
+    }
+
+    @Test
+    public void historySnapshot_blankCommandText_rejected() throws Exception {
+        Model.ModelState state = new ModelManager().createState();
+        Constructor<?> constructor = Class.forName("seedu.address.logic.LogicManager$HistorySnapshot")
+                .getDeclaredConstructor(Model.ModelState.class, String.class);
+        constructor.setAccessible(true);
+
+        InvocationTargetException thrown = assertThrows(InvocationTargetException.class, () ->
+                constructor.newInstance(state, " "));
+
+        assertEquals(IllegalArgumentException.class, thrown.getCause().getClass());
+        assertEquals("History feedback must name a command.", thrown.getCause().getMessage());
     }
 
     private Harness linkedHarness() throws Exception {
