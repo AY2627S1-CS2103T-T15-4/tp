@@ -9,7 +9,7 @@ import seedu.address.commons.util.ToStringBuilder;
 
 /**
  * Represents a dog in the address book.
- * Guarantees: details are present and not null, field values are validated, immutable.
+ * Guarantees: stored dogs have positive IDs; details are present and not null, field values are validated, immutable.
  */
 public class Dog {
 
@@ -22,19 +22,20 @@ public class Dog {
     /**
      * Creates a dog with the given details.
      *
-     * @param name name of the dog
-     * @param breed breed of the dog
-     * @param size size of the dog
+     * @param id Positive persistent dog ID.
+     * @param name Name of the dog.
+     * @param breed Breed of the dog.
+     * @param size Size of the dog.
      */
     public Dog(int id, DogName name, Breed breed, Size size) {
         this(id, name, breed, size, null);
     }
 
-    /** Creates a stored dog with an optional positive owner ID. */
+    /** Creates a stored dog with a positive dog ID and an optional positive owner ID. */
     public Dog(int id, DogName name, Breed breed, Size size, Integer ownerId) {
         requireAllNonNull(name, breed, size);
-        if (id < 0) {
-            throw new IllegalArgumentException("Dog id must be nonnegative.");
+        if (id < 1) {
+            throw new IllegalArgumentException("Dog id must be positive.");
         }
         this.id = id;
         this.name = name;

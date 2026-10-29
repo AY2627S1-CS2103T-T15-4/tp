@@ -14,6 +14,7 @@ class UserPrefs
 class UniqueCustomerList
 class UniqueDogList
 class Enrolment
+class Activity
 class Customer
 class Dog
 class "customer.Name" as CustomerName
@@ -44,12 +45,18 @@ Customer *--> BackupContact
 Dog *--> DogName
 Dog *--> Breed
 Dog *--> Size
-Dog --> "0..1" Customer : ownerId
 ModelManager --> "* filtered" Customer
 ModelManager --> "* filtered" Dog
 ModelManager --> "* filtered" Activity
 ModelManager ..> Enrolment : enrols dogs
-Enrolment --> Activity
-Enrolment --> Dog
-Activity --> "0..*" Enrolment
+
+note bottom of Enrolment
+  Stores activity and dog IDs plus an
+  occurrence date, not object references.
+end note
+
+note bottom of Dog
+  Stores its persistent dog ID and an
+  optional customer ID for ownership.
+end note
 @enduml

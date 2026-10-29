@@ -1,9 +1,12 @@
 package seedu.address.ui;
 
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javafx.event.ActionEvent;
@@ -24,6 +27,11 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.Logic;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.FilterUnlinkedCommand;
+import seedu.address.logic.commands.ResetDisplayCommand;
+import seedu.address.logic.commands.SearchActivityCommand;
+import seedu.address.logic.commands.SearchCustomerCommand;
+import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 
@@ -36,11 +44,18 @@ public class MainWindow extends UiPart<Stage> {
     private static final String FXML = "MainWindow.fxml";
     private static final DateTimeFormatter TODAY_HEADER_FORMAT = DateTimeFormatter.ofPattern("dd MMM yyyy");
     private static final long PAW_PATTERN_SEED = 2103L;
+    private static final Set<String> DISPLAY_CHANGING_COMMAND_WORDS = Set.of(
+            FilterUnlinkedCommand.COMMAND_WORD,
+            ResetDisplayCommand.COMMAND_WORD,
+            SearchActivityCommand.COMMAND_WORD,
+            SearchCustomerCommand.COMMAND_WORD,
+            SearchDogCommand.COMMAND_WORD);
 
     private final Logger logger = LogsCenter.getLogger(getClass());
 
     private Stage primaryStage;
     private Logic logic;
+    private final Clock clock;
 
     // Independent Ui parts residing in this Ui container
     private CustomerListPanel customerListPanel;
@@ -78,15 +93,21 @@ public class MainWindow extends UiPart<Stage> {
     private StackPane resultDisplayPlaceholder;
 
     /**
-     * Creates a {@code MainWindow} with the given {@code Stage}, {@code Logic},
-     * and the data file path to show in the status bar.
+     * Creates a {@code MainWindow} with the given {@code Stage} and {@code Logic}.
+     * The data-file path parameter is retained for compatibility with the UI construction API.
      */
     public MainWindow(Stage primaryStage, Logic logic, Path dataFilePath) {
+        this(primaryStage, logic, dataFilePath, Clock.systemDefaultZone());
+    }
+
+    /** Creates a main window with an injectable clock for deterministic date-sensitive views. */
+    MainWindow(Stage primaryStage, Logic logic, Path dataFilePath, Clock clock) {
         super(FXML, primaryStage);
 
         // Set dependencies
         this.primaryStage = primaryStage;
         this.logic = logic;
+        this.clock = Objects.requireNonNull(clock);
         // Configure the UI
         setWindowDefaultSize(logic.getGuiSettings());
 
@@ -105,7 +126,7 @@ public class MainWindow extends UiPart<Stage> {
 
     /**
      * Sets the accelerator of a MenuItem.
-     * @param keyCombination the KeyCombination value of the accelerator
+     * @param keyCombination The KeyCombination value of the accelerator.
      */
     private void setAccelerator(MenuItem menuItem, KeyCombination keyCombination) {
         menuItem.setAccelerator(keyCombination);
@@ -147,12 +168,12 @@ public class MainWindow extends UiPart<Stage> {
         dogListPanelPlaceholder.getChildren().add(dogListPanel.getRoot());
 
         activityListPanel = new ActivityListPanel(logic.getFilteredActivityList(), logic.getEnrolmentList(),
-                logic.getActivityEnrolmentContextChanges(), logic::getActivityEnrolmentSummary);
+                clock, logic.getActivityEnrolmentContextChanges(), logic::getActivityEnrolmentSummary);
         activityListPanelPlaceholder.getChildren().add(activityListPanel.getRoot());
 
-        todayActivityListPanel = new TodayActivityListPanel(logic.getActivityList());
+        todayActivityListPanel = new TodayActivityListPanel(logic.getActivityList(), logic.getEnrolmentList(), clock);
         todayActivityListPanelPlaceholder.getChildren().add(todayActivityListPanel.getRoot());
-        todayActivitiesHeader.setText("Today · " + LocalDate.now().format(TODAY_HEADER_FORMAT));
+        refreshActivityPanels();
 
         resultDisplay = new ResultDisplay();
         resultDisplayPlaceholder.getChildren().add(resultDisplay.getRoot());
@@ -283,6 +304,8 @@ public class MainWindow extends UiPart<Stage> {
     CommandResult executeCommand(String commandText) throws CommandException, ParseException {
         try {
             CommandResult commandResult = logic.execute(commandText);
+            refreshActivityPanels();
+            resetListScrollForDisplayCommand(commandText);
             logger.info("Result: " + commandResult.getFeedbackToUser());
             resultDisplay.setFeedbackToUser(commandResult.getFeedbackToUser());
 
@@ -300,5 +323,29 @@ public class MainWindow extends UiPart<Stage> {
             resultDisplay.setFeedbackToUser(e.getMessage());
             throw e;
         }
+    }
+
+    /** Refreshes date-sensitive activity cards and their shared Today heading. */
+    private void refreshActivityPanels() {
+        LocalDate today = LocalDate.now(clock);
+        activityListPanel.refresh(today);
+        todayActivityListPanel.refresh(today);
+        todayActivitiesHeader.setText("Today · " + today.format(TODAY_HEADER_FORMAT));
+    }
+
+    /** Resets every record panel after a command intentionally changes the displayed result set. */
+    private void resetListScrollForDisplayCommand(String commandText) {
+        String strippedCommand = commandText.stripLeading();
+        if (strippedCommand.isEmpty()) {
+            return;
+        }
+        String commandWord = strippedCommand.split("\\s+", 2)[0];
+        if (!DISPLAY_CHANGING_COMMAND_WORDS.contains(commandWord)) {
+            return;
+        }
+        customerListPanel.scrollToTop();
+        dogListPanel.scrollToTop();
+        activityListPanel.scrollToTop();
+        todayActivityListPanel.scrollToTop();
     }
 }

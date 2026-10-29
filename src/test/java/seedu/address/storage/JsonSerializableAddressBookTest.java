@@ -5,13 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalWatchDog.getTypicalAddressBook;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.AddressBook;
@@ -30,6 +34,9 @@ import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
 
 public class JsonSerializableAddressBookTest {
+
+    @TempDir
+    public Path temporaryFolder;
 
     @Test
     public void roundTrip_watchDogRecords_preservesLinksAndIdCounters() throws Exception {
@@ -119,17 +126,59 @@ public class JsonSerializableAddressBookTest {
     }
 
     @Test
-    public void toModelType_negativePersistedIdCounters_derivesCountersFromRecords() throws Exception {
-        Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
-        JsonSerializableAddressBook data = new JsonSerializableAddressBook(
-                List.of(new JsonAdaptedCustomer(customer(9, "Alice Tan"))),
-                List.of(new JsonAdaptedDog(dog)), -1, 0L, null, null, null);
+    public void toModelType_missingDogCounter_derivesCounterFromRecords() throws Exception {
+        String legacyJson = """
+                {"customers":[{"id":9,"name":"Alice Tan","phone":"91234567",
+                "email":"test@example.com","backupContact":"98765432"}],
+                "dogs":[{"id":7,"name":"Buddy","breed":"Poodle","size":"Small"}],
+                "nextCustomerId":0}
+                """;
 
-        AddressBook restored = data.toModelType();
+
+        AddressBook restored = JsonUtil.fromJsonString(
+                legacyJson, JsonSerializableAddressBook.class).toModelType();
 
         assertEquals(10, restored.addCustomer(customer(-1, "Beth Tan")).getId());
         assertEquals(8, restored.addDog(new Dog(new DogName("Milo"), new Breed("Poodle"),
                 new Size("Small"))).getId());
+    }
+
+    @Test
+    public void toModelType_invalidPersistedDogCounter_throwsIllegalValueException() {
+        Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
+        for (long counter : new long[]{-1, 0, 6, 7, (long) Integer.MAX_VALUE + 2}) {
+            JsonSerializableAddressBook data = new JsonSerializableAddressBook(null,
+                    List.of(new JsonAdaptedDog(dog)), counter, null, null, null, null);
+
+            assertThrows(IllegalValueException.class, data::toModelType);
+        }
+    }
+
+    @Test
+    public void toModelType_exhaustedDogCounter_roundTripsWithoutOverflow() throws Exception {
+        AddressBook original = new AddressBook();
+        original.addDogFromStorage(new Dog(Integer.MAX_VALUE, new DogName("Buddy"),
+                new Breed("Poodle"), new Size("Small")));
+
+        String json = JsonUtil.toJsonString(new JsonSerializableAddressBook(original));
+        AddressBook restored = JsonUtil.fromJsonString(json, JsonSerializableAddressBook.class).toModelType();
+
+        assertEquals(original, restored);
+        assertEquals((long) Integer.MAX_VALUE + 1, restored.getNextDogId());
+    }
+
+    @Test
+    public void readAddressBook_nonIntegerDogCounter_rejectedWithoutRewritingFile() throws Exception {
+        Path file = temporaryFolder.resolve("invalid-dog-counter.json");
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(file);
+        for (String value : List.of("1.9", "1.0", "1e0", "\"1\"", "true", "{}", "[]",
+                "9223372036854775808")) {
+            String json = "{\"nextDogId\":" + value + "}";
+            Files.writeString(file, json);
+
+            assertThrows(DataLoadingException.class, storage::readAddressBook);
+            assertEquals(json, Files.readString(file));
+        }
     }
 
     @Test

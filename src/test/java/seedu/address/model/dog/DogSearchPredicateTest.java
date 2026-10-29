@@ -34,6 +34,8 @@ public class DogSearchPredicateTest {
         assertThrows(NullPointerException.class, () -> new DogSearchPredicate(null));
         assertThrows(IllegalArgumentException.class, () -> new DogSearchPredicate("  "));
         assertThrows(IllegalArgumentException.class, () -> new DogSearchPredicate(-1));
+        assertThrows(IllegalArgumentException.class, () -> new DogSearchPredicate(0));
+        assertThrows(IllegalArgumentException.class, () -> new DogSearchPredicate(null, null, null, 0));
     }
 
     @Test

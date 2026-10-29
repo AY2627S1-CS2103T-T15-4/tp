@@ -74,7 +74,7 @@ public class TodayCommandTest {
     }
 
     @Test
-    public void execute_noTodayActivities_showsEmptyRelatedLists() {
+    public void execute_noTodayActivities_showsEmptyRelatedLists() throws Exception {
         ModelManager model = new ModelManager();
         model.addActivity(new ActivityName("Tomorrow's walk"), LocalDate.now().plusDays(1), LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);

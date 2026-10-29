@@ -85,7 +85,8 @@ public class ModelManagerTest {
         modelManager.enrolDogs(walk.getId(), walk.getStartDate(), List.of(buddy.getId()));
         Model.ModelState state = modelManager.createState();
         long nextCustomerId = state.addressBook().getNextCustomerId();
-        int nextDogId = state.addressBook().getNextDogId();
+        long nextDogId = state.addressBook().getNextDogId();
+
         long nextActivityId = state.addressBook().getNextActivityId();
 
         modelManager.addCustomer(nextCustomer);
@@ -109,7 +110,7 @@ public class ModelManagerTest {
         Activity nextActivity = modelManager.addActivity(new ActivityName("Run"), LocalDate.now(),
                 LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.ONCE);
         assertEquals(nextCustomerId, modelManager.getAddressBook().getCustomerList().get(1).getId());
-        assertEquals(nextDogId, nextDog.getId());
+        assertEquals(nextDogId, (long) nextDog.getId());
         assertEquals(nextActivityId, nextActivity.getId());
     }
 

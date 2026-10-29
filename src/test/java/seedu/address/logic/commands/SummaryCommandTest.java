@@ -61,7 +61,7 @@ public class SummaryCommandTest {
         assertEquals(List.of(), model.getFilteredCustomerList());
         assertEquals(List.of(), model.getFilteredActivityList());
         // The predicates must remain active when later records are added.
-        model.addDog(dog(0));
+        model.addDog(dog(1));
         addActivity(model, TODAY, Recurrence.ONCE);
         assertEquals(List.of(), model.getFilteredDogList());
         assertEquals(List.of(), model.getFilteredActivityList());
@@ -96,7 +96,7 @@ public class SummaryCommandTest {
                 + "Today (2026-10-25): 0 activities | 0 distinct dogs enrolled",
                 command.execute(model).getFeedbackToUser());
         assertEquals(1, clock.reads);
-        model.addDog(dog(0));
+        model.addDog(dog(1));
         addActivity(model, TODAY.plusDays(2), Recurrence.DAILY);
         clock.instant = Instant.parse("2026-10-25T16:00:00Z");
         assertEquals("Overall: 1 dogs | 0 customers\n"

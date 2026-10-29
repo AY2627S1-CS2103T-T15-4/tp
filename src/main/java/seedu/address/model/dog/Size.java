@@ -1,3 +1,4 @@
+// @@author Umaiza-15
 package seedu.address.model.dog;
 
 import static java.util.Objects.requireNonNull;
@@ -10,7 +11,7 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 public class Size {
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Names should only contain alphanumeric characters and spaces, and should not be blank";
+            "Invalid size. Please enter small, medium, large, or giant.";
 
     /*
      * The first character of the name must not be a whitespace,
@@ -32,7 +33,7 @@ public class Size {
     }
 
     /**
-     * Returns true if a given string is a valid name.
+     * Returns true if a given string is a valid size.
      */
     public static boolean isValidSize(String test) {
         return test.matches(SIZE_REGEX);

@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.AppUtil.checkArgument;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -19,8 +20,13 @@ public class DeleteDogCommand extends Command {
 
     private final int dogId;
 
-    /** Creates a command to delete the dog with the specified ID. */
+    /**
+     * Creates a command to delete the dog with the specified positive ID.
+     *
+     * @throws IllegalArgumentException if {@code dogId} is not positive
+     */
     public DeleteDogCommand(int dogId) {
+        checkArgument(dogId >= 1, "Dog ID must be positive.");
         this.dogId = dogId;
     }
 

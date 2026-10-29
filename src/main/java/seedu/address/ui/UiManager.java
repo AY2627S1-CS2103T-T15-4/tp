@@ -28,8 +28,7 @@ public class UiManager implements Ui {
     private MainWindow mainWindow;
 
     /**
-     * Creates a {@code UiManager} with the given {@code Logic} and the data file path
-     * to show in the status bar.
+     * Creates a {@code UiManager} with the given {@code Logic} and data-file path supplied to the main window.
      */
     public UiManager(Logic logic, Path dataFilePath) {
         this.logic = logic;

@@ -228,6 +228,12 @@ public class AddressBookTest {
     }
 
     @Test
+    public void constructor_zeroId_rejectsDog() {
+        assertThrows(IllegalArgumentException.class, "Dog id must be positive.", () ->
+                new Dog(0, new DogName("Cookie"), new Breed("Poodle"), new Size("Small")));
+    }
+
+    @Test
     public void addDogFromStorage_preservesIdAndAdvancesCounter() {
         Dog storedDog = new Dog(7, new DogName("Cookie"),
                 new Breed("Golden Retriever"), new Size("Large"));
@@ -241,8 +247,96 @@ public class AddressBookTest {
     }
 
     @Test
-    public void setNextDogId_negativeId_throwsIllegalArgumentException() {
+    public void addDogFromStorage_maximumId_setsExhaustedCounter() {
+        Dog storedDog = new Dog(Integer.MAX_VALUE, new DogName("Cookie"),
+                new Breed("Golden Retriever"), new Size("Large"));
+
+        addressBook.addDogFromStorage(storedDog);
+
+        assertEquals((long) Integer.MAX_VALUE + 1, addressBook.getNextDogId());
+    }
+
+    @Test
+    public void addDog_lastAvailableId_doesNotOverflowOrMutateAfterExhaustion() {
+        addressBook.setNextDogId(Integer.MAX_VALUE);
+        Dog added = addressBook.addDog(new Dog(new DogName("Cookie"),
+                new Breed("Golden Retriever"), new Size("Large")));
+
+        assertEquals(Integer.MAX_VALUE, added.getId());
+        assertEquals((long) Integer.MAX_VALUE + 1, addressBook.getNextDogId());
+        AddressBook beforeRejectedAddition = new AddressBook(addressBook);
+
+        assertThrows(IllegalStateException.class, "No more dog IDs are available.", () ->
+                addressBook.addDog(new Dog(new DogName("Milo"), new Breed("Poodle"), new Size("Small"))));
+        assertEquals(beforeRejectedAddition, addressBook);
+    }
+
+    @Test
+    public void enrolDogs_zeroDogId_rejectsInvalidId() throws Exception {
+        LocalDate date = LocalDate.of(2028, 2, 29);
+        Activity activity = addressBook.addActivity(new ActivityName("Walk"), date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+
+        assertThrows(seedu.address.model.dog.exceptions.EnrolException.class,
+                "Dog IDs must be positive whole numbers.", () ->
+                        addressBook.enrolDogs(activity.getId(), date, List.of(0)));
+        assertThrows(seedu.address.model.dog.exceptions.EnrolException.class,
+                "Dog IDs must be positive whole numbers.", () ->
+                        addressBook.unenrolDogs(activity.getId(), date, List.of(0)));
+    }
+
+    @Test
+    public void setNextDogId_invalidCounter_throwsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> addressBook.setNextDogId(-1));
+        assertThrows(IllegalArgumentException.class,
+                "Next dog ID must be positive, exceed all stored dog IDs, and be within range.", () ->
+                addressBook.setNextDogId(0));
+        assertThrows(IllegalArgumentException.class, () ->
+                addressBook.setNextDogId((long) Integer.MAX_VALUE + 2));
+    }
+
+    @Test
+    public void resetData_emptyBookWithZeroCounter_rejectsCounter() {
+        ReadOnlyAddressBook legacyData = new ReadOnlyAddressBook() {
+            @Override
+            public ObservableList<Customer> getCustomerList() {
+                return FXCollections.observableArrayList();
+            }
+
+            @Override
+            public long getNextDogId() {
+                return 0;
+            }
+        };
+
+        assertThrows(IllegalArgumentException.class, () -> addressBook.resetData(legacyData));
+        assertEquals(1, addressBook.getNextDogId());
+    }
+
+    @Test
+    public void resetData_counterNotAboveStoredDogs_rejectsWithoutMutation() {
+        addressBook.addDog(new Dog(new DogName("Existing"), new Breed("Poodle"), new Size("Small")));
+        AddressBook before = new AddressBook(addressBook);
+        Dog incomingDog = new Dog(7, new DogName("Incoming"), new Breed("Beagle"), new Size("Medium"));
+        ReadOnlyAddressBook invalidData = new ReadOnlyAddressBook() {
+            @Override
+            public ObservableList<Customer> getCustomerList() {
+                return FXCollections.observableArrayList();
+            }
+
+            @Override
+            public ObservableList<Dog> getDogList() {
+                return FXCollections.observableArrayList(incomingDog);
+            }
+
+            @Override
+            public long getNextDogId() {
+                return 7;
+            }
+        };
+
+        assertThrows(IllegalArgumentException.class, () -> addressBook.resetData(invalidData));
+        assertEquals(before, addressBook);
     }
 
     @Test
@@ -300,6 +394,21 @@ public class AddressBookTest {
 
         assertEquals(original.getDogList(), differentCustomers.getDogList());
         assertNotEquals(original, differentCustomers);
+    }
+
+    @Test
+    public void equals_differentIdCounters_returnsFalse() {
+        AddressBook original = new AddressBook();
+        AddressBook differentDogCounter = new AddressBook();
+        differentDogCounter.setNextDogId(2);
+        AddressBook differentCustomerCounter = new AddressBook();
+        differentCustomerCounter.setNextCustomerId(2);
+        AddressBook differentActivityCounter = new AddressBook();
+        differentActivityCounter.setNextActivityId(2);
+
+        assertNotEquals(original, differentDogCounter);
+        assertNotEquals(original, differentCustomerCounter);
+        assertNotEquals(original, differentActivityCounter);
     }
 
     @Test

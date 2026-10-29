@@ -42,11 +42,15 @@ public interface Logic {
     /** Returns an unmodifiable observable view of all activities. */
     ObservableList<Activity> getActivityList();
 
+    /**
+     * Returns a live unmodifiable observable view of all dated enrolments.
+     *
+     * @return all dated enrolments
+     */
+    ObservableList<Enrolment> getEnrolmentList();
+
     /** Returns an unmodifiable observable view of filtered activities. */
     ObservableList<Activity> getFilteredActivityList();
-
-    /** Returns all enrolment records for refreshing activity-card details. */
-    ObservableList<Enrolment> getEnrolmentList();
 
     /** Returns the current search-specific enrolment summary for an activity. */
     String getActivityEnrolmentSummary(Activity activity);

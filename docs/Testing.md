@@ -31,9 +31,9 @@ You can run tests in two ways.
 
 ## Types of tests
 
-`RecordListPanelTest` exercises JavaFX card rendering and live list updates. It requires a graphical
-display. On headless Linux, run it with `xvfb-run ./gradlew test --tests seedu.address.ui.RecordListPanelTest`
-when Xvfb is installed; otherwise these UI tests are skipped. The remaining tests do not require Xvfb.
+Tests for cards, list panels, the command box, and the main window exercise JavaFX rendering and interactions.
+They require a graphical display. On headless Linux, run the full suite with `xvfb-run ./gradlew test` when
+Xvfb is installed; otherwise JavaFX-dependent tests are skipped.
 
 This project has three types of tests:
 

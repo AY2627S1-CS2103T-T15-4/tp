@@ -14,7 +14,7 @@ public class DeleteDogCommandParser implements Parser<DeleteDogCommand> {
         String trimmedArgs = args.trim();
         try {
             int dogId = Integer.parseInt(trimmedArgs);
-            if (dogId < 0) {
+            if (dogId < 1) {
                 throw new NumberFormatException();
             }
             return new DeleteDogCommand(dogId);

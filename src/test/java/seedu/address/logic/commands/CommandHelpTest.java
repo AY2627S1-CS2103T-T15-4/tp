@@ -16,9 +16,11 @@ public class CommandHelpTest {
 
         assertTrue(customerHelp.contains("Customer and activity IDs range from 1 to 2147483647."));
         assertFalse(customerHelp.contains("customer IDs range from 0"));
-        assertTrue(dogHelp.contains("Dog IDs range from 0 to 2147483647."));
-        assertTrue(deleteDogHelp.contains("delete dog 0"));
-        assertTrue(enrolHelp.contains("d/2,3"));
-        assertTrue(dogHelp.contains("letters, numbers or spaces"));
+        assertTrue(dogHelp.contains("Dog IDs range from 1 to 2147483647."));
+        assertFalse(dogHelp.contains("Dog IDs range from 0"));
+        assertTrue(deleteDogHelp.contains("delete dog 1"));
+        assertTrue(enrolHelp.contains("d/2 3"));
+        assertFalse(enrolHelp.contains("d/2,3"));
+        assertTrue(dogHelp.contains("hyphens and apostrophes"));
     }
 }

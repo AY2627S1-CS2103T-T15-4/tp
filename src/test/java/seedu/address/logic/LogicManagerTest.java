@@ -11,6 +11,7 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,9 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
@@ -178,24 +182,61 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void getEnrolmentList_unenrolUndoRedoAndClear_updateExistingUnmodifiableView() throws Exception {
+        LocalDate date = LocalDate.of(2026, 10, 28);
+        AddressBook book = new AddressBook();
+        book.addActivity(new ActivityName("Walk"), date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        book.addDogFromStorage(new Dog(1, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        Enrolment booking = new Enrolment(1, 1, date);
+        book.addEnrolmentFromStorage(booking);
+        model = new ModelManager(book, new UserPrefs());
+        logic = new LogicManager(model, new StorageManager(
+                new JsonAddressBookStorage(temporaryFolder.resolve("enrolmentHistory.json")),
+                new JsonUserPrefsStorage(temporaryFolder.resolve("enrolmentHistoryPrefs.json"))));
+        ObservableList<Enrolment> enrolments = logic.getEnrolmentList();
+        int[] notifications = {0};
+        enrolments.addListener((ListChangeListener<Enrolment>) change -> notifications[0]++);
+
+        assertEquals(List.of(booking), enrolments);
+        assertThrows(UnsupportedOperationException.class, () -> enrolments.clear());
+
+        logic.execute("unenrol a/1 date/2026-10-28 d/1");
+        assertEquals(List.of(), enrolments);
+        logic.execute("undo");
+        assertEquals(List.of(booking), enrolments);
+        logic.execute("redo");
+        assertEquals(List.of(), enrolments);
+        logic.execute("undo");
+        logic.execute("clear");
+        logic.execute("Y");
+        assertEquals(List.of(), enrolments);
+        assertTrue(notifications[0] >= 5);
+    }
+
+    @Test
     public void execute_undoRedo_restoresDataAndAllowsAnotherUndo() throws Exception {
         ObservableList<Dog> dogs = logic.getDogList();
         String addCommand = "  adddog n/Buddy b/Poodle s/small  ";
 
         logic.execute(addCommand);
         Dog buddy = dogs.get(0);
+        assertEquals(2, model.getAddressBook().getNextDogId());
         assertEquals(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, addCommand.trim()),
                 logic.execute("undo").getFeedbackToUser());
         assertEquals(List.of(), dogs);
+        assertEquals(1, model.getAddressBook().getNextDogId());
         assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
 
         assertEquals(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, addCommand.trim()),
                 logic.execute("redo").getFeedbackToUser());
         assertEquals(List.of(buddy), dogs);
+        assertEquals(2, model.getAddressBook().getNextDogId());
         assertCommandException("redo", RedoCommand.MESSAGE_NO_COMMAND);
 
         logic.execute("undo");
         assertEquals(List.of(), dogs);
+        assertEquals(1, model.getAddressBook().getNextDogId());
     }
 
     @Test

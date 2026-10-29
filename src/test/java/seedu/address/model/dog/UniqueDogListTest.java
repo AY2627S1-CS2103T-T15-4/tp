@@ -24,11 +24,11 @@ public class UniqueDogListTest {
     }
 
     @Test
-    public void add_unassignedDogs_allowsBothDogs() {
-        uniqueDogList.add(new Dog(new DogName("Cookie"), new Breed("Poodle"), new Size("Small")));
-        uniqueDogList.add(new Dog(new DogName("Cookie"), new Breed("Poodle"), new Size("Small")));
+    public void add_unassignedDog_rejectsDogWithoutPersistentId() {
+        Dog unassigned = new Dog(new DogName("Cookie"), new Breed("Poodle"), new Size("Small"));
 
-        assertEquals(2, uniqueDogList.asUnmodifiableObservableList().size());
+        assertThrows(IllegalArgumentException.class, "Dog ID must be positive.", () ->
+                uniqueDogList.add(unassigned));
     }
 
     @Test
