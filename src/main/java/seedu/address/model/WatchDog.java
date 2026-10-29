@@ -157,6 +157,8 @@ public class WatchDog implements ReadOnlyWatchDog {
         Activity activity = new Activity((int) nextActivityId, name, date, start, end, recurrence);
         nextActivityId++;
         activities.add(activity);
+        assert nextActivityId > activity.getId() : "The next activity ID must exceed the allocated ID.";
+        logger.fine("Created activity ID " + activity.getId() + ".");
         return activity;
     }
 
@@ -389,6 +391,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
         // All endpoints were validated; a mismatch here means the internal update is defective.
         assert hasExpectedOwners(dogIds, customerId) : "Linked dogs must exist and belong to the requested customer.";
+        logger.fine("Linked " + dogIds.size() + " dogs to customer ID " + customerId + ".");
     }
 
     /**
@@ -419,6 +422,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         }
         dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
         assert hasExpectedOwners(dogIds, null) : "Unlinked dogs must exist and have no owner.";
+        logger.fine("Unlinked " + dogIds.size() + " dogs from their owners.");
     }
 
     /** Checks stored endpoints as well as ownership, so missing dogs cannot satisfy the postcondition. */
