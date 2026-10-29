@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.model.activity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,6 +18,19 @@ public class ActivityTest {
     private static final LocalTime START = LocalTime.of(10, 0);
     private static final LocalTime END = LocalTime.of(11, 0);
     private static final ActivityName NAME = new ActivityName("Training");
+
+    @Test
+    public void nextOccurrence_everyWeekdayAndOffset_returnsFirstValidOccurrence() {
+        LocalDate monday = LocalDate.of(2028, 1, 3);
+        for (int weekday = 0; weekday < 7; weekday++) {
+            LocalDate first = monday.plusDays(weekday);
+            Activity weekly = new Activity(1, NAME, first, START, END, Recurrence.WEEKLY);
+            for (int offset = 1; offset <= 7; offset++) {
+                assertEquals(Optional.of(first.plusWeeks(1)),
+                        weekly.nextOccurrenceOnOrAfter(first.plusDays(offset)));
+            }
+        }
+    }
 
     private Activity activity(Recurrence recurrence) {
         return new Activity(12, NAME, FIRST_DATE, START, END, recurrence);
@@ -97,6 +111,18 @@ public class ActivityTest {
     }
 
     @Test
+    public void nextOccurrence_weeklyEveryOffset_returnsEarliestMatchingDate() {
+        Activity weekly = activity(Recurrence.WEEKLY);
+        for (int offset = 1; offset <= 7; offset++) {
+            LocalDate query = FIRST_DATE.plusDays(offset);
+            assertEquals(Optional.of(FIRST_DATE.plusWeeks(1)), weekly.nextOccurrenceOnOrAfter(query));
+        }
+        Activity lastWeek = new Activity(1, NAME, LocalDate.MAX.minusDays(7), START, END, Recurrence.WEEKLY);
+        assertEquals(Optional.of(LocalDate.MAX), lastWeek.nextOccurrenceOnOrAfter(LocalDate.MAX.minusDays(1)));
+        assertEquals(Optional.of(LocalDate.MAX), lastWeek.nextOccurrenceOnOrAfter(LocalDate.MAX));
+    }
+
+    @Test
     public void replacements_preserveIdentityAndOriginal() {
         Activity original = activity(Recurrence.WEEKLY);
         Activity renamed = original.withName(new ActivityName("Grooming"));
@@ -144,5 +170,6 @@ public class ActivityTest {
         assertNotEquals(original, activity(Recurrence.DAILY));
         assertTrue(original.toString().contains("Training"));
     }
+    // @@author
 
 }

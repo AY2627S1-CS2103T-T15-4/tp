@@ -47,10 +47,12 @@ public class JsonSerializableWatchDogTest {
 
         WatchDog restored = JsonUtil.fromJsonString(json, JsonSerializableWatchDog.class).toModelType();
 
+        // @@author Kenneth-Chia
         assertEquals(original, restored);
         assertEquals(80, restored.getNextDogId());
         assertEquals(30, restored.getNextCustomerId());
         assertFalse(json.contains("\"persons\""));
+        // @@author
     }
 
     @Test
@@ -62,9 +64,11 @@ public class JsonSerializableWatchDogTest {
 
         WatchDog restored = JsonUtil.fromJsonString(legacyJson, JsonSerializableWatchDog.class).toModelType();
 
+        // @@author Kenneth-Chia
         assertEquals(original, restored);
         assertEquals(original.getNextDogId(), restored.getNextDogId());
         assertEquals(original.getNextCustomerId(), restored.getNextCustomerId());
+        // @@author
     }
 
     @Test

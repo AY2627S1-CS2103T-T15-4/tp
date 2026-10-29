@@ -1,3 +1,4 @@
+//@@author its-shoutime
 package seedu.address.storage;
 
 import static java.util.Objects.requireNonNull;
@@ -65,12 +66,14 @@ class JsonAdaptedCustomer {
         if (id < 1) {
             throw new IllegalValueException("Customer ID must be positive.");
         }
+        // @@author Kenneth-Chia
         try {
             return new Customer(id, new Name(name), new Phone(phone), new Email(email),
                     new BackupContact(backupContact));
         } catch (IllegalArgumentException e) {
             throw new IllegalValueException(e.getMessage(), e);
         }
+        // @@author
     }
 
     private static void requirePresent(Object value, String fieldName) throws IllegalValueException {

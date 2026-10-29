@@ -2,20 +2,41 @@
 !include style.puml
 skinparam ArrowFontStyle plain
 skinparam ParticipantFontColor #FFFFFF
+/'
+// @@author Kenneth-Chia
+'/
 skinparam maxMessageSize 180
+/'
+// @@author
+'/
 
 participant "command:EditActivityCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
 
+/'
+// @@author Kenneth-Chia
+'/
 [-> Command : execute(model)
+/'
+// @@author
+'/
 Command -> Model : getActivityList()
 Model --> Command : activities
+/'
+// @@author Kenneth-Chia
+'/
 note over Command
   Finds the target by persistent ID.
   Builds an edited activity with the same ID;
   omitted fields retain their values.
+/'
+// @@author
+'/
 end note
 Command -> Model : setActivity(target, editedActivity)
+/'
+// @@author Kenneth-Chia
+'/
 note right of Model
   Rejects an activity with any enrolments.
   For an unenrolled activity, validates
@@ -26,10 +47,19 @@ note over Command
   Reports the edited activity ID.
 end note
 [<-- Command : commandResult
+/'
+// @@author
+'/
 
 legend bottom
+/'
+// @@author Kenneth-Chia
+'/
   Edits an activity with no enrolments. Model internals are omitted.
   Parsing and saving follow the shared Logic flow.
   Successful execution only; validation failures are omitted.
+/'
+// @@author
+'/
 endlegend
 @enduml

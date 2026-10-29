@@ -74,6 +74,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 The original AB3 person commands `add`, `edit`, `delete INDEX` and `find` are no longer supported.
 Use the customer and dog commands described below.
 
+<!--@@author its-shoutime-->
 ### Viewing help: `help`
 
 Opens a help window containing the link to this User Guide. Use `help COMMAND` to display a specific
@@ -103,6 +104,8 @@ Both forms preserve records, filters, and undo/redo history. For example, after 
 running `help adddog`, `undo` undoes the addition. Running help after `undo` also preserves `redo`.
 
 
+<!--@@author-->
+<!-- @@author Kenneth-Chia -->
 ### Adding an activity: `addactivity`
 
 Creates an activity schedule with zero dogs and reports its persistent ID. The schedule is saved
@@ -130,6 +133,7 @@ Examples:
 Invalid dates, times, recurrence values, missing or repeated fields produce an error.
 Creation does not book any dogs, so overlapping empty schedules are allowed. Dog booking commands
 and activity cards are separate features; this contribution reports creation in the command feedback.
+<!-- @@author -->
 
 ### Reading activity cards
 
@@ -279,6 +283,7 @@ Format: `summary` (no parameters; surrounding whitespace is accepted)
 
 Example: `summary` displays the statistics below using your stored records and the current local date.
 
+<!-- @@author Kenneth-Chia -->
 Example output:
 
 ```text
@@ -296,6 +301,7 @@ Today (2026-10-24): 5 activities | 12 distinct dogs enrolled
   All activity counts include empty activities and sessions that ended earlier today.
 * Today's distinct dogs enrolled counts each dog ID once across all activities on that date.
   Yesterday's and tomorrow's enrolments are excluded. Enrolment does not indicate attendance.
+<!-- @@author -->
 
 The date shown is read once when the command runs, using the computer's local date.
 WatchDog attempts to save after running `summary`. If saving fails, the statistics are still displayed
@@ -333,9 +339,11 @@ Example: `editcustomer 1 p/91234567 e/johndoe@example.com`
 Assigns one or more existing, unowned dogs to an existing customer. Use this to record who owns each dog;
 one command can link several dogs to the same customer.
 
+<!-- @@author Kenneth-Chia -->
 Format: `link c/CUSTOMER_ID d/DOG_ID [DOG_ID]...`
 
 Example: `link c/1 d/2 3` links dogs 2 and 3 to customer 1.
+<!-- @@author -->
 
 * Use persistent record IDs, including records hidden by a search. Dog IDs start at 1.
 * Put exactly one `c/` field first, followed by one `d/` field with space-separated dog IDs.
@@ -361,12 +369,14 @@ Example: `link c/1 d/2 3` links dogs 2 and 3 to customer 1.
 Removes ownership links from selected dogs or from all dogs belonging to one customer. The dogs and
 customers remain in WatchDog, so you can subsequently link the dogs to another customer.
 
+<!-- @@author Kenneth-Chia -->
 Formats: `unlink d/DOG_ID [DOG_ID]...` or `unlink c/CUSTOMER_ID`
 
 Examples:
 
 * `unlink d/1 2 3` removes ownership from dogs 1, 2 and 3, even if they have different owners.
 * `unlink c/1` removes ownership from every dog belonging to customer 1, including hidden dogs.
+<!-- @@author -->
 
 * Customer and dog IDs are positive integers. Use lowercase prefixes and whitespace between dog IDs.
   Do not put whitespace after the slash. Repeated dog IDs (including `d/2 02`) are rejected.
@@ -515,6 +525,7 @@ If the ID does not exist, WatchDog displays:
 
 `Error in deleting dog:`<br>`Please enter a valid dog index`
 
+<!--@@author its-shoutime-->
 ### Deleting a customer: `deletecustomer`
 
 Deletes an existing customer using its persistent ID and removes their dogs' ownership links.
@@ -541,6 +552,7 @@ Right-click a customer or dog card to copy an individual field or all details in
 An unlinked dog's customer-ID action is disabled. The app briefly confirms a successful copy and reports when
 the operating system clipboard rejects it.
 
+<!--@@author-->
 ### Clearing all entries: `clear`
 
 Clears all customers, dogs, activities, and enrolments from WatchDog after confirmation.
@@ -565,6 +577,7 @@ if they match the active view. For example, after `searchc n/Alice` followed by 
 a customer named Bob succeeds but does not display Bob in the customer panel. Use `reset` to show all
 customers and dogs, plus activities occurring today or later.
 
+<!--@@author its-shoutime-->
 ### Undoing and redoing a command: `undo`, `redo`
 
 `undo` restores the stored records and displayed view from before the most recent undoable command.
@@ -589,6 +602,7 @@ A save error can occur after an undoable command, `undo`, `redo`, or `clear` has
 The change remains visible in the current session, with the corresponding undo or redo operation
 available where applicable, but the data file may not contain that change.
 
+<!--@@author-->
 ### Exiting the program: `exit`
 
 Closes WatchDog. Record changes are saved automatically after commands; window preferences are saved
@@ -659,3 +673,323 @@ Action     | Format, Examples
 **Undo** | `undo`
 **Redo** | `redo`
 **Help**   | `help` opens the help window; `help COMMAND` shows command details in the result section.<br>e.g., `help summary`, `help adddog`, `help deletedog`
+
+--------------------------------------------------------------------------------------------------------------------
+
+## Instructions for Manual Testing
+
+This appendix provides a path through WatchDog's current features, with representative inputs you can extend
+through exploratory testing. Refer to [Features](#features) for full command specifications. Unchanged AB3
+behaviour is not tested separately, and the planned archiving feature is excluded.
+
+<box type="info" seamless>
+
+**Before starting:** Use a disposable, empty folder for this walkthrough. The tests clear all data in that
+folder. Run the sections and their commands in order, entering **one command at a time** and pressing Enter.
+Do not insert extra successful commands between an action and its `undo` or `redo` check.
+IDs below are persistent record IDs, not positions in a filtered list. To repeat the whole walkthrough,
+start again at the preparation step.
+
+**Dates:** The examples use **2026-10-29 as today**, **2026-10-28 as yesterday**, **2026-10-30 as tomorrow**,
+and **2026-11-05 as one week from today**. If testing on another date, copy the instructions into a text
+editor and replace these four dates with the corresponding dates from your computer's local calendar,
+in `YYYY-MM-DD` format, before pasting commands. Keep `2026-02-30` unchanged: it is deliberately invalid.
+Complete the walkthrough on the same local day; restart preparation if midnight passes.
+
+Unless stated otherwise, a rejected command leaves records and the displayed results unchanged.
+The command box retains failed input; replace it before entering the next command. Error messages below
+quote the relevant text; some errors also include the command format and an example.
+</box>
+
+### Launching and preparing test records
+
+1. Follow [Quick start](#quick-start): install Java 25 as specified there, download the release JAR into
+   the empty test folder, and name it `WatchDog.jar`. Open a terminal in that folder and run:
+
+   ```text
+   java -jar WatchDog.jar
+   ```
+
+   Expected: WatchDog opens with sample records and separate customer, dog, activity, and Today panels.
+
+1. In the application's command box, enter these commands separately:
+
+   ```text
+   clear
+   Y
+   reset
+   summary
+   ```
+
+   Expected: `clear` first asks for Y/N confirmation. `Y` displays `WatchDog data has been cleared!`.
+   All panels are empty. `summary` reports zero for all six counts and the current local date.
+   Clearing also resets the ID counters, so the following additions have the IDs shown below.
+
+1. Add the shared dataset:
+
+   ```text
+   addcustomer n/Alice Tan p/9123 4567 e/alice@example.com bc/98765432
+   addcustomer n/Ben Lim p/92345678 e/ben@example.com bc/98765432
+   adddog n/Buddy b/Poodle s/Small
+   adddog n/Cookie b/Beagle s/Medium
+   adddog n/Milo b/Labrador s/Large
+   ```
+
+   Expected: Alice and Ben have customer IDs 1 and 2. Alice's phone is stored as `91234567`;
+   the shared backup contact is accepted. Buddy, Cookie, and Milo have dog IDs 1, 2, and 3.
+   Each dog initially shows no owner, and each customer has `None` in the dog-ID row.
+   Customer additions report `New customer added.`; dog additions report `New dog added:` with their details.
+
+### Customer and dog validation and editing
+
+These tests use the prepared records. Run each row in order; the invalid additions must not create records.
+
+Input | Expected result
+------|----------------
+`addcustomer n/Carol p/93456789 e/carol@example.com` | `Missing required field(s): backup contact.` followed by usage guidance.
+`addcustomer n/Carol p/1234567 e/carol@example.com bc/98765432` | `Invalid phone: Phone numbers should contain exactly 8 digits; spaces are allowed between digits`.
+`searchc i/2`, then `addcustomer n/Carol p/91234567 e/carol@example.com bc/98765432` | Ben is displayed, then `This phone number is already used by another customer.` Alice's hidden record still prevents reuse.
+`addcustomer n/Carol p/93456789 e/ALICE@EXAMPLE.COM bc/98765432` | `This email address is already used by another customer.` Email uniqueness ignores case.
+`reset`, then `editcustomer 1 n/Alice Koh` | Alice's name changes; ID 1, phone, email, and backup contact remain unchanged.
+`editcustomer 1 p/92345678` | Duplicate-phone error; Alice's phone remains `91234567`.
+`editcustomer 1` | `At least one field to edit must be provided.`
+`adddog n/Rex b/Poodle s/Tiny` | `Invalid size. Please enter small, medium, large, or giant.` followed by format guidance.
+`adddog n/Rex s/Small` | `Please enter a breed.` followed by format guidance.
+`editdog 2 s/Large` | `Edited dog:` with Cookie's details; only size changes, and ID 2 is retained.
+`editdog 99 s/Small` | `No dog with ID 99 was found.` followed by format guidance.
+
+### Linking and unlinking ownership
+
+Prerequisite: two customers and three unowned dogs from the preceding sections; the overview is visible.
+
+1. Run `link c/1 d/1 2`.<br>
+   Expected: `Linked dog IDs [1, 2] to customer ID 1.` Buddy and Cookie show customer ID 1;
+   Alice's paw-icon row shows `1, 2`.
+1. Run `link c/2 d/3 1`.<br>
+   Expected: `Dog ID 1 is already linked to customer ID 1.` The whole batch fails: Milo stays unowned.
+1. Run `unlink d/1 3`.<br>
+   Expected: `Dog ID 3 has no owner.` Buddy remains linked, demonstrating that unlinking also rejects
+   the whole batch when one dog is invalid.
+1. Run `link c/2 d/3 3`.<br>
+   Expected: `Invalid command format!` and link guidance; duplicate dog IDs are rejected.
+1. Run `unlink d/1 2`, then `link c/1 d/1 2`.<br>
+   Expected: both ownership links disappear, then return; no customer or dog is deleted.
+1. Run `searchd i/1`, then `unlink c/1`.<br>
+   Expected: both Buddy and the hidden Cookie lose their owner. Buddy remains visible and the customer
+   panel becomes empty. Repeat `unlink c/1`; expect `Customer ID 1 has no linked dogs.`
+1. Run `link c/1 d/1 2`, then `reset`.<br>
+   Expected: Alice owns Buddy and Cookie again; Ben has no dogs and Milo has no owner.
+
+### Creating and editing activity schedules
+
+Prerequisite: no activities exist. Apply the date substitutions described above, then enter:
+
+```text
+addactivity n/Morning walk date/2026-10-29 start/09:00 end/10:00 r/daily
+addactivity n/Training date/2026-10-29 start/10:00 end/11:00 r/weekly
+addactivity n/Grooming date/2026-10-29 start/09:30 end/10:30 r/once
+addactivity n/Previous visit date/2026-10-28 start/12:00 end/13:00 r/once
+addactivity n/Future visit date/2026-10-30 start/12:00 end/13:00 r/once
+```
+
+Expected: success feedback assigns activity IDs 1–5 in that order. Activities start with no bookings;
+overlapping empty schedules are allowed. In the current reset view, activities 1, 2, 3, and 5 appear,
+while past one-time activity 4 is hidden. The separate Today panel shows activities 1, 2, and 3.
+
+Input | Expected result
+------|----------------
+`addactivity n/Invalid date/2026-02-30 start/09:00 end/10:00 r/once` | `Activity date must be a valid date in YYYY-MM-DD format.` No activity is added.
+`addactivity n/Invalid date/2026-10-29 start/10:00 end/10:00 r/once` | `Activity end time must be later than its start time on the same day.` No activity is added.
+`addactivity n/Invalid date/2026-10-29 start/09:00 end/10:00 r/Daily` | `Recurrence must be once, daily, or weekly (lowercase).` No activity is added.
+`editactivity 3 n/Grooming session` | `Edited activity ID 3.` Its date, times, recurrence, and ID remain unchanged.
+`editactivity 3` | `At least one field to edit must be provided.`
+
+### Booking and cancelling dated occurrences
+
+Prerequisite: the five schedules above, with no bookings. Enter:
+
+```text
+enrol d/1 2 date/2026-10-29 a/1
+enrol a/1 date/2026-10-30 d/1 3
+enrol a/2 date/2026-10-29 d/1
+```
+
+Expected: both dogs in each batch are booked for only the specified date. The last booking is accepted
+because Training begins exactly when Morning walk ends. Morning walk's general card shows
+`Dogs with upcoming bookings: 1, 2, 3`; its Today card shows `Dogs enrolled on 2026-10-29: 1, 2`.
+Buddy appears only once in the general summary despite having two dated bookings. Training shows dog 1;
+Grooming session and Future visit show `None`. Schedule start dates remain unchanged.
+
+Run these checks in order:
+
+Input | Expected result
+------|----------------
+`enrol a/1 date/2026-10-29 d/1` | Reports that dog 1 is already enrolled in activity 1 on that date; no duplicate booking.
+`enrol a/3 date/2026-10-29 d/3 1` | Reports Buddy's overlap with Morning walk. Neither dog gains a Grooming session booking, including Milo, who was checked first.
+`enrol a/2 date/2026-10-30 d/3` | Reports that Training does not occur on that date and identifies its weekly recurrence.
+`enrol a/1 date/2026-10-28 d/3` | Reports that the enrolment date must be today or later.
+`enrol a/1 date/2026-10-29 d/3 3` | `Dog ID 3 is listed more than once. Please provide each dog ID only once.` followed by guidance.
+`editactivity 1 n/Changed walk` | `Activity ID 1 has enrolments and cannot be edited. Create a new activity instead.` The schedule and bookings remain unchanged.
+`unenrol a/1 date/2026-10-29 d/1 3` | Reports that dog 3 is not enrolled on that date. Buddy's booking remains; the batch is rejected.
+`unenrol date/2026-10-29 d/2 a/1` | Reports dog 2 unenrolled. Morning walk's Today summary now contains only dog 1; its general summary contains `1, 3`.
+`unenrol a/1 date/2026-10-29 d/2` | Reports that dog 2 is not enrolled; no further changes.
+`enrol a/1 date/2026-10-29 d/2` | Restores Cookie's booking, returning to the booking state at the start of these checks.
+
+### Searching, filtering, today's view, and statistics
+
+Prerequisite: Alice owns dogs 1 and 2, dog 3 is unowned, and the five bookings from the previous section
+are present. Each search replaces the previous search. References to the activity panel below mean the
+general activity panel; the separate Today panel continues to show all today's schedules and bookings.
+
+Input | Expected result
+------|----------------
+`searchd n/UD b/POO s/SMALL i/1` | Shows Buddy, Alice, and activities 1 and 2. All supplied fields match together. Morning walk's `Enrolments` section lists only `1. Buddy: 2026-10-29, 2026-10-30`; Training lists Buddy's booking today.
+`searchd i/99` | `Error in searching dogs:` followed by `Please enter a valid dog index`; the previous display remains.
+`searchc n/ALICE p/91234567 e/ALICE@EXAMPLE.COM bc/98765432 d/2 1 i/1` | Shows Alice, Buddy, Cookie, and activities 1 and 2. Alice must own both supplied dog IDs; the success message lists dog IDs in ascending order. Activity enrolment details include only her dogs.
+`searchc i/99` | `Error in searching customers:` followed by `Please enter a valid customer index`; the previous display remains.
+`searchc n/Nobody` | Customer, dog, and general activity panels become empty; no records are deleted.
+`searcha n/WALK d/2026-10-29 t/10:00 r/DAILY i/1` | Shows Morning walk, dogs 1 and 2, and Alice. The end time is included in time searches; recurrence searches accept uppercase values.
+`searcha i/1 d/2026-10-30` | Shows Morning walk, dogs 1 and 3, and Alice. Cookie is excluded because Cookie has no booking tomorrow.
+`searcha i/2 d/2026-10-30` | No matching activity, dog, or customer: Training does not occur tomorrow.
+`searcha i/2 d/2026-11-05` | Shows Training, but no dogs or customers: the weekly schedule recurs, while today's booking does not automatically recur.
+`searcha i/0` | `Error in searching activities:` followed by `Please enter a valid activity index`; the previous display remains.
+`searcha i/2 i/1` | `Invalid command format!` followed by search guidance; the previous display remains.
+`today` | Shows activities 1, 2, and 3, dogs 1 and 2, and Alice. Empty Grooming session is included; Milo's tomorrow-only booking is excluded.
+`today extra` | `Error in showing today:` followed by `Info is in the wrong format. Input in the correct format`.
+`filterun dog` | Shows Milo, no customers, and Morning walk with only Milo's tomorrow booking in its `Enrolments` section. The separate Today card still lists dogs 1 and 2 for Morning walk.
+`link c/2 d/3` | Milo and Morning walk disappear from the active unlinked-dog filter. Run `undo` immediately to restore Milo's unowned state and that view.
+`filterun customer` | Shows Ben only; dog and general activity panels are empty.
+`unlink c/1` | Alice joins Ben in the active unlinked-customer filter. Run `link c/1 d/1 2` to restore ownership; Alice disappears again.
+`filterun Dog` | `Info is in the wrong format. Please input: filterun dog/filterun customer only`.
+
+Run `summary` while only Ben is displayed. Expected output, with your substituted local date:
+
+```text
+Overall: 3 dogs | 2 customers
+Activity schedules: 5 total | 4 from today onwards
+Today (2026-10-29): 3 activities | 2 distinct dogs enrolled
+```
+
+The panels stay unchanged. Buddy counts once today despite having two activities; empty schedules and
+the hidden past schedule are still counted where applicable. `summary extra` produces an invalid-format
+error. Run `reset`: all three dogs and both customers return, along with activities 1, 2, 3, and 5.
+Run `searcha i/4` to confirm the past activity still exists, then `reset` again.
+`reset extra` produces an invalid-format error without changing the view.
+
+### Card details, copying, and scrolling
+
+Prerequisite: the reset view from the previous section. Use a plain-text editor to inspect clipboard output.
+
+1. Hover over Alice's contact rows and Buddy's breed, size, and owner rows.<br>
+   Expected: tooltips show the complete values. Right-click Alice and choose **Copy phone number**;
+   pasting yields `91234567`. **Copy all customer details** gives labelled lines for customer ID 1,
+   Alice Koh, her contacts, and `Dog IDs: 1, 2`. A successful copy briefly shows `Copied!`.
+1. Right-click Buddy. **Copy breed** yields `Poodle`; **Copy customer ID** yields `1`.
+   **Copy all dog details** includes Buddy's ID, name, breed, size, and `Customer ID: 1`.
+   On unowned Milo, **Copy customer ID** is disabled and all-details output includes `Customer ID: None`.
+1. Run `unlink d/1`, reopen Buddy's menu, and check that **Copy customer ID** is disabled.
+   Run `link c/1 d/1`; reopening the menu enables it again and copies `1`.
+1. Run `editdog 3 b/Labrador Retriever and Golden Retriever cross`, then resize the window until the
+   breed text is shortened. Hover over it and copy the breed.<br>
+   Expected: both the tooltip and clipboard retain the full breed. Restore it with `editdog 3 b/Labrador`.
+1. Reduce the window height until the dog panel scrolls, scroll to Milo, and run `editdog 3 s/Giant`.<br>
+   Expected: the card updates without jumping to the top. Restore with `editdog 3 s/Large`.
+   Run `reset`; the panels return to the top. Check that the three lines from `summary` can be read,
+   scrolling the result area if necessary.
+
+<!--@@author its-shoutime-->
+### Help and single-step undo/redo
+
+Prerequisite: the dataset is unchanged except for the earlier Alice and Cookie edits. Run these steps
+without inserting additional commands between them.
+
+1. Run `help adddog`.<br>
+   Expected: format, example, and specifications appear in the result area; no dog is added.
+   Run `help summary today`; expect `Unknown help topic: summary today` and supported-command guidance.
+1. Run `help`, minimize the help window, then run `help` again.<br>
+   Expected: the existing help window restores and focuses. Close it and try the Help menu or `F1`
+   while the command box has focus; the help window opens. Close it to continue.
+1. Run `editdog 1 s/Medium`, `help editdog`, then `undo`.<br>
+   Expected: Buddy returns to Small; help did not replace the undo history. Run `undo` again;
+   expect `There is no command to undo.`
+1. Run `summary`, then `redo`.<br>
+   Expected: Buddy returns to Medium; summary and the failed undo preserved redo. Run `undo`, then
+   `editdog 1 s/Small`, then `redo`; expect `There is no command to redo.` The successful edit replaced
+   the old redo history, and Buddy remains Small.
+1. Run `searchd i/1`, `reset`, then `undo`.<br>
+   Expected: Buddy, Alice, and activities 1 and 2 return as the filtered view. Run `redo`;
+   expect the overview again. View-changing commands participate in the same single-step history.
+
+<!--@@author-->
+### Saving, shutdown, and restart
+
+Prerequisite: the shared records and bookings are still present. Do this before the deletion tests.
+
+1. Resize and move the window, then run `exit`. Relaunch using `java -jar WatchDog.jar` from the same
+   test folder.<br>
+   Expected: the window size and location are retained. Before running a view-changing command, try
+   `undo` and `redo`; both report that no command is available because history does not survive restart.
+1. Run `reset`, then `summary`.<br>
+   Expected: the same counts as above. Alice Koh retains her contacts and dogs 1 and 2; Cookie is Large;
+   Milo is unowned. Activities keep IDs 1–5 and their schedules. Run `searchd i/1` to verify Buddy's two
+   Morning walk dates and Training booking survived; run `reset` to continue.
+
+<!--@@author its-shoutime-->
+### Deleting records and checking related data
+
+These tests deliberately change the shared dataset. Run them in order after the restart checks.
+
+1. Run `searchc i/2`, then `deletecustomer 1`, then `reset`.<br>
+   Expected: hidden Alice is deleted. All three dogs remain with their IDs and details; Buddy and Cookie
+   now show no owner. Morning walk and Training retain their bookings. Ben remains.
+   Repeat `deletecustomer 1`; expect `Error in deleting customer:` and `Please enter a valid customer index`.
+1. Run `deletedog 1`.<br>
+   Expected: Buddy and all three of Buddy's bookings are removed. Cookie and Milo remain; Morning walk's
+   general summary becomes `2, 3` and its Today summary becomes `2`. Training remains with `None`.
+   Repeat `deletedog 1`; expect `Error in deleting dog:` and `Please enter a valid dog index`.
+1. Run `deleteactivity 1`.<br>
+   Expected: Morning walk and its remaining bookings for today and tomorrow disappear. Dogs 2 and 3,
+   Ben, and activities 2–5 remain. Repeat `deleteactivity 1`; expect `Activity ID 1 does not exist.`
+1. Run `addactivity n/Replacement walk date/2026-10-29 start/09:00 end/10:00 r/daily`.<br>
+   Expected: the new activity has ID 6, not the deleted ID 1, and has no bookings.
+
+<!--@@author-->
+### Clear confirmation and retained filters
+
+Prerequisite: the remaining records from the deletion section. Run `reset` first.
+
+1. Run `editdog 2 s/Small`, then `clear`.<br>
+   Expected: the Y/N prompt warns that clearing cannot be undone; nothing is deleted yet.
+1. Enter `maybe`, then `reset`.<br>
+   Expected: each input produces `Please enter Y or N.` followed by the confirmation prompt.
+   The second input does not execute a reset while confirmation is pending.
+1. Enter `n`, then `undo`.<br>
+   Expected: `Clear cancelled. No data has been deleted.` Cookie returns to Large on undo;
+   cancelling preserved the earlier edit's history. Run `redo` to return Cookie to Small.
+1. Run `searchc n/Alice`, `clear`, then `y`.<br>
+   Expected: all customers, dogs, schedules, and bookings are removed. Immediately run `undo` and `redo`;
+   both report no command available. Clear cannot be undone.
+1. Run `addcustomer n/Ben Lim p/92345678 e/ben@example.com bc/98765432`.<br>
+   Expected: addition succeeds but the customer panel stays empty under the retained Alice filter.
+   Run `reset`; Ben appears with customer ID 1. `summary` shows one customer and zero for the other counts.
+   Exit and relaunch; only Ben remains, with no dogs, activities, or bookings.
+
+### Loading edited or invalid data
+
+Use the disposable test folder after the preceding tests. Close WatchDog before every file change and
+back up `data/watchdog.json` outside its `data` folder. Restore that backup before each numbered test.
+
+1. In the saved JSON, change Ben's name from `Ben Lim` to `Ben Koh`, leaving all other fields untouched.
+   Launch WatchDog.<br>
+   Expected: customer ID 1 displays Ben Koh and the original contact details. Exit before restoring the backup.
+1. Replace the JSON contents with `not valid json` and launch WatchDog.<br>
+   Expected: the panels are empty and a data-loading warning is logged. Before entering any command,
+   inspect the file: the invalid text has not been overwritten. Run `summary`; it reports zero counts
+   and saves valid empty data. Exit before restoring the backup.
+1. Rename `data/watchdog.json` to `watchdog.saved.json` and launch WatchDog.<br>
+   Expected: sample records load because the expected data file is missing. Run `reset`;
+   a new `data/watchdog.json` is created. Exit and restore the backup if keeping the test folder.
+
+For additional variations, try missing/repeated fields, boundary times, invalid IDs, and changes while
+filters are active. Extend the dataset only after completing the ordered walkthrough so that its expected
+IDs, relationships, and counts remain reproducible.

@@ -43,6 +43,7 @@ public class LogicManager implements Logic {
     private final Model model;
     private final Storage storage;
     private final WatchDogParser watchDogParser;
+    //@@author its-shoutime
     private HistorySnapshot undoSnapshot;
     private HistorySnapshot redoSnapshot;
     private boolean awaitingClearConfirmation;
@@ -184,12 +185,14 @@ public class LogicManager implements Logic {
             }
         }
     }
+    //@@author
 
     @Override
     public ObservableList<Customer> getFilteredCustomerList() {
         return model.getFilteredCustomerList();
     }
 
+    // @@author Kenneth-Chia
     @Override
     public ObservableList<Dog> getFilteredDogList() {
         return model.getFilteredDogList();
@@ -199,6 +202,7 @@ public class LogicManager implements Logic {
     public ObservableList<Dog> getDogList() {
         return model.getDogList();
     }
+    // @@author
 
     @Override
     public ObservableList<Activity> getActivityList() {

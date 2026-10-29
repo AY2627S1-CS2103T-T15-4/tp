@@ -127,6 +127,7 @@ public class WatchDogParserTest {
     }
     // @@author
 
+    //@@author its-shoutime
     @Test
     public void parseCommand_deleteCustomer() throws Exception {
         DeleteCustomerCommand command = (DeleteCustomerCommand) parser.parseCommand("deletecustomer 21");
@@ -148,6 +149,7 @@ public class WatchDogParserTest {
             assertThrows(ParseException.class, () -> parser.parseCommand(input));
         }
     }
+    //@@author
 
     @Test
     public void parseCommand_editDog() throws Exception {
@@ -234,6 +236,7 @@ public class WatchDogParserTest {
         assertTrue(parser.parseCommand(ExitCommand.COMMAND_WORD + " 3") instanceof ExitCommand);
     }
 
+    //@@author its-shoutime
     @Test
     public void parseCommand_help() throws Exception {
         assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD) instanceof HelpCommand);
@@ -257,6 +260,7 @@ public class WatchDogParserTest {
             assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
         }
     }
+    //@@author
 
     @Test
     public void parseCommand_reset_acceptsOnlyCommandWord() throws Exception {

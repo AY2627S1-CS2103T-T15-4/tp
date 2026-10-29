@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.model.activity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,3 +35,4 @@ public class ActivityNameTest {
         assertNotEquals(name, "Walk");
     }
 }
+// @@author

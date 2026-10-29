@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.storage;
 
 import java.io.IOException;
@@ -17,3 +18,4 @@ class NextActivityIdDeserializer extends JsonDeserializer<Long> {
         return parser.getLongValue();
     }
 }
+// @@author

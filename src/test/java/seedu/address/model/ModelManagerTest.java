@@ -48,6 +48,7 @@ public class ModelManagerTest {
         assertEquals(oldUserPrefs, modelManager.getUserPrefs());
     }
 
+    //@@author its-shoutime
     @Test
     public void restoreState_restoresDataAndActiveFilters() {
         modelManager.addCustomer(ALICE);
@@ -113,6 +114,7 @@ public class ModelManagerTest {
         assertEquals(nextDogId, (long) nextDog.getId());
         assertEquals(nextActivityId, nextActivity.getId());
     }
+    //@@author
 
     @Test
     public void setGuiSettings_nullGuiSettings_throwsNullPointerException() {

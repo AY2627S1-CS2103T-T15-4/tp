@@ -1,3 +1,4 @@
+<!--@@author its-shoutime-unused-->
 # Unused code — @its-shoutime
 
 The select-dog and select-customer implementation, tests, parsers, and UML diagrams

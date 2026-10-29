@@ -33,6 +33,7 @@ public interface Model {
 
     Predicate<Activity> PREDICATE_SHOW_ALL_ACTIVITIES = unused -> true;
 
+    //@@author its-shoutime
     /** Captures the complete model state needed to restore a previous command. */
     record ModelState(ReadOnlyWatchDog watchDog, Predicate<Customer> customerPredicate,
             Predicate<Dog> dogPredicate, Predicate<Activity> activityPredicate,
@@ -52,11 +53,13 @@ public interface Model {
     default void restoreState(ModelState state) {
         throw new UnsupportedOperationException("Model snapshots are not supported");
     }
+    //@@author
 
     void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
 
     void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
 
+    // @@author Kenneth-Chia
     /**
      * Returns an unmodifiable snapshot of distinct stored dogs enrolled on {@code date}, in full dog-list order.
      * Matches persistent IDs independently of displayed filters. Later model mutations do not change the snapshot.
@@ -73,6 +76,7 @@ public interface Model {
 
     /** Unlinks all owned dogs; throws if the customer is missing or has no dogs. Preserves records and filters. */
     void unlinkCustomerDogs(int customerId) throws UnlinkException;
+    // @@author
 
     /**
      * Returns the user prefs.
@@ -99,11 +103,13 @@ public interface Model {
 
     boolean hasCustomer(Customer customer);
 
+    //@@author its-shoutime
     /**
      * Deletes the given customer and unlinks their dogs, preserving the dog records.
      * The customer must exist in WatchDog.
      */
     void deleteCustomer(Customer customer);
+    //@@author
 
     /**
      * Adds the given customer.

@@ -420,9 +420,11 @@ public class WatchDogTest {
         WatchDog original = getTypicalWatchDog();
         WatchDog copy = new WatchDog(original);
 
+        // @@author Kenneth-Chia
         assertEquals(original, original);
         assertEquals(original, copy);
         assertEquals(copy, original);
+        // @@author
         assertEquals(new WatchDog(), new WatchDog());
     }
 
@@ -430,6 +432,7 @@ public class WatchDogTest {
     public void equals_differentDogs_returnsFalse() {
         WatchDog original = getTypicalWatchDog();
         WatchDog differentDogs = new WatchDog(original);
+        // @@author Kenneth-Chia
         differentDogs.removeDog(MAX);
 
         assertEquals(original.getCustomerList(), differentDogs.getCustomerList());
@@ -438,13 +441,16 @@ public class WatchDogTest {
 
     @Test
     public void equals_differentCustomers_returnsFalse() {
+        // @@author
         WatchDog original = getTypicalWatchDog();
         WatchDog differentCustomers = new WatchDog(original);
+        // @@author Kenneth-Chia
         differentCustomers.setCustomers(List.of(ALICE));
 
         assertEquals(original.getDogList(), differentCustomers.getDogList());
         assertNotEquals(original, differentCustomers);
     }
+    // @@author
 
     @Test
     public void equals_differentIdCounters_returnsFalse() {

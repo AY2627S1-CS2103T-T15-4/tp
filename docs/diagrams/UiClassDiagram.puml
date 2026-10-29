@@ -4,6 +4,9 @@ skinparam arrowThickness 1.1
 skinparam arrowColor UI_COLOR_T4
 skinparam classBackgroundColor UI_COLOR
 
+/'
+// @@author Kenneth-Chia
+'/
 class "<<interface>>\nUi" as Ui
 class UiManager
 class MainWindow
@@ -45,11 +48,20 @@ note right of ActivityListPanel
   Observes activity, enrolment and search-context
   changes to refresh per-dog enrolment dates.
 end note
+/'
+// @@author
+'/
 
+/'
+// @@author Kenneth-Chia
+'/
 note bottom of TodayActivityListPanel
   Uses all schedules and exact-date bookings.
   General panel shows bookings today or later.
   MainWindow refreshes both with one date
   after successful commands.
+/'
+// @@author
+'/
 end note
 @enduml
