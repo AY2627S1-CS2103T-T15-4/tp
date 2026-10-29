@@ -29,7 +29,7 @@ public class SearchDogCommandParserTest {
 
     @Test
     public void parse_invalidFields_throwsParseException() {
-        String[] invalidInputs = {"", "n/Waffle n/Max", "b/Poodle b/Lab", "s/tiny", "i/-1", "i/abc",
+        String[] invalidInputs = {"", "n/Waffle n/Max", "b/Poodle b/Lab", "s/tiny", "i/0", "i/-1", "i/abc",
             "N/Waffle", "x/value", "n/Lala x/value", "n/", "s/medium s/large", "i/1 i/2",
             "text n/Waffle"};
 
@@ -59,5 +59,10 @@ public class SearchDogCommandParserTest {
         String expectedMessage = "Error in searching dogs:\n"
                 + "Invalid dog size. Please input small/medium/large/giant only.";
         assertThrows(ParseException.class, expectedMessage, () -> parser.parse("s/tiny"));
+    }
+
+    @Test
+    public void command_zeroId_rejectsInvalidDogId() {
+        assertThrows(IllegalArgumentException.class, () -> new SearchDogCommand(null, null, null, 0));
     }
 }

@@ -69,7 +69,11 @@ public class SearchCustomerCommandTest {
         var dogs = List.copyOf(model.getFilteredDogList());
         String summary = model.getActivityEnrolmentSummary(activity);
 
-        for (int id : new int[]{-1, 0, 999, Integer.MAX_VALUE}) {
+        for (int id : new int[]{-1, 0}) {
+            assertThrows(IllegalArgumentException.class, () ->
+                    new SearchCustomerCommand(null, null, null, null, Set.of(1, id)));
+        }
+        for (int id : new int[]{999, Integer.MAX_VALUE}) {
             assertThrows(CommandException.class, "Error in searching customers:\nPlease enter a valid dog index", () ->
                     new SearchCustomerCommand(null, null, null, null, Set.of(1, id)).execute(model));
             assertThrows(CommandException.class, SearchCustomerCommand.MESSAGE_INVALID_CUSTOMER_ID, () ->

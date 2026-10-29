@@ -46,8 +46,24 @@ public class EnrolDogCommandTest {
     @Test
     public void execute_invalidActivityOrDog_throwsCommandException() throws Exception {
         ModelManager model = new ModelManager();
-        assertThrows(CommandException.class, () -> new EnrolDogCommand(1, LocalDate.of(2026, 1, 1),
-                List.of(1)).execute(model));
+        CommandException exception = assertThrows(CommandException.class, () ->
+                new EnrolDogCommand(1, LocalDate.of(2028, 1, 1), List.of(1)).execute(model));
+
+        assertEquals("Activity ID 1 does not exist." + EnrolDogCommand.MESSAGE_FORMAT_GUIDANCE,
+                exception.getMessage());
+    }
+
+    @Test
+    public void execute_pastDate_returnsSpecificMessageWithGuidance() {
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
+        ModelManager model = new ModelManager();
+
+        CommandException exception = assertThrows(CommandException.class, () ->
+                new EnrolDogCommand(1, yesterday, List.of(1)).execute(model));
+
+        assertEquals("Cannot enrol on " + yesterday + ": the date must be today or later. Today is "
+                + today + "." + EnrolDogCommand.MESSAGE_FORMAT_GUIDANCE, exception.getMessage());
     }
 
     @Test
@@ -73,6 +89,8 @@ public class EnrolDogCommandTest {
         assertNotEquals(command, null);
         assertNotEquals(command, "command");
         assertThrows(IllegalArgumentException.class, () -> new EnrolDogCommand(-1,
+                LocalDate.of(2028, 1, 1), List.of(2)));
+        assertThrows(IllegalArgumentException.class, () -> new EnrolDogCommand(0,
                 LocalDate.of(2028, 1, 1), List.of(2)));
         assertThrows(IllegalArgumentException.class, () -> new EnrolDogCommand(1,
                 LocalDate.of(2028, 1, 1), List.of()));

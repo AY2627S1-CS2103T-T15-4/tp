@@ -16,8 +16,11 @@ public interface ReadOnlyAddressBook {
         return FXCollections.emptyObservableList();
     }
 
-    /** Returns the next unused dog ID, or {@code -1} when unavailable. */
-    default int getNextDogId() {
+    /**
+     * Returns the next unused positive dog ID, {@code Integer.MAX_VALUE + 1} when IDs are exhausted,
+     * or {@code -1} when the counter is unavailable in legacy data.
+     */
+    default long getNextDogId() {
         return -1;
     }
 
@@ -31,6 +34,11 @@ public interface ReadOnlyAddressBook {
         return FXCollections.emptyObservableList();
     }
 
+    /**
+     * Returns a live unmodifiable observable collection of dated enrolments.
+     *
+     * @return the dated enrolments
+     */
     default ObservableList<Enrolment> getEnrolmentList() {
         return FXCollections.emptyObservableList();
     }

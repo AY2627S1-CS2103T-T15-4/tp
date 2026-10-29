@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.AppUtil.checkArgument;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -35,15 +36,21 @@ public class SearchCustomerCommand extends Command {
     private final Integer customerId;
     private final CustomerSearchPredicate predicate;
 
-    /** Creates a customer search with any combination of supported fields except customer ID. */
+    /** Creates a customer search using the supplied fields and, when present, positive dog IDs. */
     public SearchCustomerCommand(String name, String phone, String email,
                                  String backupContact, Set<Integer> dogIds) {
         this(name, phone, email, backupContact, dogIds, null);
     }
 
-    /** Creates a customer search with any combination of supported fields. */
+    /**
+     * Creates a customer search using the supplied fields and, when present, positive dog IDs.
+     *
+     * @throws IllegalArgumentException if any supplied dog ID is not positive
+     */
     public SearchCustomerCommand(String name, String phone, String email,
                                  String backupContact, Set<Integer> dogIds, Integer customerId) {
+        checkArgument(dogIds == null || dogIds.stream().allMatch(id -> id != null && id >= 1),
+                "Dog search IDs must be positive.");
         this.name = name;
         this.phone = phone;
         this.email = email;

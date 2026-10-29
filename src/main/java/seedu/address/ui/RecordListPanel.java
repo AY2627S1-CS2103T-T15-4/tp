@@ -49,13 +49,28 @@ public class RecordListPanel extends UiPart<Region> {
         updateRecords();
     }
 
+    /** Reconciles combined customer and dog cards while retaining stable record identity. */
     private void updateRecords() {
-        List<Supplier<Region>> cards = new ArrayList<>();
-        customers.forEach(customer -> cards.add(() -> new CustomerCard(customer, allDogs.stream()
+        List<CardListEntry> cards = new ArrayList<>();
+        customers.forEach(customer -> {
+            List<Integer> ownedDogIds = allDogs.stream()
                 .filter(dog -> dog.getOwnerId().filter(ownerId -> ownerId == customer.getId()).isPresent())
-                .map(Dog::getId).toList()).getRoot()));
-        dogs.forEach(dog -> cards.add(() -> new DogCard(dog).getRoot()));
-        recordListView.getItems().setAll(cards);
+                .map(Dog::getId)
+                .sorted()
+                .toList();
+            Supplier<Region> cardFactory = () -> new CustomerCard(customer, ownedDogIds).getRoot();
+            cards.add(new CardListEntry("customer:" + customer.getId(), List.of(customer, ownedDogIds), cardFactory));
+        });
+        dogs.forEach(dog -> {
+            Supplier<Region> cardFactory = () -> new DogCard(dog).getRoot();
+            cards.add(new CardListEntry("dog:" + dog.getId(), dog, cardFactory));
+        });
+        CardListUpdater.reconcile(recordListView, cards);
+    }
+
+    /** Scrolls to the first record after an explicit display-changing command. */
+    void scrollToTop() {
+        CardListUpdater.scrollToTop(recordListView);
     }
 
     /**

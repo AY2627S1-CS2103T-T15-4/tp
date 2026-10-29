@@ -10,20 +10,20 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 public class Breed {
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Breeds should only contain alphanumeric characters and spaces, and should not be blank";
+            "Breeds should only contain alphanumeric characters, spaces, and hyphens, and should not be blank";
 
     /*
      * The first character of the name must not be a whitespace,
      * otherwise " " (a blank string) becomes a valid input.
      */
-    public static final String VALIDATION_REGEX = "[\\p{Alnum}][\\p{Alnum} ]*";
+    public static final String VALIDATION_REGEX = "[\\p{Alnum}][\\p{Alnum} -]*";
 
     public final String breed;
 
     /**
-     * Constructs a {@code breedInput}.
+     * Constructs a {@code Breed}.
      *
-     * @param breedInput A valid name.
+     * @param breedInput A valid breed.
      */
     public Breed(String breedInput) {
         requireNonNull(breedInput);
@@ -32,7 +32,7 @@ public class Breed {
     }
 
     /**
-     * Returns true if a given string is a valid name.
+     * Returns true if a given string is a valid breed.
      */
     public static boolean isValidBreed(String test) {
         return test.matches(VALIDATION_REGEX);

@@ -31,7 +31,12 @@ public class UnlinkCommandParser implements Parser<UnlinkCommand> {
             }
             List<Integer> dogIds = new ArrayList<>();
             for (int i = 0; i < fields.length; i++) {
-                dogIds.add(Integer.parseInt(i == 0 ? fields[i].substring(2) : fields[i]));
+                int dogId = Integer.parseInt(i == 0 ? fields[i].substring(2) : fields[i]);
+                if (dogId < 1) {
+                    throw invalidFormat();
+                }
+                dogIds.add(dogId);
+
             }
             if (new HashSet<>(dogIds).size() != dogIds.size()) {
                 throw invalidFormat();

@@ -1,3 +1,4 @@
+// @@author Umaiza-15
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
@@ -24,18 +25,28 @@ public class EditDogCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the dog identified by its ID. "
             + "Parameters: ID [" + PREFIX_NAME + "NAME] [" + PREFIX_BREED + "BREED] ["
             + PREFIX_SIZE + "SIZE]\n"
-            + "Example: " + COMMAND_WORD + " 1 " + PREFIX_SIZE + "Large";
+            + "Example: " + COMMAND_WORD + " 1 " + PREFIX_SIZE + "Large\n"
+            + "Valid sizes: small, medium, large, giant.";
+    public static final String MESSAGE_FORMAT_GUIDANCE = "\nFormat: " + COMMAND_WORD + " DOG_ID ["
+            + PREFIX_NAME + "NAME] [" + PREFIX_BREED + "BREED] [" + PREFIX_SIZE + "SIZE]"
+            + "\nExample: " + COMMAND_WORD + " 1 " + PREFIX_NAME + "Cookie "
+            + PREFIX_BREED + "Golden Retriever " + PREFIX_SIZE + "Large"
+            + "\nValid sizes: small, medium, large, giant.";
     public static final String MESSAGE_EDIT_DOG_SUCCESS = "Edited dog: %1$s";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
-    public static final String MESSAGE_INVALID_DOG_ID = "The dog ID provided is invalid.";
+    public static final String MESSAGE_INVALID_DOG_ID = "No dog with ID %1$d was found.";
 
     private final int dogId;
     private final EditDogDescriptor editDogDescriptor;
 
-    /** Creates a command to edit the dog with {@code dogId}. */
+    /**
+     * Creates a command to edit the dog with the specified positive ID.
+     *
+     * @throws IllegalArgumentException If {@code dogId} is not positive.
+     */
     public EditDogCommand(int dogId, EditDogDescriptor editDogDescriptor) {
-        if (dogId < 0) {
-            throw new IllegalArgumentException("Dog ID must be nonnegative.");
+        if (dogId < 1) {
+            throw new IllegalArgumentException("Dog ID must be positive.");
         }
         requireNonNull(editDogDescriptor);
         this.dogId = dogId;
@@ -49,10 +60,11 @@ public class EditDogCommand extends Command {
         Dog dogToEdit = model.getDogList().stream()
                 .filter(dog -> dog.getId() == dogId)
                 .findFirst()
-                .orElseThrow(() -> new CommandException(MESSAGE_INVALID_DOG_ID));
+                .orElseThrow(() -> new CommandException(String.format(MESSAGE_INVALID_DOG_ID, dogId)
+                        + MESSAGE_FORMAT_GUIDANCE));
 
         if (!editDogDescriptor.isAnyFieldEdited()) {
-            throw new CommandException(MESSAGE_NOT_EDITED);
+            throw new CommandException(MESSAGE_NOT_EDITED + MESSAGE_FORMAT_GUIDANCE);
         }
 
         Dog editedDog = createEditedDog(dogToEdit, editDogDescriptor);
@@ -60,6 +72,7 @@ public class EditDogCommand extends Command {
         return new CommandResult(String.format(MESSAGE_EDIT_DOG_SUCCESS, Messages.format(editedDog)));
     }
 
+    /** Returns a dog that preserves unspecified fields and ownership from the original dog. */
     private static Dog createEditedDog(Dog dogToEdit, EditDogDescriptor descriptor) {
         DogName updatedName = descriptor.getName().orElse(dogToEdit.getName());
         Breed updatedBreed = descriptor.getBreed().orElse(dogToEdit.getBreed());
@@ -94,6 +107,7 @@ public class EditDogCommand extends Command {
         private Breed breed;
         private Size size;
 
+        /** Creates an empty descriptor. */
         public EditDogDescriptor() {}
 
         /** Creates a defensive copy of the given descriptor. */

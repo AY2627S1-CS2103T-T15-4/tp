@@ -60,11 +60,11 @@ Unlinking preserves records and filters, including a customer's last dog, and us
 `ownerId` storage field without a schema change.
 
 `AddressBook.removeCustomer` clears ownership of that customer's dogs, regardless of filters,
-preserving their persistent IDs and details. Unowned dog cards show `Owner ID: None`.
+preserving their persistent IDs and details. Unowned dog cards show a person icon followed by `None`.
 Removing a dog leaves its customer intact. Customer edits must preserve persistent IDs to keep links valid.
-Observable list updates refresh dog cards, which display owner IDs without changing search filters.
-Customer cards display owned dog IDs below backup contact. `RecordListPanel` observes the complete dog list
-as well as visible records, so these IDs remain accurate when dog cards are filtered out.
+Observable list updates refresh dog cards, which display customer IDs without changing search filters.
+Customer cards display owned dog IDs below backup contact. `CustomerListPanel` observes the complete dog list
+as well as visible customers, so these IDs remain accurate when dog cards are filtered out.
 
 `JsonAdaptedDog` persists `ownerId`. A missing or null field means unlinked, preserving compatibility
 with older files. Negative owner IDs and references to missing customers are rejected on load;
@@ -132,15 +132,21 @@ The **API** of this component is specified in [`Ui.java`](https://github.com/AY2
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
-The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `RecordListPanel`,
-`ActivityListPanel`, `TodayActivityListPanel`, and `StatusBarFooter`. `TodayActivityListPanel` reuses the
-activity list and filters it to schedules occurring today. All of these, including `MainWindow`, inherit
-from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
+The UI consists of a `MainWindow` and its parts, including `CommandBox`, `ResultDisplay`, separate customer,
+dog and activity list panels, and `TodayActivityListPanel`. `TodayActivityListPanel` reuses the activity-list
+implementation and filters it to schedules occurring today. Visible GUI parts inherit from the abstract
+`UiPart` class, which provides their shared FXML-loading behavior.
 
-`RecordListPanel` observes the filtered customer and dog lists, plus the complete dog list exposed by `Logic`.
-It displays customers followed by dogs in a single list, using `CustomerCard` and `DogCard`.
-List changes rebuild the card factories; JavaFX creates card nodes as cells need them.
-Cards use persistent IDs, not row numbers. The complete dog list supplies ownership details independently of filters.
+Each list panel observes its model data and uses `CardListUpdater` to reconcile stable, ID-keyed card factories.
+Unchanged entries are retained instead of rebuilding the entire list, which preserves the visible record during
+ordinary edits, ownership changes, and enrolment changes. Commands that intentionally replace the displayed
+result set, such as search, list, filter, and reset, scroll the panels to the first result. JavaFX still creates
+card nodes only as cells need them. Customer ownership summaries use the complete dog list independently of
+the current dog filter.
+
+Customer and dog cards install their tooltips and copy menus through `CardInteractionUtil`. Clipboard writes
+return a success result through `ClipboardWriter`, so the UI shows `Copied!` only after a successful write and
+shows failure feedback otherwise.
 
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T15-4/tp/blob/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T15-4/tp/blob/master/src/main/java/seedu/address/ui/MainWindow.java).
 
@@ -239,8 +245,18 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 The address book assigns the dog a persistent ID when it is added. The ID is allocated from a
 monotonically increasing counter rather than from the dog's position in the list, so deleting a dog
-does not change the identities of the remaining dogs. The counter and dog IDs are persisted so that
-new dogs continue to receive unique IDs after the application restarts.
+does not change the identities of the remaining dogs and deleted IDs are never reused. The counter
+and dog IDs are persisted so that new dogs continue to receive unique IDs after the application
+restarts.
+
+Dog IDs remain positive `int` values, while the next-ID counter is a `long`. A counter value of
+`Integer.MAX_VALUE + 1` represents exhaustion; `adddog` then fails without changing the stored dogs
+or counter. A missing counter in legacy data is derived as one more than the largest stored dog ID,
+or one for an empty dog list. An explicit stored counter must be greater than every stored dog ID and
+cannot exceed the exhaustion value. Zero, negative, fractional, string-valued, out-of-range, or
+otherwise inconsistent counters are rejected rather than silently repaired. A counter may validly be
+more than one above the largest current dog ID because higher-ID dogs might previously have been
+deleted.
 
 The following diagram shows the add-dog command flow. The important part of this flow is that the
 persistent dog ID is assigned by the address book only
@@ -403,7 +419,7 @@ Enrolments are never removed by editing. `LogicManager` then saves the address b
 
 `AddressBookParser` routes `searchd` to `SearchDogCommandParser`. The parser accepts the lowercase fields
 `n/`, `b/`, `s/`, and `i/`, rejects duplicate or unknown fields, normalises whitespace, and validates sizes
-and nonnegative IDs. `DogSearchPredicate` performs case-insensitive substring matching for names and breeds,
+and positive dog IDs. `DogSearchPredicate` performs case-insensitive substring matching for names and breeds,
 case-insensitive exact matching for sizes, and exact matching for IDs.
 
 `SearchDogCommand` rejects IDs that are not present in the database before changing filtered lists. It applies
@@ -500,17 +516,39 @@ storing dog objects directly inside the reusable activity schedule.
 Users can enrol or unenrol one or more dogs using:
 
 ```text
-enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2
-unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2
+enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]
+unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]
 ```
 
-The parser converts the activity ID, occurrence date, and comma-separated dog IDs into a command.
+The parsers accept the three required fields in any order and convert the activity ID, occurrence date, and
+whitespace-separated dog IDs into a command. Each field must appear exactly once, and activity and dog IDs must
+be positive. Parser errors identify the missing, invalid, repeated, or malformed field and append the command's
+complete format and example. Execution errors append the same guidance.
 The command delegates through `Model` and `ModelManager` to `AddressBook`, which verifies that the
 activity and dogs exist, the date is a valid occurrence and is today or later, and the requested
 enrolments are valid before updating the enrolment list. A dog cannot be enrolled in another activity
 with an overlapping time on the same date; adjacent activities are allowed. Batch operations are
 atomic. Successful mutations are logged at `FINE` and guarded by postcondition assertions. Enrolment
 changes are persisted with the address book.
+
+The activity-card overview follows a view policy rather than changing the schedule model. `Logic` exposes
+`getEnrolmentList()` as the same live unmodifiable observable view supplied by `AddressBook`; no dog IDs are
+stored redundantly in `Activity`. `MainWindow` passes that view to both activity panels. The general panel
+formats distinct, numerically sorted dog IDs from enrolments whose date is today or later, while the Today
+panel uses only enrolments whose date equals the captured local date. Existing address-book invariants ensure
+that these enrolments refer to stored activities and dogs.
+
+`ActivityBookingSummary` performs the date query and formatting without JavaFX. `ActivityListPanel` captures
+`LocalDate.now(clock)` once per refresh, reconciles cards when either the displayed activities or enrolments
+change, and accepts an injectable clock for deterministic tests. The Today variant additionally displays only
+schedules that occur on that captured date. Because reset, clear, undo and redo update the existing observable
+lists, listeners remain attached. `MainWindow` also requests a refresh after each successful command, so date
+rollover is reflected on the next successful command; no midnight scheduler is installed.
+
+`ActivityCard(Activity, String)` receives the complete overview label. It presents `Schedule starts` separately
+from the booking summary and never substitutes an enrolment date for `Activity.startDate`. Xander's search-context
+work can extend the supplied presentation text or add per-dog date lines without changing the baseline live-list
+plumbing or storing view state in `Activity`.
 
 <puml src="diagrams/EnrolDogSequenceDiagram.puml" alt="Enrolling dogs into an activity" />
 
@@ -525,7 +563,8 @@ removal is logged and checked with a postcondition assertion.
 the enrol and unenrol command/parser tests cover command construction and malformed or impossible dates.
 `EnrolmentStorageTest` covers persisted and legacy records. `DeleteDogCommandTest` checks that deleting a dog
 removes both past and future enrolments without affecting other dogs. `ListPanelsTest` and `MainWindowTest`
-cover the today-only activity filter and its UI integration.
+cover the today-only activity filter and its UI integration. `ActivityBookingSummaryTest` covers empty summaries,
+date boundaries, activity isolation, deduplication and numeric sorting with fixed dates.
 
 The sequence diagrams focus on interactions between application layers. Low-level list operations
 and exception propagation are omitted where they do not affect the overall design.
@@ -1016,8 +1055,6 @@ testers are expected to do more *exploratory* testing.
    1. Relaunch the app by double-clicking the JAR file.<br>
        Expected: The most recent window size and location are retained.
 
-1. _{ more test cases … }_
-
 ### Daycare summary
 
 Use a disposable data folder for this test. Substitute the computer's current local date for
@@ -1053,6 +1090,53 @@ appear as an undoable mutation.
    the dog returns and saves. Repeat for a failed `redo`, a new add after `undo`, and `clear`.
    A failed `clear` leaves memory empty and neither history operation available.
 
+### Adding and editing dogs
+
+1. Run `adddog n/O'Neil-Jr b/German-Shepherd s/medium`.
+   Expect one dog to be added with a positive persistent ID, with the apostrophe and hyphens preserved.
+1. Omit each required field in turn, and repeat with an empty value such as
+   `adddog n/ b/Poodle s/small`. Expect the message to identify the missing or empty field and then show
+   the full `adddog` format, example, and valid size options. No dog is added.
+1. Repeat with an unsupported size, a repeated prefix, text before the first prefix, or punctuation that is
+   invalid for the relevant field. Expect a specific validation or format error followed by the same shared
+   guidance. No dog is added.
+1. Run `editdog ID n/Sir-Barks-a-Lot b/Mixed-Breed` using the ID from step 1. Expect the supplied fields to
+   change while the dog's size, customer link, persistent ID, and enrolments remain unchanged.
+1. Run `editdog 0 s/large`, use a missing positive ID, omit all edit fields, and provide an empty field.
+   Expect the relevant ID or field error followed by the full `editdog` format, example, and size options.
+   The original dog remains unchanged.
+
+### Enrolling and unenrolling dogs
+
+Use an existing activity occurrence on `TODAY` or a future date and two existing positive dog IDs.
+
+1. Run `enrol d/DOG_ID_1  DOG_ID_2 date/YYYY-MM-DD a/ACTIVITY_ID`, using multiple spaces and a field order
+   different from the documented format. Expect both dogs to be enrolled in that occurrence.
+1. Repeat the same enrolment. Expect the command to report that the dogs are already enrolled; no duplicate
+   enrolment records are created.
+1. Try a missing or empty field, a repeated prefix, `a/0`, `d/0`, a comma-separated dog list, duplicate dog
+   IDs, an invalid date, and a past date. Expect the message to identify the problem and then show the full
+   `enrol` format and example. No enrolments change.
+1. Enrol one selected dog in another activity that overlaps the same date and time, then try to enrol both
+   selected dogs in the first activity. Expect the whole command to fail atomically because of the conflict.
+1. Run `unenrol date/YYYY-MM-DD d/DOG_ID_1  DOG_ID_2 a/ACTIVITY_ID` with the fields reordered.
+   Expect only those dated enrolments to be removed. Repeat the command and expect an error without other changes.
+1. Repeat the invalid-field checks for `unenrol`. Also verify that a valid past occurrence can be unenrolled,
+   unlike enrolment, so historical mistakes can be corrected.
+
+### Card details, copying, and scrolling
+
+1. Add or edit a customer to have a long email, and a dog to have a long breed. Hover over each shortened detail.
+   Expect a wrapped tooltip containing the complete value.
+1. Right-click a customer card. Copy each contact field and then all details, pasting each result into a text
+   editor. Expect exact plain-text values and labelled multiline output for all details.
+1. Right-click a linked dog card and copy its customer ID. Unlink the dog and reopen the menu.
+   Expect the customer-ID item to be disabled and the all-details output to show `Customer ID: None`.
+   Relink the dog and expect the action and updated ID to return without restarting the app.
+1. Scroll each populated panel to a middle record and edit, link, unlink, enrol, or unenrol a visible record.
+   Expect the visible record to remain anchored without a jump. Run a search, list, filter, or reset command;
+   expect each replaced result set to start at its first record.
+
 ### Deleting a dog
 
 1. Add a dog with `adddog n/Buddy b/Poodle s/small` and note its displayed ID.
@@ -1063,8 +1147,22 @@ appear as an undoable mutation.
 
 ### Saving data
 
-1. Dealing with missing/corrupted data files
+Use a disposable copy of the app folder for these tests.
 
-   1. _{Explain how to simulate missing or corrupted data files and state the expected behavior.}_
+1. Missing data file
 
-1. _{ more test cases … }_
+   1. Ensure the app is closed, then remove `data/addressbook.json` and launch the app.<br>
+      Expected: The app starts with sample data. A subsequent successful command recreates the data file.
+
+1. Invalid JSON
+
+   1. Ensure the app is closed, then replace the contents of `data/addressbook.json` with text that is not
+      valid JSON and launch the app.<br>
+      Expected: The app starts with an empty address book and records a data-loading warning in the log.
+
+1. Invalid persisted dog counter
+
+   1. Save at least one dog, close the app, and change `nextDogId` in `data/addressbook.json` to zero,
+      a non-integer value, or a value not greater than every stored dog ID. Relaunch the app.<br>
+      Expected: The app rejects the inconsistent file, starts with an empty address book, and records a
+      data-loading warning. Restore the disposable file before continuing other tests.

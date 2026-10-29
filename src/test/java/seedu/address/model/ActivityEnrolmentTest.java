@@ -55,6 +55,8 @@ public class ActivityEnrolmentTest {
         assertThrows(EnrolException.class, () -> addressBook.enrolDogs(99, LocalDate.of(2028, 2, 29), List.of(DOG_ID)));
         assertThrows(EnrolException.class, () -> addressBook.enrolDogs(-1,
                 LocalDate.of(2028, 2, 29), List.of(DOG_ID)));
+        assertThrows(EnrolException.class, "Activity IDs must be positive whole numbers.", () ->
+                addressBook.enrolDogs(0, LocalDate.of(2028, 2, 29), List.of(DOG_ID)));
         assertEquals(List.of(), addressBook.getEnrolmentList());
 
         addressBook.enrolDogs(ACTIVITY_ID, LocalDate.of(2028, 2, 29), List.of(DOG_ID));
@@ -74,6 +76,8 @@ public class ActivityEnrolmentTest {
                 LocalDate.of(2028, 2, 29), List.of(DOG_ID)));
         assertThrows(EnrolException.class, () -> addressBook.unenrolDogs(-1,
                 LocalDate.of(2028, 2, 29), List.of(DOG_ID)));
+        assertThrows(EnrolException.class, "Activity IDs must be positive whole numbers.", () ->
+                addressBook.unenrolDogs(0, LocalDate.of(2028, 2, 29), List.of(DOG_ID)));
         assertEquals(List.of(new Enrolment(ACTIVITY_ID, DOG_ID, LocalDate.of(2028, 2, 29))),
                 addressBook.getEnrolmentList());
     }

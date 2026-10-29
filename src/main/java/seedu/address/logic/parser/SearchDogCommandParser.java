@@ -71,7 +71,7 @@ public class SearchDogCommandParser implements Parser<SearchDogCommand> {
         }
         try {
             int parsed = Integer.parseInt(value);
-            if (parsed <= 0) {
+            if (parsed < 1) {
                 throw new NumberFormatException();
             }
             return parsed;

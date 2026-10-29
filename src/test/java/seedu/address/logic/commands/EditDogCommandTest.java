@@ -41,8 +41,9 @@ public class EditDogCommandTest {
         EditDogDescriptor descriptor = new EditDogDescriptor();
         descriptor.setSize(new Size("Small"));
 
-        assertThrows(CommandException.class, () ->
-                new EditDogCommand(99, descriptor).execute(model));
+        assertThrows(CommandException.class,
+                "No dog with ID 99 was found." + EditDogCommand.MESSAGE_FORMAT_GUIDANCE, () ->
+                        new EditDogCommand(99, descriptor).execute(model));
     }
 
     @Test
@@ -67,14 +68,17 @@ public class EditDogCommandTest {
         Dog dog = model.addDog(new Dog(new DogName("Cookie"),
                 new Breed("Golden Retriever"), new Size("Large")));
 
-        assertThrows(CommandException.class, () ->
-                new EditDogCommand(dog.getId(), new EditDogDescriptor()).execute(model));
+        assertThrows(CommandException.class,
+                EditDogCommand.MESSAGE_NOT_EDITED + EditDogCommand.MESSAGE_FORMAT_GUIDANCE, () ->
+                        new EditDogCommand(dog.getId(), new EditDogDescriptor()).execute(model));
     }
 
     @Test
     public void constructor_negativeId_throwsException() {
         assertThrows(IllegalArgumentException.class, () ->
                 new EditDogCommand(-1, new EditDogDescriptor()));
+        assertThrows(IllegalArgumentException.class, "Dog ID must be positive.", () ->
+                new EditDogCommand(0, new EditDogDescriptor()));
     }
 
     @Test

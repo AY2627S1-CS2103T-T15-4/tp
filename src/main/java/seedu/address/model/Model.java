@@ -10,6 +10,7 @@ import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
@@ -140,6 +141,15 @@ public interface Model {
         return getAddressBook().getActivityList();
     }
 
+    /**
+     * Returns all dated enrolments as a live unmodifiable observable view.
+     *
+     * @return all dated enrolments
+     */
+    default ObservableList<Enrolment> getEnrolmentList() {
+        return getAddressBook().getEnrolmentList();
+    }
+
     /** Returns an unmodifiable observable view of filtered activities. */
     ObservableList<Activity> getFilteredActivityList();
 
@@ -170,7 +180,11 @@ public interface Model {
      */
     void selectCustomer(int customerId);
 
-    /** Adds a dog and returns the dog with its assigned persistent ID. */
+    /**
+     * Adds a dog and returns the dog with its assigned persistent ID.
+     *
+     * @throws IllegalStateException if all supported dog IDs have been allocated
+     */
     Dog addDog(Dog dog);
 
     /** Returns whether a dog with the same persistent ID exists. */

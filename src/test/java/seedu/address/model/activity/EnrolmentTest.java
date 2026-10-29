@@ -2,7 +2,7 @@ package seedu.address.model.activity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static seedu.address.testutil.Assert.assertThrows;
 
 import java.time.LocalDate;
 
@@ -11,10 +11,12 @@ import org.junit.jupiter.api.Test;
 /** Contains tests for {@link Enrolment}. */
 public class EnrolmentTest {
     @Test
-    public void constructor_activityIdBoundary_requiresPositiveId() {
-        LocalDate date = LocalDate.of(2028, 2, 29);
-        assertThrows(IllegalArgumentException.class, () -> new Enrolment(0, 0, date));
-        assertEquals(1, new Enrolment(1, 0, date).getActivityId());
+    public void constructor_nonPositiveId_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, "Activity and dog IDs must be positive.", () ->
+                new Enrolment(0, 1, LocalDate.of(2028, 2, 29)));
+        assertThrows(IllegalArgumentException.class, "Activity and dog IDs must be positive.", () ->
+                new Enrolment(1, 0, LocalDate.of(2028, 2, 29)));
+
     }
 
     @Test

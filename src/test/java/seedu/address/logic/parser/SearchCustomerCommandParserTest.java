@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.testutil.Assert;
 
 public class SearchCustomerCommandParserTest {
     private final SearchCustomerCommandParser parser = new SearchCustomerCommandParser();
@@ -36,8 +37,8 @@ public class SearchCustomerCommandParserTest {
 
     @Test
     public void parse_invalidPhoneBackupOrId_throwsParseException() {
-        for (String input : new String[]{"p/9123456", "bc/912345678", "d/-1", "d/abc",
-            "i/0", "i/00", "i/-1", "i/abc"}) {
+        for (String input : new String[]{"p/9123456", "bc/912345678", "d/0", "d/-1", "d/abc", "i/-1", "i/abc"}) {
+
             assertThrows(ParseException.class, () -> parser.parse(input));
         }
     }
@@ -53,5 +54,11 @@ public class SearchCustomerCommandParserTest {
                     "Error in searching customers:\nPlease enter a valid customer index", () ->
                     parser.parse("i/" + value));
         }
+    }
+
+    @Test
+    public void command_zeroDogId_rejectsInvalidDogId() {
+        Assert.assertThrows(IllegalArgumentException.class, () ->
+                new SearchCustomerCommand(null, null, null, null, java.util.Set.of(0)));
     }
 }

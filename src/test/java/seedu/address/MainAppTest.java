@@ -49,7 +49,7 @@ public class MainAppTest {
 
         app.logic.execute("adddog n/Cookie b/Poodle s/Small");
         AddressBook saved = new AddressBook(app.model.getAddressBook());
-        int nextDogId = saved.getNextDogId();
+        long nextDogId = saved.getNextDogId();
         assertEquals(saved, dataStorage().readAddressBook().orElseThrow());
 
         MainApp restarted = createApp();

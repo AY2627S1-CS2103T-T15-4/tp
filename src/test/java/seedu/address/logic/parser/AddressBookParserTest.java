@@ -6,6 +6,9 @@ import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.testutil.Assert.assertThrows;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.AddDogCommand;
@@ -16,6 +19,7 @@ import seedu.address.logic.commands.EditActivityCommand;
 import seedu.address.logic.commands.EditActivityCommand.EditActivityDescriptor;
 import seedu.address.logic.commands.EditDogCommand;
 import seedu.address.logic.commands.EditDogCommand.EditDogDescriptor;
+import seedu.address.logic.commands.EnrolDogCommand;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FilterUnlinkedCommand;
 import seedu.address.logic.commands.HelpCommand;
@@ -27,6 +31,7 @@ import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.commands.SummaryCommand;
 import seedu.address.logic.commands.TodayCommand;
 import seedu.address.logic.commands.UndoCommand;
+import seedu.address.logic.commands.UnenrolDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.dog.Breed;
@@ -145,6 +150,20 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_editActivityInvalidArgs_failure() {
         assertThrows(ParseException.class, () -> parser.parseCommand("editactivity invalid n/Training"));
+    }
+
+    @Test
+    public void parseCommand_enrol_acceptsAnyPrefixOrderAndWhitespaceSeparatedDogIds() throws Exception {
+        EnrolDogCommand expected = new EnrolDogCommand(1, LocalDate.of(2028, 2, 29), List.of(2, 3, 5));
+
+        assertEquals(expected, parser.parseCommand("enrol d/2  3\t5 a/1 date/2028-02-29"));
+    }
+
+    @Test
+    public void parseCommand_unenrol_acceptsAnyPrefixOrderAndWhitespaceSeparatedDogIds() throws Exception {
+        UnenrolDogCommand expected = new UnenrolDogCommand(1, LocalDate.of(2028, 2, 29), List.of(2, 3, 5));
+
+        assertEquals(expected, parser.parseCommand("unenrol date/2028-02-29 d/2  3\t5 a/1"));
     }
 
     @Test

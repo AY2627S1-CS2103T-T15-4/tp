@@ -46,9 +46,8 @@ class JsonAdaptedEnrolment {
 
     /** Converts this adapter, migrating a legacy record to the supplied activity start date when necessary. */
     public Enrolment toModelType(LocalDate legacyDate) throws IllegalValueException {
-        if (activityId == null || dogId == null || activityId <= 0 || dogId < 0) {
-            throw new IllegalValueException(
-                    "Activity IDs must be positive and dog IDs nonnegative; both must be present.");
+        if (activityId == null || dogId == null || activityId < 1 || dogId < 1) {
+            throw new IllegalValueException("Activity and dog IDs must be positive.");
         }
         LocalDate resolvedDate = date == null ? legacyDate : date;
         if (resolvedDate == null) {
