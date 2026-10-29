@@ -438,7 +438,7 @@ Dog and customer IDs belong to separate categories and may overlap.
 
 ### Clearing all entries: `clear`
 
-Clears all customers, dogs, activities, and enrolments from the address book after confirmation.
+Clears all customers, dogs, activities, and enrolments from WatchDog after confirmation.
 
 Format: `clear`
 
@@ -496,7 +496,7 @@ WatchDog data is saved automatically as a JSON file `[JAR file location]/data/ad
 <box type="warning" seamless>
 
 **Caution:**
-If your changes make the data file invalid, WatchDog starts with an empty address book at the next run. The invalid file remains on disk until you run a command (WatchDog saves after every command). Still, we recommend backing up the file before editing it.<br>
+If your changes make the data file invalid, WatchDog starts with no saved records at the next run. The invalid file remains on disk until you run a command (WatchDog saves after every command). Still, we recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause WatchDog to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
 
