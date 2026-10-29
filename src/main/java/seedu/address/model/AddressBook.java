@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javafx.collections.FXCollections;
@@ -62,20 +63,24 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     /**
      * Resets the existing data of this {@code AddressBook} with {@code newData}.
+     * Rejects dog owners missing from the incoming customers before changing any records.
      */
     public void resetData(ReadOnlyAddressBook newData) {
         requireNonNull(newData);
 
         List<Activity> restored = List.copyOf(newData.getActivityList());
         List<Enrolment> restoredEnrolments = List.copyOf(newData.getEnrolmentList());
+        List<Dog> restoredDogs = List.copyOf(newData.getDogList());
+        List<Customer> restoredCustomers = List.copyOf(newData.getCustomerList());
+        validateDogOwners(restoredDogs, restoredCustomers);
         long minimumId = restored.stream().mapToLong(Activity::getId).max().orElse(0) + 1;
         long nextId = newData.getNextActivityId();
         if (restored.stream().map(Activity::getId).distinct().count() != restored.size()
                 || nextId < minimumId || nextId > (long) Integer.MAX_VALUE + 1) {
             throw new IllegalArgumentException("Invalid activity IDs or next activity ID.");
         }
-        dogs.setDogs(newData.getDogList());
-        setCustomers(newData.getCustomerList());
+        dogs.setDogs(restoredDogs);
+        customers.setCustomers(restoredCustomers);
         nextActivityId = nextId;
 
         int restoredNextDogId = newData.getNextDogId();
@@ -85,7 +90,7 @@ public class AddressBook implements ReadOnlyAddressBook {
                         .mapToInt(Dog::getId).max().orElse(-1) + 1;
 
         int restoredNextCustomerId = newData.getNextCustomerId();
-        this.nextCustomerId = restoredNextCustomerId >= 0
+        this.nextCustomerId = restoredNextCustomerId >= 1
                 ? restoredNextCustomerId
                 : customers.asUnmodifiableObservableList().stream()
                         .mapToInt(Customer::getId).max().orElse(0) + 1;
@@ -132,8 +137,11 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
     }
 
+    /** Replaces customers only if every existing dog owner remains present. */
     public void setCustomers(List<Customer> customers) {
-        this.customers.setCustomers(customers);
+        List<Customer> replacements = List.copyOf(customers);
+        validateDogOwners(getDogList(), replacements);
+        this.customers.setCustomers(replacements);
     }
 
     /**
@@ -152,8 +160,8 @@ public class AddressBook implements ReadOnlyAddressBook {
         return activity;
     }
 
-    /** Replaces a schedule after checking retained enrolments for conflicts. */
-    public int setActivity(Activity target, Activity editedActivity) {
+    /** Replaces an activity only when it has no enrolments, after checking for schedule conflicts. */
+    public void setActivity(Activity target, Activity editedActivity) {
         requireNonNull(target);
         requireNonNull(editedActivity);
         if (target.getId() != editedActivity.getId()) {
@@ -169,19 +177,12 @@ public class AddressBook implements ReadOnlyAddressBook {
         if (index < 0 || !activities.get(index).equals(target)) {
             throw new IllegalArgumentException("Activity to edit does not match a stored activity.");
         }
-        boolean occurrenceDatesChanged = !target.getStartDate().equals(editedActivity.getStartDate())
-                || target.getRecurrence() != editedActivity.getRecurrence();
-        if (!occurrenceDatesChanged) {
-            validateNoActivityConflict(editedActivity);
+        if (enrolments.stream().anyMatch(enrolment -> enrolment.getActivityId() == target.getId())) {
+            throw new IllegalArgumentException("Activity ID " + target.getId()
+                    + " has enrolments and cannot be edited. Create a new activity instead.");
         }
-        int removedEnrolments = occurrenceDatesChanged
-                ? (int) enrolments.stream().filter(enrolment -> enrolment.getActivityId() == target.getId()).count()
-                : 0;
+        validateNoActivityConflict(editedActivity);
         activities.set(index, editedActivity);
-        if (occurrenceDatesChanged) {
-            enrolments.removeIf(enrolment -> enrolment.getActivityId() == target.getId());
-        }
-        return removedEnrolments;
     }
 
     /** Rejects an edited schedule that would overlap another activity attended by the same dog. */
@@ -377,6 +378,8 @@ public class AddressBook implements ReadOnlyAddressBook {
             replacements.put(dogId, dog.withOwner(customerId));
         }
         dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
+        // All endpoints were validated; a mismatch here means the internal update is defective.
+        assert hasExpectedOwners(dogIds, customerId) : "Linked dogs must exist and belong to the requested customer.";
     }
 
     /**
@@ -402,6 +405,25 @@ public class AddressBook implements ReadOnlyAddressBook {
             replacements.put(dogId, dog.withoutOwner());
         }
         dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
+        assert hasExpectedOwners(dogIds, null) : "Unlinked dogs must exist and have no owner.";
+    }
+
+    /** Checks stored endpoints as well as ownership, so missing dogs cannot satisfy the postcondition. */
+    private boolean hasExpectedOwners(List<Integer> dogIds, Integer customerId) {
+        return dogIds.stream().allMatch(dogId -> getDogList().stream()
+                .anyMatch(dog -> dog.getId() == dogId
+                        && Objects.equals(dog.getOwnerId().orElse(null), customerId)));
+    }
+
+    /** Rejects dangling ownership references before publishing replacements or restored records. */
+    private static void validateDogOwners(List<Dog> dogs, List<Customer> customers) {
+        Set<Integer> customerIds = new HashSet<>();
+        customers.forEach(customer -> customerIds.add(customer.getId()));
+        for (Dog dog : dogs) {
+            if (dog.getOwnerId().filter(ownerId -> !customerIds.contains(ownerId)).isPresent()) {
+                throw new IllegalArgumentException("Dog owner must refer to an existing customer.");
+            }
+        }
     }
 
     /**
@@ -443,10 +465,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      */
     public Dog addDogFromStorage(Dog identified) {
         requireNonNull(identified);
-        if (identified.getOwnerId().isPresent() && getCustomerList().stream()
-                .noneMatch(customer -> customer.getId() == identified.getOwnerId().get())) {
-            throw new IllegalArgumentException("Dog owner must refer to an existing customer.");
-        }
+        validateDogOwners(List.of(identified), getCustomerList());
         dogs.add(identified);
         nextDogId = Math.max(nextDogId, identified.getId() + 1);
         return identified;
@@ -510,8 +529,9 @@ public class AddressBook implements ReadOnlyAddressBook {
         logger.fine("Deleted dog ID " + dogId + " and removed " + removedEnrolmentCount + " enrolments.");
     }
 
-    /** Replaces an existing dog with its edited version. */
+    /** Replaces an existing dog after validating that any owner refers to an existing customer. */
     public void setDog(Dog target, Dog editedDog) {
+        validateDogOwners(List.of(editedDog), getCustomerList());
         dogs.setDog(target, editedDog);
     }
 
@@ -556,8 +576,8 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     private Activity getActivity(int activityId) throws EnrolException {
-        if (activityId < 0) {
-            throw new EnrolException("Activity IDs must be whole numbers from 0 to 2147483647.");
+        if (activityId <= 0) {
+            throw new EnrolException("Activity IDs must be whole numbers from 1 to 2147483647.");
         }
         return getActivityList().stream().filter(activity -> activity.getId() == activityId).findFirst()
                 .orElseThrow(() -> new EnrolException("Activity ID " + activityId + " does not exist."));

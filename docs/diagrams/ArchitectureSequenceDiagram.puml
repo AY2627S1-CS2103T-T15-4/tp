@@ -12,9 +12,15 @@ participant ":StorageManager" as Storage STORAGE_COLOR
 
 User -> UI : delete dog 1
 UI -> Logic : execute("delete dog 1")
+Logic -> Model : createState()
+Model --> Logic : stateBeforeCommand
 Logic -> Model : getDogList()
 Model --> Logic : dogs
 Logic -> Model : deleteDog(dog)
+note right of Logic
+  Keeps the pre-command state for undo
+  and clears redo before saving.
+end note
 Logic -> Model : getAddressBook()
 Model --> Logic : addressBook
 Logic -> Storage : saveAddressBook(addressBook)

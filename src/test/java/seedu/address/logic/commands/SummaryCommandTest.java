@@ -68,26 +68,6 @@ public class SummaryCommandTest {
     }
 
     @Test
-    public void execute_selectedDogOrCustomer_preservesSelectionAfterMutation() throws Exception {
-        for (boolean selectDog : new boolean[] {true, false}) {
-            Model model = mixedModel();
-            Model expected = mixedModel();
-            if (selectDog) {
-                model.selectDog(9);
-                expected.selectDog(9);
-            } else {
-                model.selectCustomer(1);
-                expected.selectCustomer(1);
-            }
-            new SummaryCommand(CLOCK).execute(model);
-            assertEquals(expected, model);
-            model.unlinkDogs(List.of(9));
-            expected.unlinkDogs(List.of(9));
-            assertEquals(expected, model);
-        }
-    }
-
-    @Test
     public void execute_recurrenceAndFirstDateBoundaries_includesEmptyActivities() {
         assertActivityCounts(Recurrence.ONCE, TODAY.minusDays(1), 0, 0);
         assertActivityCounts(Recurrence.ONCE, TODAY, 1, 1);

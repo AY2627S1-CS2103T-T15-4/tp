@@ -22,6 +22,14 @@ public class DogSearchPredicateTest {
     }
 
     @Test
+    public void test_matchesAllSupportedFields() {
+        assertTrue(new DogSearchPredicate("little buddy", "poodle", "SMALL", 42).test(dog));
+        assertFalse(new DogSearchPredicate("little buddy", "labrador", "small", 42).test(dog));
+        assertFalse(new DogSearchPredicate("little buddy", "poodle", "large", 42).test(dog));
+        assertFalse(new DogSearchPredicate("little buddy", "poodle", "small", 7).test(dog));
+    }
+
+    @Test
     public void constructor_invalidQuery_throwsException() {
         assertThrows(NullPointerException.class, () -> new DogSearchPredicate(null));
         assertThrows(IllegalArgumentException.class, () -> new DogSearchPredicate("  "));

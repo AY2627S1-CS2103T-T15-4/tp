@@ -32,9 +32,27 @@ jobs:
         if: runner.os != 'Linux'
         run: ./gradlew check coverage
 
+      - name: Install Linux window manager
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y openbox x11-utils
+
       - name: Build and check with Gradle
         if: runner.os == 'Linux'
-        run: xvfb-run ./gradlew check coverage
+        run: |
+          xvfb-run -a bash -e -c '
+            openbox --sm-disable &
+            window_manager_pid=$!
+            trap "kill $window_manager_pid" EXIT
+            for attempt in {1..100}; do
+              if xprop -root _NET_SUPPORTING_WM_CHECK | grep -q "window id"; then
+                ./gradlew check coverage
+                exit $?
+              fi
+              sleep 0.1
+            done
+            echo "Window manager did not become ready within 10 seconds" >&2
+            exit 1
+          '
 
       - name: Upload coverage reports to Codecov
         if: runner.os == 'Linux'

@@ -116,6 +116,7 @@ public class ActivityStorageTest {
         }
         assertThrows(IllegalValueException.class, () -> adapter(null, valid).toModelType());
         assertThrows(IllegalValueException.class, () -> adapter(-1, valid).toModelType());
+        assertThrows(IllegalValueException.class, () -> adapter(0, valid).toModelType());
         String[] invalid = {" ", "2027-02-29", "25:00", "08:00", "monthly"};
         for (int i = 0; i < valid.length; i++) {
             String[] fields = valid.clone();

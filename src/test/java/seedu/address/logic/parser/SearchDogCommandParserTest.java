@@ -1,51 +1,55 @@
 package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static seedu.address.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.dog.DogSearchPredicate;
 
 public class SearchDogCommandParserTest {
-    private final AddressBookParser parser = new AddressBookParser();
+    private final SearchDogCommandParser parser = new SearchDogCommandParser();
 
     @Test
-    public void parse_validInput_createsExpectedCommand() throws Exception {
-        assertEquals(new SearchDogCommand(new DogSearchPredicate("Little Bud")),
-                parser.parseCommand("  search\tdog\t n/ Little Bud  "));
-        assertEquals(new SearchDogCommand(new DogSearchPredicate(0)),
-                parser.parseCommand("search dog id/0"));
-        assertEquals(new SearchDogCommand(new DogSearchPredicate(12)),
-                parser.parseCommand("search dog id/0012"));
-        assertEquals(new SearchDogCommand(new DogSearchPredicate(Integer.MAX_VALUE)),
-                parser.parseCommand("search dog id/2147483647"));
+    public void parse_validFields_normalizesValues() throws Exception {
+        SearchDogCommand expected = new SearchDogCommand("Waffle Boy", "Golden Retriever", "medium", 12);
+
+        assertEquals(expected, parser.parse(" n/Waffle   Boy b/Golden   Retriever s/MEDIUM i/12 "));
     }
 
     @Test
-    public void parse_invalidInput_throwsParseException() {
-        String[] invalidInputs = {"search dog", "search dog Buddy",
-            "search dog n/", "search dog n/   ", "search dog id/", "search dog id/-1", "search dog id/+1",
-            "search dog id/1.5", "search dog id/2147483648", "search dog id/one", "search dog id/1 2",
-            "search dog n/Buddy id/0", "search dog id/0 n/Buddy", "search dog n/Buddy n/Max",
-            "search dog id/0 id/1", "search dog b/Poodle", "search dog n/Buddy b/Poodle",
-            "search dog extra n/Buddy"};
-        for (String input : invalidInputs) {
-            ParseException exception = assertThrows(ParseException.class, () -> parser.parseCommand(input), input);
-            assertEquals(String.format(seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT,
-                    SearchDogCommand.MESSAGE_USAGE), exception.getMessage());
+    public void parse_eachSupportedField_acceptsValidValue() throws Exception {
+        assertEquals(new SearchDogCommand("Waffle", null, null, null), parser.parse("n/Waffle"));
+        assertEquals(new SearchDogCommand(null, "Golden Retriever", null, null),
+                parser.parse("b/Golden Retriever"));
+        assertEquals(new SearchDogCommand(null, null, "large", null), parser.parse("s/LARGE"));
+        assertEquals(new SearchDogCommand(null, null, null, 21), parser.parse("i/21"));
+    }
+
+    @Test
+    public void parse_invalidFields_throwsParseException() {
+        String[] invalidInputs = {"", "n/Waffle n/Max", "b/Poodle b/Lab", "s/tiny", "i/-1", "i/abc",
+            "N/Waffle", "x/value", "n/Lala x/value", "n/", "s/medium s/large", "i/1 i/2",
+            "text n/Waffle"};
+
+        for (String invalidInput : invalidInputs) {
+            assertThrows(ParseException.class, () -> parser.parse(invalidInput));
         }
     }
 
     @Test
-    public void parse_blankNameValue_rejectedByDogParser() {
-        ParseException exception = assertThrows(ParseException.class, () ->
-                new SearchDogCommandParser().parse("dog n/   "));
-        assertThrows(ParseException.class, () ->
-                new SearchDogCommandParser().parse("dog n/\u2003"));
-        assertEquals(String.format(seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT,
-                SearchDogCommand.MESSAGE_USAGE), exception.getMessage());
+    public void parse_eachInvalidField_rejectsIndividually() {
+        assertThrows(ParseException.class, () -> parser.parse("n/"));
+        assertThrows(ParseException.class, () -> parser.parse("b/"));
+        assertThrows(ParseException.class, () -> parser.parse("s/tiny"));
+        assertThrows(ParseException.class, () -> parser.parse("i/not-a-number"));
+    }
+
+    @Test
+    public void parse_invalidSize_includesSearchingErrorMessage() {
+        String expectedMessage = "Error in searching dogs:\n"
+                + "Invalid dog size. Please input small/medium/large/giant only.";
+        assertThrows(ParseException.class, expectedMessage, () -> parser.parse("s/tiny"));
     }
 }

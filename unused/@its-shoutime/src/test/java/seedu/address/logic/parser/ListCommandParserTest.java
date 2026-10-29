@@ -1,0 +1,39 @@
+//@@author its-shoutime-unused
+// Retired in v1.5: resetdisplay restores records; field-based searches narrow the display.
+package seedu.address.logic.parser;
+
+import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
+import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+
+import org.junit.jupiter.api.Test;
+
+import seedu.address.logic.commands.ListCommand;
+
+public class ListCommandParserTest {
+
+    private ListCommandParser parser = new ListCommandParser();
+
+    @Test
+    public void parse_validArgs_returnsListCommand() {
+        assertParseSuccess(parser, "customer", new ListCommand());
+        assertParseSuccess(parser, "  customer  ", new ListCommand());
+    }
+
+    @Test
+    public void parse_invalidArgs_throwsParseException() {
+        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, ListCommand.MESSAGE_USAGE);
+        assertParseFailure(parser, "dog", expectedMessage);
+        assertParseFailure(parser, "Customer", expectedMessage);
+        assertParseFailure(parser, "customers", expectedMessage);
+        assertParseFailure(parser, "customer extra", expectedMessage);
+        assertParseFailure(parser, "customer 1", expectedMessage);
+    }
+
+    @Test
+    public void parse_missingCategory_throwsHelpfulParseException() {
+        assertParseFailure(parser, "", ListCommand.MESSAGE_MISSING_CATEGORY);
+        assertParseFailure(parser, "   ", ListCommand.MESSAGE_MISSING_CATEGORY);
+    }
+
+}

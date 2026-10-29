@@ -1,118 +1,202 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.testutil.Assert.assertThrows;
 
-import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
-import seedu.address.logic.parser.AddressBookParser;
-import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.AddressBook;
-import seedu.address.model.Model;
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.ModelManager;
-import seedu.address.model.UserPrefs;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
-import seedu.address.model.customer.CustomerSearchPredicate;
-import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.model.dog.Breed;
+import seedu.address.model.dog.Dog;
+import seedu.address.model.dog.DogName;
+import seedu.address.model.dog.Size;
 
-/** Exercises customer search parsing and execution against the real model. */
 public class SearchCustomerCommandTest {
-    private final AddressBookParser parser = new AddressBookParser();
-    private final Model model = new ModelManager();
-
     @Test
-    public void execute_nameSearch_filtersAllMatchesWithoutChangingRecords() throws Exception {
-        Customer first = customer(0, "Alex Tan");
-        Customer second = customer(7, "Alex Tan");
-        Customer third = customer(42, "Alexandra Lim");
-        model.addCustomer(first);
-        model.addCustomer(second);
-        model.addCustomer(third);
-        AddressBook before = new AddressBook(model.getAddressBook());
+    public void execute_combinedFields_matchesAllRequestedFields() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
 
-        assertEquals("3 customers found.", execute("search customer n/aLeX"));
-        assertEquals(List.of(first, second, third), model.getFilteredCustomerList());
-        assertEquals("2 customers found.", execute("search customer n/alex tan"));
-        assertEquals(List.of(first, second), model.getFilteredCustomerList());
-        assertEquals("0 customers found.", execute("search customer n/alex  tan"));
-        assertEquals(List.of(), model.getFilteredCustomerList());
-        assertEquals(before, model.getAddressBook());
+        CommandResult result = new SearchCustomerCommand(
+                "anna", "91234567", "anna@example.com", "98765432", Set.of(1, 2)).execute(model);
+
+        assertEquals("Successfully searched customers by name: anna, phone: 91234567, "
+                + "email: anna@example.com, dog ids: 1 2, backup contact: 98765432",
+                result.getFeedbackToUser());
+        assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
+        assertEquals(List.of(model.getDogList().get(0), model.getDogList().get(1)),
+                model.getFilteredDogList());
     }
 
     @Test
-    public void execute_idSearch_usesPersistentIdAndReplacesPreviousFilter() throws Exception {
-        Customer first = customer(0, "Alex Tan");
-        Customer second = customer(42, "Beth Lim");
-        model.addCustomer(first);
-        model.addCustomer(second);
-        assertEquals("1 customers found.", execute("search customer n/alex"));
-        assertEquals("1 customers found.", execute("search customer id/42"));
-        assertEquals(List.of(second), model.getFilteredCustomerList());
-        assertEquals("0 customers found.", execute("search customer id/1"));
-        assertEquals(List.of(), model.getFilteredCustomerList());
-        assertEquals("1 customers found.", execute("search customer id/0"));
-        assertEquals(List.of(first), model.getFilteredCustomerList());
-        new ListCommand().execute(model);
-        assertEquals(List.of(first, second), model.getFilteredCustomerList());
+    public void execute_nameMatching_isCaseInsensitiveSubstring() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+
+        new SearchCustomerCommand("AN", null, null, null, null).execute(model);
+
+        assertEquals(2, model.getFilteredCustomerList().size());
+        assertEquals(3, model.getFilteredDogList().size());
     }
 
     @Test
-    public void execute_emptyBook_returnsNoMatches() throws Exception {
-        assertEquals("0 customers found.", execute("search customer n/Alex"));
-        assertEquals("0 customers found.", execute("search customer id/0"));
+    public void execute_requiresAllRequestedDogs() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+
+        new SearchCustomerCommand(null, null, null, null, Set.of(1, 3)).execute(model);
+
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+        assertTrue(model.getFilteredDogList().isEmpty());
     }
 
     @Test
-    public void parse_invalidInput_preservesResultsAndRecords() throws Exception {
-        Customer alex = customer(42, "Alex Tan");
-        model.addCustomer(alex);
-        execute("search customer n/alex");
-        AddressBook before = new AddressBook(model.getAddressBook());
-        assertThrows(ParseException.class, () -> parser.parseCommand("search customer id/-1"));
-        assertEquals(List.of(alex), model.getFilteredCustomerList());
-        assertEquals(before, model.getAddressBook());
+    public void execute_unknownDogId_throwsCommandException() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+
+        assertThrows(CommandException.class, SearchCustomerCommand.MESSAGE_INVALID_DOG_ID, () ->
+                new SearchCustomerCommand(null, null, null, null, Set.of(100)).execute(model));
     }
 
     @Test
-    public void execute_loadedCustomer_searchesPersistedId(@TempDir Path directory) throws Exception {
-        Customer customer = customer(42, "Alex Tan");
-        model.addCustomer(customer);
-        JsonAddressBookStorage storage = new JsonAddressBookStorage(directory.resolve("addressbook.json"));
-        storage.saveAddressBook(model.getAddressBook());
-        Model loadedModel = new ModelManager(storage.readAddressBook().orElseThrow(),
-                new UserPrefs());
-        parser.parseCommand("search customer id/42").execute(loadedModel);
-        assertEquals(List.of(customer), loadedModel.getFilteredCustomerList());
+    public void execute_customerId_filtersCustomerAndLinkedDogs() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+
+        CommandResult result = new SearchCustomerCommand(null, null, null, null, null, 2).execute(model);
+
+        assertEquals("Successfully searched customers by customer id: 2", result.getFeedbackToUser());
+        assertEquals(List.of(model.getCustomerList().get(1)), model.getFilteredCustomerList());
+        assertEquals(List.of(model.getDogList().get(2)), model.getFilteredDogList());
     }
 
     @Test
-    public void constructorAndExecute_nullArguments_throwNullPointerException() {
-        assertThrows(NullPointerException.class, () -> new SearchCustomerCommand(null));
-        SearchCustomerCommand command = new SearchCustomerCommand(new CustomerSearchPredicate("Alex"));
-        assertThrows(NullPointerException.class, () -> command.execute(null));
+    public void execute_unknownCustomerId_throwsCommandException() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+
+        assertThrows(CommandException.class, SearchCustomerCommand.MESSAGE_INVALID_CUSTOMER_ID, () ->
+                new SearchCustomerCommand(null, null, null, null, null, 99).execute(model));
     }
 
     @Test
-    public void equals_sameSearchPredicateOnly() {
-        SearchCustomerCommand command = new SearchCustomerCommand(new CustomerSearchPredicate("Alex"));
+    public void execute_eachFieldMismatch_excludesCustomer() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+
+        new SearchCustomerCommand("missing", null, null, null, null).execute(model);
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+        new SearchCustomerCommand(null, "99999999", null, null, null).execute(model);
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+        new SearchCustomerCommand(null, null, "other@example.com", null, null).execute(model);
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+        new SearchCustomerCommand(null, null, null, "99999999", null).execute(model);
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+    }
+
+    @Test
+    public void execute_refreshesLinkedDogsAfterCustomerEdit() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        new SearchCustomerCommand("anna", null, null, null, null).execute(model);
+        Customer anna = model.getCustomerList().get(0);
+        model.setCustomer(anna, new Customer(1, "Beth Lee", "91234567",
+                "anna@example.com", "98765432"));
+
+        assertEquals(1, model.getFilteredCustomerList().size());
+        assertEquals(1, model.getFilteredDogList().size());
+    }
+
+    @Test
+    public void execute_refreshesLinkedDogsAfterRelationshipChange() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        new SearchCustomerCommand("anna", null, null, null, null).execute(model);
+        model.unlinkDogs(List.of(1, 2));
+
+        assertEquals(2, model.getFilteredCustomerList().size());
+        assertEquals(1, model.getFilteredDogList().size());
+    }
+
+    @Test
+    public void execute_customerThenDogSearchAndEdit_keepsMatchingActivityVisible() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        Activity activity = model.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        model.enrolDogs(activity.getId(), activity.getStartDate(), List.of(1));
+
+        new SearchCustomerCommand("anna", null, null, null, null).execute(model);
+        new SearchDogCommand(null, null, null, 1).execute(model);
+        EditDogCommand.EditDogDescriptor descriptor = new EditDogCommand.EditDogDescriptor();
+        descriptor.setName(new DogName("Buddy Updated"));
+        new EditDogCommand(1, descriptor).execute(model);
+
+        assertEquals(List.of(activity), model.getFilteredActivityList());
+        assertTrue(model.getActivityEnrolmentSummary(activity).contains("Buddy Updated"));
+    }
+
+    @Test
+    public void execute_customerSearch_ignoresUnownedEnrolments() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        Dog unowned = model.addDog(new Dog(new DogName("Unowned"), new Breed("Poodle"), new Size("small")));
+        Activity activity = model.addActivity(new ActivityName("Unowned walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        model.enrolDogs(activity.getId(), activity.getStartDate(), List.of(unowned.getId()));
+
+        new SearchCustomerCommand("anna", null, null, null, null).execute(model);
+
+        assertTrue(model.getFilteredActivityList().isEmpty());
+        assertEquals("", model.getActivityEnrolmentSummary(activity));
+    }
+
+    @Test
+    public void execute_customerSearch_filtersActivitiesAndShowsMatchingDogDates() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        Activity activity = model.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.WEEKLY);
+        model.enrolDogs(activity.getId(), LocalDate.of(2028, 3, 7), List.of(1));
+
+        new SearchCustomerCommand("anna", null, null, null, null).execute(model);
+
+        assertEquals(List.of(activity), model.getFilteredActivityList());
+        assertEquals("Enrolments:\n1. Buddy: 2028-03-07", model.getActivityEnrolmentSummary(activity));
+    }
+
+    @Test
+    public void equals_differentFields_returnsFalse() {
+        SearchCustomerCommand command = new SearchCustomerCommand(
+                "anna", "91234567", "anna@example.com", "98765432", Set.of(1), 1);
+
         assertEquals(command, command);
-        assertEquals(command, new SearchCustomerCommand(new CustomerSearchPredicate("Alex")));
-        assertNotEquals(command, new SearchCustomerCommand(new CustomerSearchPredicate("Beth")));
-        assertNotEquals(command, new SearchCustomerCommand(new CustomerSearchPredicate(42)));
-        assertNotEquals(command, null);
-        assertNotEquals(command, new Object());
+        assertTrue(!command.equals(null));
+        assertTrue(!command.equals("command"));
+        assertTrue(!command.equals(new SearchCustomerCommand(
+                "other", "91234567", "anna@example.com", "98765432", Set.of(1))));
+        assertTrue(!command.equals(new SearchCustomerCommand(
+                "anna", "99999999", "anna@example.com", "98765432", Set.of(1))));
+        assertTrue(!command.equals(new SearchCustomerCommand(
+                "anna", "91234567", "other@example.com", "98765432", Set.of(1))));
+        assertTrue(!command.equals(new SearchCustomerCommand(
+                "anna", "91234567", "anna@example.com", "99999999", Set.of(1))));
+        assertTrue(!command.equals(new SearchCustomerCommand(
+                "anna", "91234567", "anna@example.com", "98765432", Set.of(2))));
+        assertTrue(!command.equals(new SearchCustomerCommand(
+                "anna", "91234567", "anna@example.com", "98765432", Set.of(1), 2)));
     }
 
-    private String execute(String input) throws Exception {
-        return parser.parseCommand(input).execute(model).getFeedbackToUser();
-    }
-
-    private Customer customer(int id, String name) {
-        return new Customer(id, name, "91234567", "alex@example.com", "98765432");
+    private ModelManager modelWithCustomersAndDogs() throws Exception {
+        ModelManager model = new ModelManager();
+        Customer anna = new Customer(1, "Anna Lee", "91234567", "anna@example.com", "98765432");
+        model.addCustomer(anna);
+        model.addCustomer(new Customer(2, "Annabelle Keel", "92345678", "annabelle@example.com", "97654321"));
+        Dog buddy = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
+        Dog max = model.addDog(new Dog(new DogName("Max"), new Breed("Labrador"), new Size("Large")));
+        Dog kia = model.addDog(new Dog(new DogName("Kia"), new Breed("Pointer"), new Size("Medium")));
+        model.linkDogs(1, List.of(buddy.getId(), max.getId()));
+        model.linkDogs(2, List.of(kia.getId()));
+        return model;
     }
 }

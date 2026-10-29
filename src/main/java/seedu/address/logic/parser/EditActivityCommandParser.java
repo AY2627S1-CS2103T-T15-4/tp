@@ -22,7 +22,9 @@ import seedu.address.logic.commands.EditActivityCommand.EditActivityDescriptor;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.Recurrence;
 
-/** Parses optional edits to an existing activity series. */
+/**
+ * Parses optional edits to an existing activity series.
+ */
 public class EditActivityCommandParser implements Parser<EditActivityCommand> {
     private static final Pattern PREFIX_TOKEN = Pattern.compile("(?:^|\\s)([A-Za-z]+/)");
     private static final Set<String> ALLOWED_PREFIXES = Set.of("n/", "date/", "start/", "end/", "r/");
@@ -71,7 +73,7 @@ public class EditActivityCommandParser implements Parser<EditActivityCommand> {
     private static int parseActivityId(String value) throws ParseException {
         try {
             int activityId = Integer.parseInt(value.trim());
-            if (activityId < 0) {
+            if (activityId <= 0) {
                 throw new NumberFormatException();
             }
             return activityId;

@@ -111,9 +111,10 @@ public class MainWindow extends UiPart<Stage> {
         menuItem.setAccelerator(keyCombination);
 
         /*
-         * TODO: the code below can be removed once the bug reported here
-         * https://bugs.openjdk.java.net/browse/JDK-8131666
-         * is fixed in a later version of the SDK.
+         * JavaFX SDK 17.0.7 still consumes function-key events in TextInputControl.
+         * Revisit this workaround when the project upgrades to an SDK version that
+         * includes the fix for OpenJDK issue JDK-8131666; remove it only after
+         * accelerator tests pass while a TextField or TextArea has focus.
          *
          * According to the bug report, TextInputControl (TextField, TextArea) will
          * consume function-key events. Because CommandBox contains a TextField and
@@ -145,7 +146,8 @@ public class MainWindow extends UiPart<Stage> {
         dogListPanel = new DogListPanel(logic.getFilteredDogList());
         dogListPanelPlaceholder.getChildren().add(dogListPanel.getRoot());
 
-        activityListPanel = new ActivityListPanel(logic.getFilteredActivityList());
+        activityListPanel = new ActivityListPanel(logic.getFilteredActivityList(), logic.getEnrolmentList(),
+                logic.getActivityEnrolmentContextChanges(), logic::getActivityEnrolmentSummary);
         activityListPanelPlaceholder.getChildren().add(activityListPanel.getRoot());
 
         todayActivityListPanel = new TodayActivityListPanel(logic.getActivityList());

@@ -69,8 +69,8 @@ class JsonAdaptedCustomer {
         if (backupContact == null) {
             throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, "backupContact"));
         }
-        if (id < 0) {
-            throw new IllegalValueException("Customer id must be nonnegative.");
+        if (id < 1) {
+            throw new IllegalValueException("Customer ID must be positive.");
         }
         try {
             return new Customer(id, new Name(name), new Phone(phone), new Email(email),

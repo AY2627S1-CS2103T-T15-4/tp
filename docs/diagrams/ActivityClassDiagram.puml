@@ -9,7 +9,7 @@ class AddressBook {
   -nextActivityId: long
   +addActivity(...): Activity
   +removeActivity(activity: Activity): void
-  +setActivity(target, editedActivity): int
+  +setActivity(target, editedActivity): void
   +enrolDogs(activityId, date, dogIds): void
   +unenrolDogs(activityId, date, dogIds): void
 }

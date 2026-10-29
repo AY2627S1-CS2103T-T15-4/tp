@@ -17,19 +17,18 @@ note over Command
 end note
 Command -> Model : setActivity(target, editedActivity)
 note right of Model
-  If start date or recurrence changes,
-  removes this activity's enrolments.
-  Otherwise checks booking conflicts
-  and retains the enrolments.
+  Rejects an activity with any enrolments.
+  For an unenrolled activity, validates
+  and replaces the stored schedule.
+  Editing never removes enrolments.
 end note
-Model --> Command : removedEnrolments
 note over Command
-  Includes the removed count in feedback.
+  Reports the edited activity ID.
 end note
 [<-- Command : commandResult
 
 legend bottom
-  Edits an activity using a parsed descriptor. Model internals are omitted.
+  Edits an activity with no enrolments. Model internals are omitted.
   Parsing and saving follow the shared Logic flow.
   Successful execution only; validation failures are omitted.
 endlegend

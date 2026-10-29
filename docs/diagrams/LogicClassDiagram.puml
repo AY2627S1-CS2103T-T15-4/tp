@@ -34,4 +34,9 @@ note bottom of AddDogCommand
   Other commands and parser internals
   are omitted.
 end note
+
+note bottom of LogicManager
+  Handles undo/redo snapshots and clear confirmation.
+  History fields and commands are omitted.
+end note
 @enduml

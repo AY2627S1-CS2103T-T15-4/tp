@@ -35,6 +35,11 @@ CustomerListPanel ..> CustomerCard : creates
 DogListPanel ..> DogCard : creates
 ActivityListPanel ..> ActivityCard : creates
 
+note right of ActivityListPanel
+  Observes activity, enrolment and search-context
+  changes to refresh per-dog enrolment dates.
+end note
+
 note bottom of TodayActivityListPanel
   Uses the complete activity list,
   filtered to schedules occurring today.

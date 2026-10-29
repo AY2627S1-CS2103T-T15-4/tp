@@ -26,8 +26,8 @@ public class DeleteActivityCommand extends Command {
 
     /** Creates a command to delete the activity with the specified ID. */
     public DeleteActivityCommand(int activityId) {
-        if (activityId < 0) {
-            throw new IllegalArgumentException("Activity ID must be nonnegative.");
+        if (activityId <= 0) {
+            throw new IllegalArgumentException("Activity ID must be positive.");
         }
         this.activityId = activityId;
     }

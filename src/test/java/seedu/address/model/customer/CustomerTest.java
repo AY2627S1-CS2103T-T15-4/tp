@@ -17,6 +17,7 @@ public class CustomerTest {
     @Test
     public void constructor_invalidArguments_throwsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> new Customer(-1, NAME, PHONE, EMAIL, BACKUP_CONTACT));
+        assertThrows(IllegalArgumentException.class, () -> new Customer(0, NAME, PHONE, EMAIL, BACKUP_CONTACT));
     }
 
     @Test
@@ -39,6 +40,18 @@ public class CustomerTest {
         assertTrue(customer.isSameCustomer(new Customer(1, new Name("Bob Lee"), PHONE, EMAIL, BACKUP_CONTACT)));
         assertFalse(customer.isSameCustomer(null));
         assertFalse(customer.isSameCustomer(new Customer(2, NAME, PHONE, EMAIL, BACKUP_CONTACT)));
+    }
+
+    @Test
+    public void isSameCustomer_unassignedCustomers_doNotShareIdentity() {
+        Customer unassigned = new Customer(NAME, PHONE, EMAIL, BACKUP_CONTACT);
+        Customer otherUnassigned = new Customer(NAME, PHONE, EMAIL, BACKUP_CONTACT);
+        Customer assigned = new Customer(1, NAME, PHONE, EMAIL, BACKUP_CONTACT);
+
+        assertTrue(unassigned.isSameCustomer(unassigned));
+        assertFalse(unassigned.isSameCustomer(otherUnassigned));
+        assertFalse(unassigned.isSameCustomer(assigned));
+        assertFalse(assigned.isSameCustomer(unassigned));
     }
 
     @Test

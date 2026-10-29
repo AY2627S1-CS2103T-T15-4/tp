@@ -1,0 +1,31 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 180
+
+participant "command:SearchActivityCommand" as Command LOGIC_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+
+[-> Command : execute(model)
+note over Command
+  Builds activityPredicate for name Walk
+  and occurrence date 2026-10-28.
+  Related predicates use the same date
+  when matching enrolments.
+end note
+Command -> Model : updateFilteredActivityList(activityPredicate)
+Command -> Model : updateFilteredDogList(enrolledDogPredicate)
+Command -> Model : updateFilteredCustomerList(ownerPredicate)
+note right of Model
+  Retains predicates for later refreshes.
+  Stored records are unchanged.
+end note
+[<-- Command : commandResult
+
+legend bottom
+  Searches activities by name and date. Predicate evaluation is omitted.
+  Parsing and saving follow the shared Logic flow.
+  Successful execution only; validation failures are omitted.
+endlegend
+@enduml

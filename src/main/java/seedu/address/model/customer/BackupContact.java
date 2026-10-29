@@ -1,3 +1,4 @@
+//@@author lilosy
 package seedu.address.model.customer;
 
 import static java.util.Objects.requireNonNull;
@@ -10,8 +11,8 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
  */
 public class BackupContact {
     public static final String MESSAGE_CONSTRAINTS =
-            "Phone numbers should only contain digits, and should be at least 3 digits long";
-    public static final String VALIDATION_REGEX = "\\d{3,}";
+            "Backup contact numbers should contain exactly 8 digits; spaces are allowed between digits";
+    public static final String VALIDATION_REGEX = "\\d(?: *\\d){7}";
     public final String value;
 
     /**
@@ -22,7 +23,7 @@ public class BackupContact {
     public BackupContact(String backupContact) {
         requireNonNull(backupContact);
         checkArgument(isValidBackupContact(backupContact), MESSAGE_CONSTRAINTS);
-        value = backupContact;
+        value = backupContact.replace(" ", "");
     }
 
     /**

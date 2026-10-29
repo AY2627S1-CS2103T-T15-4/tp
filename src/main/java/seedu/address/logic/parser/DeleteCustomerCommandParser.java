@@ -14,7 +14,7 @@ public class DeleteCustomerCommandParser implements Parser<DeleteCustomerCommand
         String trimmedArgs = args.trim();
         try {
             int customerId = Integer.parseInt(trimmedArgs);
-            if (customerId < 0) {
+            if (customerId < 1) {
                 throw new NumberFormatException();
             }
             return new DeleteCustomerCommand(customerId);

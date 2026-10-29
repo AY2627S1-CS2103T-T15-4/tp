@@ -28,6 +28,7 @@
       <Label fx:id="date" styleClass="cell_small_label" />
       <Label fx:id="time" styleClass="cell_small_label" />
       <Label fx:id="recurrence" styleClass="cell_small_label" />
+      <Label fx:id="enrolments" styleClass="cell_small_label" wrapText="true" />
     </VBox>
   </GridPane>
 </HBox>

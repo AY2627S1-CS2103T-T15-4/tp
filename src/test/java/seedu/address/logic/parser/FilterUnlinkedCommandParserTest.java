@@ -19,8 +19,14 @@ public class FilterUnlinkedCommandParserTest {
 
     @Test
     public void parse_invalidCategory_throwsParseException() {
-        for (String input : new String[]{"", "Dog", "customer extra", "cat"}) {
+        for (String input : new String[]{"", "Dog", "CUSTOMER", "customer extra", "cat", "searchun dog"}) {
             assertThrows(ParseException.class, () -> parser.parse(input));
         }
+    }
+
+    @Test
+    public void parse_invalidCategory_showsNewCommandFormat() {
+        String expectedMessage = "Info is in the wrong format. Please input: filterun dog/filterun customer only";
+        assertThrows(ParseException.class, expectedMessage, () -> parser.parse("unknown"));
     }
 }
