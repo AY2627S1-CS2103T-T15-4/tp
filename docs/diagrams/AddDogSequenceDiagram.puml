@@ -15,8 +15,9 @@ Command -> Model : hasDog(dog)
 Model --> Command : false
 Command -> Model : addDog(dog)
 note right of Model
-  Assigns a persistent ID and
-  refreshes displayed records.
+  Delegates to WatchDog.addDog(dog),
+  which assigns the persistent ID.
+  Refreshes displayed records.
 end note
 Model --> Command : addedDog
 note over Command

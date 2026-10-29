@@ -353,7 +353,7 @@ state and returns a warning without saving or changing history. The next input m
 and cannot itself be undone. Confirmation is consumed even if saving the cleared data fails.
 
 `Model.createState()` copies the `WatchDog`, including its records and all three next-ID counters, and captures
-the active customer, dog and activity predicates and the selected record IDs. `Model.restoreState()`
+the active customer, dog and activity predicates and the enrolment-summary dog predicate. `Model.restoreState()`
 resets the existing WatchDog and reapplies the saved display state. Reusing the existing model
 and observable lists lets UI listeners continue to see updates after a restoration. It refreshes
 predicates twice: the first pass installs source filters, and the second re-evaluates dependent filters.
@@ -415,7 +415,7 @@ Some parameter and return details are omitted. `nextOccurrenceOnOrAfter(date)` r
 `WatchDogParser` routes `addactivity` to `AddActivityCommandParser`. The parser requires
 `n/`, `date/`, `start/`, `end/`, and `r/` exactly once, rejects unknown alphabetic prefixes,
 and validates strict calendar dates, minute-resolution 24-hour times and lowercase recurrence.
-The immutable command validates a details snapshot with an unused ID of zero. Parsing never allocates
+The immutable command validates a details snapshot with a placeholder ID. Parsing never allocates
 an ID. `execute` calls `Model.addActivity(ActivityName, LocalDate, LocalTime, LocalTime, Recurrence)`
 and reports the identified schedule returned by the model. No dog/customer filters change.
 
