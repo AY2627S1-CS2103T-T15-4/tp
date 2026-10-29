@@ -49,7 +49,7 @@ public class SearchDogCommandParserTest {
     @Test
     public void parse_invalidId_includesSearchingErrorMessage() {
         for (String value : new String[]{"-1", "0", "00", "not-a-number", "2147483648", "-2147483649"}) {
-            assertThrows(ParseException.class, "Error in searching dogs:\nPlease enter a valid dog index", () ->
+            assertThrows(ParseException.class, "Error in searching dogs:\nPlease enter a valid dog ID", () ->
                     parser.parse("i/" + value));
         }
     }

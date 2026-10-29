@@ -16,7 +16,7 @@ public class DeleteDogCommand extends Command {
             + " <id>: Deletes the dog with the specified ID.\n"
             + "Example: deletedog 12";
     public static final String MESSAGE_SUCCESS = "Successfully deleted dog %1$d: %2$s; Breed: %3$s; Size: %4$s";
-    public static final String MESSAGE_INVALID_ID = "Error in deleting dog:\nPlease enter a valid dog index";
+    public static final String MESSAGE_INVALID_ID = "Error in deleting dog:\nPlease enter a valid dog ID";
 
     private final int dogId;
 

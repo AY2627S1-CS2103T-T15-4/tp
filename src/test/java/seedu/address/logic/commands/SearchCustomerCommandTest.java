@@ -91,7 +91,7 @@ public class SearchCustomerCommandTest {
                     new SearchCustomerCommand(null, null, null, null, Set.of(1, id)));
         }
         for (int id : new int[]{999, Integer.MAX_VALUE}) {
-            assertThrows(CommandException.class, "Error in searching customers:\nPlease enter a valid dog index", () ->
+            assertThrows(CommandException.class, "Error in searching customers:\nPlease enter a valid dog ID", () ->
                     new SearchCustomerCommand(null, null, null, null, Set.of(1, id)).execute(model));
             assertThrows(CommandException.class, SearchCustomerCommand.MESSAGE_INVALID_CUSTOMER_ID, () ->
                     new SearchCustomerCommand(null, null, null, null, null, id).execute(model));

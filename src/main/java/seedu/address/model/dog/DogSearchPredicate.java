@@ -1,5 +1,7 @@
 package seedu.address.model.dog;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -31,6 +33,7 @@ public class DogSearchPredicate implements Predicate<Dog> {
 
     @Override
     public boolean test(Dog dog) {
+        requireNonNull(dog);
         return (nameQuery == null || normalize(dog.getName().fullName).contains(nameQuery))
                 && (breedQuery == null || normalize(dog.getBreed().breed).contains(breedQuery))
                 && (sizeQuery == null || normalize(dog.getSize().size).equals(sizeQuery))

@@ -1,5 +1,7 @@
 package seedu.address.model.customer;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -45,12 +47,13 @@ public class CustomerSearchPredicate implements Predicate<Customer> {
         this.email = email == null ? null : email.toLowerCase(Locale.ROOT);
         this.backupContact = backupContact;
         this.dogIds = dogIds == null ? null : Set.copyOf(dogIds);
-        this.dogs = dogs;
+        this.dogs = requireNonNull(dogs);
         this.customerId = customerId;
     }
 
     @Override
     public boolean test(Customer customer) {
+        requireNonNull(customer);
         return (customerId == null || customer.getId() == customerId)
                 && matchesName(customer)
                 && matchesPhone(customer)
