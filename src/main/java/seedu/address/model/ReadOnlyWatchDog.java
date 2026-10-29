@@ -48,6 +48,8 @@ public interface ReadOnlyWatchDog {
         return 1;
     }
 
+    //@@author its-shoutime
     ObservableList<Customer> getCustomerList();
+    //@@author
 
 }

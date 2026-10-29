@@ -224,9 +224,11 @@ How the parsing works:
 * For commands requiring field parsing, `WatchDogParser` creates the appropriate parser. The diagram uses `AddDogCommandParser` as a representative example: it tokenises the arguments, validates values with parsing utilities, and creates an `AddDogCommand` containing a dog without an allocated persistent ID.
 * Concrete command parsers implement `Parser` and return command objects. The diagram omits the other parsers; some commands, such as `summary`, are constructed directly by `WatchDogParser` after checking their arguments.
 
+<!--@@author its-shoutime-->
 `help [COMMAND]` is parsed by `HelpCommandParser`, which looks up normalized, possibly multiword
 topics in `CommandHelp` and creates a `HelpCommand`. Bare `help` opens the help window; topic help
 returns command guidance through normal result feedback. Both forms preserve undo/redo history.
+<!--@@author-->
 
 ### Model component
 **API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/blob/master/src/main/java/seedu/address/model/Model.java)
@@ -324,6 +326,7 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 <puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog using its persistent ID" />
 
+<!--@@author its-shoutime-->
 ### Retired list commands
 
 The former list dog and list customer commands are no longer routed by WatchDogParser.
@@ -338,6 +341,8 @@ The former select dog and select customer implementations are retained under
 unused/@its-shoutime/ for authorship reference only. They are not routed by the active
 WatchDogParser and are not supported by the final product.
 
+<!--@@author-->
+<!--@@author its-shoutime-->
 ### Undo and redo
 
 `WatchDogParser` accepts `undo` and `redo` only without arguments. `LogicManager` handles these
@@ -375,6 +380,7 @@ invalidated history, `clear`, failed commands, dependent filters, and save failu
 `ModelManagerTest` checks restoration of data, ID counters, relationships, filters, and selection, while
 `WatchDogParserTest` checks argument validation.
 
+<!--@@author-->
 ### Daycare summary
 
 `WatchDogParser` accepts `summary` with blank arguments only and constructs `SummaryCommand`.
@@ -1217,6 +1223,7 @@ Use a disposable data folder for this test. Substitute the computer's current lo
 Also verify mutation → undo → summary → redo: summary preserves the redo operation and does not
 appear as an undoable mutation.
 
+<!--@@author its-shoutime-->
 ### Undo and redo
 
 1. Add a dog, run `help`, then `undo`. The dog disappears; `help` is not the undone command.
@@ -1229,6 +1236,7 @@ appear as an undoable mutation.
    the dog returns and saves. Repeat for a failed `redo`, a new add after `undo`, and `clear`.
    A failed `clear` leaves memory empty and neither history operation available.
 
+<!--@@author-->
 ### Adding and editing dogs
 
 1. Run `adddog n/O'Neil-Jr b/German-Shepherd s/medium`.
@@ -1374,10 +1382,12 @@ placeholders below with these fixture values. Refer to the UG for complete searc
 
 ### Help and clear confirmation
 
+<!--@@author its-shoutime-->
 1. Run `help adddog` and `help deletedog`. Expect guidance in the result area without executing either
    command or changing records or filters. Run `help summary today`; expect an error listing supported commands.
 1. Run `help`, minimize its window, and run `help` again. Expect the existing window to restore and focus.
    Repeat via the Help menu and `F1`.
+<!--@@author-->
 1. In a disposable dataset, add a dog, run `clear`, then enter `maybe`. Expect a Y/N prompt and no changes.
    Enter `reset` while confirmation is pending; expect another Y/N prompt rather than executing reset.
 1. Enter ` n ` to cancel. Expect records and filters unchanged; `undo` should still undo the dog addition.

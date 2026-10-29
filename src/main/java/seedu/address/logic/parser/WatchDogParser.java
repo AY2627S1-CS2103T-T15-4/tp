@@ -75,7 +75,9 @@ public class WatchDogParser {
             case AddDogCommand.COMMAND_WORD -> new AddDogCommandParser().parse(arguments);
             case DeleteActivityCommand.COMMAND_WORD -> new DeleteActivityCommandParser().parse(arguments);
             case DeleteDogCommand.COMMAND_WORD -> new DeleteDogCommandParser().parse(arguments);
+            //@@author its-shoutime
             case DeleteCustomerCommand.COMMAND_WORD -> new DeleteCustomerCommandParser().parse(arguments);
+            //@@author
             case EditActivityCommand.COMMAND_WORD -> new EditActivityCommandParser().parse(arguments);
             case EditCustomerCommand.COMMAND_WORD -> new EditCustomerCommandParser().parse(arguments);
             case EditDogCommand.COMMAND_WORD -> new EditDogCommandParser().parse(arguments);
@@ -103,6 +105,7 @@ public class WatchDogParser {
                 yield new ResetDisplayCommand();
             }
             case ExitCommand.COMMAND_WORD -> new ExitCommand();
+            //@@author its-shoutime
             case HelpCommand.COMMAND_WORD -> new HelpCommandParser().parse(arguments);
             case RedoCommand.COMMAND_WORD -> {
                 if (!arguments.isBlank()) {
@@ -118,6 +121,7 @@ public class WatchDogParser {
                 }
                 yield new UndoCommand();
             }
+            //@@author
             default -> {
                 logger.finer("This user input caused a ParseException: " + userInput);
                 throw new ParseException(MESSAGE_UNKNOWN_COMMAND);
