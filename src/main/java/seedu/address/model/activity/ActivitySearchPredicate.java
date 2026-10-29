@@ -1,4 +1,7 @@
+// @@author XanderGoh
 package seedu.address.model.activity;
+
+import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -22,6 +25,7 @@ public class ActivitySearchPredicate implements Predicate<Activity> {
 
     @Override
     public boolean test(Activity activity) {
+        requireNonNull(activity);
         return matchesName(activity) && matchesDate(activity) && matchesTime(activity)
                 && matchesRecurrence(activity);
     }

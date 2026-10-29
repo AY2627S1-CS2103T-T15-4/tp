@@ -5,11 +5,17 @@ import static java.util.Objects.requireNonNull;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+// @@author XanderGoh
 import java.util.function.Function;
+// @@author
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
+// @@author XanderGoh
 import javafx.beans.Observable;
+// @@author
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -31,7 +37,9 @@ public class ActivityListPanel extends UiPart<Region> {
     private final ObservableList<Enrolment> enrolments;
     private final Clock clock;
     private final boolean todayPanel;
+    // @@author XanderGoh
     private final Function<Activity, String> enrolmentSummary;
+    // @@author
 
     /**
      * Creates a general panel showing upcoming dog bookings for the supplied activities.
@@ -43,6 +51,7 @@ public class ActivityListPanel extends UiPart<Region> {
         this(activities, enrolments, Clock.systemDefaultZone(), false, null, activity -> "");
     }
 
+    // @@author XanderGoh
     /** Creates a panel with a dynamic search-specific enrolment summary. */
     public ActivityListPanel(ObservableList<Activity> activities, ObservableList<Enrolment> enrolments,
             Function<Activity, String> enrolmentSummary) {
@@ -55,6 +64,7 @@ public class ActivityListPanel extends UiPart<Region> {
         this(activities, enrolments == null ? javafx.collections.FXCollections.observableArrayList() : enrolments,
                 Clock.systemDefaultZone(), false, contextChanges, enrolmentSummary);
     }
+    // @@author
 
     /**
      * Creates a date-sensitive panel with an injectable clock.
@@ -89,9 +99,11 @@ public class ActivityListPanel extends UiPart<Region> {
         recordListView.setCellFactory(listView -> new RecordListViewCell());
         activities.addListener((ListChangeListener<Activity>) change -> refresh());
         enrolments.addListener((ListChangeListener<Enrolment>) change -> refresh());
+        // @@author XanderGoh
         if (contextChanges != null) {
             contextChanges.addListener(observable -> refresh());
         }
+        // @@author
         refresh();
     }
 
@@ -108,18 +120,22 @@ public class ActivityListPanel extends UiPart<Region> {
     public void refresh(LocalDate today) {
         requireNonNull(today);
         List<CardListEntry> cards = new ArrayList<>();
-        activities.stream()
-                .filter(activity -> !todayPanel || activity.occursOn(today))
-                .forEach(activity -> {
-                    String bookingSummary = todayPanel
-                            ? ActivityBookingSummary.bookingsOn(enrolments, activity.getId(), today)
-                            : ActivityBookingSummary.upcomingBookings(enrolments, activity.getId(), today);
-                    String searchSummary = todayPanel ? "" : enrolmentSummary.apply(activity);
-                    Supplier<Region> cardFactory = () -> new ActivityCard(activity, bookingSummary,
-                            searchSummary).getRoot();
-                    Object contentSnapshot = List.of(activity, bookingSummary, searchSummary);
-                    cards.add(new CardListEntry("activity:" + activity.getId(), contentSnapshot, cardFactory));
-                });
+        Stream<Activity> displayedActivities = activities.stream()
+                .filter(activity -> !todayPanel || activity.occursOn(today));
+        if (todayPanel) {
+            displayedActivities = displayedActivities.sorted(Comparator.comparing(Activity::getStartTime)
+                    .thenComparingInt(Activity::getId));
+        }
+        displayedActivities.forEach(activity -> {
+            String bookingSummary = todayPanel
+                    ? ActivityBookingSummary.bookingsOn(enrolments, activity.getId(), today)
+                    : ActivityBookingSummary.upcomingBookings(enrolments, activity.getId(), today);
+            String searchSummary = todayPanel ? "" : enrolmentSummary.apply(activity);
+            Supplier<Region> cardFactory = () -> new ActivityCard(activity, bookingSummary,
+                    searchSummary, todayPanel).getRoot();
+            Object contentSnapshot = List.of(activity, bookingSummary, searchSummary);
+            cards.add(new CardListEntry("activity:" + activity.getId(), contentSnapshot, cardFactory));
+        });
         CardListUpdater.reconcile(recordListView, cards);
     }
 

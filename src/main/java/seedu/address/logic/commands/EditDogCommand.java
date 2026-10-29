@@ -94,6 +94,11 @@ public class EditDogCommand extends Command {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(dogId, editDogDescriptor);
+    }
+
+    @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .add("dogId", dogId)
@@ -158,6 +163,11 @@ public class EditDogCommand extends Command {
             return Objects.equals(name, otherDescriptor.name)
                     && Objects.equals(breed, otherDescriptor.breed)
                     && Objects.equals(size, otherDescriptor.size);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, breed, size);
         }
 
         @Override

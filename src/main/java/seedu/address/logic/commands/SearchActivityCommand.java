@@ -1,6 +1,8 @@
+// @@author XanderGoh
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.AppUtil.checkArgument;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -21,7 +23,7 @@ public class SearchActivityCommand extends Command {
             + " [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE] [i/ACTIVITY_ID]: "
             + "Searches activities by activity fields.";
     public static final String MESSAGE_INVALID_ID = "Error in searching activities:\n"
-            + "Please enter a valid activity index";
+            + "Please enter a valid activity ID";
     private static final String MESSAGE_SUCCESS_PREFIX = "Successfully searched activities by ";
 
     private final String name;
@@ -43,6 +45,7 @@ public class SearchActivityCommand extends Command {
     /** Creates a search combining all supplied fields, including an optional activity ID. */
     public SearchActivityCommand(String name, LocalDate date, LocalTime time, Recurrence recurrence,
             Integer activityId) {
+        checkArgument(activityId == null || activityId >= 1, "Activity search ID must be positive.");
         this.name = name;
         this.date = date;
         this.time = time;

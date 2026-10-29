@@ -93,14 +93,15 @@ public class Dog {
     }
 
     /**
-     * Returns true if both dogs have the same ID.
+     * Returns true for this object or dogs with the same positive persistent ID.
+     * Separate unassigned dogs do not share an identity.
      * This defines a weaker notion of equality between two dogs.
      */
     public boolean isSameDog(Dog otherDog) {
         if (otherDog == this) {
             return true;
         }
-        return otherDog != null && otherDog.getId() == getId();
+        return otherDog != null && id > 0 && otherDog.getId() == id;
     }
 
     /**

@@ -77,7 +77,9 @@ public class LogicManagerTest {
 
     @Test
     public void execute_commandExecutionError_throwsCommandException() {
+        // @@author XanderGoh
         String deleteCommand = "deletedog 9";
+        // @@author
         assertCommandException(deleteCommand, DeleteDogCommand.MESSAGE_INVALID_ID);
     }
 
@@ -219,6 +221,7 @@ public class LogicManagerTest {
         assertTrue(notifications[0] >= 5);
     }
 
+    //@@author its-shoutime
     @Test
     public void execute_undoRedo_restoresDataAndAllowsAnotherUndo() throws Exception {
         ObservableList<Dog> dogs = logic.getDogList();
@@ -380,7 +383,9 @@ public class LogicManagerTest {
     @Test
     public void execute_failedCommand_preservesUndoHistory() throws Exception {
         logic.execute("adddog n/Buddy b/Poodle s/small");
+        // @@author XanderGoh
         assertCommandException("deletedog 9", DeleteDogCommand.MESSAGE_INVALID_ID);
+        // @@author
 
         logic.execute("undo");
         assertEquals(List.of(), logic.getDogList());
@@ -487,6 +492,7 @@ public class LogicManagerTest {
                 : String.format(LogicManager.FILE_OPS_ERROR_FORMAT, failure.getMessage());
         assertThrows(CommandException.class, expectedMessage, () -> logic.execute(undo ? "undo" : "redo"));
     }
+    //@@author
 
     /**
      * Executes the command and confirms that

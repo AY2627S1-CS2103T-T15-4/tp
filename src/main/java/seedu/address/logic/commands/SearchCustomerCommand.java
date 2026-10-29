@@ -1,3 +1,4 @@
+// @@author XanderGoh
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
@@ -23,9 +24,9 @@ public class SearchCustomerCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + " [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_IDS] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]";
     public static final String MESSAGE_INVALID_DOG_ID = "Error in searching customers:\n"
-            + "Please enter a valid dog index";
+            + "Please enter a valid dog ID";
     public static final String MESSAGE_INVALID_CUSTOMER_ID = "Error in searching customers:\n"
-            + "Please enter a valid customer index";
+            + "Please enter a valid customer ID";
     private static final String MESSAGE_SUCCESS_PREFIX = "Successfully searched customers by ";
 
     private final String name;
@@ -43,19 +44,20 @@ public class SearchCustomerCommand extends Command {
     }
 
     /**
-     * Creates a customer search using the supplied fields and, when present, positive dog IDs.
+     * Creates a customer search, copying the supplied positive dog IDs to preserve the query.
      *
-     * @throws IllegalArgumentException if any supplied dog ID is not positive
+     * @throws IllegalArgumentException if any supplied dog or customer ID is not positive
      */
     public SearchCustomerCommand(String name, String phone, String email,
                                  String backupContact, Set<Integer> dogIds, Integer customerId) {
         checkArgument(dogIds == null || dogIds.stream().allMatch(id -> id != null && id >= 1),
                 "Dog search IDs must be positive.");
+        checkArgument(customerId == null || customerId >= 1, "Customer search ID must be positive.");
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.backupContact = backupContact;
-        this.dogIds = dogIds;
+        this.dogIds = dogIds == null ? null : Set.copyOf(dogIds);
         this.customerId = customerId;
         this.predicate = null;
     }

@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.model.activity;
 
 /**

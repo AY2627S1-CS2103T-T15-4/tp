@@ -48,6 +48,7 @@ public class ModelManagerTest {
         assertEquals(oldUserPrefs, modelManager.getUserPrefs());
     }
 
+    //@@author its-shoutime
     @Test
     public void restoreState_restoresDataAndActiveFilters() {
         modelManager.addCustomer(ALICE);
@@ -113,6 +114,7 @@ public class ModelManagerTest {
         assertEquals(nextDogId, (long) nextDog.getId());
         assertEquals(nextActivityId, nextActivity.getId());
     }
+    //@@author
 
     @Test
     public void setGuiSettings_nullGuiSettings_throwsNullPointerException() {
@@ -141,6 +143,7 @@ public class ModelManagerTest {
         assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredCustomerList().remove(0));
     }
 
+    // @@author XanderGoh
     @Test
     public void activityEnrolmentSummary_multipleDogsAndDates_isSortedAndGrouped() throws Exception {
         Activity activity = modelManager.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
@@ -190,6 +193,7 @@ public class ModelManagerTest {
 
         assertEquals("", modelManager.getActivityEnrolmentSummary(activity));
     }
+    // @@author
 
     @Test
     public void equals() {

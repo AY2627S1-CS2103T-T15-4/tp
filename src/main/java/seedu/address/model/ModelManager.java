@@ -7,22 +7,30 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
+// @@author XanderGoh
 import java.util.StringJoiner;
+// @@author
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+// @@author XanderGoh
 import javafx.beans.property.SimpleIntegerProperty;
+// @@author
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
+// @@author XanderGoh
 import seedu.address.model.activity.Enrolment;
+// @@author
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
+// @@author XanderGoh
 import seedu.address.model.dog.Dog;
+// @@author
 import seedu.address.model.dog.exceptions.EnrolException;
 import seedu.address.model.dog.exceptions.LinkException;
 import seedu.address.model.dog.exceptions.UnlinkException;
@@ -38,11 +46,13 @@ public class ModelManager implements Model {
     private final FilteredList<Customer> filteredCustomers;
     private final FilteredList<Dog> filteredDogs;
     private final FilteredList<Activity> filteredActivities;
+    // @@author XanderGoh
     private Predicate<Customer> activeCustomerPredicate;
     private Predicate<Dog> activeDogPredicate;
     private Predicate<Activity> activeActivityPredicate;
     private Predicate<Dog> enrolmentDogPredicate;
     private final SimpleIntegerProperty enrolmentContextVersion = new SimpleIntegerProperty();
+    // @@author
 
     /**
      * Initializes a ModelManager with the given watchDog and userPrefs.
@@ -63,6 +73,7 @@ public class ModelManager implements Model {
         this(new WatchDog(), new UserPrefs());
     }
 
+    //@@author its-shoutime
     @Override
     public ModelState createState() {
         return new ModelState(new WatchDog(watchDog), activeCustomerPredicate, activeDogPredicate,
@@ -76,11 +87,15 @@ public class ModelManager implements Model {
         activeCustomerPredicate = state.customerPredicate();
         activeDogPredicate = state.dogPredicate();
         activeActivityPredicate = state.activityPredicate();
+        // @@author XanderGoh
         enrolmentDogPredicate = state.enrolmentDogPredicate();
+        // @@author
         logger.fine("Restored " + watchDog.getCustomerList().size() + " customers, "
                 + watchDog.getDogList().size() + " dogs and "
                 + watchDog.getActivityList().size() + " activities.");
+        // @@author XanderGoh
         signalEnrolmentContextChanged();
+        // @@author
         filteredCustomers.setPredicate(null);
         filteredDogs.setPredicate(null);
         filteredActivities.setPredicate(null);
@@ -88,6 +103,7 @@ public class ModelManager implements Model {
         // Some restored predicates read another filtered list; re-evaluate after their source is installed.
         refreshDisplayedRecords();
     }
+    //@@author
 
     //=========== UserPrefs ==================================================================================
 
@@ -124,20 +140,26 @@ public class ModelManager implements Model {
     public Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end,
             Recurrence recurrence) {
         Activity activity = watchDog.addActivity(name, date, start, end, recurrence);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
         return activity;
     }
 
     @Override
     public void setActivity(Activity target, Activity editedActivity) {
         watchDog.setActivity(target, editedActivity);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
     }
 
     @Override
     public void deleteActivity(Activity target) {
         watchDog.removeActivity(target);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
     }
 
     @Override
@@ -150,13 +172,17 @@ public class ModelManager implements Model {
     @Override
     public void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
         watchDog.enrolDogs(activityId, date, dogIds);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
     }
 
     @Override
     public void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
         watchDog.unenrolDogs(activityId, date, dogIds);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
     }
 
     @Override
@@ -174,19 +200,25 @@ public class ModelManager implements Model {
     @Override
     public void linkDogs(int customerId, List<Integer> dogIds) throws LinkException {
         watchDog.linkDogs(customerId, dogIds);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
     }
 
     @Override
     public void unlinkDogs(List<Integer> dogIds) throws UnlinkException {
         watchDog.unlinkDogs(dogIds);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
     }
 
     @Override
     public void unlinkCustomerDogs(int customerId) throws UnlinkException {
         watchDog.unlinkCustomerDogs(customerId);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
     }
 
     @Override
@@ -194,22 +226,28 @@ public class ModelManager implements Model {
         return watchDog.hasDog(dog);
     }
 
+    // @@author XanderGoh
     @Override
     public void deleteDog(Dog dog) {
         watchDog.removeDog(dog);
         refreshDisplayedRecords();
     }
+    // @@author
 
     @Override
     public void setDog(Dog target, Dog editedDog) {
         watchDog.setDog(target, editedDog);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
     }
 
     @Override
     public Dog addDog(Dog dog) {
         Dog addedDog = watchDog.addDog(dog);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
         return addedDog;
     }
 
@@ -220,16 +258,22 @@ public class ModelManager implements Model {
         return watchDog.hasCustomer(customer);
     }
 
+    //@@author its-shoutime
     @Override
     public void deleteCustomer(Customer target) {
         watchDog.removeCustomer(target);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
     }
+    //@@author
 
     @Override
     public void addCustomer(Customer customer) {
         watchDog.addCustomer(customer);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
     }
 
     @Override
@@ -237,15 +281,19 @@ public class ModelManager implements Model {
         requireAllNonNull(target, editedCustomer);
 
         watchDog.setCustomer(target, editedCustomer);
+        // @@author XanderGoh
         refreshDisplayedRecords();
+        // @@author
     }
 
     //=========== Filtered Record List Accessors =============================================================
 
+    // @@author XanderGoh
     @Override
     public ObservableList<Dog> getDogList() {
         return watchDog.getDogList();
     }
+    // @@author
 
     @Override
     public ObservableList<Dog> getFilteredDogList() {
@@ -255,10 +303,13 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredDogList(Predicate<Dog> predicate) {
         requireNonNull(predicate);
+        // @@author XanderGoh
         activeDogPredicate = predicate;
+        // @@author
         filteredDogs.setPredicate(predicate);
     }
 
+    //@@author its-shoutime
     @Override
     public ObservableList<Customer> getFilteredCustomerList() {
         return filteredCustomers;
@@ -267,9 +318,12 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredCustomerList(Predicate<Customer> predicate) {
         requireNonNull(predicate);
+        // @@author XanderGoh
         activeCustomerPredicate = predicate;
+        // @@author
         filteredCustomers.setPredicate(predicate);
     }
+    //@@author
 
     @Override
     public ObservableList<Activity> getFilteredActivityList() {
@@ -279,12 +333,17 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredActivityList(Predicate<Activity> predicate) {
         requireNonNull(predicate);
+        // @@author XanderGoh
         activeActivityPredicate = predicate;
+        // @@author
         filteredActivities.setPredicate(predicate);
+        // @@author XanderGoh
         enrolmentDogPredicate = null;
         signalEnrolmentContextChanged();
+        // @@author
     }
 
+    // @@author XanderGoh
     @Override
     public void setActivityEnrolmentDogPredicate(Predicate<Dog> predicate) {
         enrolmentDogPredicate = predicate;
@@ -342,6 +401,7 @@ public class ModelManager implements Model {
             filteredActivities.setPredicate(activeActivityPredicate);
         }
     }
+    // @@author
 
     @Override
     public boolean equals(Object other) {

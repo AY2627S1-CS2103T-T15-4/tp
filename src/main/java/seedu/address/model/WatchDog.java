@@ -63,7 +63,7 @@ public class WatchDog implements ReadOnlyWatchDog {
 
     /**
      * Resets the existing data of this {@code WatchDog} with {@code newData}.
-     * Rejects invalid ownership, duplicate customer or activity IDs, and invalid counters
+     * Rejects invalid ownership, duplicate customer or activity IDs, invalid counters, and dated bookings
      * before replacing lists.
      */
     public void resetData(ReadOnlyWatchDog newData) {
@@ -93,12 +93,26 @@ public class WatchDog implements ReadOnlyWatchDog {
                 ? minimumCustomerId : restoredNextCustomerId;
         validateNextCustomerId(nextRestoredCustomerId, minimumCustomerId);
 
+        validateRestoredRecords(restoredCustomers, restoredDogs, restored, restoredEnrolments);
         dogs.setDogs(restoredDogs);
         customers.setCustomers(restoredCustomers);
         nextActivityId = nextId;
         nextDogId = nextRestoredDogId;
         nextCustomerId = nextRestoredCustomerId;
         activities.restore(restored, restoredEnrolments);
+        assert activities.equals(restored) && enrolments.equals(restoredEnrolments)
+                : "Restoration must preserve the validated schedules and bookings.";
+        logger.fine("Restored " + restored.size() + " activities and " + restoredEnrolments.size() + " enrolments.");
+    }
+
+    /** Reuses storage validation in an isolated book so a rejected snapshot cannot partially replace live data. */
+    private static void validateRestoredRecords(List<Customer> customers, List<Dog> dogs,
+            List<Activity> activities, List<Enrolment> enrolments) {
+        WatchDog candidate = new WatchDog();
+        candidate.customers.setCustomers(customers);
+        candidate.dogs.setDogs(dogs);
+        candidate.activities.addAll(activities);
+        enrolments.forEach(candidate::addEnrolmentFromStorage);
     }
 
     /** Delays activity notifications until the corresponding enrolments have also been restored. */
@@ -106,6 +120,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         private final List<Activity> values = new ArrayList<>();
 
         /** Replaces schedules and publishes one coherent change after enrolments have been restored. */
+        // @@author Kenneth-Chia
         private void restore(List<Activity> restored, List<Enrolment> restoredEnrolments) {
             beginChange();
             try {
@@ -140,6 +155,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         protected Activity doRemove(int index) {
             return values.remove(index);
         }
+        // @@author
     }
 
     /** Replaces customers only if every existing dog owner remains present. */
@@ -149,6 +165,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         this.customers.setCustomers(replacements);
     }
 
+    // @@author Kenneth-Chia
     /**
      * Creates an empty schedule with a fresh persistent ID. Identical details are allowed.
      * Validates before changing records or consuming an ID.
@@ -162,8 +179,11 @@ public class WatchDog implements ReadOnlyWatchDog {
         Activity activity = new Activity((int) nextActivityId, name, date, start, end, recurrence);
         nextActivityId++;
         activities.add(activity);
+        assert nextActivityId > activity.getId() : "The next activity ID must exceed the allocated ID.";
+        logger.fine("Created activity ID " + activity.getId() + ".");
         return activity;
     }
+    // @@author
 
     /** Replaces an activity only when it has no enrolments, after checking for schedule conflicts. */
     public void setActivity(Activity target, Activity editedActivity) {
@@ -220,6 +240,7 @@ public class WatchDog implements ReadOnlyWatchDog {
                 && second.getStartTime().isBefore(first.getEndTime());
     }
 
+    // @@author Kenneth-Chia
     /** Restores a schedule with its persisted ID; rejects duplicate identities. */
     public void addActivityFromStorage(Activity activity) {
         requireNonNull(activity);
@@ -248,6 +269,7 @@ public class WatchDog implements ReadOnlyWatchDog {
     public ObservableList<Activity> getActivityList() {
         return activityView;
     }
+    // @@author
 
     /** Removes an existing activity and its enrolments without reusing its ID. */
     public void removeActivity(Activity activity) {
@@ -293,6 +315,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         customers.setCustomer(target, editedCustomer);
     }
 
+    //@@author its-shoutime
     /**
      * Removes {@code key} and clears ownership of that customer's dogs without deleting them.
      * {@code key} must exist in WatchDog. Other customers and dogs are unaffected.
@@ -304,6 +327,7 @@ public class WatchDog implements ReadOnlyWatchDog {
                         ? dog.withoutOwner() : dog)
                 .toList());
     }
+    //@@author
 
     /**
      * Enrols a batch of existing dogs identified by distinct positive IDs into one occurrence of an existing
@@ -394,6 +418,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
         // All endpoints were validated; a mismatch here means the internal update is defective.
         assert hasExpectedOwners(dogIds, customerId) : "Linked dogs must exist and belong to the requested customer.";
+        logger.fine("Linked " + dogIds.size() + " dogs to customer ID " + customerId + ".");
     }
 
     /**
@@ -424,6 +449,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         }
         dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
         assert hasExpectedOwners(dogIds, null) : "Unlinked dogs must exist and have no owner.";
+        logger.fine("Unlinked " + dogIds.size() + " dogs from their owners.");
     }
 
     /** Checks stored endpoints as well as ownership, so missing dogs cannot satisfy the postcondition. */
@@ -556,8 +582,10 @@ public class WatchDog implements ReadOnlyWatchDog {
      *
      * @throws IllegalArgumentException If no stored dog has the same persistent ID.
      */
+    // @@author XanderGoh
     public void removeDog(Dog dog) {
         requireNonNull(dog);
+        // @@author
         Dog storedDog = getDogList().stream()
                 .filter(candidate -> candidate.isSameDog(dog))
                 .findFirst()
@@ -566,8 +594,12 @@ public class WatchDog implements ReadOnlyWatchDog {
         long removedEnrolmentCount = enrolments.stream().filter(enrolment -> enrolment.getDogId() == dogId).count();
         enrolments.removeIf(enrolment -> enrolment.getDogId() == dogId);
         dogs.remove(storedDog);
-        assert enrolments.stream().noneMatch(enrolment -> enrolment.getDogId() == dogId);
-        assert getDogList().stream().noneMatch(remainingDog -> remainingDog.isSameDog(storedDog));
+        // @@author XanderGoh
+        assert enrolments.stream().noneMatch(enrolment -> enrolment.getDogId() == dogId)
+                : "Deleted dog must have no remaining enrolments.";
+        assert getDogList().stream().noneMatch(remainingDog -> remainingDog.isSameDog(storedDog))
+                : "Deleted dog must no longer be stored.";
+        // @@author
         logger.fine("Deleted dog ID " + dogId + " and removed " + removedEnrolmentCount + " enrolments.");
     }
 
@@ -587,15 +619,19 @@ public class WatchDog implements ReadOnlyWatchDog {
                 .toString();
     }
 
+    // @@author XanderGoh
     @Override
     public ObservableList<Dog> getDogList() {
         return dogs.asUnmodifiableObservableList();
     }
+    // @@author
 
+    //@@author its-shoutime
     @Override
     public ObservableList<Customer> getCustomerList() {
         return customers.asUnmodifiableObservableList();
     }
+    //@@author
 
     @Override
     public ObservableList<Enrolment> getEnrolmentList() {

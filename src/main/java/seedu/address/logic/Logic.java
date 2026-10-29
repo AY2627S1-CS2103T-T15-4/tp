@@ -30,8 +30,10 @@ public interface Logic {
      */
     CommandResult execute(String commandText) throws CommandException, ParseException;
 
+    //@@author its-shoutime
     /** Returns an unmodifiable view of the filtered list of customers */
     ObservableList<Customer> getFilteredCustomerList();
+    //@@author
 
     /** Returns an unmodifiable observable view of filtered dogs. */
     ObservableList<Dog> getFilteredDogList();
@@ -52,11 +54,15 @@ public interface Logic {
     /** Returns an unmodifiable observable view of filtered activities. */
     ObservableList<Activity> getFilteredActivityList();
 
+    // @@author XanderGoh
     /** Returns the current search-specific enrolment summary for an activity. */
     String getActivityEnrolmentSummary(Activity activity);
+    // @@author
 
+    // @@author XanderGoh
     /** Returns an observable signal for changes to the activity-card enrolment context. */
     Observable getActivityEnrolmentContextChanges();
+    // @@author
 
     /**
      * Returns the user prefs' GUI settings.

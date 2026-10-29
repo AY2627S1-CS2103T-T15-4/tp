@@ -1,5 +1,7 @@
+// @@author XanderGoh
 package seedu.address.logic.parser;
 
+import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 
 import java.util.LinkedHashSet;
@@ -19,6 +21,7 @@ public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand
 
     @Override
     public SearchCustomerCommand parse(String args) throws ParseException {
+        requireNonNull(args);
         String input = args.trim();
         if (input.isEmpty()) {
             throw invalidFormat();

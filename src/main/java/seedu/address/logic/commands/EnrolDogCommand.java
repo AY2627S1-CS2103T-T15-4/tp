@@ -35,13 +35,13 @@ public class EnrolDogCommand extends Command {
      * @throws NullPointerException If {@code dogIds} is null.
      */
     public EnrolDogCommand(int activityId, LocalDate date, List<Integer> dogIds) {
-        this.dogIds = List.copyOf(dogIds);
+        requireNonNull(dogIds);
         checkArgument(activityId >= 1 && date != null && !dogIds.isEmpty()
-                && dogIds.stream().allMatch(id -> id >= 1)
-
+                && dogIds.stream().allMatch(id -> id != null && id >= 1)
                 && new HashSet<>(dogIds).size() == dogIds.size(), "Invalid enrol IDs.");
         this.activityId = activityId;
         this.date = date;
+        this.dogIds = List.copyOf(dogIds);
     }
 
     @Override

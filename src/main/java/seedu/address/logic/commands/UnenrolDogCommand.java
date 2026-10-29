@@ -34,8 +34,9 @@ public class UnenrolDogCommand extends Command {
      * @throws NullPointerException If {@code dogIds} is null.
      */
     public UnenrolDogCommand(int activityId, LocalDate date, List<Integer> dogIds) {
+        requireNonNull(dogIds);
         checkArgument(activityId >= 1 && date != null && !dogIds.isEmpty()
-                && dogIds.stream().allMatch(id -> id >= 1)
+                && dogIds.stream().allMatch(id -> id != null && id >= 1)
                 && new HashSet<>(dogIds).size() == dogIds.size(), "Invalid unenrol IDs.");
         this.activityId = activityId;
         this.date = date;

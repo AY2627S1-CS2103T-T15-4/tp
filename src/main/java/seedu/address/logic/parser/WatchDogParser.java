@@ -15,20 +15,26 @@ import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.DeleteActivityCommand;
 import seedu.address.logic.commands.DeleteCustomerCommand;
+// @@author XanderGoh
 import seedu.address.logic.commands.DeleteDogCommand;
+// @@author
 import seedu.address.logic.commands.EditActivityCommand;
 import seedu.address.logic.commands.EditCustomerCommand;
 import seedu.address.logic.commands.EditDogCommand;
 import seedu.address.logic.commands.EnrolDogCommand;
 import seedu.address.logic.commands.ExitCommand;
+// @@author XanderGoh
 import seedu.address.logic.commands.FilterUnlinkedCommand;
+// @@author
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.LinkCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
+// @@author XanderGoh
 import seedu.address.logic.commands.SearchActivityCommand;
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.commands.SearchDogCommand;
+// @@author
 import seedu.address.logic.commands.SummaryCommand;
 import seedu.address.logic.commands.TodayCommand;
 import seedu.address.logic.commands.UndoCommand;
@@ -70,15 +76,22 @@ public class WatchDogParser {
 
         return switch (commandWord) {
             case AddActivityCommand.COMMAND_WORD -> new AddActivityCommandParser().parse(arguments);
+            // @@author XanderGoh
             case SearchActivityCommand.COMMAND_WORD -> new SearchActivityCommandParser().parse(arguments);
+            // @@author
             case AddCustomerCommand.COMMAND_WORD -> new AddCustomerCommandParser().parse(arguments);
             case AddDogCommand.COMMAND_WORD -> new AddDogCommandParser().parse(arguments);
             case DeleteActivityCommand.COMMAND_WORD -> new DeleteActivityCommandParser().parse(arguments);
+            // @@author XanderGoh
             case DeleteDogCommand.COMMAND_WORD -> new DeleteDogCommandParser().parse(arguments);
+            // @@author
+            //@@author its-shoutime
             case DeleteCustomerCommand.COMMAND_WORD -> new DeleteCustomerCommandParser().parse(arguments);
+            //@@author
             case EditActivityCommand.COMMAND_WORD -> new EditActivityCommandParser().parse(arguments);
             case EditCustomerCommand.COMMAND_WORD -> new EditCustomerCommandParser().parse(arguments);
             case EditDogCommand.COMMAND_WORD -> new EditDogCommandParser().parse(arguments);
+            // @@author XanderGoh
             case SearchDogCommand.COMMAND_WORD -> new SearchDogCommandParser().parse(arguments);
             case SearchCustomerCommand.COMMAND_WORD -> new SearchCustomerCommandParser().parse(arguments);
             case FilterUnlinkedCommand.COMMAND_WORD -> new FilterUnlinkedCommandParser().parse(arguments);
@@ -109,6 +122,7 @@ public class WatchDogParser {
                 yield new ResetDisplayCommand();
             }
             case ExitCommand.COMMAND_WORD -> new ExitCommand();
+            //@@author its-shoutime
             case HelpCommand.COMMAND_WORD -> new HelpCommandParser().parse(arguments);
             case RedoCommand.COMMAND_WORD -> {
                 if (!arguments.isBlank()) {
@@ -124,6 +138,7 @@ public class WatchDogParser {
                 }
                 yield new UndoCommand();
             }
+            //@@author
             default -> {
                 logger.finer("This user input caused a ParseException: " + userInput);
                 throw new ParseException(MESSAGE_UNKNOWN_COMMAND);

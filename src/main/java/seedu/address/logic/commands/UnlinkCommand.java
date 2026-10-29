@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
@@ -31,9 +32,9 @@ public class UnlinkCommand extends Command {
     /** Creates an unlink request containing distinct positive dog IDs. */
     public UnlinkCommand(List<Integer> dogIds) {
         this.dogIds = List.copyOf(dogIds);
-        checkArgument(!dogIds.isEmpty()
-                && dogIds.stream().allMatch(id -> id >= 1)
-                && new HashSet<>(dogIds).size() == dogIds.size(), "Invalid unlink IDs.");
+        checkArgument(!this.dogIds.isEmpty()
+                && this.dogIds.stream().allMatch(id -> id >= 1)
+                && new HashSet<>(this.dogIds).size() == this.dogIds.size(), "Invalid unlink IDs.");
         this.customerId = null;
     }
 

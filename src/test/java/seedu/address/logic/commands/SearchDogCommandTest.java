@@ -1,3 +1,4 @@
+// @@author XanderGoh
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +42,7 @@ public class SearchDogCommandTest {
             assertThrows(IllegalArgumentException.class, () -> new SearchDogCommand(null, null, null, id));
         }
         for (int id : new int[]{999, Integer.MAX_VALUE}) {
-            assertThrows(CommandException.class, "Error in searching dogs:\nPlease enter a valid dog index", () ->
+            assertThrows(CommandException.class, "Error in searching dogs:\nPlease enter a valid dog ID", () ->
                     new SearchDogCommand(null, null, null, id).execute(model));
             assertEquals(customers, model.getFilteredCustomerList());
             assertEquals(dogs, model.getFilteredDogList());

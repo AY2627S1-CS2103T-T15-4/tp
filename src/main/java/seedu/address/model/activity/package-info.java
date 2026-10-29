@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 /**
  * Activity schedule domain objects, independent of parsing, persistence, and presentation.
  *

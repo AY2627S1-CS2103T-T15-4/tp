@@ -1,3 +1,4 @@
+// @@author XanderGoh
 package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,7 +31,7 @@ public class SearchActivityCommandParserTest {
     public void parse_invalidActivityId_usesSpecificError() {
         for (String value : new String[]{"0", "-1", "abc", "2147483648", "-2147483649", "1 2"}) {
             assertThrows(ParseException.class,
-                    "Error in searching activities:\nPlease enter a valid activity index", () ->
+                    "Error in searching activities:\nPlease enter a valid activity ID", () ->
                     parser.parse("i/" + value));
         }
     }

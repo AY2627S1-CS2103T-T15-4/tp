@@ -1,4 +1,7 @@
+// @@author XanderGoh
 package seedu.address.logic.parser;
+
+import static java.util.Objects.requireNonNull;
 
 import seedu.address.logic.commands.DeleteDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -11,6 +14,7 @@ public class DeleteDogCommandParser implements Parser<DeleteDogCommand> {
 
     @Override
     public DeleteDogCommand parse(String args) throws ParseException {
+        requireNonNull(args);
         String trimmedArgs = args.trim();
         try {
             int dogId = Integer.parseInt(trimmedArgs);

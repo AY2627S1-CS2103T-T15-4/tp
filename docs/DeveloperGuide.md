@@ -14,6 +14,7 @@
 ## **Acknowledgements**
 
 * WatchDog adapts the architecture, utilities and documentation of [AddressBook Level-3](https://github.com/se-edu/addressbook-level3).
+* Libraries used: [JavaFX](https://openjfx.io/), [Jackson](https://github.com/FasterXML/jackson), [JUnit5](https://github.com/junit-team/junit5)
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -25,10 +26,12 @@ Refer to the guide [_Setting up and getting started_](SettingUp.md).
 
 ## **Design**
 
+<!-- @@author Kenneth-Chia -->
 The diagrams below describe the implemented design. Class diagrams are partial views: they omit
 unrelated members and utility classes. Solid arrows show navigable associations, dashed arrows show
 dependencies, and hollow triangles point to a superclass or implemented interface. Labels explain
 the purpose of a dependency where needed.
+<!-- @@author -->
 
 ### Persistent identities
 
@@ -49,10 +52,12 @@ After successful link or unlink publication, an internal assertion checks that e
 still exists and has the intended owner, or no owner for unlink. These checks do not mutate records or
 replace the ordinary validation of command input.
 
+<!-- @@author Kenneth-Chia -->
 Each immutable `Dog` stores an optional owner customer ID. This is the single source of truth;
 customers do not store a duplicate dog-ID list. A dog may be unlinked or have one owner, while a customer
 may own any number of dogs. Linking an already-owned dog is rejected, including links to the same owner.
 Dog equality includes ownership, while identity remains the persistent dog ID.
+<!-- @@author -->
 
 `UnlinkCommandParser` accepts either `c/CUSTOMER_ID` or `d/DOG_ID [DOG_ID]...` with distinct,
 whitespace-separated dog IDs in one field; repeated dog prefixes and mixed prefixes
@@ -73,7 +78,8 @@ as well as visible customers, so these IDs remain accurate when dog cards are fi
 
 `JsonAdaptedDog` persists `ownerId`. A missing or null field means unlinked, preserving compatibility
 with older files. Negative owner IDs and references to missing customers are rejected on load;
-customers are restored before dogs. Copies of WatchDog retain ownership through immutable dogs.
+owner IDs must be integer JSON numbers, so fractions and numeric strings cannot silently change ownership.
+Customers are restored before dogs. Copies of WatchDog retain ownership through immutable dogs.
 The shared model boundaries also reject dangling owner IDs: `setDog` validates the replacement,
 `setCustomers` checks that existing owners remain present, and `resetData` validates ownership,
 customer-ID uniqueness, and identity counters against snapshots of the incoming data before changing
@@ -92,6 +98,7 @@ the dogs attending it while distinguishing occurrences of recurring activities.
 It also allows dogs to be enrolled or unenrolled independently without modifying the activity's
 schedule or storing duplicate dog objects inside `Activity`.
 
+<!-- @@author Kenneth-Chia -->
 The conceptual class diagram below summarises these domain relationships. Each enrolment belongs
 to one dog and one activity schedule, with its date identifying the occurrence. A dog can have at most
 one owner, and each dog or activity can have many dated enrolments.
@@ -101,6 +108,7 @@ one owner, and each dog or activity can have many dated enrolments.
 These lines describe domain relationships, rather than Java object references. In the implementation,
 `Dog` stores `ownerId`, and `Enrolment` stores `dogId`, `activityId`, and `date`. The model resolves these
 IDs against the complete lists. The model diagrams below show that storage structure separately.
+<!-- @@author -->
 
 ### Architecture
 
@@ -182,6 +190,7 @@ The `UI` component,
 * keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
 * depends on some classes in the `Model` component because it displays `Customer` and `Dog` objects from the model.
 
+<!-- @@author Kenneth-Chia -->
 The general activity panel shows distinct dog IDs booked today or later, alongside search-specific
 per-dog enrolment dates when a search context supplies them. The Today panel uses all schedules and
 shows only schedules and bookings on the current date. `ActivityBookingSummary` formats these booking
@@ -191,6 +200,7 @@ There is no midnight scheduler; the date is re-evaluated on the next refresh.
 
 The UI diagram omits the common `UiPart` superclass, JavaFX internals, and card interaction helpers
 to focus on panels, card creation, and booking summaries.
+<!-- @@author -->
 
 ### Logic component
 
@@ -225,9 +235,11 @@ How the parsing works:
 * For commands requiring field parsing, `WatchDogParser` creates the appropriate parser. The diagram uses `AddDogCommandParser` as a representative example: it tokenises the arguments, validates values with parsing utilities, and creates an `AddDogCommand` containing a dog without an allocated persistent ID.
 * Concrete command parsers implement `Parser` and return command objects. The diagram omits the other parsers; some commands, such as `summary`, are constructed directly by `WatchDogParser` after checking their arguments.
 
+<!--@@author its-shoutime-->
 `help [COMMAND]` is parsed by `HelpCommandParser`, which looks up normalized, possibly multiword
 topics in `CommandHelp` and creates a `HelpCommand`. Bare `help` opens the help window; topic help
 returns command guidance through normal result feedback. Both forms preserve undo/redo history.
+<!--@@author-->
 
 ### Model component
 **API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/blob/master/src/main/java/seedu/address/model/Model.java)
@@ -267,10 +279,12 @@ commands (`add`, `edit`, `delete INDEX` and `find`), person storage adapters and
 have been removed. Shared components such as `WatchDog`, preferences, parsing utilities,
 help, `clear` and JSON storage remain in use.
 
+<!-- @@author Kenneth-Chia -->
 Existing JSON files may contain a legacy `persons` field. It is ignored on loading and omitted
 on the next save; its records are not converted to customers. Customer/dog records, ownership
 links and both next-ID counters are preserved. A file containing only legacy persons loads
 as an empty WatchDog book. No startup sample person records are created.
+<!-- @@author -->
 
 ### Common classes
 
@@ -280,10 +294,12 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 ## **Implementation**
 
+<!-- @@author Kenneth-Chia -->
 Feature sequence diagrams show successful command execution through the `Model` API, with
 `ModelManager` as the concrete participant. Parsing and saving follow the shared flows above.
 Model validation and list updates are summarised in notes; their internal calls and exception
 paths are omitted. The summary query is a separate view of the model's internal ID resolution.
+<!-- @@author -->
 
 ### Adding dogs
 
@@ -366,6 +382,8 @@ The former select dog and select customer implementations are retained under
 unused/@its-shoutime/ for authorship reference only. They are not routed by the active
 WatchDogParser and are not supported by the final product.
 
+<!--@@author-->
+<!--@@author its-shoutime-->
 ### Undo and redo
 
 `WatchDogParser` accepts `undo` and `redo` only without arguments. `LogicManager` handles these
@@ -404,6 +422,7 @@ invalidated history, `clear`, failed commands, dependent filters, and save failu
 `ModelManagerTest` checks restoration of data, ID counters, relationships, filters, and selection, while
 `WatchDogParserTest` checks argument validation.
 
+<!--@@author-->
 ### Daycare summary
 
 `WatchDogParser` accepts `summary` with blank arguments only and constructs `SummaryCommand`.
@@ -411,6 +430,7 @@ At execution, the command captures `LocalDate.now(clock)` once and uses that dat
 and the feedback date. The default clock uses the system's local zone; tests inject a clock.
 Counts use the full model lists, so filters and dog/customer selection remain unchanged.
 
+<!-- @@author Kenneth-Chia -->
 Each stored activity schedule contributes once to the total. A schedule contributes to the
 from-today-onwards count when `nextOccurrenceOnOrAfter(today)` is present, and to today's activity
 count when `occursOn(today)` is true. Empty activities and sessions that ended earlier today are
@@ -427,12 +447,14 @@ and why hidden dogs still contribute to the summary. Stream operations are expla
 activity schedule counts and feedback formatting are omitted.
 
 <puml src="diagrams/DogsEnrolledOnSequenceDiagram.puml" alt="Resolving distinct dogs enrolled on the summary date from stored IDs" />
+<!-- @@author -->
 
 Feedback follows the existing `CommandResult` and `ResultDisplay` path. No records, filters or
 selection are mutated, and no storage schema changes are needed. `LogicManager` still attempts
 to save after successful execution, preserving its existing save-error handling. Summary neither
 creates an undo entry nor discards redo history.
 
+<!-- @@author Kenneth-Chia -->
 ### Activity creation and storage
 
 The following partial class diagram expands the activity fields and separately stored enrolments.
@@ -441,6 +463,7 @@ Some parameter and return details are omitted. `nextOccurrenceOnOrAfter(date)` r
 `Optional<LocalDate>`, containing the next occurrence when one exists.
 
 <puml src="diagrams/ActivityClassDiagram.puml" alt="Activity schedule classes and model integration" />
+<!-- @@author -->
 
 `WatchDogParser` routes `addactivity` to `AddActivityCommandParser`. The parser requires
 `n/`, `date/`, `start/`, `end/`, and `r/` exactly once, rejects unknown alphabetic prefixes,
@@ -465,14 +488,20 @@ Activity IDs and the counter must be integer JSON numbers; fractions, numeric st
 out-of-range numbers are rejected before conversion. Reset restores identity counters before replacing
 activities and enrolments. An internal activity list batches activity notifications until enrolments
 are restored, so listeners of either list see the restored schedules, enrolments and counters.
+Before publishing a reset, an isolated candidate validates incoming customer and dog identities and
+reuses storage enrolment validation for references, occurrence dates, duplicate bookings and overlaps.
+Rejected snapshots leave the existing records, counters and observable lists unchanged. Historical
+bookings remain valid during restoration; the restriction to today or later applies to new enrolments.
 `LogicManager` uses its existing save path after successful command execution.
 
+<!-- @@author Kenneth-Chia -->
 The following sequence diagram shows successful execution of
 `addactivity n/Training date/2026-10-20 start/10:00 end/11:00 r/weekly`.
 The command uses the `Model` interface, implemented by `ModelManager`. The diagram focuses on the
 identified schedule returned by that API; parsing and persistence follow the shared Logic flow.
 
 <puml src="diagrams/AddActivitySequenceDiagram.puml" alt="Creating an activity schedule through the model API" />
+<!-- @@author -->
 
 ### Deleting an activity
 
@@ -681,15 +710,25 @@ unenrolment, and dog deletion assert that the expected dated records are present
 mutation. The Gradle `run` and `test` tasks enable assertions so these checks are active during development
 and automated testing.
 
+<!-- @@author Kenneth-Chia -->
+Customer search commands and predicates copy their query dog IDs, preventing a caller from changing an
+existing query through its original set. The predicate retains the live stored-dog view so later ownership
+changes still refresh the results. Restoration asserts that validated schedules and bookings are preserved.
+Recurrence and summary tests check date boundaries and schedule counts. Their `FINE`
+diagnostics contain counts and dates rather than customer contacts.
+<!-- @@author -->
+
 `LogicManager` records each command. `WatchDog` logs successful enrolment changes and dog deletion at
 `FINE`, including the number of enrolment records removed. An invalid enrolment restored from storage is
 logged at `WARNING` with its IDs, date, and validation reason before the load error is propagated. Expected
 user validation failures are returned through command feedback rather than logged as warnings, avoiding
 misleading error logs for routine input mistakes.
 
+<!-- @@author Kenneth-Chia -->
 `AddActivityCommandParserTest`, `AddActivityCommandTest`, `ActivityIntegrationTest` and
 `ActivityStorageTest` cover parser failures, unchanged state, observable access, identity boundaries,
 all recurrence modes, old files and command-to-disk round trips using temporary files.
+<!-- @@author -->
 
 ### Search commands
 
@@ -1191,6 +1230,7 @@ Confirmation ignores letter case and surrounding whitespace; active filters rema
 
 NFR-01. **Platform compatibility**: Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
 
+<!-- @@author Kenneth-Chia -->
 NFR-02. **Offline operation**: After installation and setup, all core dog and customer management operations shall work without an internet connection.
 
 NFR-03. **Performance**: With up to 500 dog records and 500 customer records, WatchDog shall display the result of an add, edit, delete, list or search command within 2 seconds of submission on the agreed test laptop.
@@ -1206,6 +1246,7 @@ NFR-07. **Error clarity**: For invalid command syntax, missing required fields o
 NFR-08. **Robustness**: An invalid command or an input that fails validation shall not terminate the application or change existing records. The application shall remain ready to accept the next command.
 
 NFR-09. **Data persistence**: Following successful data changes and a normal application exit, WatchDog shall restore the updated dog records, customer records and their associations when reopened.
+<!-- @@author -->
 
 NFR-10. **Privacy**: WatchDog shall store dog and customer records locally and shall not transmit their contents to external services.
 
@@ -1245,16 +1286,17 @@ testers are expected to do more *exploratory* testing.
 
    1. Download the JAR file and copy it into an empty folder.
 
-   1. Double-click the JAR file.<br>
+   1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar WatchDog.jar`.<br>
       Expected: The GUI opens with sample customers. The window size may not be optimal.
 
 1. Saving window preferences
 
    1. Resize the window to an optimal size. Move the window to a different location. Close the window.
 
-   1. Relaunch the app by double-clicking the JAR file.<br>
+   1. Relaunch the app from the same folder using `java -jar WatchDog.jar`.<br>
        Expected: The most recent window size and location are retained.
 
+<!-- @@author Kenneth-Chia -->
 ### Daycare summary
 
 Use a disposable data folder for this test. Substitute the computer's current local date for
@@ -1274,10 +1316,12 @@ Use a disposable data folder for this test. Substitute the computer's current lo
    the customer and all five schedules remain counted.
 1. At the minimum window size and normal/larger display scaling, verify that all three feedback
    lines can be read, scrolling within the result area if needed. Repeat with larger counts.
+<!-- @@author -->
 
 Also verify mutation → undo → summary → redo: summary preserves the redo operation and does not
 appear as an undoable mutation.
 
+<!--@@author its-shoutime-->
 ### Undo and redo
 
 1. Add a dog, run `help`, then `undo`. The dog disappears; `help` is not the undone command.
@@ -1290,6 +1334,7 @@ appear as an undoable mutation.
    the dog returns and saves. Repeat for a failed `redo`, a new add after `undo`, and `clear`.
    A failed `clear` leaves memory empty and neither history operation available.
 
+<!--@@author-->
 ### Adding and editing dogs
 
 1. Run `adddog n/O'Neil-Jr b/German-Shepherd s/medium`.
@@ -1435,10 +1480,12 @@ placeholders below with these fixture values. Refer to the UG for complete searc
 
 ### Help and clear confirmation
 
+<!--@@author its-shoutime-->
 1. Run `help adddog` and `help deletedog`. Expect guidance in the result area without executing either
    command or changing records or filters. Run `help summary today`; expect an error listing supported commands.
 1. Run `help`, minimize its window, and run `help` again. Expect the existing window to restore and focus.
    Repeat via the Help menu and `F1`.
+<!--@@author-->
 1. In a disposable dataset, add a dog, run `clear`, then enter `maybe`. Expect a Y/N prompt and no changes.
    Enter `reset` while confirmation is pending; expect another Y/N prompt rather than executing reset.
 1. Enter ` n ` to cancel. Expect records and filters unchanged; `undo` should still undo the dog addition.

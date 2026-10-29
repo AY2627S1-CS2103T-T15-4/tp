@@ -10,10 +10,12 @@ application {
     mainClass = 'seedu.address.Main'
 }
 
+//@@author its-shoutime
 run {
     enableAssertions = true
     jvmArgs '--enable-native-access=ALL-UNNAMED'
 }
+//@@author
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -31,11 +33,14 @@ checkstyle {
 
 test {
     useJUnitPlatform()
+    //@@author its-shoutime
     enableAssertions = true
+    //@@author
     jvmArgs '--enable-native-access=ALL-UNNAMED'
     finalizedBy jacocoTestReport
 }
 
+//@@author its-shoutime
 tasks.register('repositoryChecks', Exec) {
     description = 'Runs the text checks used by Linux CI.'
     commandLine 'sh', "${rootDir}/.github/run-checks.sh"
@@ -43,6 +48,7 @@ tasks.register('repositoryChecks', Exec) {
 }
 
 check.dependsOn tasks.named('repositoryChecks')
+//@@author
 
 task coverage(type: JacocoReport) {
     dependsOn test
