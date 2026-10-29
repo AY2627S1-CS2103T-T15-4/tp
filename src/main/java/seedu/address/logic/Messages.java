@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import seedu.address.logic.parser.Prefix;
+import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 
 /**
@@ -39,6 +40,21 @@ public class Messages {
                 .append(dog.getBreed())
                 .append("; Size: ")
                 .append(dog.getSize());
+        return builder.toString();
+    }
+
+    /** Formats the {@code customer} for display to the user. */
+    public static String format(Customer customer) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(customer.getId())
+                .append("; Name: ")
+                .append(customer.getName())
+                .append("; Phone: ")
+                .append(customer.getPhone())
+                .append("; Email: ")
+                .append(customer.getEmail())
+                .append("; Backup Contact: ")
+                .append(customer.getBackupContact());
         return builder.toString();
     }
 }

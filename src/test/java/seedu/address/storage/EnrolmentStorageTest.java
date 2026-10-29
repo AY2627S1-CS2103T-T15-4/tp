@@ -61,6 +61,8 @@ public class EnrolmentStorageTest {
         JsonAdaptedActivity activity = new JsonAdaptedActivity(1, "Walk", "2028-02-29",
                 "09:00", "10:00", "ONCE");
         JsonAdaptedDog dog = new JsonAdaptedDog(7, "Buddy", "Poodle", "Small", null);
+        assertThrows(IllegalValueException.class, () ->
+                new JsonAdaptedEnrolment(0, 7, LocalDate.of(2028, 2, 29)).toModelType());
         JsonAdaptedEnrolment valid = new JsonAdaptedEnrolment(1, 7, LocalDate.of(2028, 2, 29));
 
         assertThrows(IllegalValueException.class, () -> new JsonSerializableAddressBook(
@@ -88,7 +90,8 @@ public class EnrolmentStorageTest {
     }
 
     @Test
-    public void enrolment_negativeId_rejected() {
+    public void enrolment_invalidId_rejected() {
+        assertThrows(IllegalArgumentException.class, () -> new Enrolment(0, 7, LocalDate.of(2028, 2, 29)));
         assertThrows(IllegalArgumentException.class, () -> new Enrolment(-1, 7, LocalDate.of(2028, 2, 29)));
         assertThrows(IllegalArgumentException.class, () -> new Enrolment(1, -1, LocalDate.of(2028, 2, 29)));
     }

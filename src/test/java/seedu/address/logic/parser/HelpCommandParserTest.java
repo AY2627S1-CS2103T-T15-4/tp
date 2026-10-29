@@ -25,10 +25,10 @@ public class HelpCommandParserTest {
 
     @Test
     public void parse_supportedTopics_returnsFormattedHelpInResultSection() throws Exception {
-        String[] topics = {"adddog", "addcustomer", "editdog", "editcustomer", "list", "list dog",
-            "list customer", "delete", "delete dog", "delete customer", "link", "unlink", "searchd",
+        String[] topics = {"adddog", "addcustomer", "editdog", "editcustomer",
+            "delete", "delete dog", "delete customer", "link", "unlink", "searchd",
             "searchc", "filterun", "addactivity", "editactivity", "deleteactivity", "searcha", "enrol",
-            "unenrol", "today", "resetdisplay", "summary", "clear", "undo", "redo", "help", "exit"};
+            "unenrol", "today", "reset", "summary", "clear", "undo", "redo", "help", "exit"};
         for (String topic : topics) {
             CommandResult result = parser.parseCommand("help " + topic).execute(new ModelManager());
             assertFalse(result.isShowHelp(), topic);
@@ -48,7 +48,7 @@ public class HelpCommandParserTest {
     @Test
     public void parse_unknownTopicOrCommandArguments_throwsHelpfulError() {
         for (String topic : new String[] {"3", "unknown", "Summary", "summary today", "adddog n/Cookie",
-            "delete dog 1", "list cat", "search", "select"}) {
+            "delete dog 1", "list cat", "list", "list dog", "list customer", "resetdisplay", "search", "select"}) {
             assertThrows(ParseException.class, String.format(HelpCommandParser.MESSAGE_UNKNOWN_TOPIC, topic), () ->
                     parser.parseCommand("help " + topic));
         }

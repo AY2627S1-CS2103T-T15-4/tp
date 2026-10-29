@@ -24,9 +24,9 @@ public class TodayCommandTest {
     @Test
     public void execute_showsTodayActivitiesDogsAndOwners() throws Exception {
         ModelManager model = new ModelManager();
-        model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
+        model.addCustomer(new Customer(1, "Anna", "91234567", "anna@example.com", "98765432"));
         Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
-        model.linkDogs(0, List.of(dog.getId()));
+        model.linkDogs(1, List.of(dog.getId()));
         Activity today = model.addActivity(new ActivityName("Today's walk"), LocalDate.now(), LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
         Activity tomorrow = model.addActivity(new ActivityName("Tomorrow's walk"), LocalDate.now().plusDays(1),
@@ -57,9 +57,9 @@ public class TodayCommandTest {
     @Test
     public void execute_unrelatedEnrolments_doNotLeakIntoTodayDisplay() throws Exception {
         ModelManager model = new ModelManager();
-        model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
+        model.addCustomer(new Customer(1, "Anna", "91234567", "anna@example.com", "98765432"));
         Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
-        model.linkDogs(0, List.of(dog.getId()));
+        model.linkDogs(1, List.of(dog.getId()));
         Activity emptyToday = model.addActivity(new ActivityName("Empty today"), LocalDate.now(), LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
         Activity tomorrow = model.addActivity(new ActivityName("Tomorrow"), LocalDate.now().plusDays(1),

@@ -21,7 +21,7 @@ public class EnrolDogCommandParser implements Parser<EnrolDogCommand> {
     private static final String MESSAGE_INVALID_DATE =
             "Date must be a real calendar date in YYYY-MM-DD format.";
     private static final String MESSAGE_INVALID_IDS =
-            "Activity and dog IDs must be whole numbers from 0 to 2147483647.";
+            "Activity IDs must be whole numbers from 1 to 2147483647; dog IDs from 0 to 2147483647.";
 
     @Override
     public EnrolDogCommand parse(String args) throws ParseException {
@@ -41,7 +41,7 @@ public class EnrolDogCommandParser implements Parser<EnrolDogCommand> {
             for (String dogId : fields[1].split("\\s*,\\s*")) {
                 dogIds.add(Integer.parseInt(dogId));
             }
-            if (activityId < 0 || dogIds.stream().anyMatch(dogId -> dogId < 0)) {
+            if (activityId <= 0 || dogIds.stream().anyMatch(dogId -> dogId < 0)) {
                 throw new ParseException(MESSAGE_INVALID_IDS);
             }
             HashSet<Integer> seenDogIds = new HashSet<>();

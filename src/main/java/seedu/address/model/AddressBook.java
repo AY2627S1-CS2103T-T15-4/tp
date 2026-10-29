@@ -90,7 +90,7 @@ public class AddressBook implements ReadOnlyAddressBook {
                         .mapToInt(Dog::getId).max().orElse(-1) + 1;
 
         int restoredNextCustomerId = newData.getNextCustomerId();
-        this.nextCustomerId = restoredNextCustomerId >= 0
+        this.nextCustomerId = restoredNextCustomerId >= 1
                 ? restoredNextCustomerId
                 : customers.asUnmodifiableObservableList().stream()
                         .mapToInt(Customer::getId).max().orElse(0) + 1;
@@ -576,8 +576,8 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     private Activity getActivity(int activityId) throws EnrolException {
-        if (activityId < 0) {
-            throw new EnrolException("Activity IDs must be whole numbers from 0 to 2147483647.");
+        if (activityId <= 0) {
+            throw new EnrolException("Activity IDs must be whole numbers from 1 to 2147483647.");
         }
         return getActivityList().stream().filter(activity -> activity.getId() == activityId).findFirst()
                 .orElseThrow(() -> new EnrolException("Activity ID " + activityId + " does not exist."));

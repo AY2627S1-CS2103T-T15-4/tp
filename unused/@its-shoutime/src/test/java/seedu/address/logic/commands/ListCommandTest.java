@@ -1,3 +1,5 @@
+// Retired list-customer tests, preserved outside the active test source set.
+// Unannotated portions retain their original AB3 and mixed setup provenance.
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,6 +40,7 @@ public class ListCommandTest {
         expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
     }
 
+    //@@author its-shoutime-unused
     @Test
     public void execute_noCustomers_showsEmptyMessage() {
         Model emptyModel = new ModelManager();
@@ -69,6 +72,7 @@ public class ListCommandTest {
         assertEquals(List.of(), model.getFilteredCustomerList());
     }
 
+    //@@author
     @Test
     public void execute_listIsNotFiltered_showsSameList() {
         assertCommandSuccess(new ListCommand(), model, customersOnlyResult(), expectedModel);
@@ -80,6 +84,7 @@ public class ListCommandTest {
         assertCommandSuccess(new ListCommand(), model, customersOnlyResult(), expectedModel);
     }
 
+    //@@author its-shoutime-unused
     private CommandResult customersOnlyResult() {
         return new CommandResult(ListCommand.MESSAGE_SUCCESS);
     }

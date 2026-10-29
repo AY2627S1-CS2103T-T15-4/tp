@@ -8,10 +8,13 @@ import java.util.TreeSet;
 public final class CommandHelp {
     private static final String DOG_FIELDS = "Names and breeds must be nonblank letters, numbers or spaces. "
             + "Size is small, medium, large or giant (case-insensitive).";
-    private static final String CUSTOMER_FIELDS = "Phone and backup contact must contain exactly eight digits. "
-            + "Name must be nonblank and email must be valid.";
+    private static final String CUSTOMER_FIELDS = "Phone and backup contact must contain exactly eight digits; "
+            + "spaces between digits are removed. Names allow letters, numbers, spaces, hyphens and apostrophes; "
+            + "punctuation must be followed by a letter or number. Email must be valid. "
+            + "Primary phone and email must be unique across customers (email ignores case); "
+            + "backup contacts may be shared.";
     private static final String IDS = "Use persistent record IDs, including hidden records; "
-            + "IDs are integers from 0 to 2147483647.";
+            + "Dog and customer IDs range from 0 to 2147483647; activity IDs from 1 to 2147483647.";
     private static final String ACTIVITY_FIELDS = "Dates use YYYY-MM-DD and times use 24-hour HH:mm. "
             + "End must be later than start on the same day. Recurrence is lowercase once, daily or weekly.";
 
@@ -33,12 +36,6 @@ public final class CommandHelp {
                     "editcustomer 1 p/91234567 e/johndoe@example.com",
                     "Requires an existing customer and at least one field. Omitted fields are preserved. "
                             + IDS + " " + CUSTOMER_FIELDS),
-            entry("list", "list customer OR list dog", "list customer",
-                    "Specify a lowercase category to show all records of that category."),
-            entry("list customer", "list customer", "list customer",
-                    "Shows all customers. If empty, displays: There are no customers to display."),
-            entry(ListDogCommand.COMMAND_WORD, "list dog", "list dog",
-                    "Shows all dogs. If empty, displays: There are no dogs to display."),
             entry("delete", "delete dog DOG_ID OR delete customer CUSTOMER_ID", "delete dog 0",
                     "Specify the category and an existing persistent ID. " + IDS),
             entry(DeleteDogCommand.COMMAND_WORD, "delete dog DOG_ID", "delete dog 0",
@@ -46,14 +43,15 @@ public final class CommandHelp {
                             + "Other dogs, customers and activity schedules remain. " + IDS),
             entry(DeleteCustomerCommand.COMMAND_WORD, "delete customer CUSTOMER_ID", "delete customer 21",
                     "Deletes an existing customer and unlinks all their dogs without deleting the dogs. " + IDS),
-            entry(LinkCommand.COMMAND_WORD, "link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...", "link c/1 d/2 d/3",
-                    "Put exactly one c/ field first, then one or more distinct d/ fields. "
+            entry(LinkCommand.COMMAND_WORD, "link c/CUSTOMER_ID d/DOG_ID [DOG_ID]...", "link c/1 d/2 3",
+                    "Put exactly one c/ field first, then one d/ field with distinct IDs separated by whitespace. "
                             + "Prefixes are lowercase; no whitespace after the slash. "
                             + "All records must exist and every dog must be unowned. "
                             + "Any invalid record rejects the entire batch. Filters stay active. " + IDS),
-            entry(UnlinkCommand.COMMAND_WORD, "unlink d/DOG_ID [d/DOG_ID]... OR unlink c/CUSTOMER_ID",
-                    "unlink d/2 d/3",
-                    "Do not mix dog and customer prefixes. Dog IDs must be distinct, existing and owned; "
+            entry(UnlinkCommand.COMMAND_WORD, "unlink d/DOG_ID [DOG_ID]... OR unlink c/CUSTOMER_ID",
+                    "unlink d/2 3",
+                    "Use one d/ field with whitespace-separated IDs. Do not mix dog and customer prefixes. "
+                            + "Dog IDs must be distinct, existing and owned; "
                             + "the customer form requires an existing customer with linked dogs. "
                             + "The whole batch fails if any record is invalid. No records are deleted. " + IDS),
             entry(SearchDogCommand.COMMAND_WORD, "searchd [n/NAME] [b/BREED] [s/SIZE] [i/DOG_ID]",
@@ -107,7 +105,7 @@ public final class CommandHelp {
                     "Accepts no parameters. Shows activities occurring today, dogs enrolled in today's "
                             + "occurrences and their owners. Replaces all three displays; empty panels mean "
                             + "no matching records. Includes recurring activities."),
-            entry(ResetDisplayCommand.COMMAND_WORD, "resetdisplay", "resetdisplay",
+            entry(ResetDisplayCommand.COMMAND_WORD, "reset", "reset",
                     "Accepts no parameters. Shows all customers and dogs, and schedules with an occurrence "
                             + "today or later using the computer's local date. Hides past one-time activities. "
                             + "Changes the view only and can be undone."),

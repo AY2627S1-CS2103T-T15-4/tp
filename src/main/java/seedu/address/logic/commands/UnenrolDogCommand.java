@@ -23,9 +23,9 @@ public class UnenrolDogCommand extends Command {
     private final LocalDate date;
     private final List<Integer> dogIds;
 
-    /** Creates a command containing distinct nonnegative dog and activity IDs. */
+    /** Creates a command containing a positive activity ID and distinct nonnegative dog IDs. */
     public UnenrolDogCommand(int activityId, LocalDate date, List<Integer> dogIds) {
-        checkArgument(activityId >= 0 && date != null && !dogIds.isEmpty()
+        checkArgument(activityId > 0 && date != null && !dogIds.isEmpty()
                 && dogIds.stream().allMatch(id -> id >= 0)
                 && new HashSet<>(dogIds).size() == dogIds.size(), "Invalid unenrol IDs.");
         this.activityId = activityId;

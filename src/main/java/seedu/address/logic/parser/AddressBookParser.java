@@ -22,8 +22,6 @@ import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FilterUnlinkedCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.LinkCommand;
-import seedu.address.logic.commands.ListCommand;
-import seedu.address.logic.commands.ListDogCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.SearchActivityCommand;
@@ -45,7 +43,6 @@ public class AddressBookParser {
      * Used for initial separation of command word and args.
      */
     private static final Pattern BASIC_COMMAND_FORMAT = Pattern.compile("(?<commandWord>\\S+)(?<arguments>.*)");
-    private static final Pattern LIST_DOG_COMMAND_FORMAT = Pattern.compile("list\\s+dog");
     private static final Pattern DELETE_DOG_COMMAND_FORMAT = Pattern.compile(
             "delete\\s+dog(?=\\s|$)(?<arguments>.*)");
     private static final Pattern DELETE_CUSTOMER_COMMAND_FORMAT = Pattern.compile(
@@ -60,9 +57,6 @@ public class AddressBookParser {
      * @throws ParseException if the user input does not conform to the expected format
      */
     public Command parseCommand(String userInput) throws ParseException {
-        if (LIST_DOG_COMMAND_FORMAT.matcher(userInput.trim()).matches()) {
-            return new ListDogCommand();
-        }
         Matcher deleteDogMatcher = DELETE_DOG_COMMAND_FORMAT.matcher(userInput.trim());
         if (deleteDogMatcher.matches()) {
             return new DeleteDogCommandParser().parse(deleteDogMatcher.group("arguments"));
@@ -101,7 +95,6 @@ public class AddressBookParser {
             case UnlinkCommand.COMMAND_WORD -> new UnlinkCommandParser().parse(arguments);
             case EnrolDogCommand.COMMAND_WORD -> new EnrolDogCommandParser().parse(arguments);
             case UnenrolDogCommand.COMMAND_WORD -> new UnenrolDogCommandParser().parse(arguments);
-            case ListCommand.COMMAND_WORD -> new ListCommandParser().parse(arguments);
             case SummaryCommand.COMMAND_WORD -> {
                 if (!arguments.isBlank()) {
                     throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,

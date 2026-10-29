@@ -33,6 +33,7 @@ public class AddCustomerCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
 
+        CustomerContactValidator.validate(toAdd, model.getCustomerList(), null);
         model.addCustomer(toAdd);
         return new CommandResult(MESSAGE_SUCCESS);
     }

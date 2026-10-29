@@ -1,3 +1,4 @@
+//@@author lilosy
 package seedu.address.model.customer;
 
 import static seedu.address.commons.util.AppUtil.checkArgument;
@@ -9,7 +10,7 @@ import seedu.address.commons.util.ToStringBuilder;
 
 /**
  * Represents a customer in the daycare database.
- * Guarantees: details are present and not null, and immutable. Stored customers have nonnegative IDs.
+ * Guarantees: details are present and not null, and immutable. Stored customers have positive IDs.
  */
 public class Customer {
 
@@ -20,12 +21,13 @@ public class Customer {
     private final BackupContact backupContact;
 
     /**
-     * Every field must be present and not null. {@code id} must be nonnegative.
-     * Name, phone, email, and backup contact are stored as given, including internal spaces and letter case.
+     * Every field must be present and not null. {@code id} must be positive.
+     * Name and email values are preserved as supplied. Phone and backup contact values are normalized
+     * by their respective value objects, which remove spaces between digits before storage.
      */
     public Customer(int id, Name name, Phone phone, Email email, BackupContact backupContact) {
         requireAllNonNull(name, phone, email, backupContact);
-        checkArgument(id >= 0, "Customer id must be nonnegative.");
+        checkArgument(id >= 1, "Customer ID must be positive.");
         this.id = id;
         this.name = name;
         this.phone = phone;
@@ -49,7 +51,7 @@ public class Customer {
     /**
      * Constructs a customer from raw field values.
      *
-     * @param id A nonnegative customer identifier.
+     * @param id A positive customer identifier.
      * @param name A valid customer name.
      * @param phone A valid primary phone number.
      * @param email A valid email address.
@@ -88,7 +90,7 @@ public class Customer {
             return true;
         }
 
-        return otherCustomer != null && id >= 0 && otherCustomer.getId() == id;
+        return otherCustomer != null && id >= 1 && otherCustomer.getId() == id;
     }
 
     /**

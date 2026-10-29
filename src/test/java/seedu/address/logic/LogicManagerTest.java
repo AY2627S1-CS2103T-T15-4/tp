@@ -21,8 +21,8 @@ import javafx.collections.ObservableList;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteDogCommand;
-import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.RedoCommand;
+import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -72,8 +72,8 @@ public class LogicManagerTest {
 
     @Test
     public void execute_validCommand_success() throws Exception {
-        String listCommand = ListCommand.COMMAND_WORD + " customer";
-        assertCommandSuccess(listCommand, ListCommand.MESSAGE_EMPTY, model);
+        String resetCommand = ResetDisplayCommand.COMMAND_WORD;
+        assertCommandSuccess(resetCommand, String.format(ResetDisplayCommand.MESSAGE_SUCCESS, LocalDate.now()), model);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void getFilteredDogList_searchAndList_updateExistingObservableView() throws Exception {
+    public void getFilteredDogList_searchAndReset_updateExistingObservableView() throws Exception {
         Dog buddy = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
         Dog max = model.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("small")));
         ObservableList<Dog> displayedDogs = logic.getFilteredDogList();
@@ -139,7 +139,7 @@ public class LogicManagerTest {
         assertThrows(ParseException.class, () -> logic.execute("searchd i/-1"));
         assertEquals(List.of(buddy), displayedDogs);
 
-        logic.execute("list dog");
+        logic.execute("reset");
         assertEquals(List.of(buddy, max), displayedDogs);
         assertEquals(List.of(buddy, max), logic.getDogList());
     }
@@ -332,7 +332,7 @@ public class LogicManagerTest {
         Dog buddy = logic.getDogList().get(0);
         logic.execute("searchd i/" + buddy.getId());
         assertEquals(List.of(buddy), logic.getFilteredDogList());
-        logic.execute("resetdisplay");
+        logic.execute("reset");
         logic.execute("undo");
         assertEquals(List.of(buddy), logic.getDogList());
         assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
@@ -373,7 +373,7 @@ public class LogicManagerTest {
         logic.execute("adddog n/Cookie b/Chihuahua s/Small");
         Dog cookie = logic.getDogList().get(0);
         logic.execute("searchd n/Absent");
-        logic.execute("help resetdisplay");
+        logic.execute("help reset");
         assertEquals(List.of(), logic.getFilteredDogList());
         assertEquals(List.of(cookie), logic.getDogList());
         assertThrows(ParseException.class, () -> logic.execute("help unknown"));

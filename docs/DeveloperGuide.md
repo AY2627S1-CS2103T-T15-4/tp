@@ -34,7 +34,8 @@ relationships to refer to a record reliably even when the visible list changes.
 
 ### Customer–dog ownership
 
-`LinkCommandParser` accepts one customer ID followed by one or more distinct dog IDs.
+`LinkCommandParser` accepts `c/CUSTOMER_ID d/DOG_ID [DOG_ID]...`: one customer field followed by
+one dog field containing distinct, whitespace-separated IDs. Repeated `d/` prefixes are rejected.
 `LinkCommand` delegates the batch to `Model.linkDogs`; `ModelManager` forwards to `AddressBook`.
 The address book looks up persistent IDs in the complete lists and validates every endpoint and ownership
 constraint before publishing one replacement dog list. A rejected batch throws `LinkException` without
@@ -48,7 +49,8 @@ customers do not store a duplicate dog-ID list. A dog may be unlinked or have on
 may own any number of dogs. Linking an already-owned dog is rejected, including links to the same owner.
 Dog equality includes ownership, while identity remains the persistent dog ID.
 
-`UnlinkCommandParser` accepts either one customer ID or one or more distinct dog IDs; mixed prefixes
+`UnlinkCommandParser` accepts either `c/CUSTOMER_ID` or `d/DOG_ID [DOG_ID]...` with distinct,
+whitespace-separated dog IDs in one field; repeated dog prefixes and mixed prefixes
 are rejected. `UnlinkCommand` delegates to `Model.unlinkCustomerDogs` or `Model.unlinkDogs` and translates
 `UnlinkException` into command feedback. `AddressBook` validates every selected dog exists and has an owner
 before publishing one replacement list of unowned copies. Dogs may belong to different customers.
@@ -259,6 +261,14 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 <puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog through the application layers" />
 
+### Retired list commands
+
+The former list dog and list customer commands are no longer routed by AddressBookParser.
+Use reset to restore all customers and dogs and upcoming activities, or searchc/searchd
+to narrow the display. Retired list-dog source and tests are preserved under unused/@xandergoh/;
+list-customer source, parser, and tests are under unused/@its-shoutime/. These archives are
+excluded from Gradle source and test sets and retain authorship annotations.
+
 ### Retired select commands
 
 The former select dog and select customer implementations are retained under
@@ -366,7 +376,7 @@ interface, implemented by `StorageManager`. Concrete lifelines are shown to make
 ### Deleting an activity
 
 `AddressBookParser` routes `deleteactivity` to `DeleteActivityCommandParser`, which accepts one
-nonnegative persistent ID. The command finds the matching activity in `Model.getActivityList()` and
+positive persistent ID. The command finds the matching activity in `Model.getActivityList()` and
 passes it to `Model.deleteActivity`. `ModelManager` delegates to `AddressBook.removeActivity`, which
 checks that the activity is still stored, removes its enrolments, and then removes the activity.
 The next activity ID does not change, so deleted IDs are not reused. After the command returns its
@@ -556,7 +566,7 @@ The active category searches are `searcha`, `searchc`, and `searchd`. Each parse
 
 `SearchDogCommandParser` accepts `n/`, `b/`, `s/`, and `i/`; `SearchCustomerCommandParser` accepts `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/`; and `SearchActivityCommandParser` accepts `n/`, `d/`, `t/`, and `r/`. Unsupported prefixes, duplicate fields, invalid IDs, invalid sizes, and malformed values are rejected before execution.
 
-The global search command and its category compatibility routes have been retired. Use the field-based searchc, searchd, and searcha commands (i/ for persistent IDs). Retired global search code, tests, and orphaned helpers are preserved under unused/@Kenneth-Chia/. The list commands and resetdisplay remain available.
+The global search command and its category compatibility routes have been retired. Use the field-based searchc, searchd, and searcha commands (i/ for persistent IDs). Retired global search code, tests, and orphaned helpers are preserved under unused/@Kenneth-Chia/. The list commands and reset remain available.
 
 Search command tests cover parser validation, field combinations, related-record updates, persistent IDs, and unchanged stored records.
 
@@ -668,8 +678,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  User requests to list dogs.
-2.  System shows a list of dogs.
+1.  User requests to restore the display using `reset`.
+2.  System shows all dogs and customers, plus upcoming activities.
 
     Use case ends.
 
@@ -748,7 +758,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **MSS**
 
 1.  User enters the command and the customer details to add a customer.
-2.  System validates the command and customer details.
+2.  System validates the command and customer details, including the uniqueness of the primary phone number and email address.
 3.  System adds the customer and displays a success message.
 
     Use case ends.
@@ -767,14 +777,23 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes from step 1.
 
+* 2b. System detects that the primary phone number or email address is already used by an existing customer,
+  including customers hidden by filters. Phone comparison ignores spaces; email comparison ignores letter case.
+
+    * 2b1. System identifies the duplicate contact field and displays an error without adding a customer or changing existing records.
+
+      Use case resumes from step 1.
+
+Shared backup contact numbers are allowed.
+
 
 
 **Use case: UC06 - View Customer**
 
 **MSS**
 
-1.  User requests to list customers.
-2.  System shows a list of customers.
+1.  User requests to restore the display using `reset`.
+2.  System shows all customers and dogs, plus upcoming activities.
 
     Use case ends.
 
@@ -793,31 +812,40 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **MSS**
 
 1.  User requests to <ins>list customers (UC06)</ins>.
-2.  User enters the command, customer details and the customer id for the customer to be edited.
-3.  System validates the command, customer details and customer id.
+2.  User enters the command, customer details and the customer ID for the customer to be edited.
+3.  System validates the command, customer details and positive customer ID, including the uniqueness of the resulting primary phone number and email address against other customers.
 4.  System edits the customer and displays a success message.
 
     Use case ends.
 
 **Extensions**
 
-* 1a. User enters an invalid command format.
+* 2a. User enters an invalid command format.
 
-    * 1a1. System displays an unknown-command message.
-
-      Use case resumes from step 1.
-
-* 2a. System detects invalid customer details.
-
-    * 2a1. System requests the correct details.
+    * 2a1. System displays an error message.
 
       Use case resumes from step 2.
 
-* 2b. System cannot find the specified customer id.
+* 3a. System detects invalid customer details or a non-positive customer ID.
 
-    * 2b1. System requests for an existing customer id.
+    * 3a1. System requests the correct details without changing existing records.
 
       Use case resumes from step 2.
+
+* 3b. System cannot find the specified customer ID.
+
+    * 3b1. System requests an existing customer ID without changing existing records.
+
+      Use case resumes from step 2.
+
+* 3c. System detects that the resulting primary phone number or email address is already used by another customer,
+  including customers hidden by filters. Phone comparison ignores spaces; email comparison ignores letter case.
+
+    * 3c1. System identifies the duplicate contact field and displays an error without changing existing records.
+
+      Use case resumes from step 2.
+
+Customers may retain their own primary phone number and email address. Shared backup contact numbers are allowed.
 
 
 
@@ -951,7 +979,7 @@ appear as an undoable mutation.
 1. Add a dog, run `help`, then `undo`. The dog disappears; `help` is not the undone command.
 1. Run `help`, then `redo`. The dog returns. Repeat with `summary` instead of `help`.
 1. Undo again, then add another dog. `redo` reports no command to redo and does not replace the new dog.
-1. Link two dogs to different customers. Run `searchd n/Buddy`, `resetdisplay`, then `undo`.
+1. Link two dogs to different customers. Run `searchd n/Buddy`, `reset`, then `undo`.
    Only Buddy and Buddy's owner appear. Repeat using `searchc n/Alice`; only Alice and her dog appear.
 1. With disposable data, make the data file unwritable after a successful add, then run `undo`.
    The save reports an error, but the dog disappears from memory. Restore write access and run `redo`;
