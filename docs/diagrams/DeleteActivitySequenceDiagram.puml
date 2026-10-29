@@ -2,68 +2,28 @@
 !include style.puml
 skinparam ArrowFontStyle plain
 skinparam ParticipantFontColor #FFFFFF
-skinparam maxMessageSize 230
+skinparam maxMessageSize 180
 
-actor User
-participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":WatchDogParser" as Router LOGIC_COLOR
-participant ":DeleteActivityCommandParser" as Parser LOGIC_COLOR
 participant "command:DeleteActivityCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
-participant ":WatchDog" as Book MODEL_COLOR
-participant ":StorageManager" as Storage STORAGE_COLOR
 
-User -> Logic : execute("deleteactivity 21")
-activate Logic
-Logic -> Router : parseCommand(commandText)
-activate Router
-Router -> Parser : parse(" 21")
-activate Parser
-Parser -> Parser : validate positive activity ID
-Parser -> Command : new DeleteActivityCommand(21)
-Parser --> Router : command
-deactivate Parser
-Router --> Logic : command
-deactivate Router
-
-Logic -> Command : execute(model)
-activate Command
+[-> Command : execute(model)
 Command -> Model : getActivityList()
-activate Model
 Model --> Command : activities
-deactivate Model
-Command -> Command : find activity with ID 21
-Command -> Model : deleteActivity(activityToDelete)
-activate Model
-Model -> Book : removeActivity(activityToDelete)
-activate Book
-Book -> Book : verify activity is stored and unchanged
-Book -> Book : remove enrolments for activity ID 21
-Book -> Book : remove activity from observable list
-note right of Book
-  The next activity ID is unchanged.
-  Deleted IDs are not reused.
+note over Command
+  Finds the activity with persistent ID 21.
 end note
-Book --> Model : success
-deactivate Book
-Model --> Command : success
-deactivate Model
-Command --> Logic : CommandResult with deleted ID and name
-deactivate Command
-
-Logic -> Model : getWatchDog()
-activate Model
-Model --> Logic : watchDog
-deactivate Model
-Logic -> Storage : saveWatchDog(watchDog)
-activate Storage
-Storage --> Logic
-deactivate Storage
-Logic --> User : display result
-deactivate Logic
+Command -> Model : deleteActivity(activityToDelete)
+note right of Model
+  Removes the schedule and all its enrolments.
+  The next activity ID is unchanged;
+  deleted IDs are not reused.
+end note
+[<-- Command : commandResult
 
 legend bottom
-  Successful deletion is shown. Invalid IDs, stale activities,
-  and storage errors are omitted.
+  Deletes activity 21. Model internals are omitted.
+  Parsing and saving follow the shared Logic flow.
+  Successful execution only; validation failures are omitted.
 endlegend
 @enduml

@@ -1,0 +1,19 @@
+@startuml
+!include style.puml
+skinparam arrowColor MODEL_COLOR_T4
+skinparam classAttributeIconSize 0
+left to right direction
+
+class Customer MODEL_COLOR
+class Dog MODEL_COLOR
+class Activity MODEL_COLOR
+class Enrolment MODEL_COLOR {
+  date
+}
+show Enrolment attributes
+
+Customer "0..1" -- "*" Dog : owns
+Dog "1" -- "*" Enrolment
+Enrolment "*" -- "1" Activity : books an occurrence of
+
+@enduml

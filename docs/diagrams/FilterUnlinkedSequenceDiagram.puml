@@ -1,23 +1,30 @@
 @startuml
 !include style.puml
-skinparam arrowColor LOGIC_COLOR_T4
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 180
 
-actor User
-participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":WatchDogParser" as Router LOGIC_COLOR
-participant ":FilterUnlinkedCommandParser" as Parser LOGIC_COLOR
 participant "command:FilterUnlinkedCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
 
-User -> Logic : execute("filterun dog")
-Logic -> Router : parseCommand(...)
-Router -> Parser : parse(...)
-Parser -> Command : new FilterUnlinkedCommand(...)
-Parser --> Router : command
-Router --> Logic : command
-Logic -> Command : execute(Model)
-Command -> Model : update filtered unlinked list
-Model --> Command : refresh related panel
-Command --> Logic : success message
-Logic --> User : display filtered records
+[-> Command : execute(model)
+Command -> Model : updateFilteredDogList(unownedDogPredicate)
+Command -> Model : updateFilteredCustomerList(noCustomersPredicate)
+Command -> Model : updateFilteredActivityList(unownedDogActivityPredicate)
+Command -> Model : setActivityEnrolmentDogPredicate(unownedDogPredicate)
+note right of Model
+  Shows dogs with no owner and hides customers.
+  Shows activities with bookings for unowned dogs.
+  Enrolment details include only those dogs.
+  Stored records are unchanged.
+end note
+[<-- Command : commandResult
+
+legend bottom
+  Shows the dog form of filterun. Predicate evaluation is omitted.
+  The customer form shows customers with no dogs
+  and hides dogs and activities.
+  Parsing and saving follow the shared Logic flow.
+  Successful execution only; validation failures are omitted.
+endlegend
 @enduml

@@ -4,45 +4,26 @@ skinparam arrowThickness 1.1
 skinparam arrowColor LOGIC_COLOR_T4
 skinparam classBackgroundColor LOGIC_COLOR
 
-Class "{abstract}\nCommand" as Command
-Class XYZCommand
+class WatchDogParser
+class "<<interface>>\nParser" as Parser
+class AddDogCommandParser
+class AddDogCommand
+class CliSyntax
+class ParserUtil
+class ArgumentMultimap
+class ArgumentTokenizer
+class Prefix
 
-package "Parser classes"{
-Class "<<interface>>\nParser" as Parser
-Class WatchDogParser
-Class XYZCommandParser
-Class EnrolDogCommandParser
-Class UnenrolDogCommandParser
-Class CliSyntax
-Class ParserUtil
-Class ArgumentMultimap
-Class ArgumentTokenizer
-Class Prefix
-}
+WatchDogParser ..> AddDogCommandParser : creates
+AddDogCommandParser .up.|> Parser
+AddDogCommandParser ..> AddDogCommand : creates
+AddDogCommandParser ..> ArgumentTokenizer : tokenizes
+AddDogCommandParser ..> ArgumentMultimap : reads
+AddDogCommandParser ..> CliSyntax : uses prefixes
+AddDogCommandParser ..> ParserUtil : parses values
+ArgumentTokenizer ..> ArgumentMultimap : creates
+ArgumentTokenizer ..> Prefix
+ArgumentMultimap --> "*" Prefix : keys
+CliSyntax ..> Prefix : defines constants
 
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> WatchDogParser
-
-WatchDogParser .down.> XYZCommandParser: <<create>>
-
-XYZCommandParser ..> XYZCommand : <<create>>
-EnrolDogCommandParser ..> EnrolDogCommand : <<create>>
-UnenrolDogCommandParser ..> UnenrolDogCommand : <<create>>
-WatchDogParser ..> Command : <<use>>
-XYZCommandParser .up.|> Parser
-XYZCommandParser ..> ArgumentMultimap
-XYZCommandParser ..> ArgumentTokenizer
-ArgumentTokenizer .left.> ArgumentMultimap
-XYZCommandParser ..> CliSyntax
-CliSyntax ..> Prefix
-XYZCommandParser ..> ParserUtil
-ParserUtil .down.> Prefix
-ArgumentTokenizer .down.> Prefix
-XYZCommand -up-|> Command
-EnrolDogCommand -up-|> Command
-UnenrolDogCommand -up-|> Command
-note right of EnrolDogCommandParser
-  enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]
-  unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]
-end note
 @enduml
