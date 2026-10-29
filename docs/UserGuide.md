@@ -62,7 +62,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 * Items followed by `...` can appear zero or more times.<br>
   For example, `link c/7 d/42 51` links multiple dogs to one customer.
 
-* Parameters can be in any order.<br>
+* Field parameters can be in any order unless stated otherwise. `link` requires `c/` before `d/`.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
 * Extraneous parameters for some commands that take no parameters, such as `exit` and `clear`, are ignored.<br>
@@ -87,13 +87,14 @@ messages appear), use `help COMMAND`. This does not open the help window or exec
 
 Examples:
 
+* `help` opens the help window.
 * `help summary`
 * `help adddog`
-* `help delete dog`
+* `help deletedog`
 * `help reset`
 
-Use the lowercase command name without its arguments. Multiword command names are supported;
-surrounding whitespace and multiple spaces between words are accepted. An unknown command name or
+Use the lowercase command name without its arguments. Surrounding whitespace and multiple spaces
+between `help` and the command name are accepted. An unknown command name or
 extra arguments (for example, `help summary today`) display an error and the supported command names.
 Plain `help` still opens the original help window.
 
@@ -165,6 +166,9 @@ Edits an activity with the specified persistent ID. An activity can be edited on
 If dogs are enrolled, the command leaves the activity unchanged and suggests creating a new activity instead.
 
 Format: `editactivity ACTIVITY_ID [n/NAME] [date/YYYY-MM-DD] [start/HH:mm] [end/HH:mm] [r/once|daily|weekly]`
+
+Example: `editactivity 21 n/Morning walk start/09:00 end/10:00` changes activity 21's name and times,
+provided it exists and has no enrolments. Its other details remain unchanged.
 
 ### Searching activities: `searcha`
 
@@ -261,12 +265,16 @@ are not changed.
 
 Format: `reset`
 
+Example: `reset` restores the overview after a search or filter.
+
 ### Viewing daycare statistics: `summary`
 
 Shows six statistics using all stored records, including records hidden by search or filters.
 The command preserves your records and filters.
 
 Format: `summary` (no parameters; surrounding whitespace is accepted)
+
+Example: `summary` displays the statistics below using your stored records and the current local date.
 
 Example output:
 
@@ -393,6 +401,15 @@ Example: `searchd b/Golden Retriever s/Medium`
 Formats: `enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]` and
 `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]`.
 
+Examples:
+
+* `enrol a/1 date/2026-11-04 d/2 3` enrols dogs 2 and 3 in activity 1's occurrence on 4 November 2026.
+* `unenrol a/1 date/2026-11-04 d/2 3` removes those two dated bookings.
+
+These examples assume activity 1 and dogs 2 and 3 exist and the activity occurs on that date.
+For `enrol`, use today or a future occurrence date when trying the example; the dogs must not already
+be enrolled or have overlapping bookings. For `unenrol`, both dogs must have the specified bookings.
+
 The `a/`, `date/`, and `d/` fields may appear in any order and must each appear exactly once. Dog IDs are separated
 by one or more spaces, must be positive integers, and must not repeat; commas and `d/0` are rejected. Activity IDs
 must also be positive integers and are supplied separately using `a/`.
@@ -404,6 +421,11 @@ that a historical enrolment can be corrected, provided the activity occurred and
 ### Filtering unlinked records: `filterun`
 
 Format: `filterun dog` or `filterun customer`
+
+Examples:
+
+* `filterun dog` finds dogs without an owner.
+* `filterun customer` finds customers without dogs.
 
 * `filterun dog` displays dogs that are not linked to any customer and clears the customer panel.
   The activity panel shows activities those dogs are enrolled in, including past enrolments. Each activity's
@@ -440,17 +462,17 @@ Example: `searchc n/Anna d/12 34`
   The activity panel shows only activities with enrolments belonging to the matching customers. Each activity
   includes an `Enrolments` section containing only their dogs and those dogs' stored enrolment dates.
 
-### Deleting a dog: `delete dog`
+### Deleting a dog: `deletedog`
 
 Deletes a dog using its persistent dog ID and removes all of that dog's activity enrolments, including past
 occurrences. Other dogs' enrolments and the activity schedules remain unchanged.
 
-Format: `delete dog ID`
+Format: `deletedog ID`
 
 Examples:
 
-* `delete dog 1`
-* `delete  dog   1`
+* `deletedog 1`
+* `deletedog   1`
 
 Multiple spaces between the command components are accepted.
 
@@ -462,18 +484,18 @@ If the ID does not exist, WatchDog displays:
 
 `Error in deleting dog:`<br>`Please enter a valid dog index`
 
-### Deleting a customer: `delete customer`
+### Deleting a customer: `deletecustomer`
 
 Deletes a customer using its persistent customer ID.
 
-Format: `delete customer ID`
+Format: `deletecustomer ID`
 
 Example:
 
-* `delete customer 21`
-* `delete  customer   21`
+* `deletecustomer 21`
+* `deletecustomer   21`
 
-Leading and trailing whitespace and multiple spaces between the command words and ID are accepted.
+Leading and trailing whitespace and multiple spaces between the command name and ID are accepted.
 
 ### Customer and dog cards
 
@@ -540,6 +562,8 @@ Exits the program.
 
 Format: `exit`
 
+Example: `exit` closes WatchDog.
+
 ### Saving the data
 
 WatchDog automatically saves data after every command. You do not need to save manually.
@@ -571,7 +595,6 @@ _Details coming soon ..._
 ## Known issues
 
 1. **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
-2. **If you minimize the Help Window** and then run the `help` command (or use the `Help` menu, or the keyboard shortcut `F1`) again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -597,8 +620,8 @@ Action     | Format, Examples
 **Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 **Edit dog** | `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`<br>e.g., `editdog 1 s/Large`
 **Edit customer** | `editcustomer CUSTOMER_ID [n/NAME] [p/PHONE] [e/EMAIL] [bc/BACKUP_CONTACT]`<br>e.g., `editcustomer 1 p/91234567`
-**Delete dog** | `delete dog ID`<br>e.g., `delete dog 1`
-**Delete customer** | `delete customer ID`<br>e.g., `delete customer 21`
+**Delete dog** | `deletedog ID`<br>e.g., `deletedog 1`
+**Delete customer** | `deletecustomer ID`<br>e.g., `deletecustomer 21`
 **Undo** | `undo`
 **Redo** | `redo`
-**Help**   | `help` opens the help window; `help COMMAND` shows command details in the result section.<br>e.g., `help summary`, `help adddog`, `help delete dog`
+**Help**   | `help` opens the help window; `help COMMAND` shows command details in the result section.<br>e.g., `help summary`, `help adddog`, `help deletedog`

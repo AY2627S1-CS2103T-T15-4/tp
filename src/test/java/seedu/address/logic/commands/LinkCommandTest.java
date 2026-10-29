@@ -77,7 +77,7 @@ public class LinkCommandTest {
         Dog otherOwnersDog = model.getDogList().get(2);
         Dog unlinked = model.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("small")));
         model.updateFilteredDogList(dog -> false);
-        execute("delete customer 7");
+        execute("deletecustomer 7");
         assertEquals(List.of(firstUnowned, secondUnowned, otherOwnersDog, unlinked), model.getDogList());
         assertTrue(model.getFilteredDogList().isEmpty());
         assertEquals(8, model.getCustomerList().get(0).getId());

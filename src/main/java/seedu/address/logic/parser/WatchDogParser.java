@@ -14,6 +14,8 @@ import seedu.address.logic.commands.AddDogCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.DeleteActivityCommand;
+import seedu.address.logic.commands.DeleteCustomerCommand;
+import seedu.address.logic.commands.DeleteDogCommand;
 import seedu.address.logic.commands.EditActivityCommand;
 import seedu.address.logic.commands.EditCustomerCommand;
 import seedu.address.logic.commands.EditDogCommand;
@@ -43,10 +45,6 @@ public class WatchDogParser {
      * Used for initial separation of command word and args.
      */
     private static final Pattern BASIC_COMMAND_FORMAT = Pattern.compile("(?<commandWord>\\S+)(?<arguments>.*)");
-    private static final Pattern DELETE_DOG_COMMAND_FORMAT = Pattern.compile(
-            "delete\\s+dog(?=\\s|$)(?<arguments>.*)");
-    private static final Pattern DELETE_CUSTOMER_COMMAND_FORMAT = Pattern.compile(
-            "delete\\s+customer(?=\\s|$)(?<arguments>.*)");
     private static final Logger logger = LogsCenter.getLogger(WatchDogParser.class);
 
     /**
@@ -57,14 +55,6 @@ public class WatchDogParser {
      * @throws ParseException if the user input does not conform to the expected format
      */
     public Command parseCommand(String userInput) throws ParseException {
-        Matcher deleteDogMatcher = DELETE_DOG_COMMAND_FORMAT.matcher(userInput.trim());
-        if (deleteDogMatcher.matches()) {
-            return new DeleteDogCommandParser().parse(deleteDogMatcher.group("arguments"));
-        }
-        Matcher deleteCustomerMatcher = DELETE_CUSTOMER_COMMAND_FORMAT.matcher(userInput.trim());
-        if (deleteCustomerMatcher.matches()) {
-            return new DeleteCustomerCommandParser().parse(deleteCustomerMatcher.group("arguments"));
-        }
         final Matcher matcher = BASIC_COMMAND_FORMAT.matcher(userInput.trim());
         if (!matcher.matches()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, HelpCommand.MESSAGE_USAGE));
@@ -84,6 +74,8 @@ public class WatchDogParser {
             case AddCustomerCommand.COMMAND_WORD -> new AddCustomerCommandParser().parse(arguments);
             case AddDogCommand.COMMAND_WORD -> new AddDogCommandParser().parse(arguments);
             case DeleteActivityCommand.COMMAND_WORD -> new DeleteActivityCommandParser().parse(arguments);
+            case DeleteDogCommand.COMMAND_WORD -> new DeleteDogCommandParser().parse(arguments);
+            case DeleteCustomerCommand.COMMAND_WORD -> new DeleteCustomerCommandParser().parse(arguments);
             case EditActivityCommand.COMMAND_WORD -> new EditActivityCommandParser().parse(arguments);
             case EditCustomerCommand.COMMAND_WORD -> new EditCustomerCommandParser().parse(arguments);
             case EditDogCommand.COMMAND_WORD -> new EditDogCommandParser().parse(arguments);

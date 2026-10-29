@@ -15,10 +15,10 @@ participant "m:ModelManager" as ModelManager MODEL_COLOR
 participant "b:WatchDog" as WatchDog MODEL_COLOR
 end box
 
-[-> LogicManager : execute("delete dog 1")
+[-> LogicManager : execute("deletedog 1")
 activate LogicManager
 
-LogicManager -> WatchDogParser : parseCommand("delete dog 1")
+LogicManager -> WatchDogParser : parseCommand("deletedog 1")
 activate WatchDogParser
 
 create DeleteDogCommandParser

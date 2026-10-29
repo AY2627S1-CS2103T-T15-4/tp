@@ -235,7 +235,7 @@ public class MainWindowTest {
                     label(activities.getItems().get(0).get(), "dogSummary"));
 
             window.executeCommand("undo");
-            window.executeCommand("delete dog 1");
+            window.executeCommand("deletedog 1");
             assertEquals("Dogs with upcoming bookings: None",
                     label(activities.getItems().get(0).get(), "dogSummary"));
 

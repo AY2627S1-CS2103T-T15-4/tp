@@ -14,10 +14,10 @@ import seedu.address.model.customer.Customer;
 /** Deletes a customer identified by its persistent ID and unlinks their dogs. */
 public class DeleteCustomerCommand extends Command {
 
-    public static final String COMMAND_WORD = "delete customer";
+    public static final String COMMAND_WORD = "deletecustomer";
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + " <id>: Deletes the customer with the specified ID and unlinks their dogs without deleting them.\n"
-            + "Example: delete customer 21";
+            + "Example: deletecustomer 21";
     public static final String MESSAGE_SUCCESS = "Successfully deleted customer: %1$s; id: %2$d; "
             + "Contact: %3$s; Email: %4$s; Backup contact: %5$s";
     public static final String MESSAGE_INVALID_ID = "Error in deleting customer:\nPlease enter a valid customer index";

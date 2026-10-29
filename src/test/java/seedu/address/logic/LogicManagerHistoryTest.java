@@ -63,7 +63,7 @@ public class LogicManagerHistoryTest {
 
         assertThrows(ParseException.class, () -> harness.logic.execute("notacommand"));
         assertThrows(ParseException.class, () -> harness.logic.execute("redo extra"));
-        assertThrows(CommandException.class, () -> harness.logic.execute("delete dog 99"));
+        assertThrows(CommandException.class, () -> harness.logic.execute("deletedog 99"));
         harness.logic.execute("redo");
         assertEquals(List.of("Buddy"), harness.dogNames());
     }
