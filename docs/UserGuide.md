@@ -194,8 +194,10 @@ Example:
 
 * `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 
-Customer names may contain letters, numbers, spaces, hyphens, and apostrophes. A hyphen or apostrophe
-must be followed by a letter or number; repeated punctuation is not allowed. For example, `Jean-Luc`
+Customer names may contain only English letters (`A-Z`, `a-z`), digits (`0-9`), spaces, hyphens (`-`),
+and straight apostrophes (`'`). Accented letters (such as `é`), Chinese characters, and curly apostrophes
+(`’`) are not supported. Names must start with an English letter or digit. A hyphen or apostrophe must
+be followed by an English letter or digit; repeated punctuation is not allowed. For example, `Jean-Luc`
 and `O'Neil` are valid names.
 
 Email addresses must use the `local-part@domain` format. Apostrophes are allowed in the local part
@@ -433,6 +435,11 @@ Examples:
 
 Clearing also discards the undo and redo history, so `clear` cannot be undone. This remains true
 if the command changes memory but its save fails.
+
+Clearing preserves the current search filters and display selection. Newly added records appear only
+if they match the active view. For example, after `searchc n/Alice` followed by `clear` and `Y`, adding
+a customer named Bob succeeds but does not display Bob in the customer panel. Use `reset` to show all
+customers and dogs, plus activities occurring today or later.
 
 ### Undoing and redoing a command: `undo`, `redo`
 
