@@ -36,9 +36,9 @@ public class UnlinkCommand extends Command {
         this.customerId = null;
     }
 
-    /** Creates a request to unlink all dogs belonging to a nonnegative customer ID. */
+    /** Creates a request to unlink all dogs belonging to a positive customer ID. */
     public UnlinkCommand(int customerId) {
-        checkArgument(customerId >= 0, "Invalid customer ID.");
+        checkArgument(customerId > 0, "Invalid customer ID.");
         this.customerId = customerId;
         this.dogIds = List.of();
     }

@@ -122,6 +122,7 @@ public class UnlinkCommandTest {
         assertNotEquals(command, null);
         assertNotEquals(command, new Object());
         assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(-1));
+        assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(0));
         assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(List.of()));
         assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(List.of(-1)));
         assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(List.of(42, 42)));

@@ -84,7 +84,7 @@ public class ModelManagerTest {
         modelManager.linkDogs(owner.getId(), List.of(buddy.getId()));
         modelManager.enrolDogs(walk.getId(), walk.getStartDate(), List.of(buddy.getId()));
         Model.ModelState state = modelManager.createState();
-        int nextCustomerId = state.addressBook().getNextCustomerId();
+        long nextCustomerId = state.addressBook().getNextCustomerId();
         int nextDogId = state.addressBook().getNextDogId();
         long nextActivityId = state.addressBook().getNextActivityId();
 

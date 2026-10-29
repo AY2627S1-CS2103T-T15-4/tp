@@ -117,7 +117,7 @@ public class CustomerContactUniquenessTest {
     private void assertRejected(String input, String message) throws Exception {
         List<Customer> customersBefore = List.copyOf(model.getCustomerList());
         List<Customer> visibleBefore = List.copyOf(model.getFilteredCustomerList());
-        int nextCustomerId = model.getAddressBook().getNextCustomerId();
+        long nextCustomerId = model.getAddressBook().getNextCustomerId();
         Command command = parser.parseCommand(input);
 
         CommandException exception = assertThrows(CommandException.class, () -> command.execute(model));

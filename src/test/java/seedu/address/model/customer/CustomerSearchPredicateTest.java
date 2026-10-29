@@ -60,6 +60,7 @@ public class CustomerSearchPredicateTest {
         assertThrows(NullPointerException.class, () -> new CustomerSearchPredicate(null));
         assertThrows(IllegalArgumentException.class, () -> new CustomerSearchPredicate("  "));
         assertThrows(IllegalArgumentException.class, () -> new CustomerSearchPredicate(-1));
+        assertThrows(IllegalArgumentException.class, () -> new CustomerSearchPredicate(0));
     }
 
     @Test

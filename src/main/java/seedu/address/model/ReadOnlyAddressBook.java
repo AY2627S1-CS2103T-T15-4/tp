@@ -21,8 +21,8 @@ public interface ReadOnlyAddressBook {
         return -1;
     }
 
-    /** Returns the next unused customer ID, or {@code -1} when unavailable. */
-    default int getNextCustomerId() {
+    /** Returns the next unused customer ID, MAX_VALUE + 1 when exhausted, or {@code -1} when unavailable. */
+    default long getNextCustomerId() {
         return -1;
     }
 

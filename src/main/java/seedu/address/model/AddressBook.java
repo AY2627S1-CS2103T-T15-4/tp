@@ -44,7 +44,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     private final ObservableList<Enrolment> enrolments = FXCollections.observableArrayList();
     private long nextActivityId = 1;
     private int nextDogId = 1;
-    private int nextCustomerId = 1;
+    private long nextCustomerId = 1;
 
 
     /** Creates an empty address book. */
@@ -89,11 +89,11 @@ public class AddressBook implements ReadOnlyAddressBook {
                 : dogs.asUnmodifiableObservableList().stream()
                         .mapToInt(Dog::getId).max().orElse(-1) + 1;
 
-        int restoredNextCustomerId = newData.getNextCustomerId();
+        long restoredNextCustomerId = newData.getNextCustomerId();
         this.nextCustomerId = restoredNextCustomerId >= 1
                 ? restoredNextCustomerId
                 : customers.asUnmodifiableObservableList().stream()
-                        .mapToInt(Customer::getId).max().orElse(0) + 1;
+                        .mapToLong(Customer::getId).max().orElse(0) + 1;
         activities.restore(restored, restoredEnrolments);
     }
 
@@ -265,12 +265,15 @@ public class AddressBook implements ReadOnlyAddressBook {
      */
     public Customer addCustomer(Customer customer) {
         requireNonNull(customer);
+        if (customer.getId() < 0 && nextCustomerId > Integer.MAX_VALUE) {
+            throw new IllegalStateException("No more customer IDs are available");
+        }
         Customer identifiedCustomer = customer.getId() < 0
-                ? new Customer(nextCustomerId, customer.getName(), customer.getPhone(), customer.getEmail(),
+                ? new Customer((int) nextCustomerId, customer.getName(), customer.getPhone(), customer.getEmail(),
                         customer.getBackupContact())
                 : customer;
         customers.add(identifiedCustomer);
-        nextCustomerId = Math.max(nextCustomerId, identifiedCustomer.getId() + 1);
+        nextCustomerId = Math.max(nextCustomerId, (long) identifiedCustomer.getId() + 1);
         return identifiedCustomer;
     }
 
@@ -477,7 +480,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     @Override
-    public int getNextCustomerId() {
+    public long getNextCustomerId() {
         return nextCustomerId;
     }
 
@@ -489,10 +492,12 @@ public class AddressBook implements ReadOnlyAddressBook {
         this.nextDogId = nextDogId;
     }
 
-    /** Restores the next unused customer ID from persistent storage. */
-    public void setNextCustomerId(int nextCustomerId) {
-        if (nextCustomerId < 1) {
-            throw new IllegalArgumentException("Next customer ID must be positive.");
+    /** Restores the next unused customer ID; MAX_VALUE + 1 represents exhausted IDs. */
+    public void setNextCustomerId(long nextCustomerId) {
+        long minimumId = customers.asUnmodifiableObservableList().stream()
+                .mapToLong(Customer::getId).max().orElse(0) + 1;
+        if (nextCustomerId < minimumId || nextCustomerId > (long) Integer.MAX_VALUE + 1) {
+            throw new IllegalArgumentException("Invalid next customer ID.");
         }
         this.nextCustomerId = nextCustomerId;
     }
