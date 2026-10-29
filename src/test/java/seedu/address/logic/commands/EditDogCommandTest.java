@@ -92,6 +92,7 @@ public class EditDogCommandTest {
 
         assertTrue(command.equals(command));
         assertTrue(command.equals(new EditDogCommand(1, descriptor)));
+        assertEquals(command.hashCode(), new EditDogCommand(1, descriptor).hashCode());
         assertTrue(Set.of(command).contains(new EditDogCommand(1, descriptor)));
         assertFalse(command.equals(null));
         assertFalse(command.equals("command"));
