@@ -1,5 +1,7 @@
 package seedu.address.model;
 
+import static java.util.Objects.requireNonNull;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -30,6 +32,10 @@ public interface Model {
     record ModelState(ReadOnlyAddressBook addressBook, Predicate<Customer> customerPredicate,
             Predicate<Dog> dogPredicate, Predicate<Activity> activityPredicate,
             Predicate<Dog> enrolmentDogPredicate) {
+        /** Predicates may be null when that panel has no active filter. The data snapshot may not. */
+        public ModelState {
+            requireNonNull(addressBook);
+        }
     }
 
     /** Returns a snapshot of the current data and display state. */

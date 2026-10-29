@@ -1,5 +1,7 @@
 package seedu.address.logic.parser;
 
+import static java.util.Objects.requireNonNull;
+
 import seedu.address.logic.commands.DeleteCustomerCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
@@ -11,12 +13,15 @@ public class DeleteCustomerCommandParser implements Parser<DeleteCustomerCommand
 
     @Override
     public DeleteCustomerCommand parse(String args) throws ParseException {
+        requireNonNull(args);
         String trimmedArgs = args.trim();
+        // Digits only: Integer.parseInt also accepts a leading '+' and other numeric forms.
+        if (!trimmedArgs.matches("[1-9]\\d*")) {
+            throw new ParseException(MESSAGE_INVALID_FORMAT);
+        }
         try {
             int customerId = Integer.parseInt(trimmedArgs);
-            if (customerId < 1) {
-                throw new NumberFormatException();
-            }
+            assert customerId >= 1;
             return new DeleteCustomerCommand(customerId);
         } catch (NumberFormatException exception) {
             throw new ParseException(MESSAGE_INVALID_FORMAT, exception);

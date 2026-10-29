@@ -1,5 +1,8 @@
 package seedu.address.logic;
 
+import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
+
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.logging.Logger;
@@ -40,16 +43,15 @@ public class LogicManager implements Logic {
     private final Model model;
     private final Storage storage;
     private final AddressBookParser addressBookParser;
-    private ModelState undoState;
-    private String undoCommandText;
-    private ModelState redoState;
-    private String redoCommandText;
+    private HistorySnapshot undoSnapshot;
+    private HistorySnapshot redoSnapshot;
     private boolean awaitingClearConfirmation;
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
      */
     public LogicManager(Model model, Storage storage) {
+        requireAllNonNull(model, storage);
         this.model = model;
         this.storage = storage;
         addressBookParser = new AddressBookParser();
@@ -90,35 +92,35 @@ public class LogicManager implements Logic {
     }
 
     private CommandResult executeUndo() throws CommandException {
-        if (undoState == null) {
+        if (undoSnapshot == null) {
+            logger.info("Undo requested when there is no undo snapshot.");
             throw new CommandException(UndoCommand.MESSAGE_NO_COMMAND);
         }
-        ModelState state = undoState;
-        String undoneCommand = undoCommandText;
-        ModelState stateAfterUndo = model.createState();
-        model.restoreState(state);
-        undoState = null;
-        undoCommandText = null;
-        redoState = stateAfterUndo;
-        redoCommandText = undoneCommand;
+        HistorySnapshot undone = undoSnapshot;
+        HistorySnapshot redo = new HistorySnapshot(model.createState(), undone.commandText());
+        model.restoreState(undone.state());
+        undoSnapshot = null;
+        redoSnapshot = redo;
+        assert redoSnapshot != null;
+        logger.info("Undid the previous command and stored a redo snapshot.");
         saveAddressBook(true);
-        return new CommandResult(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, undoneCommand));
+        return new CommandResult(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, undone.commandText()));
     }
 
     private CommandResult executeRedo() throws CommandException {
-        if (redoState == null) {
+        if (redoSnapshot == null) {
+            logger.info("Redo requested when there is no redo snapshot.");
             throw new CommandException(RedoCommand.MESSAGE_NO_COMMAND);
         }
-        ModelState stateBeforeRedo = model.createState();
-        ModelState state = redoState;
-        String redoneCommand = redoCommandText;
-        model.restoreState(state);
-        undoState = stateBeforeRedo;
-        undoCommandText = redoneCommand;
-        redoState = null;
-        redoCommandText = null;
+        HistorySnapshot redone = redoSnapshot;
+        HistorySnapshot undo = new HistorySnapshot(model.createState(), redone.commandText());
+        model.restoreState(redone.state());
+        undoSnapshot = undo;
+        redoSnapshot = null;
+        assert undoSnapshot != null;
+        logger.info("Redid the previous command and stored an undo snapshot.");
         saveAddressBook(true);
-        return new CommandResult(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, redoneCommand));
+        return new CommandResult(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, redone.commandText()));
     }
 
     /**
@@ -139,15 +141,25 @@ public class LogicManager implements Logic {
     private void recordHistory(boolean isClear, boolean isHistoryNeutral, ModelState stateBeforeCommand,
             String commandText) {
         if (isClear) {
-            undoState = null;
-            undoCommandText = null;
-            redoState = null;
-            redoCommandText = null;
+            undoSnapshot = null;
+            redoSnapshot = null;
+            logger.info("Cleared undo and redo history.");
         } else if (!isHistoryNeutral) {
-            undoState = stateBeforeCommand;
-            undoCommandText = commandText.trim();
-            redoState = null;
-            redoCommandText = null;
+            assert stateBeforeCommand != null : "An undoable command must capture a snapshot.";
+            undoSnapshot = new HistorySnapshot(stateBeforeCommand, commandText.trim());
+            redoSnapshot = null;
+        }
+    }
+
+    /**
+     * One restorable model snapshot paired with the command text shown in feedback.
+     * The two values cannot be stored independently.
+     */
+    private record HistorySnapshot(ModelState state, String commandText) {
+        private HistorySnapshot {
+            requireNonNull(state);
+            requireNonNull(commandText);
+            assert !commandText.isBlank() : "History feedback must name a command.";
         }
     }
 

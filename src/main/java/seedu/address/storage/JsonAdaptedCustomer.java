@@ -1,5 +1,7 @@
 package seedu.address.storage;
 
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -41,6 +43,7 @@ class JsonAdaptedCustomer {
      * Converts a given {@code Customer} into this class for Jackson use.
      */
     public JsonAdaptedCustomer(Customer source) {
+        requireNonNull(source);
         id = source.getId();
         name = source.getName().fullName;
         phone = source.getPhone().value;
@@ -54,21 +57,11 @@ class JsonAdaptedCustomer {
      * @throws IllegalValueException if there were any data constraints violated in the adapted customer.
      */
     public Customer toModelType() throws IllegalValueException {
-        if (id == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, "id"));
-        }
-        if (name == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, "name"));
-        }
-        if (phone == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, "phone"));
-        }
-        if (email == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, "email"));
-        }
-        if (backupContact == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, "backupContact"));
-        }
+        requirePresent(id, "id");
+        requirePresent(name, "name");
+        requirePresent(phone, "phone");
+        requirePresent(email, "email");
+        requirePresent(backupContact, "backupContact");
         if (id < 1) {
             throw new IllegalValueException("Customer ID must be positive.");
         }
@@ -77,6 +70,12 @@ class JsonAdaptedCustomer {
                     new BackupContact(backupContact));
         } catch (IllegalArgumentException e) {
             throw new IllegalValueException(e.getMessage(), e);
+        }
+    }
+
+    private static void requirePresent(Object value, String fieldName) throws IllegalValueException {
+        if (value == null) {
+            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, fieldName));
         }
     }
 
