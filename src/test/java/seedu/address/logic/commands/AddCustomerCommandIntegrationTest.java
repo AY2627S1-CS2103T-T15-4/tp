@@ -31,7 +31,7 @@ public class AddCustomerCommandIntegrationTest {
 
         assertEquals(List.of(2, 3), model.getFilteredCustomerList().stream().map(Customer::getId).toList());
 
-        JsonAddressBookStorage storage = new JsonAddressBookStorage(directory.resolve("addressbook.json"));
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(directory.resolve("data").resolve("watchdog.json"));
         storage.saveAddressBook(model.getAddressBook());
         Model reloadedModel = new ModelManager(storage.readAddressBook().orElseThrow(), new UserPrefs());
 

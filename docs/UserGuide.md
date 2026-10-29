@@ -491,7 +491,7 @@ WatchDog automatically saves data after every command. You do not need to save m
 
 ### Editing the data file
 
-WatchDog data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+WatchDog data is saved automatically as `data/watchdog.json` inside the folder from which you launch WatchDog (the home folder in Quick Start). Advanced users are welcome to update data directly by editing that data file.
 
 <box type="warning" seamless>
 
