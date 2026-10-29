@@ -25,8 +25,10 @@ public class AddCustomerCommandParser implements Parser<AddCustomerCommand> {
     /**
      * Parses the given {@code String} of arguments in the context of the {@code AddCustomerCommand}
      * and returns an {@code AddCustomerCommand} for execution.
+     *
      * @throws ParseException if the user input does not conform to the expected format
      */
+    @Override
     public AddCustomerCommand parse(String args) throws ParseException {
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_BACKUP_CONTACT);
