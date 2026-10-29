@@ -109,6 +109,22 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_deleteCustomerWithWhitespace() throws Exception {
+        for (String input : new String[] {"delete  customer 21", "delete    customer   21",
+            "  delete  customer 21  ", "\tdelete\t\tcustomer\t21\t"}) {
+            assertEquals(new DeleteCustomerCommand(21), parser.parseCommand(input));
+        }
+    }
+
+    @Test
+    public void parseCommand_deleteCustomerWithInvalidArguments_throwsParseException() {
+        for (String input : new String[] {"delete  customer", "delete  customer -1",
+            "delete  customer abc", "delete  customer 21 22", "delete  customer21"}) {
+            assertThrows(ParseException.class, () -> parser.parseCommand(input));
+        }
+    }
+
+    @Test
     public void parseCommand_editDog() throws Exception {
         EditDogDescriptor descriptor = new EditDogDescriptor();
         descriptor.setSize(new Size("Medium"));
@@ -172,7 +188,7 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_help() throws Exception {
         assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD) instanceof HelpCommand);
-        assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD + " 3") instanceof HelpCommand);
+        assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD + " summary") instanceof HelpCommand);
     }
 
     @Test

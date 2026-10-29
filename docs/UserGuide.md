@@ -65,8 +65,8 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Extraneous parameters for some commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
-  For example, `help 123` is interpreted as `help`. `reset` and `summary` reject extra parameters.
+* Extraneous parameters for some commands that take no parameters, such as `exit` and `clear`, are ignored.<br>
+  `reset` and `summary` reject extra parameters. `help` accepts an optional command name.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
@@ -81,6 +81,24 @@ Shows a message explaining how to access the help page.
 ![help message](images/helpMessage.png)
 
 Format: `help`
+
+To view a command's format, example and specifications in the result section (where success and error
+messages appear), use `help COMMAND`. This does not open the help window or execute the named command.
+
+Examples:
+
+* `help summary`
+* `help adddog`
+* `help delete dog`
+* `help reset`
+
+Use the lowercase command name without its arguments. Multiword command names are supported;
+surrounding whitespace and multiple spaces between words are accepted. An unknown command name or
+extra arguments (for example, `help summary today`) display an error and the supported command names.
+Plain `help` still opens the original help window.
+
+Both forms preserve records, filters, and undo/redo history. For example, after adding a dog and
+running `help adddog`, `undo` undoes the addition. Running help after `undo` also preserves `redo`.
 
 
 ### Adding an activity: `addactivity`
@@ -407,6 +425,9 @@ Format: `delete customer ID`
 Example:
 
 * `delete customer 21`
+* `delete  customer   21`
+
+Leading and trailing whitespace and multiple spaces between the command words and ID are accepted.
 
 ### Customer and dog cards
 
@@ -524,4 +545,4 @@ Action     | Format, Examples
 **Delete customer** | `delete customer ID`<br>e.g., `delete customer 21`
 **Undo** | `undo`
 **Redo** | `redo`
-**Help**   | `help`
+**Help**   | `help` opens the help window; `help COMMAND` shows command details in the result section.<br>e.g., `help summary`, `help adddog`, `help delete dog`

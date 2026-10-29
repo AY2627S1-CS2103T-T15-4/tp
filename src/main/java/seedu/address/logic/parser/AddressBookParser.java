@@ -14,7 +14,6 @@ import seedu.address.logic.commands.AddDogCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.DeleteActivityCommand;
-import seedu.address.logic.commands.DeleteCustomerCommand;
 import seedu.address.logic.commands.EditActivityCommand;
 import seedu.address.logic.commands.EditCustomerCommand;
 import seedu.address.logic.commands.EditDogCommand;
@@ -46,7 +45,8 @@ public class AddressBookParser {
     private static final Pattern BASIC_COMMAND_FORMAT = Pattern.compile("(?<commandWord>\\S+)(?<arguments>.*)");
     private static final Pattern DELETE_DOG_COMMAND_FORMAT = Pattern.compile(
             "delete\\s+dog(?=\\s|$)(?<arguments>.*)");
-    private static final Pattern DELETE_CUSTOMER_COMMAND_FORMAT = Pattern.compile("delete\\s+customer(?:\\s+.*)?");
+    private static final Pattern DELETE_CUSTOMER_COMMAND_FORMAT = Pattern.compile(
+            "delete\\s+customer(?=\\s|$)(?<arguments>.*)");
     private static final Logger logger = LogsCenter.getLogger(AddressBookParser.class);
 
     /**
@@ -61,9 +61,9 @@ public class AddressBookParser {
         if (deleteDogMatcher.matches()) {
             return new DeleteDogCommandParser().parse(deleteDogMatcher.group("arguments"));
         }
-        if (DELETE_CUSTOMER_COMMAND_FORMAT.matcher(userInput.trim()).matches()) {
-            String arguments = userInput.trim().substring(DeleteCustomerCommand.COMMAND_WORD.length());
-            return new DeleteCustomerCommandParser().parse(arguments);
+        Matcher deleteCustomerMatcher = DELETE_CUSTOMER_COMMAND_FORMAT.matcher(userInput.trim());
+        if (deleteCustomerMatcher.matches()) {
+            return new DeleteCustomerCommandParser().parse(deleteCustomerMatcher.group("arguments"));
         }
         final Matcher matcher = BASIC_COMMAND_FORMAT.matcher(userInput.trim());
         if (!matcher.matches()) {
@@ -111,7 +111,7 @@ public class AddressBookParser {
                 yield new ResetDisplayCommand();
             }
             case ExitCommand.COMMAND_WORD -> new ExitCommand();
-            case HelpCommand.COMMAND_WORD -> new HelpCommand();
+            case HelpCommand.COMMAND_WORD -> new HelpCommandParser().parse(arguments);
             case RedoCommand.COMMAND_WORD -> {
                 if (!arguments.isBlank()) {
                     throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
