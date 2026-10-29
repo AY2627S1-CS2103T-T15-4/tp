@@ -63,7 +63,8 @@ public class WatchDog implements ReadOnlyWatchDog {
 
     /**
      * Resets the existing data of this {@code WatchDog} with {@code newData}.
-     * Validates incoming identities, ownership and dated bookings before changing any records.
+     * Rejects invalid ownership, duplicate customer or activity IDs, invalid counters, and dated bookings
+     * before replacing lists.
      */
     public void resetData(ReadOnlyWatchDog newData) {
         requireNonNull(newData);
@@ -83,17 +84,21 @@ public class WatchDog implements ReadOnlyWatchDog {
         long restoredNextDogId = newData.getNextDogId();
         long nextRestoredDogId = restoredNextDogId == -1 ? minimumDogId : restoredNextDogId;
         validateNextDogId(nextRestoredDogId, minimumDogId);
+        if (restoredCustomers.stream().map(Customer::getId).distinct().count() != restoredCustomers.size()) {
+            throw new IllegalArgumentException("Customers list contains duplicate customer IDs.");
+        }
+        long minimumCustomerId = restoredCustomers.stream().mapToLong(Customer::getId).max().orElse(0) + 1;
+        long restoredNextCustomerId = newData.getNextCustomerId();
+        long nextRestoredCustomerId = restoredNextCustomerId == -1
+                ? minimumCustomerId : restoredNextCustomerId;
+        validateNextCustomerId(nextRestoredCustomerId, minimumCustomerId);
+
         validateRestoredRecords(restoredCustomers, restoredDogs, restored, restoredEnrolments);
         dogs.setDogs(restoredDogs);
         customers.setCustomers(restoredCustomers);
         nextActivityId = nextId;
         nextDogId = nextRestoredDogId;
-
-        long restoredNextCustomerId = newData.getNextCustomerId();
-        this.nextCustomerId = restoredNextCustomerId >= 1
-                ? restoredNextCustomerId
-                : customers.asUnmodifiableObservableList().stream()
-                        .mapToLong(Customer::getId).max().orElse(0) + 1;
+        nextCustomerId = nextRestoredCustomerId;
         activities.restore(restored, restoredEnrolments);
         assert activities.equals(restored) && enrolments.equals(restoredEnrolments)
                 : "Restoration must preserve the validated schedules and bookings.";
@@ -558,10 +563,15 @@ public class WatchDog implements ReadOnlyWatchDog {
     public void setNextCustomerId(long nextCustomerId) {
         long minimumId = customers.asUnmodifiableObservableList().stream()
                 .mapToLong(Customer::getId).max().orElse(0) + 1;
+        validateNextCustomerId(nextCustomerId, minimumId);
+        this.nextCustomerId = nextCustomerId;
+    }
+
+    /** Rejects a restored customer counter that is reused, nonpositive, or outside the supported range. */
+    private static void validateNextCustomerId(long nextCustomerId, long minimumId) {
         if (nextCustomerId < minimumId || nextCustomerId > (long) Integer.MAX_VALUE + 1) {
             throw new IllegalArgumentException("Invalid next customer ID.");
         }
-        this.nextCustomerId = nextCustomerId;
     }
     // @@author
 

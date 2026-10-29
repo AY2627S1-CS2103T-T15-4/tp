@@ -7,6 +7,7 @@ import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.customer.Customer;
+import seedu.address.model.customer.exceptions.DuplicateCustomerException;
 
 /** Adds a customer to WatchDog. */
 public class AddCustomerCommand extends Command {
@@ -37,6 +38,8 @@ public class AddCustomerCommand extends Command {
         CustomerContactValidator.validate(toAdd, model.getCustomerList(), null);
         try {
             model.addCustomer(toAdd);
+        } catch (DuplicateCustomerException e) {
+            throw new CommandException(MESSAGE_DUPLICATE_CUSTOMER, e);
         } catch (IllegalStateException e) {
             throw new CommandException(e.getMessage(), e);
         }

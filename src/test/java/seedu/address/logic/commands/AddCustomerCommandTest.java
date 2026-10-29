@@ -19,6 +19,7 @@ import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
+import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.ReadOnlyWatchDog;
 import seedu.address.model.activity.Activity;
@@ -55,6 +56,18 @@ public class AddCustomerCommandTest {
     @Test
     public void execute_nullModel_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new AddCustomerCommand(ALICE).execute(null));
+    }
+
+    @Test
+    public void execute_duplicateCustomerId_throwsCommandException() {
+        Model model = new ModelManager();
+        model.addCustomer(ALICE);
+        Customer duplicateId = new Customer(1, new Name("Bob Lim"), new Phone("92345678"),
+                new Email("bob@example.com"), new BackupContact("93456789"));
+
+        assertThrows(CommandException.class, AddCustomerCommand.MESSAGE_DUPLICATE_CUSTOMER, () ->
+                new AddCustomerCommand(duplicateId).execute(model));
+        assertEquals(List.of(ALICE), model.getCustomerList());
     }
 
     @Test

@@ -81,8 +81,9 @@ with older files. Negative owner IDs and references to missing customers are rej
 owner IDs must be integer JSON numbers, so fractions and numeric strings cannot silently change ownership.
 Customers are restored before dogs. Copies of WatchDog retain ownership through immutable dogs.
 The shared model boundaries also reject dangling owner IDs: `setDog` validates the replacement,
-`setCustomers` checks that existing owners remain present, and `resetData` validates ownership against
-snapshots of the incoming dogs and customers before changing records. Customer deletion uses its explicit
+`setCustomers` checks that existing owners remain present, and `resetData` validates ownership,
+customer-ID uniqueness, and identity counters against snapshots of the incoming data before changing
+records. Customer deletion uses its explicit
 unlinking path instead of removing a referenced customer through `setCustomers`.
 `EditDogCommand` preserves the current owner ID when constructing a replacement dog, so editing details
 does not unlink the dog. Ownership changes remain explicit through linking, unlinking, or customer deletion.
@@ -340,7 +341,33 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 <puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog using its persistent ID" />
 
-<!--@@author its-shoutime-->
+### Adding customers
+
+`addcustomer` follows the same parser–command–model flow as `adddog`, but requires a name,
+primary phone number, email address, and backup contact. `AddCustomerCommandParser` rejects
+missing, repeated, or invalid fields and creates a customer without an ID. Before adding it,
+`AddCustomerCommand` checks the complete customer list for an existing primary phone number
+or email address. Phone numbers are normalized before comparison, email comparison ignores
+letter case, and backup contacts may be shared. `WatchDog` then assigns the customer a
+persistent ID from its next-customer-ID counter, which is saved with the records so deleted
+IDs are not reused.
+
+When restoring a `ReadOnlyWatchDog`, `resetData` derives a missing customer counter from the
+largest incoming customer ID. An explicit counter must exceed every incoming customer ID and
+cannot exceed `Integer.MAX_VALUE + 1`. Duplicate customer IDs and invalid counters are rejected
+before any stored list is changed, so these inputs cannot leave a partial reset.
+
+### Editing customers
+
+Like `editdog`, `editcustomer` identifies the record by its persistent ID rather than its
+position in a filtered list. `EditCustomerCommandParser` requires a positive ID and at least
+one replacement field. The command copies the edit descriptor, combines supplied values
+with the stored customer's unchanged fields, and creates a replacement with the same ID.
+It checks the resulting primary phone and email against other customers, excluding the
+customer being edited so they may keep their own contact details. `Model.setCustomer`
+replaces the stored record while retaining the ID used by dog ownership links. Unlike a
+dog edit, there is no owner field to copy: each dog's owner ID is stored on the dog.
+
 ### Retired list commands
 
 The former list dog and list customer commands are no longer routed by WatchDogParser.
@@ -365,7 +392,8 @@ cannot restore history. `LogicManager` keeps one undo snapshot and one redo snap
 with the original command text for feedback. A successful undoable command replaces the undo
 snapshot with the state captured before its execution and clears the redo snapshot. View-changing
 commands are undoable. `help`, `summary`, and `exit` preserve both slots, as do parse errors and
-commands rejected during execution. `clear` first puts `LogicManager` into a pending confirmation
+commands rejected during execution. `WatchDogParser` rejects arguments after `clear` before
+`LogicManager` enters the pending confirmation state. A valid `clear` then puts `LogicManager` into that
 state and returns a warning without saving or changing history. The next input must be `Y` or `N`
 (case-insensitive, with surrounding whitespace accepted). Invalid answers leave confirmation pending;
 `N` cancels without changing data or history. `Y` executes `ClearCommand`, discards both snapshots,
@@ -804,367 +832,399 @@ remain requirements for future iterations; priority does not indicate implementa
 
 ### Use cases
 
+For all use cases, the **System** is WatchDog and the **Actor** is the user. IDs refer to persistent
+record IDs, so a record can be selected even when it is hidden by a filter. Unless stated otherwise,
+validation errors display feedback without applying the requested change. After a successful command
+that changes records or the view, the system attempts to save; a save failure is reported, while the
+change can remain in memory.
 
-(For all use cases below, the **System** is the 'Watchdog' and the **Actor** is the user, unless specified otherwise)
-
-**Use case: UC01 - Add Dog**
+**Use case: UC01 - Add Dog (adddog)**
 
 **MSS**
 
-1.  User enters the command and the dog details to add a dog.
-2.  System validates the command and dog details.
-3.  System adds the dog and displays a success message.
+1. User enters the dog's name, breed, and size.
+2. System validates the details and assigns a persistent dog ID.
+3. System stores the dog and displays a success message.
 
-    Use case ends.
+   Use case ends.
 
 **Extensions**
 
-* 1a. User enters an invalid command format.
+* 2a. A required field is missing or invalid: system reports the field error and does not add a dog.
+* 2b. No dog IDs remain: system reports exhaustion without changing the records.
 
-    * 1a1. System displays an unknown-command message.
-
-      Use case resumes from step 1.
-
-* 2a. System detects invalid dog details.
-
-    * 2a1. System requests for correct details.
-
-      Use case resumes from step 1.
-
-
-
-**Use case: UC02 - View Dog**
+**Use case: UC02 - Edit Dog (editdog)**
 
 **MSS**
 
-1.  User requests to restore the display using `reset`.
-2.  System shows all dogs and customers, plus upcoming activities.
+1. User enters a dog ID and at least one replacement detail.
+2. System finds the dog in the complete list and validates the supplied details.
+3. System replaces the dog, preserving its ID, owner, and enrolments, and displays a success message.
 
-    Use case ends.
+   Use case ends.
 
 **Extensions**
 
-* 1a. User enters an invalid command format.
+* 2a. The ID is invalid or unknown, no edit field is supplied, or a detail is invalid:
+  system reports the problem without changing the dog.
 
-    * 1a1. System displays an unknown-command message.
-
-      Use case resumes from step 1.
-
-
-
-**Use case: UC03 - Edit Dog**
+**Use case: UC03 - Delete Dog (deletedog)**
 
 **MSS**
 
-1.  User requests to <ins>view dogs (UC02)</ins> using `reset`.
-2.  User enters the command, dog details and the dog id for the dog to be edited.
-3.  System validates the command, dog details and dog id.
-4.  System edits the dog and displays a success message.
+1. User enters a dog ID.
+2. System finds the dog in the complete list.
+3. System deletes the dog and all its dated activity enrolments, including past enrolments,
+   while retaining its former owner and the activity schedules.
 
-    Use case ends.
+   Use case ends.
 
 **Extensions**
 
-* 1a. User enters an invalid command format.
+* 2a. The ID is invalid or unknown: system reports the problem without deleting a record.
 
-    * 1a1. System displays an unknown-command message.
-
-      Use case resumes from step 1.
-
-* 2a. System detects invalid dog details.
-
-    * 2a1. System requests the correct details.
-
-      Use case resumes from step 2.
-
-* 2b. System cannot find the specified dog id.
-
-    * 2b1. System requests for an existing dog id.
-
-      Use case resumes from step 2.
-
-
-
-**Use case: UC04 - Delete Dog**
+**Use case: UC04 - Add Customer (addcustomer)**
 
 **MSS**
 
-1.  User requests to <ins>view dogs (UC02)</ins> using `reset`.
-2.  User enters the command and the dog id for the dog to be deleted.
-3.  System validates the command and dog id.
-4.  System deletes the dog and displays a success message.
+1. User enters a name, primary phone number, email address, and backup contact.
+2. System validates the fields and checks that no customer, including a filtered-out customer,
+   uses the primary phone number or email address.
+3. System assigns a persistent customer ID, stores the customer, and displays a success message.
 
-    Use case ends.
+   Use case ends.
 
 **Extensions**
 
-* 1a. User enters an invalid command format.
+* 2a. A required field is missing or invalid: system reports the field error without adding a customer.
+* 2b. The primary phone or email is already in use: system identifies the duplicate field without
+  changing records. Phone comparison ignores spaces; email comparison ignores letter case.
 
-    * 1a1. System displays an unknown-command message.
+Backup contacts may be shared.
 
-      Use case resumes from step 1.
-
-* 2a. System cannot find the specified dog id.
-
-    * 2a1. System requests for an existing dog id.
-
-      Use case resumes from step 2.
-
-
-
-**Use case: UC05 - Add Customer**
+**Use case: UC05 - Edit Customer (editcustomer)**
 
 **MSS**
 
-1.  User enters the command and the customer details to add a customer.
-2.  System validates the command and customer details, including the uniqueness of the primary phone number and email address.
-3.  System adds the customer and displays a success message.
+1. User enters a customer ID and at least one replacement detail.
+2. System finds the customer in the complete list and validates the resulting contact details
+   against other customers, excluding the customer being edited.
+3. System replaces the customer, preserving the ID used by their dogs, and displays a success message.
 
-    Use case ends.
+   Use case ends.
 
 **Extensions**
 
-* 1a. User enters an invalid command format.
+* 2a. The ID is invalid or unknown, no edit field is supplied, or a detail is invalid:
+  system reports the problem without changing the customer.
+* 2b. Another customer uses the resulting primary phone or email: system identifies the duplicate
+  field without changing records.
 
-    * 1a1. System displays an unknown-command message.
+Unspecified details are retained, and backup contacts may be shared.
 
-      Use case resumes from step 1.
-
-* 2a. System detects invalid customer details.
-
-    * 2a1. System requests for correct details.
-
-      Use case resumes from step 1.
-
-* 2b. System detects that the primary phone number or email address is already used by an existing customer,
-  including customers hidden by filters. Phone comparison ignores spaces; email comparison ignores letter case.
-
-    * 2b1. System identifies the duplicate contact field and displays an error without adding a customer or changing existing records.
-
-      Use case resumes from step 1.
-
-Shared backup contact numbers are allowed.
-
-
-
-**Use case: UC06 - View Customer**
+**Use case: UC06 - Delete Customer (deletecustomer)**
 
 **MSS**
 
-1.  User requests to restore the display using `reset`.
-2.  System shows all customers and dogs, plus upcoming activities.
+1. User enters a customer ID.
+2. System finds the customer in the complete list.
+3. System deletes the customer and unlinks their dogs without deleting the dogs.
 
-    Use case ends.
+   Use case ends.
 
 **Extensions**
 
-* 1a. User enters an invalid command format.
+* 2a. The ID is invalid or unknown: system reports the problem without changing records.
 
-    * 1a1. System displays an unknown-command message.
-
-      Use case resumes from step 1.
-
-
-
-**Use case: UC07 - Edit Customer**
+**Use case: UC07 - Link Dogs to a Customer (link)**
 
 **MSS**
 
-1.  User requests to <ins>view customers (UC06)</ins> using `reset`.
-2.  User enters the command, customer details and the customer ID for the customer to be edited.
-3.  System validates the command, customer details and positive customer ID, including the uniqueness of the resulting primary phone number and email address against other customers.
-4.  System edits the customer and displays a success message.
+1. User enters one customer ID and one or more distinct dog IDs.
+2. System validates that the customer and all dogs exist and that every selected dog is unowned.
+3. System links all selected dogs to the customer and updates the active view.
 
-    Use case ends.
+   Use case ends.
 
 **Extensions**
 
-* 2a. User enters an invalid command format.
+* 2a. Any ID is invalid or missing, a dog is already owned, or a dog ID is repeated:
+  system rejects the entire batch without changing ownership.
 
-    * 2a1. System displays an error message.
-
-      Use case resumes from step 2.
-
-* 3a. System detects invalid customer details or a non-positive customer ID.
-
-    * 3a1. System requests the correct details without changing existing records.
-
-      Use case resumes from step 2.
-
-* 3b. System cannot find the specified customer ID.
-
-    * 3b1. System requests an existing customer ID without changing existing records.
-
-      Use case resumes from step 2.
-
-* 3c. System detects that the resulting primary phone number or email address is already used by another customer,
-  including customers hidden by filters. Phone comparison ignores spaces; email comparison ignores letter case.
-
-    * 3c1. System identifies the duplicate contact field and displays an error without changing existing records.
-
-      Use case resumes from step 2.
-
-Customers may retain their own primary phone number and email address. Shared backup contact numbers are allowed.
-
-
-
-**Use case: UC08 - Delete Customer**
+**Use case: UC08 - Unlink Dogs (unlink)**
 
 **MSS**
 
-1.  User requests to <ins>view customers (UC06)</ins> using `reset`.
-2.  User enters the command and the customer id for the customer to be deleted.
-3.  System validates the command and customer id.
-4.  System deletes the customer and displays a success message.
+1. User enters either an existing customer ID or one or more distinct dog IDs.
+2. System finds the linked dogs and validates the entire request.
+3. System removes their ownership links while retaining the dog and customer records.
 
-    Use case ends.
+   Use case ends.
 
 **Extensions**
 
-* 1a. User enters an invalid command format.
+* 2a. A selected dog is missing or unowned, an ID is repeated, or the selected customer is
+  missing or has no linked dogs: system rejects the entire request without changing ownership.
 
-    * 1a1. System displays an unknown-command message.
-
-      Use case resumes from step 1.
-
-* 2a. System cannot find the specified customer id.
-
-    * 2a1. System requests for an existing customer id.
-
-      Use case resumes from step 2.
-
-
-
-**Use case: UC09 - Edit Activity**
+**Use case: UC09 - Add Activity (addactivity)**
 
 **MSS**
 
-1.  User enters the command, the persistent activity ID and one or more activity details to edit.
-2.  System validates the command, activity ID and resulting activity details, and checks that the activity has no enrolments.
-3.  System updates the activity schedule, preserving its ID and unspecified details, and displays a success message.
+1. User enters a name, first date, start time, end time, and recurrence.
+2. System validates the schedule and assigns a persistent activity ID.
+3. System stores the activity without enrolments and displays a success message.
 
-    Use case ends.
+   Use case ends.
 
 **Extensions**
 
-* 2a. User enters an invalid command format or activity ID format, or provides no fields to edit.
+* 2a. A field is missing or invalid, or the end time is not later than the start time:
+  system reports the problem without creating an activity.
+* 2b. No activity IDs remain: system reports exhaustion without changing records.
 
-    * 2a1. System displays an error message without changing existing records.
+Past first dates and overlapping activities without enrolled dogs are permitted.
 
-      Use case resumes from step 1.
-
-* 2b. System detects invalid activity details, including an end time that is not later than the start time on the same day.
-
-    * 2b1. System requests the correct details without changing existing records.
-
-      Use case resumes from step 1.
-
-* 2c. System cannot find the specified activity ID, including in activities hidden by filters.
-
-    * 2c1. System displays an error requesting an existing activity ID without changing existing records.
-
-      Use case resumes from step 1.
-
-* 2d. System detects that the activity has enrolments, including past occurrences.
-
-    * 2d1. System rejects the edit and asks the user to create a new activity instead, without changing existing records.
-
-      Use case ends.
-
-For recurring activities, the edit applies to the entire schedule rather than a single occurrence.
-
-
-
-**Use case: UC10 - Delete Activity**
+**Use case: UC10 - Edit Activity (editactivity)**
 
 **MSS**
 
-1.  User enters the command and the persistent activity ID for the activity to be deleted.
-2.  System validates the command and activity ID and locates the activity, including activities hidden by filters.
-3.  System deletes the activity schedule and all its dog enrolments, including past occurrences, and displays a success message.
+1. User enters an activity ID and at least one replacement field.
+2. System finds the activity in the complete list, validates the resulting schedule, and confirms
+   that the activity has no enrolments on any occurrence.
+3. System updates the entire schedule, preserving its ID and unspecified fields.
 
-    Use case ends.
+   Use case ends.
 
 **Extensions**
 
-* 2a. User enters an invalid command format or activity ID format.
+* 2a. The ID is invalid or unknown, no edit field is supplied, or the resulting schedule is invalid:
+  system reports the problem without changing the activity.
+* 2b. The activity has enrolments: system rejects the edit and suggests creating a new activity.
 
-    * 2a1. System displays an error message without changing existing records.
-
-      Use case resumes from step 1.
-
-* 2b. System cannot find the specified activity ID.
-
-    * 2b1. System displays an error requesting an existing activity ID without changing existing records.
-
-      Use case resumes from step 1.
-
-For recurring activities, deletion removes the entire schedule rather than a single occurrence.
-Dog and customer records, other activity schedules and their enrolments are preserved.
-
-
-
-**Use case: UC11 - Clear all records with confirmation**
+**Use case: UC11 - Delete Activity (deleteactivity)**
 
 **MSS**
 
-1. User enters `clear`.
+1. User enters an activity ID.
+2. System finds the activity in the complete list.
+3. System deletes the entire schedule and all its dated enrolments while retaining dogs,
+   customers, and other activities.
+
+   Use case ends.
+
+**Extensions**
+
+* 2a. The ID is invalid or unknown: system reports the problem without changing records.
+
+**Use case: UC12 - Enrol Dogs (enrol)**
+
+**MSS**
+
+1. User enters an activity ID, an occurrence date, and one or more distinct dog IDs.
+2. System validates all records, the date, existing enrolments, and overlapping bookings
+   for each dog on that date.
+3. System creates every requested dated enrolment.
+
+   Use case ends.
+
+**Extensions**
+
+* 2a. An ID or date is invalid, the date is before today or is not an occurrence, a dog is
+  already enrolled, or a booking overlaps: system rejects the entire batch.
+
+**Use case: UC13 - Unenrol Dogs (unenrol)**
+
+**MSS**
+
+1. User enters an activity ID, an occurrence date, and one or more distinct dog IDs.
+2. System validates the records and confirms every specified dog is enrolled in that occurrence.
+3. System removes only those dated enrolments, preserving the activity schedule and dogs.
+
+   Use case ends.
+
+**Extensions**
+
+* 2a. Any record, date, or specified enrolment is invalid or missing: system rejects the
+  entire batch without removing an enrolment.
+
+Past occurrence dates are allowed so historical mistakes can be corrected.
+
+**Use case: UC14 - Search Dogs (searchd)**
+
+**MSS**
+
+1. User enters one or more dog search fields: name, breed, size, or ID.
+2. System finds dogs matching every supplied field.
+3. System filters the dog, related customer, and enrolled activity displays without changing records.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. A field is invalid or the ID does not exist: system reports the problem and retains the current view.
+
+**Use case: UC15 - Search Customers (searchc)**
+
+**MSS**
+
+1. User enters one or more customer search fields: name, phone, email, backup contact, dog IDs, or customer ID.
+2. System finds customers matching every supplied field and any required dog ownership.
+3. System filters the customer, owned dog, and enrolled activity displays without changing records.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. A field is invalid or a specified customer or dog ID does not exist:
+  system reports the problem and retains the current view.
+
+If the specified dogs exist but no customer owns all of them, the search succeeds with no matching customers.
+
+**Use case: UC16 - Search Activities (searcha)**
+
+**MSS**
+
+1. User enters one or more activity search fields: name, date, time, recurrence, or ID.
+2. System finds schedules matching every supplied field.
+3. System filters the activity, enrolled dog, and owner displays without changing records.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. A field or ID is invalid: system reports the problem and retains the current view.
+
+**Use case: UC17 - Filter Unlinked Records (filterun)**
+
+**MSS**
+
+1. User enters filterun dog or filterun customer.
+2. System shows dogs without owners or customers without dogs, respectively, and clears the
+   other record panel. The dog form also shows activities booked by unowned dogs; the customer
+   form clears the activity panel.
+3. System keeps the filter active as records and ownership change.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. The category is missing or invalid: system reports the accepted categories and retains the view.
+
+**Use case: UC18 - Show Today's Activities (today)**
+
+**MSS**
+
+1. User enters today.
+2. System shows activities occurring on the current local date, dogs enrolled in those
+   occurrences, and their owners.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. User supplies extra arguments: system reports the format and retains the current view.
+
+**Use case: UC19 - Reset the Display (reset)**
+
+**MSS**
+
+1. User enters reset.
+2. System shows all customers and dogs and activity schedules with an occurrence today or later.
+3. System preserves the stored records.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. User supplies extra arguments: system reports the format and retains the current view.
+
+**Use case: UC20 - View Daycare Summary (summary)**
+
+**MSS**
+
+1. User enters summary.
+2. System reports total customers and dogs, total and upcoming activity schedules,
+   and today's activities and distinct enrolled dogs.
+3. System preserves records, filters, and undo/redo history.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. User supplies extra arguments: system reports the format without changing the view.
+
+**Use case: UC21 - Undo a Command (undo)**
+
+**MSS**
+
+1. User enters undo.
+2. System restores the records and view from before the most recent undoable command.
+3. System makes that command available for redo.
+
+   Use case ends.
+
+**Extensions**
+
+* 2a. No undoable command is available: system reports that there is nothing to undo.
+
+Only the most recent undoable command can be undone; confirmed clear discards the history.
+
+**Use case: UC22 - Redo a Command (redo)**
+
+**MSS**
+
+1. User enters redo.
+2. System restores the records and view from just before the last undo.
+3. System makes the redone command available for undo.
+
+   Use case ends.
+
+**Extensions**
+
+* 2a. No redo is available: system reports that there is nothing to redo.
+
+**Use case: UC23 - Clear All Records (clear)**
+
+**MSS**
+
+1. User enters clear.
 2. System warns that clearing cannot be undone and requests Y/N confirmation.
-3. User enters `Y`.
-4. System clears all records and undo/redo history, preserves active filters, and attempts to save.
+3. User enters Y.
+4. System removes all customers, dogs, activities, and enrolments and discards undo/redo history.
 
    Use case ends.
 
 **Extensions**
 
-* 3a. User enters `N`: system cancels without changing records or history. Use case ends.
-* 3b. User enters anything other than Y/N: system requests Y/N again without executing another command.
-  Use case resumes from step 3. Answers ignore case and surrounding whitespace.
-* 4a. Saving fails: system reports the error; memory remains cleared and history remains unavailable.
-  Use case ends.
+* 1a. User supplies arguments after clear: system rejects the command before requesting confirmation.
+* 3a. User enters N: system cancels without changing records or history.
+* 3b. User enters a different response: system requests Y/N again without executing another command.
+* 4a. Saving fails: system reports the error; memory remains cleared and undo/redo remain unavailable.
 
-**Use case: UC12 - Link a batch of dogs to a customer**
+Confirmation ignores letter case and surrounding whitespace; active filters remain in effect.
+
+**Use case: UC24 - Get Help (help)**
 
 **MSS**
 
-1. User supplies one customer ID and one or more distinct dog IDs using `link`.
-2. System validates the entire batch, including existence of every record and absence of existing owners.
-3. System assigns every selected dog to the customer, refreshes the active view, and attempts to save.
+1. User enters help, optionally followed by a command name.
+2. System opens the help window or displays that command's format and description.
+3. System preserves records, the current view, and undo/redo history.
 
    Use case ends.
 
 **Extensions**
 
-* 2a. The format or an ID is invalid, a record is missing, or any dog already has an owner:
-  system reports the problem without changing any ownership. Use case resumes from step 1.
-* 3a. Saving fails: system reports the error; ownership changes remain in memory and can be undone.
-  Use case ends.
+* 2a. The command name is unknown: system lists supported help topics without changing the view.
 
-`unlink d/ID [ID]...` follows the same atomic pattern, requiring every dog to exist and have an owner,
-then removing their ownership. Dogs may have different owners. `unlink c/ID` instead selects all dogs
-of one existing customer; a customer with no linked dogs is rejected. Neither form deletes records.
-
-**Use case: UC13 - Enrol a batch of dogs in an activity occurrence**
+**Use case: UC25 - Exit (exit)**
 
 **MSS**
 
-1. User supplies an activity ID, an occurrence date, and distinct dog IDs using `enrol`.
-2. System validates all records, that the date is today or later and occurs in the schedule, and that
-   none of the dogs is already enrolled or has an overlapping booking on that date.
-3. System creates all requested dated enrolments, refreshes the view, and attempts to save.
+1. User enters exit.
+2. System acknowledges the request and closes the application.
 
    Use case ends.
-
-**Extensions**
-
-* 2a. A field or record is invalid, the date is invalid, or any dog fails the booking checks:
-  system reports the problem without creating any requested enrolment. Use case resumes from step 1.
-* 3a. Saving fails: system reports the error; enrolments remain in memory and can be undone.
-  Use case ends.
-
-`unenrol` follows the same atomic pattern but requires every exact activity/dog/date booking to exist
-and removes those bookings. It permits past occurrence dates so historical mistakes can be corrected.
-Adjacent activities whose end and start times are equal do not conflict.
 
 ### Non-Functional Requirements
 

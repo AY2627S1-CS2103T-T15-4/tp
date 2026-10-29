@@ -76,8 +76,8 @@ You can use `searchc`, `searchd`, or
 * Field parameters can be in any order unless stated otherwise. `link` requires `c/` before `d/`.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* `reset` and `summary` reject extra parameters. `help` accepts an optional command name.
-  Some commands without parameters, such as `exit` and `clear`, ignore extra input.
+* `exit` ignores extra parameters. `clear`, `reset`, and `summary` reject extra parameters.<br>
+  `help` accepts an optional command name.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
@@ -576,7 +576,6 @@ running `help adddog`, `undo` undoes the addition. Running help after `undo` als
 
 <!--@@author-->
 
-<!--@@author its-shoutime-->
 #### Undoing and redoing a command: `undo`, `redo`
 
 `undo` restores the stored records and displayed view from before the most recent undoable command.
@@ -608,6 +607,8 @@ available where applicable, but the data file may not contain that change.
 Clears all customers, dogs, activities, and enrolments from WatchDog after confirmation.
 
 Format: `clear`
+
+Enter `clear` alone. Extra parameters are rejected before the confirmation prompt appears.
 
 The app warns that this action cannot be undone and asks for confirmation (Y/N).
 Enter `Y` to clear all entries or `N` to cancel in the command box. Both answers are

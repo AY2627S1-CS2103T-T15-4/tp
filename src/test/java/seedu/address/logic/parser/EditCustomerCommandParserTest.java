@@ -45,6 +45,8 @@ public class EditCustomerCommandParserTest {
     @Test
     public void parse_outOfRangeId_failure() {
         assertParseFailure(parser, " 2147483648 n/Alice", "Please provide a valid positive customer ID");
+        assertParseFailure(parser, " 999999999999999999999999999999999 n/Alice",
+                "Please provide a valid positive customer ID");
     }
 
     @Test

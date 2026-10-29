@@ -16,14 +16,18 @@ import seedu.address.model.dog.Size;
 public class ParserUtil {
 
     // @@author lilosy
-    /** Parses a positive persistent customer ID. */
+    /** Parses a positive persistent customer ID, rejecting values outside the supported integer range. */
     public static int parseCustomerId(String customerId) throws ParseException {
         requireNonNull(customerId);
         String trimmedId = customerId.trim();
         if (!StringUtil.isNonZeroUnsignedInteger(trimmedId)) {
             throw new ParseException("Please provide a valid positive customer ID");
         }
-        return Integer.parseInt(trimmedId);
+        try {
+            return Integer.parseInt(trimmedId);
+        } catch (NumberFormatException e) {
+            throw new ParseException("Please provide a valid positive customer ID", e);
+        }
     }
     // @@author
 
