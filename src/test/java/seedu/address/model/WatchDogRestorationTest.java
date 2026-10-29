@@ -1,11 +1,13 @@
 package seedu.address.model;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,46 @@ public class WatchDogRestorationTest {
     private static final Activity FIRST = activity(1, 9, 10);
     private static final Activity OVERLAPPING = activity(2, 9, 11);
     private static final Activity ADJACENT = activity(3, 10, 11);
+
+    @Test
+    public void addActivity_listenerResetsBook_detectsInvalidatedAllocation() {
+        WatchDog target = new WatchDog();
+        AtomicBoolean resetPending = new AtomicBoolean(true);
+        target.getActivityList().addListener((ListChangeListener<Activity>) change -> {
+            if (resetPending.getAndSet(false)) {
+                target.resetData(new WatchDog());
+            }
+        });
+
+        assertThrows(AssertionError.class, () -> target.addActivity(new ActivityName("Walk"), DATE,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE));
+    }
+
+    @Test
+    public void resetData_listenerRemovesRestoredActivity_detectsInvalidatedSnapshot() {
+        WatchDog target = new WatchDog();
+        AtomicBoolean removalPending = new AtomicBoolean(true);
+        target.getActivityList().addListener((ListChangeListener<Activity>) change -> {
+            if (removalPending.getAndSet(false)) {
+                target.removeActivity(FIRST);
+            }
+        });
+
+        assertThrows(AssertionError.class, () -> target.resetData(snapshot(List.of())));
+    }
+
+    @Test
+    public void resetData_listenerRemovesRestoredBooking_detectsInvalidatedSnapshot() {
+        WatchDog target = new WatchDog();
+        AtomicBoolean removalPending = new AtomicBoolean(true);
+        target.getActivityList().addListener((ListChangeListener<Activity>) change -> {
+            if (removalPending.getAndSet(false)) {
+                assertDoesNotThrow(() -> target.unenrolDogs(1, DATE, List.of(7)));
+            }
+        });
+
+        assertThrows(AssertionError.class, () -> target.resetData(snapshot(List.of(new Enrolment(1, 7, DATE)))));
+    }
 
     @Test
     public void resetData_invalidEnrolments_rejectsBeforePublishingAnyChanges() {
