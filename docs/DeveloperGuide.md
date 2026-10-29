@@ -14,6 +14,7 @@
 ## **Acknowledgements**
 
 * WatchDog adapts the architecture, utilities and documentation of [AddressBook Level-3](https://github.com/se-edu/addressbook-level3).
+* Libraries used: [JavaFX](https://openjfx.io/), [Jackson](https://github.com/FasterXML/jackson), [JUnit5](https://github.com/junit-team/junit5)
 
 --------------------------------------------------------------------------------------------------------------------
 
