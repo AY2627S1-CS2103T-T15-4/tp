@@ -43,6 +43,18 @@ public class CustomerTest {
     }
 
     @Test
+    public void isSameCustomer_unassignedCustomers_doNotShareIdentity() {
+        Customer unassigned = new Customer(NAME, PHONE, EMAIL, BACKUP_CONTACT);
+        Customer otherUnassigned = new Customer(NAME, PHONE, EMAIL, BACKUP_CONTACT);
+        Customer assigned = new Customer(1, NAME, PHONE, EMAIL, BACKUP_CONTACT);
+
+        assertTrue(unassigned.isSameCustomer(unassigned));
+        assertFalse(unassigned.isSameCustomer(otherUnassigned));
+        assertFalse(unassigned.isSameCustomer(assigned));
+        assertFalse(assigned.isSameCustomer(unassigned));
+    }
+
+    @Test
     public void equals() {
         Customer customer = new Customer(1, NAME, PHONE, EMAIL, BACKUP_CONTACT);
 
