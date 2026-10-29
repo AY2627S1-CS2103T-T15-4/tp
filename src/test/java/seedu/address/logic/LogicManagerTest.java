@@ -289,6 +289,17 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_clearWithArguments_rejectsWithoutRequestingConfirmation() throws Exception {
+        model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        WatchDog before = new WatchDog(model.getWatchDog());
+
+        assertThrows(ParseException.class, () -> logic.execute("clear 3"));
+
+        assertEquals(before, model.getWatchDog());
+        assertEquals(ClearCommand.MESSAGE_CONFIRMATION, logic.execute("clear").getFeedbackToUser());
+    }
+
+    @Test
     public void execute_clearConfirmation_acceptsEitherCaseAndSurroundingWhitespace() throws Exception {
         for (String response : List.of("Y", "y", "  Y  ")) {
             logic.execute("adddog n/Buddy b/Poodle s/small");

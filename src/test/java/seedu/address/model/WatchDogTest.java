@@ -340,6 +340,52 @@ public class WatchDogTest {
     }
 
     @Test
+    public void resetData_duplicateCustomerIds_rejectsWithoutMutation() {
+        WatchDog before = new WatchDog(watchDog);
+        Customer first = new Customer(1, "Alice Tan", "91234567", "alice@example.com", "98765432");
+        Customer duplicateId = new Customer(1, "Bob Lim", "92345678", "bob@example.com", "93456789");
+        Dog incomingDog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
+        ReadOnlyWatchDog invalidData = new ReadOnlyWatchDog() {
+            @Override
+            public ObservableList<Customer> getCustomerList() {
+                return FXCollections.observableArrayList(first, duplicateId);
+            }
+
+            @Override
+            public ObservableList<Dog> getDogList() {
+                return FXCollections.observableArrayList(incomingDog);
+            }
+        };
+
+        assertThrows(IllegalArgumentException.class, () -> watchDog.resetData(invalidData));
+        assertEquals(before, watchDog);
+    }
+
+    @Test
+    public void resetData_invalidCustomerCounter_rejectsWithoutMutation() {
+        watchDog.addCustomer(new Customer(1, "Existing", "91234567", "existing@example.com", "98765432"));
+        WatchDog before = new WatchDog(watchDog);
+        Customer incomingCustomer = new Customer(7, "Incoming", "92345678", "incoming@example.com", "93456789");
+
+        for (long invalidCounter : List.of(0L, 7L, (long) Integer.MAX_VALUE + 2)) {
+            ReadOnlyWatchDog invalidData = new ReadOnlyWatchDog() {
+                @Override
+                public ObservableList<Customer> getCustomerList() {
+                    return FXCollections.observableArrayList(incomingCustomer);
+                }
+
+                @Override
+                public long getNextCustomerId() {
+                    return invalidCounter;
+                }
+            };
+
+            assertThrows(IllegalArgumentException.class, () -> watchDog.resetData(invalidData));
+            assertEquals(before, watchDog);
+        }
+    }
+
+    @Test
     public void hasDog_sameId_returnsTrue() {
         Dog storedDog = new Dog(3, new DogName("Cookie"),
                 new Breed("Golden Retriever"), new Size("Large"));
