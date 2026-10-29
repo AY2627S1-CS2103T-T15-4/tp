@@ -4,11 +4,11 @@ skinparam arrowColor LOGIC_COLOR_T4
 
 actor User
 participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":WatchDogParser" as Router LOGIC_COLOR
 participant ":UnenrolDogCommandParser" as Parser LOGIC_COLOR
 participant "command:UnenrolDogCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
-participant ":AddressBook" as Book MODEL_COLOR
+participant ":WatchDog" as Book MODEL_COLOR
 
 User -> Logic : execute("unenrol date/2028-02-29 d/2  3 a/1")
 Logic -> Router : parseCommand(...)
