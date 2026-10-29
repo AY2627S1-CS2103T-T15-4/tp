@@ -95,8 +95,13 @@ public class WatchDogParser {
             case SearchDogCommand.COMMAND_WORD -> new SearchDogCommandParser().parse(arguments);
             case SearchCustomerCommand.COMMAND_WORD -> new SearchCustomerCommandParser().parse(arguments);
             case FilterUnlinkedCommand.COMMAND_WORD -> new FilterUnlinkedCommandParser().parse(arguments);
-            // @@author
-            case ClearCommand.COMMAND_WORD -> new ClearCommand();
+            case ClearCommand.COMMAND_WORD -> {
+                if (!arguments.isBlank()) {
+                    throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                            ClearCommand.MESSAGE_USAGE));
+                }
+                yield new ClearCommand();
+            }
             case LinkCommand.COMMAND_WORD -> new LinkCommandParser().parse(arguments);
             case UnlinkCommand.COMMAND_WORD -> new UnlinkCommandParser().parse(arguments);
             case EnrolDogCommand.COMMAND_WORD -> new EnrolDogCommandParser().parse(arguments);

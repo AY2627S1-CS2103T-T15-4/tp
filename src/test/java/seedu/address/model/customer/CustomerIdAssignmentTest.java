@@ -46,16 +46,19 @@ public class CustomerIdAssignmentTest {
     }
 
     @Test
-    public void resetData_zeroNextCustomerId_recomputesPositiveId() {
-        WatchDog watchDog = new WatchDog(new WatchDog() {
+    public void resetData_zeroNextCustomerId_rejectsWithoutMutation() {
+        WatchDog watchDog = new WatchDog();
+        WatchDog invalidData = new WatchDog() {
             @Override
             public long getNextCustomerId() {
                 return 0;
             }
-        });
+        };
 
+        assertThrows(IllegalArgumentException.class, "Invalid next customer ID.", () ->
+                watchDog.resetData(invalidData));
         assertEquals(1, watchDog.getNextCustomerId());
-        assertEquals(1, watchDog.addCustomer(customer("Alice")).getId());
+        assertEquals(0, watchDog.getCustomerList().size());
     }
 
     @Test

@@ -45,6 +45,24 @@ public class EditCustomerCommandTest {
     }
 
     @Test
+    public void execute_modelRejectsEdit_throwsCommandException() {
+        Model model = new ModelManager() {
+            @Override
+            public void setCustomer(Customer target, Customer editedCustomer) {
+                throw new IllegalArgumentException("Customer edit was rejected.");
+            }
+        };
+        model.addCustomer(customer(1, "Alice Tan", "91234567"));
+        EditCustomerDescriptor descriptor = new EditCustomerDescriptor();
+        descriptor.setName(new Name("Alice Lee"));
+
+        CommandException exception = org.junit.jupiter.api.Assertions.assertThrows(CommandException.class, () ->
+                new EditCustomerCommand(1, descriptor).execute(model));
+
+        assertEquals("Customer edit was rejected.", exception.getMessage());
+    }
+
+    @Test
     public void execute_allFieldsEdited_preservesCustomerFilterAndId() throws Exception {
         Model model = new ModelManager();
         model.addCustomer(customer(1, "Alice Tan", "91234567"));
@@ -102,6 +120,19 @@ public class EditCustomerCommandTest {
         assertFalse(descriptor.equals(null));
         assertFalse(descriptor.equals("descriptor"));
         assertTrue(descriptor.toString().contains("Alice Tan"));
+    }
+
+    @Test
+    public void descriptor_nullInputs_throwsNullPointerException() {
+        EditCustomerDescriptor descriptor = new EditCustomerDescriptor();
+
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () ->
+                new EditCustomerDescriptor(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> descriptor.setName(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> descriptor.setPhone(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> descriptor.setEmail(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () ->
+                descriptor.setBackupContact(null));
     }
 
     @Test

@@ -12,6 +12,8 @@ import seedu.address.model.WatchDog;
 public class ClearCommand extends Command {
 
     public static final String COMMAND_WORD = "clear";
+    public static final String MESSAGE_USAGE = "clear: Clears all records after Y/N confirmation. "
+            + "Does not accept parameters.";
     public static final String MESSAGE_SUCCESS = "WatchDog data has been cleared!";
     public static final String MESSAGE_CONFIRMATION = "Clear all customers, dogs, activities and enrolments? "
             + "Warning: this action cannot be undone. Enter Y to confirm or N to cancel (Y/N).";

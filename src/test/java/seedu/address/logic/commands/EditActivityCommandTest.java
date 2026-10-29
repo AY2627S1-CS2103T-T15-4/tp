@@ -8,11 +8,14 @@ import static seedu.address.testutil.Assert.assertThrows;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import seedu.address.logic.commands.EditActivityCommand.EditActivityDescriptor;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.WatchDogParser;
@@ -138,6 +141,31 @@ public class EditActivityCommandTest {
         assertThrows(CommandException.class, EditActivityCommand.MESSAGE_INVALID_ACTIVITY_ID, () ->
                 new EditActivityCommand(99, renamed).execute(model));
         assertEquals(originalActivities, model.getActivityList());
+    }
+
+    @Test
+    public void execute_invalidActivityList_reportsCommandException() {
+        EditActivityDescriptor descriptor = new EditActivityDescriptor();
+        descriptor.setName(new ActivityName("Training"));
+        ModelManager nullListModel = new ModelManager() {
+            @Override
+            public ObservableList<Activity> getActivityList() {
+                return null;
+            }
+        };
+        ModelManager nullEntryModel = new ModelManager() {
+            @Override
+            public ObservableList<Activity> getActivityList() {
+                ArrayList<Activity> entries = new ArrayList<>();
+                entries.add(null);
+                return FXCollections.observableArrayList(entries);
+            }
+        };
+
+        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_INVALID_ACTIVITY_LIST, () ->
+                new EditActivityCommand(1, descriptor).execute(nullListModel));
+        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_INVALID_ACTIVITY_LIST, () ->
+                new EditActivityCommand(1, descriptor).execute(nullEntryModel));
     }
 
     @Test

@@ -2,8 +2,10 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Objects;
 import java.util.logging.Logger;
 
+import javafx.collections.ObservableList;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -19,6 +21,7 @@ public class DeleteActivityCommand extends Command {
             + "Example: deleteactivity 21";
     public static final String MESSAGE_SUCCESS = "Successfully deleted activity %1$d: %2$s";
     public static final String MESSAGE_INVALID_ID = "Activity ID %d does not exist.";
+    public static final String MESSAGE_INVALID_ACTIVITY_LIST = "Cannot delete activity: the activity list is invalid.";
 
     private static final Logger logger = LogsCenter.getLogger(DeleteActivityCommand.class);
 
@@ -35,7 +38,13 @@ public class DeleteActivityCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        Activity activityToDelete = model.getActivityList().stream()
+        ObservableList<Activity> activities = model.getActivityList();
+        if (activities == null || activities.stream().anyMatch(Objects::isNull)) {
+            logger.warning("Cannot delete activity ID " + activityId + ": activity list is null or contains null.");
+            throw new CommandException(MESSAGE_INVALID_ACTIVITY_LIST);
+        }
+
+        Activity activityToDelete = activities.stream()
                 .filter(activity -> activity.getId() == activityId)
                 .findFirst()
                 .orElseThrow(() -> {

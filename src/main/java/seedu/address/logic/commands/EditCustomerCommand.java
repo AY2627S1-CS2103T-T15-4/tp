@@ -71,7 +71,11 @@ public class EditCustomerCommand extends Command {
         Customer editedCustomer = createEditedCustomer(customerToEdit, editCustomerDescriptor);
 
         CustomerContactValidator.validate(editedCustomer, model.getCustomerList(), customerId);
-        model.setCustomer(customerToEdit, editedCustomer);
+        try {
+            model.setCustomer(customerToEdit, editedCustomer);
+        } catch (IllegalArgumentException e) {
+            throw new CommandException(e.getMessage(), e);
+        }
         return new CommandResult(String.format(MESSAGE_EDIT_CUSTOMER_SUCCESS, Messages.format(editedCustomer)));
     }
 
@@ -127,13 +131,14 @@ public class EditCustomerCommand extends Command {
 
         /**
          * Copy constructor.
-         * A defensive copy of each supplied field is used internally.
+         * Copies each supplied field and rejects a null descriptor.
          */
         public EditCustomerDescriptor(EditCustomerDescriptor toCopy) {
-            setName(toCopy.name);
-            setPhone(toCopy.phone);
-            setEmail(toCopy.email);
-            setBackupContact(toCopy.backupContact);
+            requireNonNull(toCopy);
+            name = toCopy.name;
+            phone = toCopy.phone;
+            email = toCopy.email;
+            backupContact = toCopy.backupContact;
         }
 
         /**
@@ -144,7 +149,7 @@ public class EditCustomerCommand extends Command {
         }
 
         public void setName(Name name) {
-            this.name = name;
+            this.name = requireNonNull(name);
         }
 
         public Optional<Name> getName() {
@@ -152,7 +157,7 @@ public class EditCustomerCommand extends Command {
         }
 
         public void setPhone(Phone phone) {
-            this.phone = phone;
+            this.phone = requireNonNull(phone);
         }
 
         public Optional<Phone> getPhone() {
@@ -160,7 +165,7 @@ public class EditCustomerCommand extends Command {
         }
 
         public void setEmail(Email email) {
-            this.email = email;
+            this.email = requireNonNull(email);
         }
 
         public Optional<Email> getEmail() {
@@ -168,7 +173,7 @@ public class EditCustomerCommand extends Command {
         }
 
         public void setBackupContact(BackupContact backupContact) {
-            this.backupContact = backupContact;
+            this.backupContact = requireNonNull(backupContact);
         }
 
         public Optional<BackupContact> getBackupContact() {
