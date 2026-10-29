@@ -65,8 +65,8 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 * Field parameters can be in any order unless stated otherwise. `link` requires `c/` before `d/`.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Extraneous parameters for some commands that take no parameters, such as `exit` and `clear`, are ignored.<br>
-  `reset` and `summary` reject extra parameters. `help` accepts an optional command name.
+* `exit` ignores extra parameters. `clear`, `reset`, and `summary` reject extra parameters.<br>
+  `help` accepts an optional command name.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
@@ -546,6 +546,8 @@ the operating system clipboard rejects it.
 Clears all customers, dogs, activities, and enrolments from WatchDog after confirmation.
 
 Format: `clear`
+
+Enter `clear` alone. Extra parameters are rejected before the confirmation prompt appears.
 
 The app warns that this action cannot be undone and asks for confirmation (Y/N).
 Enter `Y` to clear all entries or `N` to cancel in the command box. Both answers are
