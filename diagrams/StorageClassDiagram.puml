@@ -20,6 +20,7 @@ Class JsonAdaptedCustomer
 Class JsonAdaptedDog
 Class JsonAdaptedActivity
 Class JsonAdaptedEnrolment
+Class NextDogIdDeserializer
 }
 
 }
@@ -36,6 +37,7 @@ JsonSerializableAddressBook --> "*" JsonAdaptedCustomer
 JsonSerializableAddressBook --> "*" JsonAdaptedDog
 JsonSerializableAddressBook --> "*" JsonAdaptedActivity
 JsonSerializableAddressBook --> "*" JsonAdaptedEnrolment
+JsonSerializableAddressBook ..> NextDogIdDeserializer : validates nextDogId
 JsonAdaptedEnrolment : activityId: int
 JsonAdaptedEnrolment : dogId: int
 JsonAdaptedEnrolment : date: LocalDate
