@@ -63,6 +63,7 @@ public class ModelManager implements Model {
         this(new WatchDog(), new UserPrefs());
     }
 
+    //@@author its-shoutime
     @Override
     public ModelState createState() {
         return new ModelState(new WatchDog(watchDog), activeCustomerPredicate, activeDogPredicate,
@@ -88,6 +89,7 @@ public class ModelManager implements Model {
         // Some restored predicates read another filtered list; re-evaluate after their source is installed.
         refreshDisplayedRecords();
     }
+    //@@author
 
     //=========== UserPrefs ==================================================================================
 
@@ -220,11 +222,13 @@ public class ModelManager implements Model {
         return watchDog.hasCustomer(customer);
     }
 
+    //@@author its-shoutime
     @Override
     public void deleteCustomer(Customer target) {
         watchDog.removeCustomer(target);
         refreshDisplayedRecords();
     }
+    //@@author
 
     @Override
     public void addCustomer(Customer customer) {
@@ -259,6 +263,7 @@ public class ModelManager implements Model {
         filteredDogs.setPredicate(predicate);
     }
 
+    //@@author its-shoutime
     @Override
     public ObservableList<Customer> getFilteredCustomerList() {
         return filteredCustomers;
@@ -270,6 +275,7 @@ public class ModelManager implements Model {
         activeCustomerPredicate = predicate;
         filteredCustomers.setPredicate(predicate);
     }
+    //@@author
 
     @Override
     public ObservableList<Activity> getFilteredActivityList() {

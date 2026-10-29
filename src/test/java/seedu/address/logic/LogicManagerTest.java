@@ -219,6 +219,7 @@ public class LogicManagerTest {
         assertTrue(notifications[0] >= 5);
     }
 
+    //@@author its-shoutime
     @Test
     public void execute_undoRedo_restoresDataAndAllowsAnotherUndo() throws Exception {
         ObservableList<Dog> dogs = logic.getDogList();
@@ -476,6 +477,7 @@ public class LogicManagerTest {
                 : String.format(LogicManager.FILE_OPS_ERROR_FORMAT, failure.getMessage());
         assertThrows(CommandException.class, expectedMessage, () -> logic.execute(undo ? "undo" : "redo"));
     }
+    //@@author
 
     /**
      * Executes the command and confirms that

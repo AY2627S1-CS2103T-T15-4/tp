@@ -74,6 +74,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 The original AB3 person commands `add`, `edit`, `delete INDEX` and `find` are no longer supported.
 Use the customer and dog commands described below.
 
+<!--@@author its-shoutime-->
 ### Viewing help: `help`
 
 Opens a help window containing the link to this User Guide. Use `help COMMAND` to display a specific
@@ -103,6 +104,7 @@ Both forms preserve records, filters, and undo/redo history. For example, after 
 running `help adddog`, `undo` undoes the addition. Running help after `undo` also preserves `redo`.
 
 
+<!--@@author-->
 <!-- @@author Kenneth-Chia -->
 ### Adding an activity: `addactivity`
 
@@ -523,6 +525,7 @@ If the ID does not exist, WatchDog displays:
 
 `Error in deleting dog:`<br>`Please enter a valid dog index`
 
+<!--@@author its-shoutime-->
 ### Deleting a customer: `deletecustomer`
 
 Deletes an existing customer using its persistent ID and removes their dogs' ownership links.
@@ -549,6 +552,7 @@ Right-click a customer or dog card to copy an individual field or all details in
 An unlinked dog's customer-ID action is disabled. The app briefly confirms a successful copy and reports when
 the operating system clipboard rejects it.
 
+<!--@@author-->
 ### Clearing all entries: `clear`
 
 Clears all customers, dogs, activities, and enrolments from WatchDog after confirmation.
@@ -573,6 +577,7 @@ if they match the active view. For example, after `searchc n/Alice` followed by 
 a customer named Bob succeeds but does not display Bob in the customer panel. Use `reset` to show all
 customers and dogs, plus activities occurring today or later.
 
+<!--@@author its-shoutime-->
 ### Undoing and redoing a command: `undo`, `redo`
 
 `undo` restores the stored records and displayed view from before the most recent undoable command.
@@ -597,6 +602,7 @@ A save error can occur after an undoable command, `undo`, `redo`, or `clear` has
 The change remains visible in the current session, with the corresponding undo or redo operation
 available where applicable, but the data file may not contain that change.
 
+<!--@@author-->
 ### Exiting the program: `exit`
 
 Closes WatchDog. Record changes are saved automatically after commands; window preferences are saved
@@ -891,6 +897,7 @@ Prerequisite: the reset view from the previous section. Use a plain-text editor 
    Run `reset`; the panels return to the top. Check that the three lines from `summary` can be read,
    scrolling the result area if necessary.
 
+<!--@@author its-shoutime-->
 ### Help and single-step undo/redo
 
 Prerequisite: the dataset is unchanged except for the earlier Alice and Cookie edits. Run these steps
@@ -913,6 +920,7 @@ without inserting additional commands between them.
    Expected: Buddy, Alice, and activities 1 and 2 return as the filtered view. Run `redo`;
    expect the overview again. View-changing commands participate in the same single-step history.
 
+<!--@@author-->
 ### Saving, shutdown, and restart
 
 Prerequisite: the shared records and bookings are still present. Do this before the deletion tests.
@@ -926,6 +934,7 @@ Prerequisite: the shared records and bookings are still present. Do this before 
    Milo is unowned. Activities keep IDs 1–5 and their schedules. Run `searchd i/1` to verify Buddy's two
    Morning walk dates and Training booking survived; run `reset` to continue.
 
+<!--@@author its-shoutime-->
 ### Deleting records and checking related data
 
 These tests deliberately change the shared dataset. Run them in order after the restart checks.
@@ -944,6 +953,7 @@ These tests deliberately change the shared dataset. Run them in order after the 
 1. Run `addactivity n/Replacement walk date/2026-10-29 start/09:00 end/10:00 r/daily`.<br>
    Expected: the new activity has ID 6, not the deleted ID 1, and has no bookings.
 
+<!--@@author-->
 ### Clear confirmation and retained filters
 
 Prerequisite: the remaining records from the deletion section. Run `reset` first.

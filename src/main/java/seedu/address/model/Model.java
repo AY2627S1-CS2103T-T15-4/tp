@@ -29,6 +29,7 @@ public interface Model {
 
     Predicate<Activity> PREDICATE_SHOW_ALL_ACTIVITIES = unused -> true;
 
+    //@@author its-shoutime
     /** Captures the complete model state needed to restore a previous command. */
     record ModelState(ReadOnlyWatchDog watchDog, Predicate<Customer> customerPredicate,
             Predicate<Dog> dogPredicate, Predicate<Activity> activityPredicate,
@@ -48,6 +49,7 @@ public interface Model {
     default void restoreState(ModelState state) {
         throw new UnsupportedOperationException("Model snapshots are not supported");
     }
+    //@@author
 
     void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
 
@@ -95,11 +97,13 @@ public interface Model {
 
     boolean hasCustomer(Customer customer);
 
+    //@@author its-shoutime
     /**
      * Deletes the given customer and unlinks their dogs, preserving the dog records.
      * The customer must exist in WatchDog.
      */
     void deleteCustomer(Customer customer);
+    //@@author
 
     /**
      * Adds the given customer.
