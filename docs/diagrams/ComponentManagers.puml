@@ -2,30 +2,25 @@
 !include style.puml
 skinparam arrowThickness 1.1
 skinparam arrowColor LOGIC_COLOR_T4
-skinparam classBackgroundColor LOGIC_COLOR
 
 package Logic as LogicPackage {
-Class "<<interface>>\nLogic" as Logic
-Class LogicManager
+class "<<interface>>\nLogic" as Logic LOGIC_COLOR
+class LogicManager LOGIC_COLOR
 }
 
 package Model as ModelPackage {
-Class "<<interface>>\nModel" as Model
-Class ModelManager
+class "<<interface>>\nModel" as Model MODEL_COLOR
+class ModelManager MODEL_COLOR
 }
 
 package Storage as StoragePackage {
-Class "<<interface>>\nStorage" as Storage
-Class StorageManager
+class "<<interface>>\nStorage" as Storage STORAGE_COLOR
+class StorageManager STORAGE_COLOR
 }
-
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Logic
 
 LogicManager .up.|> Logic
 ModelManager .up.|> Model
 StorageManager .up.|> Storage
-
-LogicManager --> Model
-LogicManager --> Storage
+LogicManager --> "1" Model : model
+LogicManager --> "1" Storage : storage
 @enduml

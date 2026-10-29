@@ -2,76 +2,34 @@
 !include style.puml
 skinparam ArrowFontStyle plain
 skinparam ParticipantFontColor #FFFFFF
-skinparam maxMessageSize 230
+skinparam maxMessageSize 180
 
-actor User
-participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":WatchDogParser" as Router LOGIC_COLOR
-participant ":EditActivityCommandParser" as Parser LOGIC_COLOR
 participant "command:EditActivityCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
-participant ":WatchDog" as Book MODEL_COLOR
-participant ":StorageManager" as Storage STORAGE_COLOR
 
-User -> Logic : execute("editactivity 1 start/10:00")
-activate Logic
-Logic -> Router : parseCommand(commandText)
-activate Router
-Router -> Parser : parse(arguments)
-activate Parser
-Parser -> Parser : validate ID and optional fields
-Parser -> Command : new EditActivityCommand(1, descriptor)
-Parser --> Router : command
-deactivate Parser
-Router --> Logic : command
-deactivate Router
-
-Logic -> Command : execute(model)
-activate Command
+[-> Command : execute(model)
 Command -> Model : getActivityList()
-activate Model
 Model --> Command : activities
-deactivate Model
-Command -> Command : find activity by persistent ID
-Command -> Command : createEditedActivity(target, descriptor)
-note right of Command
-  The replacement retains the activity ID,
-  and values of fields that were not edited.
+note over Command
+  Finds the target by persistent ID.
+  Builds an edited activity with the same ID;
+  omitted fields retain their values.
 end note
 Command -> Model : setActivity(target, editedActivity)
-activate Model
-Model -> Book : setActivity(target, editedActivity)
-activate Book
-Book -> Book : verify target and matching ID
-alt activity has enrolments
-  Book --> Model : IllegalArgumentException: cannot edit; create a new activity
-  Model --> Command : exception
-  Command --> Logic : CommandException
-  deactivate Command
-  Logic --> User : display error
-else activity has no enrolments
-  Book -> Book : validateNoActivityConflict(editedActivity)
-  Book -> Book : replace activity
-  Book --> Model : success
-  Model --> Command : success
-  Command --> Logic : CommandResult with activity ID
-  deactivate Command
-  Logic -> Model : getWatchDog()
-  activate Model
-  Model --> Logic : watchDog
-  deactivate Model
-  Logic -> Storage : saveWatchDog(watchDog)
-  activate Storage
-  Storage --> Logic
-  deactivate Storage
-  Logic --> User : display result
-end
-deactivate Book
-deactivate Model
-deactivate Logic
+note right of Model
+  Rejects an activity with any enrolments.
+  For an unenrolled activity, validates
+  and replaces the stored schedule.
+  Editing never removes enrolments.
+end note
+note over Command
+  Reports the edited activity ID.
+end note
+[<-- Command : commandResult
 
 legend bottom
-  Successful edit and rejection due to enrolments are shown.
-  Invalid input, missing IDs, booking conflicts, and storage errors are omitted.
+  Edits an activity with no enrolments. Model internals are omitted.
+  Parsing and saving follow the shared Logic flow.
+  Successful execution only; validation failures are omitted.
 endlegend
 @enduml
