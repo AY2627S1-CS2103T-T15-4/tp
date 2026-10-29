@@ -8,7 +8,7 @@
  * {@link seedu.address.model.activity.Activity#nextOccurrenceOnOrAfter(java.time.LocalDate)}
  * finds one next date without materializing an unbounded recurring series.
  *
- * <p>Identity is the persistent nonnegative activity ID, supplied by the caller. Equality also
+ * <p>Identity is the persistent positive activity ID, supplied by the caller. Equality also
  * includes schedule details. Replacement methods preserve identity and leave the original unchanged.
  * Times describe a same-day interval with end later than start. Dates do not depend on today's clock.
  *

@@ -36,10 +36,15 @@ public class EditCustomerCommandParserTest {
 
     @Test
     public void parse_missingIdOrEditedField_failure() {
-        assertParseFailure(parser, " n/New Name", "Customer ID must be a positive integer.");
+        assertParseFailure(parser, " n/New Name", "Please provide a valid positive customer ID");
         assertParseFailure(parser, " 1", EditCustomerCommand.MESSAGE_NOT_EDITED);
-        assertParseFailure(parser, " 0 n/New Name", "Customer ID must be a positive integer.");
-        assertParseFailure(parser, " invalid n/New Name", "Customer ID must be a positive integer.");
+        assertParseFailure(parser, " 0 n/New Name", "Please provide a valid positive customer ID");
+        assertParseFailure(parser, " invalid n/New Name", "Please provide a valid positive customer ID");
+    }
+
+    @Test
+    public void parse_outOfRangeId_failure() {
+        assertParseFailure(parser, " 2147483648 n/Alice", "Please provide a valid positive customer ID");
     }
 
     @Test

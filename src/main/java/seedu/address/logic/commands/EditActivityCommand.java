@@ -29,7 +29,9 @@ public class EditActivityCommand extends Command {
             + PREFIX_START + "HH:mm] [" + PREFIX_END + "HH:mm] ["
             + PREFIX_RECURRENCE + "once|daily|weekly]\n"
             + "Example: " + COMMAND_WORD + " 1 " + PREFIX_DATE + "2026-11-04 " + PREFIX_START + "10:00";
-    public static final String MESSAGE_EDIT_ACTIVITY_SUCCESS = "Edited activity ID %d. Enrolments removed: %d.";
+    public static final String MESSAGE_EDIT_ACTIVITY_SUCCESS = "Edited activity ID %d.";
+    public static final String MESSAGE_ACTIVITY_HAS_ENROLMENTS =
+            "Activity ID %d has enrolments and cannot be edited. Create a new activity instead.";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
     public static final String MESSAGE_INVALID_ACTIVITY_ID = "The activity ID provided is invalid.";
 
@@ -40,8 +42,8 @@ public class EditActivityCommand extends Command {
 
     /** Creates a command to edit the activity with {@code activityId}. */
     public EditActivityCommand(int activityId, EditActivityDescriptor editActivityDescriptor) {
-        if (activityId < 0) {
-            throw new IllegalArgumentException("Activity ID must be nonnegative.");
+        if (activityId <= 0) {
+            throw new IllegalArgumentException("Activity ID must be positive.");
         }
         requireNonNull(editActivityDescriptor);
         this.activityId = activityId;
@@ -64,16 +66,15 @@ public class EditActivityCommand extends Command {
                     return new CommandException(MESSAGE_INVALID_ACTIVITY_ID);
                 });
 
-        int removedEnrolments;
         try {
             Activity editedActivity = createEditedActivity(activityToEdit, editActivityDescriptor);
-            removedEnrolments = model.setActivity(activityToEdit, editedActivity);
+            model.setActivity(activityToEdit, editedActivity);
         } catch (IllegalArgumentException e) {
             logger.warning("Could not edit activity ID " + activityId + ": " + e.getMessage());
             throw new CommandException(e.getMessage(), e);
         }
-        logger.info("Edited activity ID " + activityId + "; enrolments removed: " + removedEnrolments);
-        return new CommandResult(String.format(MESSAGE_EDIT_ACTIVITY_SUCCESS, activityId, removedEnrolments));
+        logger.info("Edited activity ID " + activityId);
+        return new CommandResult(String.format(MESSAGE_EDIT_ACTIVITY_SUCCESS, activityId));
     }
 
     private static Activity createEditedActivity(Activity activity, EditActivityDescriptor descriptor) {
@@ -120,6 +121,9 @@ public class EditActivityCommand extends Command {
             recurrence = toCopy.recurrence;
         }
 
+        /**
+         * Returns true if at least one field is edited.
+         */
         public boolean isAnyFieldEdited() {
             return name != null || date != null || startTime != null || endTime != null || recurrence != null;
         }

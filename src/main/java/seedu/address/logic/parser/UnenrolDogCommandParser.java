@@ -27,6 +27,7 @@ public class UnenrolDogCommandParser implements Parser<UnenrolDogCommand> {
     private static final String MESSAGE_INVALID_DOG_IDS =
             "Please provide positive, valid dog IDs separated by spaces.";
 
+
     @Override
     public UnenrolDogCommand parse(String args) throws ParseException {
         String input = args.strip();
@@ -54,6 +55,7 @@ public class UnenrolDogCommandParser implements Parser<UnenrolDogCommand> {
             for (String dogId : fields.dogIds().split("\\s+")) {
                 dogIds.add(Integer.parseInt(dogId));
             }
+
         } catch (NumberFormatException e) {
             throw error(MESSAGE_INVALID_DOG_IDS, e);
         }

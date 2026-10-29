@@ -30,6 +30,8 @@
       <Label fx:id="recurrence" styleClass="cell_small_label" />
       <Label fx:id="dogSummary" lineSpacing="1" styleClass="cell_small_label" wrapText="true"
           maxWidth="Infinity" />
+      <Label fx:id="enrolments" lineSpacing="1" styleClass="cell_small_label" wrapText="true"
+          maxWidth="Infinity" />
     </VBox>
   </GridPane>
 </HBox>

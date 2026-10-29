@@ -45,7 +45,7 @@ public class LinkCommandTest {
         model.updateFilteredDogList(dog -> dog.getId() == 43);
         var customersBefore = List.copyOf(model.getCustomerList());
         Dog unaffected = model.getDogList().get(2);
-        assertEquals("Linked dog IDs [42, 43] to customer ID 7.", execute("link c/7 d/42 d/43"));
+        assertEquals("Linked dog IDs [42, 43] to customer ID 7.", execute("link c/7 d/42 43"));
         assertEquals(Optional.of(7), model.getDogList().get(0).getOwnerId());
         assertEquals(Optional.of(7), model.getDogList().get(1).getOwnerId());
         assertEquals(unaffected, model.getDogList().get(2));
@@ -57,22 +57,22 @@ public class LinkCommandTest {
     @Test
     public void execute_missingEndpoint_rejectsEntireBatch() {
         assertRejected("link c/99 d/42", "Customer ID 99 does not exist.");
-        assertRejected("link c/7 d/42 d/99", "Dog ID 99 does not exist.");
-        assertRejected("link c/7 d/99 d/42", "Dog ID 99 does not exist.");
+        assertRejected("link c/7 d/42 99", "Dog ID 99 does not exist.");
+        assertRejected("link c/7 d/99 42", "Dog ID 99 does not exist.");
     }
 
     @Test
     public void execute_alreadyOwned_rejectsSameOwnerAndReassignmentAtomically() throws Exception {
         execute("link c/7 d/43");
-        assertRejected("link c/7 d/42 d/43", "Dog ID 43 is already linked to customer ID 7.");
-        assertRejected("link c/8 d/42 d/43", "Dog ID 43 is already linked to customer ID 7.");
+        assertRejected("link c/7 d/42 43", "Dog ID 43 is already linked to customer ID 7.");
+        assertRejected("link c/8 d/42 43", "Dog ID 43 is already linked to customer ID 7.");
     }
 
     @Test
     public void deleteCustomer_linkedDogs_unlinksOnlyOwnedDogsAndPreservesRecords() throws Exception {
         Dog firstUnowned = model.getDogList().get(0);
         Dog secondUnowned = model.getDogList().get(1);
-        execute("link c/7 d/42 d/43");
+        execute("link c/7 d/42 43");
         execute("link c/8 d/44");
         Dog otherOwnersDog = model.getDogList().get(2);
         Dog unlinked = model.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("small")));
@@ -82,7 +82,7 @@ public class LinkCommandTest {
         assertTrue(model.getFilteredDogList().isEmpty());
         assertEquals(8, model.getCustomerList().get(0).getId());
         assertEquals(1, model.getCustomerList().size());
-        execute("link c/8 d/42 d/43");
+        execute("link c/8 d/42 43");
         assertEquals(Optional.of(8), model.getDogList().get(0).getOwnerId());
         assertEquals(Optional.of(8), model.getDogList().get(1).getOwnerId());
     }
@@ -128,6 +128,7 @@ public class LinkCommandTest {
         assertNotEquals(command, null);
         assertNotEquals(command, new Object());
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(-1, List.of(42)));
+        assertThrows(IllegalArgumentException.class, () -> new LinkCommand(0, List.of(42)));
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(7, List.of()));
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(7, List.of(-1)));
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(7, List.of(42, 42)));

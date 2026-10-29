@@ -10,9 +10,9 @@ import java.util.regex.Pattern;
 import seedu.address.logic.commands.LinkCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
-/** Parses one customer prefix followed by one or more dog prefixes. */
+/** Parses one customer field followed by one space-separated dog ID field. */
 public class LinkCommandParser implements Parser<LinkCommand> {
-    private static final Pattern LINK_FORMAT = Pattern.compile("c/[0-9]+(?:\\s+d/[0-9]+)+");
+    private static final Pattern LINK_FORMAT = Pattern.compile("c/[0-9]+\\s+d/[0-9]+(?:\\s+[0-9]+)*");
 
     @Override
     public LinkCommand parse(String args) throws ParseException {
@@ -23,13 +23,17 @@ public class LinkCommandParser implements Parser<LinkCommand> {
         String[] fields = input.split("\\s+");
         try {
             int customerId = Integer.parseInt(fields[0].substring(2));
+            if (customerId <= 0) {
+                throw invalidFormat();
+            }
             List<Integer> dogIds = new ArrayList<>();
             for (int i = 1; i < fields.length; i++) {
-                int dogId = Integer.parseInt(fields[i].substring(2));
+                int dogId = Integer.parseInt(i == 1 ? fields[i].substring(2) : fields[i]);
                 if (dogId < 1) {
                     throw invalidFormat();
                 }
                 dogIds.add(dogId);
+
             }
             if (new HashSet<>(dogIds).size() != dogIds.size()) {
                 throw invalidFormat();

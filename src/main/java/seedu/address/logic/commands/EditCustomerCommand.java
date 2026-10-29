@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import seedu.address.commons.util.CollectionUtil;
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.customer.BackupContact;
@@ -45,8 +46,10 @@ public class EditCustomerCommand extends Command {
     private final EditCustomerDescriptor editCustomerDescriptor;
 
     /**
-     * @param customerId persistent ID of the customer to edit
-     * @param editCustomerDescriptor details to edit the customer with
+     * Creates a command to edit the customer with the specified ID and replacement details.
+     *
+     * @param customerId persistent ID of the customer to edit.
+     * @param editCustomerDescriptor details to edit the customer with.
      */
     public EditCustomerCommand(int customerId, EditCustomerDescriptor editCustomerDescriptor) {
         if (customerId < 1) {
@@ -67,15 +70,16 @@ public class EditCustomerCommand extends Command {
                 .orElseThrow(() -> new CommandException(MESSAGE_CUSTOMER_NOT_FOUND));
         Customer editedCustomer = createEditedCustomer(customerToEdit, editCustomerDescriptor);
 
+        CustomerContactValidator.validate(editedCustomer, model.getCustomerList(), customerId);
         model.setCustomer(customerToEdit, editedCustomer);
-        return new CommandResult(String.format(MESSAGE_EDIT_CUSTOMER_SUCCESS, editedCustomer));
+        return new CommandResult(String.format(MESSAGE_EDIT_CUSTOMER_SUCCESS, Messages.format(editedCustomer)));
     }
 
     /**
      * Creates and returns a customer with the details of {@code customerToEdit} updated by the descriptor.
      */
     private static Customer createEditedCustomer(Customer customerToEdit,
-                                                   EditCustomerDescriptor editCustomerDescriptor) {
+            EditCustomerDescriptor editCustomerDescriptor) {
         assert customerToEdit != null;
 
         Name updatedName = editCustomerDescriptor.getName().orElse(customerToEdit.getName());

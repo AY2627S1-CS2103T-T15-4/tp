@@ -1,5 +1,6 @@
 package seedu.address.logic;
 
+import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.CommandResult;
@@ -16,9 +17,15 @@ import seedu.address.model.dog.Dog;
 public interface Logic {
     /**
      * Executes the command and returns the result.
-     * @param commandText The command as entered by the user.
+     * A clear command first returns a warning and requests confirmation without changing data or history.
+     * While confirmation is pending, input is treated as a case-insensitive Y/N answer,
+     * ignoring surrounding whitespace. Y clears the data and undo/redo history; N cancels without changing either.
+     * Other input leaves confirmation pending.
+     *
+     * @param commandText The command or pending clear confirmation answer as entered by the user.
      * @return the result of the command execution.
-     * @throws CommandException If an error occurs during command execution.
+     * @throws CommandException If an error occurs during command execution
+     *     or a pending confirmation answer is invalid.
      * @throws ParseException If an error occurs during parsing.
      */
     CommandResult execute(String commandText) throws CommandException, ParseException;
@@ -44,6 +51,12 @@ public interface Logic {
 
     /** Returns an unmodifiable observable view of filtered activities. */
     ObservableList<Activity> getFilteredActivityList();
+
+    /** Returns the current search-specific enrolment summary for an activity. */
+    String getActivityEnrolmentSummary(Activity activity);
+
+    /** Returns an observable signal for changes to the activity-card enrolment context. */
+    Observable getActivityEnrolmentContextChanges();
 
     /**
      * Returns the user prefs' GUI settings.

@@ -15,11 +15,12 @@ import seedu.address.model.dog.exceptions.UnlinkException;
 public class UnlinkCommand extends Command {
     public static final String COMMAND_WORD = "unlink";
     public static final String MESSAGE_USAGE = "unlink: Unlinks selected dogs or all dogs owned by a customer.\n"
-            + "Parameters: d/DOG_ID [d/DOG_ID]... OR c/CUSTOMER_ID\n"
-            + "Customer IDs must be from 0 to 2147483647; dog IDs must be positive and must not repeat.\n"
+            + "Parameters: d/DOG_ID [DOG_ID]... OR c/CUSTOMER_ID\n"
+            + "Customer and dog IDs must be positive; dog IDs must not repeat.\n"
+
             + "The entire batch is rejected if any selected dog is missing or has no owner.\n"
             + "The customer form requires an existing customer with linked dogs; do not mix prefixes.\n"
-            + "Examples: unlink d/2 d/3 | unlink c/1";
+            + "Examples: unlink d/2 3 | unlink c/1";
     public static final String MESSAGE_SUCCESS = "Unlinked dog IDs %s from their owners.";
 
     public static final String MESSAGE_CUSTOMER_SUCCESS = "Unlinked all dogs from customer ID %d.";
@@ -36,9 +37,9 @@ public class UnlinkCommand extends Command {
         this.customerId = null;
     }
 
-    /** Creates a request to unlink all dogs belonging to a nonnegative customer ID. */
+    /** Creates a request to unlink all dogs belonging to a positive customer ID. */
     public UnlinkCommand(int customerId) {
-        checkArgument(customerId >= 0, "Invalid customer ID.");
+        checkArgument(customerId > 0, "Invalid customer ID.");
         this.customerId = customerId;
         this.dogIds = List.of();
     }

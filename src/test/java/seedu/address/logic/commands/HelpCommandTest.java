@@ -17,4 +17,10 @@ public class HelpCommandTest {
         CommandResult expectedCommandResult = new CommandResult(SHOWING_HELP_MESSAGE, true, false);
         assertCommandSuccess(new HelpCommand(), model, expectedCommandResult, expectedModel);
     }
+
+    @Test
+    public void execute_commandHelp_displaysFeedbackWithoutOpeningWindow() {
+        String help = "Format: summary\nExample: summary\nSpecifications: Accepts no parameters.";
+        assertCommandSuccess(new HelpCommand(help), model, new CommandResult(help), expectedModel);
+    }
 }

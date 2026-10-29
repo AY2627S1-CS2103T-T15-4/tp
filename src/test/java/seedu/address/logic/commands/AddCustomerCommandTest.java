@@ -13,6 +13,8 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
+import javafx.beans.Observable;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -106,7 +108,7 @@ public class AddCustomerCommandTest {
         }
 
         @Override
-        public int setActivity(Activity target, Activity editedActivity) {
+        public void setActivity(Activity target, Activity editedActivity) {
             throw unused();
         }
 
@@ -138,6 +140,17 @@ public class AddCustomerCommandTest {
         @Override public void updateFilteredActivityList(Predicate<Activity> predicate) {
             throw unused();
         }
+
+        @Override public void setActivityEnrolmentDogPredicate(Predicate<Dog> predicate) {
+            throw unused();
+        }
+        @Override public String getActivityEnrolmentSummary(Activity activity) {
+            throw unused();
+        }
+        @Override public Observable getActivityEnrolmentContextChanges() {
+            throw unused();
+        }
+
 
         @Override public ReadOnlyUserPrefs getUserPrefs() {
             throw unused();
@@ -192,6 +205,11 @@ public class AddCustomerCommandTest {
 
     private static class ModelStubAcceptingCustomerAdded extends ModelStub {
         private final List<Customer> customersAdded = new ArrayList<>();
+
+        @Override
+        public ObservableList<Customer> getCustomerList() {
+            return FXCollections.observableArrayList(customersAdded);
+        }
 
         @Override
         public boolean hasCustomer(Customer customer) {

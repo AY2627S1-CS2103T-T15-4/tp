@@ -19,11 +19,12 @@ public class DeleteCustomerCommandParserTest {
     public void parse_validId_returnsDeleteCustomerCommand() {
         assertParseSuccess(parser, "21", new DeleteCustomerCommand(21));
         assertParseSuccess(parser, "  21  ", new DeleteCustomerCommand(21));
-        assertParseSuccess(parser, "0", new DeleteCustomerCommand(0));
+        assertParseSuccess(parser, "1", new DeleteCustomerCommand(1));
     }
 
     @Test
-    public void parse_negativeId_throwsParseException() {
+    public void parse_nonPositiveId_throwsParseException() {
+        assertParseFailure(parser, "0", INVALID_FORMAT);
         assertParseFailure(parser, "-1", INVALID_FORMAT);
     }
 

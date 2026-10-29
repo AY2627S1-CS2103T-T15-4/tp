@@ -16,6 +16,7 @@ public class EnrolmentTest {
                 new Enrolment(0, 1, LocalDate.of(2028, 2, 29)));
         assertThrows(IllegalArgumentException.class, "Activity and dog IDs must be positive.", () ->
                 new Enrolment(1, 0, LocalDate.of(2028, 2, 29)));
+
     }
 
     @Test

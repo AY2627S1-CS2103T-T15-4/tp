@@ -23,7 +23,6 @@ import seedu.address.logic.commands.EnrolDogCommand;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FilterUnlinkedCommand;
 import seedu.address.logic.commands.HelpCommand;
-import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.SearchActivityCommand;
@@ -115,6 +114,22 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_deleteCustomerWithWhitespace() throws Exception {
+        for (String input : new String[] {"delete  customer 21", "delete    customer   21",
+            "  delete  customer 21  ", "\tdelete\t\tcustomer\t21\t"}) {
+            assertEquals(new DeleteCustomerCommand(21), parser.parseCommand(input));
+        }
+    }
+
+    @Test
+    public void parseCommand_deleteCustomerWithInvalidArguments_throwsParseException() {
+        for (String input : new String[] {"delete  customer", "delete  customer -1",
+            "delete  customer abc", "delete  customer 21 22", "delete  customer21"}) {
+            assertThrows(ParseException.class, () -> parser.parseCommand(input));
+        }
+    }
+
+    @Test
     public void parseCommand_editDog() throws Exception {
         EditDogDescriptor descriptor = new EditDogDescriptor();
         descriptor.setSize(new Size("Medium"));
@@ -192,7 +207,7 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_help() throws Exception {
         assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD) instanceof HelpCommand);
-        assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD + " 3") instanceof HelpCommand);
+        assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD + " summary") instanceof HelpCommand);
     }
 
     @Test
@@ -206,17 +221,19 @@ public class AddressBookParserTest {
     }
 
     @Test
-    public void parseCommand_list() throws Exception {
-        assertTrue(parser.parseCommand(ListCommand.COMMAND_WORD + " customer") instanceof ListCommand);
-        assertTrue(parser.parseCommand(ListCommand.COMMAND_WORD + "   customer  ") instanceof ListCommand);
+    public void parseCommand_retiredListCommands_throwUnknownCommand() {
+        for (String input : new String[] {"list", "list dog", "list customer", "list dogs", "list customers",
+            "  list   dog  ", "list   customer", "list dog 1", "list customer extra"}) {
+            assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
+        }
     }
 
     @Test
-    public void parseCommand_resetDisplay_acceptsOnlyCommandWord() throws Exception {
-        assertTrue(parser.parseCommand("resetdisplay") instanceof ResetDisplayCommand);
-        assertTrue(parser.parseCommand("  resetdisplay  ") instanceof ResetDisplayCommand);
+    public void parseCommand_reset_acceptsOnlyCommandWord() throws Exception {
+        assertTrue(parser.parseCommand("reset") instanceof ResetDisplayCommand);
+        assertTrue(parser.parseCommand("  reset  ") instanceof ResetDisplayCommand);
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, ResetDisplayCommand.MESSAGE_USAGE);
-        assertThrows(ParseException.class, expectedMessage, () -> parser.parseCommand("resetdisplay tomorrow"));
+        assertThrows(ParseException.class, expectedMessage, () -> parser.parseCommand("reset tomorrow"));
     }
 
     @Test

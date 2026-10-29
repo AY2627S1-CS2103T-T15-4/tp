@@ -44,7 +44,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     private final ObservableList<Enrolment> enrolments = FXCollections.observableArrayList();
     private long nextActivityId = 1;
     private long nextDogId = 1;
-    private int nextCustomerId = 1;
+    private long nextCustomerId = 1;
 
 
     /** Creates an empty address book. */
@@ -88,11 +88,11 @@ public class AddressBook implements ReadOnlyAddressBook {
         nextActivityId = nextId;
         nextDogId = nextRestoredDogId;
 
-        int restoredNextCustomerId = newData.getNextCustomerId();
-        this.nextCustomerId = restoredNextCustomerId >= 0
+        long restoredNextCustomerId = newData.getNextCustomerId();
+        this.nextCustomerId = restoredNextCustomerId >= 1
                 ? restoredNextCustomerId
                 : customers.asUnmodifiableObservableList().stream()
-                        .mapToInt(Customer::getId).max().orElse(0) + 1;
+                        .mapToLong(Customer::getId).max().orElse(0) + 1;
         activities.restore(restored, restoredEnrolments);
     }
 
@@ -160,8 +160,8 @@ public class AddressBook implements ReadOnlyAddressBook {
         return activity;
     }
 
-    /** Replaces a schedule after checking retained enrolments for conflicts. */
-    public int setActivity(Activity target, Activity editedActivity) {
+    /** Replaces an activity only when it has no enrolments, after checking for schedule conflicts. */
+    public void setActivity(Activity target, Activity editedActivity) {
         requireNonNull(target);
         requireNonNull(editedActivity);
         if (target.getId() != editedActivity.getId()) {
@@ -177,19 +177,12 @@ public class AddressBook implements ReadOnlyAddressBook {
         if (index < 0 || !activities.get(index).equals(target)) {
             throw new IllegalArgumentException("Activity to edit does not match a stored activity.");
         }
-        boolean occurrenceDatesChanged = !target.getStartDate().equals(editedActivity.getStartDate())
-                || target.getRecurrence() != editedActivity.getRecurrence();
-        if (!occurrenceDatesChanged) {
-            validateNoActivityConflict(editedActivity);
+        if (enrolments.stream().anyMatch(enrolment -> enrolment.getActivityId() == target.getId())) {
+            throw new IllegalArgumentException("Activity ID " + target.getId()
+                    + " has enrolments and cannot be edited. Create a new activity instead.");
         }
-        int removedEnrolments = occurrenceDatesChanged
-                ? (int) enrolments.stream().filter(enrolment -> enrolment.getActivityId() == target.getId()).count()
-                : 0;
+        validateNoActivityConflict(editedActivity);
         activities.set(index, editedActivity);
-        if (occurrenceDatesChanged) {
-            enrolments.removeIf(enrolment -> enrolment.getActivityId() == target.getId());
-        }
-        return removedEnrolments;
     }
 
     /** Rejects an edited schedule that would overlap another activity attended by the same dog. */
@@ -273,12 +266,15 @@ public class AddressBook implements ReadOnlyAddressBook {
      */
     public Customer addCustomer(Customer customer) {
         requireNonNull(customer);
+        if (customer.getId() < 0 && nextCustomerId > Integer.MAX_VALUE) {
+            throw new IllegalStateException("No more customer IDs are available");
+        }
         Customer identifiedCustomer = customer.getId() < 0
-                ? new Customer(nextCustomerId, customer.getName(), customer.getPhone(), customer.getEmail(),
+                ? new Customer((int) nextCustomerId, customer.getName(), customer.getPhone(), customer.getEmail(),
                         customer.getBackupContact())
                 : customer;
         customers.add(identifiedCustomer);
-        nextCustomerId = Math.max(nextCustomerId, identifiedCustomer.getId() + 1);
+        nextCustomerId = Math.max(nextCustomerId, (long) identifiedCustomer.getId() + 1);
         return identifiedCustomer;
     }
 
@@ -500,7 +496,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     @Override
-    public int getNextCustomerId() {
+    public long getNextCustomerId() {
         return nextCustomerId;
     }
 
@@ -523,10 +519,12 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
     }
 
-    /** Restores the next unused customer ID from persistent storage. */
-    public void setNextCustomerId(int nextCustomerId) {
-        if (nextCustomerId < 1) {
-            throw new IllegalArgumentException("Next customer ID must be positive.");
+    /** Restores the next unused customer ID; MAX_VALUE + 1 represents exhausted IDs. */
+    public void setNextCustomerId(long nextCustomerId) {
+        long minimumId = customers.asUnmodifiableObservableList().stream()
+                .mapToLong(Customer::getId).max().orElse(0) + 1;
+        if (nextCustomerId < minimumId || nextCustomerId > (long) Integer.MAX_VALUE + 1) {
+            throw new IllegalArgumentException("Invalid next customer ID.");
         }
         this.nextCustomerId = nextCustomerId;
     }

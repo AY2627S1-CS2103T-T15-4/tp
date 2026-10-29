@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.function.Predicate;
 
+import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.activity.Activity;
@@ -29,7 +30,7 @@ public interface Model {
     /** Captures the complete model state needed to restore a previous command. */
     record ModelState(ReadOnlyAddressBook addressBook, Predicate<Customer> customerPredicate,
             Predicate<Dog> dogPredicate, Predicate<Activity> activityPredicate,
-            Integer selectedDogId, Integer selectedCustomerId) {
+            Integer selectedDogId, Integer selectedCustomerId, Predicate<Dog> enrolmentDogPredicate) {
     }
 
     /** Returns a snapshot of the current data and display state. */
@@ -132,8 +133,8 @@ public interface Model {
     /** Deletes the given activity. The activity must exist in the address book. */
     void deleteActivity(Activity activity);
 
-    /** Replaces an activity and returns the number of enrolments removed by a date or recurrence change. */
-    int setActivity(Activity target, Activity editedActivity);
+    /** Replaces an activity with no enrolments. */
+    void setActivity(Activity target, Activity editedActivity);
 
     /** Returns all schedules, independently of dog/customer filters. */
     default ObservableList<Activity> getActivityList() {
@@ -154,6 +155,15 @@ public interface Model {
 
     /** Updates the activity filter; the predicate must not be null. */
     void updateFilteredActivityList(Predicate<Activity> predicate);
+
+    /** Sets the dog context whose enrolment dates should be shown on activity cards. */
+    void setActivityEnrolmentDogPredicate(Predicate<Dog> predicate);
+
+    /** Returns the enrolment-date summary for an activity in the current search context. */
+    String getActivityEnrolmentSummary(Activity activity);
+
+    /** Returns an observable signal for changes to the activity-card enrolment context. */
+    Observable getActivityEnrolmentContextChanges();
 
     /** Shows activities with an occurrence on or after the given date. */
     void showActivitiesOnOrAfter(LocalDate date);

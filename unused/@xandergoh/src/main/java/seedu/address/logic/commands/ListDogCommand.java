@@ -1,3 +1,5 @@
+//@@author xandergoh-unused
+// Retired in v1.5: resetdisplay restores records; field-based searches narrow the display.
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;

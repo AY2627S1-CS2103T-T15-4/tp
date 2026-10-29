@@ -65,11 +65,11 @@ public class SearchActivityCommand extends Command {
         if (name != null) {
             fields.add("name: " + name);
         }
-        if (time != null) {
-            fields.add("time: " + time);
-        }
         if (date != null) {
             fields.add("date: " + date);
+        }
+        if (time != null) {
+            fields.add("time: " + time);
         }
         if (recurrence != null) {
             fields.add("recurrence: " + formatRecurrence(recurrence));

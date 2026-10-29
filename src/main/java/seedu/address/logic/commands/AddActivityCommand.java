@@ -27,7 +27,7 @@ public class AddActivityCommand extends Command {
     /** Validates details without consuming a persistent ID. */
     public AddActivityCommand(ActivityName name, LocalDate date, LocalTime start, LocalTime end,
             Recurrence recurrence) {
-        details = new Activity(0, name, date, start, end, recurrence);
+        details = new Activity(1, name, date, start, end, recurrence);
     }
 
     @Override

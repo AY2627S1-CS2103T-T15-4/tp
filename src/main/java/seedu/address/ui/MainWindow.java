@@ -28,7 +28,6 @@ import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.Logic;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.FilterUnlinkedCommand;
-import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.SearchActivityCommand;
 import seedu.address.logic.commands.SearchCustomerCommand;
@@ -47,7 +46,6 @@ public class MainWindow extends UiPart<Stage> {
     private static final long PAW_PATTERN_SEED = 2103L;
     private static final Set<String> DISPLAY_CHANGING_COMMAND_WORDS = Set.of(
             FilterUnlinkedCommand.COMMAND_WORD,
-            ListCommand.COMMAND_WORD,
             ResetDisplayCommand.COMMAND_WORD,
             SearchActivityCommand.COMMAND_WORD,
             SearchCustomerCommand.COMMAND_WORD,
@@ -170,7 +168,7 @@ public class MainWindow extends UiPart<Stage> {
         dogListPanelPlaceholder.getChildren().add(dogListPanel.getRoot());
 
         activityListPanel = new ActivityListPanel(logic.getFilteredActivityList(), logic.getEnrolmentList(),
-                clock, false);
+                clock, logic.getActivityEnrolmentContextChanges(), logic::getActivityEnrolmentSummary);
         activityListPanelPlaceholder.getChildren().add(activityListPanel.getRoot());
 
         todayActivityListPanel = new TodayActivityListPanel(logic.getActivityList(), logic.getEnrolmentList(), clock);

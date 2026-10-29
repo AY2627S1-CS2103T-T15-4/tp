@@ -133,7 +133,8 @@ public class LogicManagerHistoryTest {
                 List<String> savedBeforeClear = harness.savedDogNames();
                 harness.storage.failure = failure;
 
-                harness.assertSaveFailure("clear", failure);
+                harness.logic.execute("clear");
+                harness.assertSaveFailure("y", failure);
                 assertEquals(List.of(), harness.dogNames());
                 assertEquals(savedBeforeClear, harness.savedDogNames());
                 harness.storage.failure = null;
@@ -151,12 +152,12 @@ public class LogicManagerHistoryTest {
             Harness afterReset = linkedHarness();
             afterReset.logic.execute(filter);
             afterReset.assertFilteredPair();
-            afterReset.logic.execute("resetdisplay");
+            afterReset.logic.execute("reset");
             afterReset.logic.execute("undo");
             afterReset.assertFilteredPair();
 
             Harness afterRedo = linkedHarness();
-            afterRedo.logic.execute("resetdisplay");
+            afterRedo.logic.execute("reset");
             afterRedo.logic.execute(filter);
             afterRedo.logic.execute("undo");
             assertEquals(2, afterRedo.model.getFilteredCustomerList().size());

@@ -126,6 +126,7 @@ public class JsonSerializableAddressBookTest {
                 "nextCustomerId":0}
                 """;
 
+
         AddressBook restored = JsonUtil.fromJsonString(
                 legacyJson, JsonSerializableAddressBook.class).toModelType();
 
@@ -181,6 +182,27 @@ public class JsonSerializableAddressBookTest {
         AddressBook restored = new JsonSerializableAddressBook(addressBook).toModelType();
 
         assertEquals(2, restored.addCustomer(customer(-1, "Bob Lim")).getId());
+    }
+
+    @Test
+    public void toModelType_legacyMaximumCustomerId_preservesExhaustion() throws Exception {
+        JsonSerializableAddressBook data = new JsonSerializableAddressBook(
+                List.of(new JsonAdaptedCustomer(customer(Integer.MAX_VALUE, "Alice Tan"))),
+                null, null, (long) Integer.MAX_VALUE, null, null);
+
+        AddressBook restored = data.toModelType();
+
+        assertEquals((long) Integer.MAX_VALUE + 1, restored.getNextCustomerId());
+        assertThrows(IllegalStateException.class,
+                "No more customer IDs are available", () -> restored.addCustomer(customer(-1, "Bob Lim")));
+    }
+
+    @Test
+    public void toModelType_nextCustomerIdAboveExhaustedCounter_throwsIllegalValueException() throws Exception {
+        String json = "{\"nextCustomerId\":2147483649}";
+        JsonSerializableAddressBook data = JsonUtil.fromJsonString(json, JsonSerializableAddressBook.class);
+
+        assertThrows(IllegalValueException.class, "Invalid next customer ID.", data::toModelType);
     }
 
     @Test

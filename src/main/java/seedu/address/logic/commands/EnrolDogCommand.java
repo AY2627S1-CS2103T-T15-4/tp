@@ -21,6 +21,7 @@ public class EnrolDogCommand extends Command {
     public static final String MESSAGE_FORMAT_GUIDANCE = "\nFormat: enrol a/ACTIVITY_ID "
             + "date/YYYY-MM-DD d/DOG_ID [DOG_ID...]"
             + "\nExample: enrol a/1 date/2028-02-29 d/2 3";
+
     public static final String MESSAGE_SUCCESS = "Enrolled dog IDs %s to activity ID %d on %s.";
 
     private final int activityId;
@@ -37,6 +38,7 @@ public class EnrolDogCommand extends Command {
         this.dogIds = List.copyOf(dogIds);
         checkArgument(activityId >= 1 && date != null && !dogIds.isEmpty()
                 && dogIds.stream().allMatch(id -> id >= 1)
+
                 && new HashSet<>(dogIds).size() == dogIds.size(), "Invalid enrol IDs.");
         this.activityId = activityId;
         this.date = date;

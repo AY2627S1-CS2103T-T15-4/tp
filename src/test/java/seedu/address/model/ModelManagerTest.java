@@ -89,8 +89,9 @@ public class ModelManagerTest {
         modelManager.linkDogs(owner.getId(), List.of(buddy.getId()));
         modelManager.enrolDogs(walk.getId(), walk.getStartDate(), List.of(buddy.getId()));
         Model.ModelState state = modelManager.createState();
-        int nextCustomerId = state.addressBook().getNextCustomerId();
+        long nextCustomerId = state.addressBook().getNextCustomerId();
         long nextDogId = state.addressBook().getNextDogId();
+
         long nextActivityId = state.addressBook().getNextActivityId();
 
         modelManager.addCustomer(nextCustomer);
@@ -143,6 +144,56 @@ public class ModelManagerTest {
     @Test
     public void getFilteredCustomerList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredCustomerList().remove(0));
+    }
+
+    @Test
+    public void activityEnrolmentSummary_multipleDogsAndDates_isSortedAndGrouped() throws Exception {
+        Activity activity = modelManager.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.DAILY);
+        Dog first = modelManager.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        Dog second = modelManager.addDog(new Dog(new DogName("Max"), new Breed("Labrador"), new Size("large")));
+        LocalDate firstDate = activity.getStartDate().plusDays(2);
+        LocalDate secondDate = activity.getStartDate().plusDays(1);
+        modelManager.enrolDogs(activity.getId(), firstDate, List.of(first.getId()));
+        modelManager.enrolDogs(activity.getId(), secondDate, List.of(first.getId(), second.getId()));
+        modelManager.setActivityEnrolmentDogPredicate(dog -> true);
+
+        assertEquals("Enrolments:\n1. Buddy: 2028-03-01, 2028-03-02\n"
+                + "2. Max: 2028-03-01", modelManager.getActivityEnrolmentSummary(activity));
+    }
+
+    @Test
+    public void activityEnrolmentSummary_noMatchingDogs_returnsEmpty() {
+        Activity activity = modelManager.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        modelManager.setActivityEnrolmentDogPredicate(dog -> false);
+
+        assertEquals("", modelManager.getActivityEnrolmentSummary(activity));
+    }
+
+    @Test
+    public void activityEnrolmentSummary_matchingDogWithoutEnrolment_returnsEmpty() {
+        Activity activity = modelManager.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        modelManager.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        modelManager.setActivityEnrolmentDogPredicate(dog -> true);
+
+        assertEquals("", modelManager.getActivityEnrolmentSummary(activity));
+    }
+
+    @Test
+    public void activityEnrolmentSummary_replacedSearch_doesNotShowStaleDates() throws Exception {
+        Activity activity = modelManager.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        Dog first = modelManager.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        Dog second = modelManager.addDog(new Dog(new DogName("Max"), new Breed("Labrador"), new Size("large")));
+        modelManager.enrolDogs(activity.getId(), activity.getStartDate(), List.of(first.getId()));
+        modelManager.setActivityEnrolmentDogPredicate(dog -> dog.getId() == first.getId());
+        assertTrue(modelManager.getActivityEnrolmentSummary(activity).contains("Buddy"));
+
+        modelManager.setActivityEnrolmentDogPredicate(dog -> dog.getId() == second.getId());
+
+        assertEquals("", modelManager.getActivityEnrolmentSummary(activity));
     }
 
     @Test

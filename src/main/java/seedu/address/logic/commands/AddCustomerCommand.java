@@ -33,7 +33,12 @@ public class AddCustomerCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
 
-        model.addCustomer(toAdd);
+        CustomerContactValidator.validate(toAdd, model.getCustomerList(), null);
+        try {
+            model.addCustomer(toAdd);
+        } catch (IllegalStateException e) {
+            throw new CommandException(e.getMessage(), e);
+        }
         return new CommandResult(MESSAGE_SUCCESS);
     }
 

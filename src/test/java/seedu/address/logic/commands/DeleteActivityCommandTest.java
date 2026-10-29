@@ -45,6 +45,11 @@ public class DeleteActivityCommandTest {
     }
 
     @Test
+    public void constructor_zeroActivityId_rejected() {
+        assertThrows(IllegalArgumentException.class, () -> new DeleteActivityCommand(0));
+    }
+
+    @Test
     public void parseAndExecute_existingRecurringActivity_removesOnlyItsEnrolments() throws Exception {
         Activity other = model.getActivityList().get(1);
 

@@ -64,8 +64,8 @@ class JsonAdaptedDog {
             throw new IllegalValueException(Size.MESSAGE_CONSTRAINTS);
         }
 
-        if (ownerId != null && ownerId < 0) {
-            throw new IllegalValueException("Dog owner ID must be nonnegative.");
+        if (ownerId != null && ownerId < 1) {
+            throw new IllegalValueException("Dog owner ID must be positive.");
         }
         return new Dog(id, new DogName(name), new Breed(breed), new Size(size), ownerId);
     }

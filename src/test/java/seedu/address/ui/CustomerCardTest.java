@@ -128,7 +128,7 @@ public class CustomerCardTest {
     public void copyMenu_longValuesAndRepeatedCopies_preserveCompleteLatestValue() throws Exception {
         runOnFxThread(() -> {
             String longEmail = "Very.Long.Email.Address.With.Many.Parts@example-domain.com";
-            Customer longValueCustomer = new Customer(8, "Casey Tan", "00123456789", longEmail, "000987654");
+            Customer longValueCustomer = new Customer(8, "Casey Tan", "00123456", longEmail, "00987654");
             Customer otherCustomer = new Customer(9, "Beth Tan", "99887766", "Beth.Tan@example.com", "88776655");
             AtomicReference<String> copiedText = new AtomicReference<>();
             ContextMenu longValueMenu = CardInteractionUtil.getCopyMenu(
@@ -137,11 +137,11 @@ public class CustomerCardTest {
                     new CustomerCard(otherCustomer, List.of(), recordingWriter(copiedText)).getRoot());
 
             longValueMenu.getItems().get(0).fire();
-            assertEquals("00123456789", copiedText.get());
+            assertEquals("00123456", copiedText.get());
             longValueMenu.getItems().get(1).fire();
             assertEquals(longEmail, copiedText.get());
             longValueMenu.getItems().get(2).fire();
-            assertEquals("000987654", copiedText.get());
+            assertEquals("00987654", copiedText.get());
             otherMenu.getItems().get(1).fire();
             assertEquals("Beth.Tan@example.com", copiedText.get());
             longValueMenu.getItems().get(4).fire();

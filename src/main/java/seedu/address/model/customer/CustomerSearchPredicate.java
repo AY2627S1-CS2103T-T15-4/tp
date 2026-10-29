@@ -97,8 +97,8 @@ public class CustomerSearchPredicate implements Predicate<Customer> {
     }
 
     private static int validateId(int value) {
-        if (value < 0) {
-            throw new IllegalArgumentException("Customer search ID cannot be negative");
+        if (value <= 0) {
+            throw new IllegalArgumentException("Customer search ID must be positive");
         }
         return value;
     }

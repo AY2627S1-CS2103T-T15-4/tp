@@ -20,7 +20,7 @@ public class ParserUtil {
         requireNonNull(customerId);
         String trimmedId = customerId.trim();
         if (!StringUtil.isNonZeroUnsignedInteger(trimmedId)) {
-            throw new ParseException("Customer ID must be a positive integer.");
+            throw new ParseException("Please provide a valid positive customer ID");
         }
         return Integer.parseInt(trimmedId);
     }

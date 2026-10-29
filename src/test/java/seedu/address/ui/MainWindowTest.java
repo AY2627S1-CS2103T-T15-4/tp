@@ -96,11 +96,11 @@ public class MainWindowTest {
         model.addActivity(new ActivityName("Today walk"), LocalDate.now(),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
         Logic logic = new LogicManager(model, new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonAddressBookStorage(folder.resolve("watchdog.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
-            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("watchdog.json"));
             window.fillInnerParts();
             ListView<Supplier<Region>> customers = listView(window.getCustomerListPanel());
             ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
@@ -119,7 +119,7 @@ public class MainWindowTest {
             assertEquals(1, todaysActivities.getItems().size());
             assertEquals("Today walk", label(todaysActivities.getItems().get(0).get(), "name"));
 
-            window.executeCommand("list customer");
+            window.executeCommand("reset");
             assertEquals(1, customers.getItems().size());
             assertEquals("Lily Koh", label(customers.getItems().get(0).get(), "name"));
 
@@ -131,7 +131,7 @@ public class MainWindowTest {
             assertEquals(1, customers.getItems().size());
             assertEquals("Lily Koh", label(customers.getItems().get(0).get(), "name"));
 
-            window.executeCommand("list dog");
+            window.executeCommand("searchd n/Cookie");
             assertEquals(1, dogs.getItems().size());
             assertEquals("Cookie", label(dogs.getItems().get(0).get(), "name"));
         });
@@ -153,19 +153,19 @@ public class MainWindowTest {
         model.addActivity(new ActivityName("Future walk"), today.plusDays(1),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
         Logic logic = new LogicManager(model, new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonAddressBookStorage(folder.resolve("watchdog.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
-            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("watchdog.json"));
             window.fillInnerParts();
             ListView<Supplier<Region>> customers = listView(window.getCustomerListPanel());
             ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
             ListView<Supplier<Region>> activities = listView(window.getActivityListPanel());
 
-            window.executeCommand("list dog");
+            window.executeCommand("searchd n/Cookie");
             assertTrue(customers.getItems().isEmpty());
-            window.executeCommand("resetdisplay");
+            window.executeCommand("reset");
 
             assertEquals(1, customers.getItems().size());
             assertEquals(1, dogs.getItems().size());
@@ -240,6 +240,7 @@ public class MainWindowTest {
                     label(activities.getItems().get(0).get(), "dogSummary"));
 
             window.executeCommand("clear");
+            window.executeCommand("Y");
             assertTrue(activities.getItems().isEmpty());
             assertTrue(todayActivities.getItems().isEmpty());
         });
@@ -249,11 +250,11 @@ public class MainWindowTest {
     public void fillInnerParts_resizesPawPatternAndRendersPawMarks() throws Exception {
         Path folder = Files.createTempDirectory("mainwindow-paw-pattern");
         Logic logic = new LogicManager(new ModelManager(), new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonAddressBookStorage(folder.resolve("watchdog.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
-            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("watchdog.json"));
             window.fillInnerParts();
             Pane pawPattern = (Pane) window.getPrimaryStage().getScene().lookup("#pawPattern");
 
@@ -400,7 +401,7 @@ public class MainWindowTest {
             dogs.layout();
             assertTrue(firstVisibleIndex(dogs) > 0);
 
-            window.executeCommand("list dog");
+            window.executeCommand("reset");
             dogs.layout();
 
             assertEquals(0, firstVisibleIndex(dogs));

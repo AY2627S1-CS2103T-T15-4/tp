@@ -57,6 +57,7 @@ public class EnrolDogCommandParserTest {
 
         for (String activityId : List.of("0", "-1", "x", "1.5", "999999999999")) {
             assertMessage("a/" + activityId + " date/2028-02-29 d/2", expected);
+
         }
     }
 

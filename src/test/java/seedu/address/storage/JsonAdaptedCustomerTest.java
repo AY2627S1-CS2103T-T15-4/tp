@@ -39,11 +39,13 @@ public class JsonAdaptedCustomerTest {
     }
 
     @Test
-    public void toModelType_negativeId_throwsIllegalValueException() {
-        JsonAdaptedCustomer customer = new JsonAdaptedCustomer(-1, VALID_NAME, VALID_PHONE, VALID_EMAIL,
-                VALID_BACKUP_CONTACT);
+    public void toModelType_nonPositiveId_throwsIllegalValueException() {
+        for (int id : new int[]{-1, 0}) {
+            JsonAdaptedCustomer customer = new JsonAdaptedCustomer(id, VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                    VALID_BACKUP_CONTACT);
 
-        assertThrows(IllegalValueException.class, "Customer id must be nonnegative.", customer::toModelType);
+            assertThrows(IllegalValueException.class, "Customer ID must be positive.", customer::toModelType);
+        }
     }
 
     @Test

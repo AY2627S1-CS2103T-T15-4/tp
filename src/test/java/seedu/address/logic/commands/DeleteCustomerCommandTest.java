@@ -21,6 +21,12 @@ public class DeleteCustomerCommandTest {
     private static final Customer JOHN = new Customer(2, "John Doe", "81234567", "john@gmail.com", "81234568");
 
     @Test
+    public void constructor_nonPositiveCustomerId_rejected() {
+        assertThrows(IllegalArgumentException.class, () -> new DeleteCustomerCommand(0));
+        assertThrows(IllegalArgumentException.class, () -> new DeleteCustomerCommand(-1));
+    }
+
+    @Test
     public void execute_existingCustomer_deletesCustomer() throws Exception {
         Model model = new ModelManager(new AddressBook(), new UserPrefs());
         model.addCustomer(LILY);

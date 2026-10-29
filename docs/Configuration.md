@@ -5,4 +5,9 @@
 
 # Configuration guide
 
-Certain properties of the application can be controlled (e.g user preferences file location, logging level) through the configuration file (default: `config.json`).
+WatchDog stores its window size and position in `preferences.json` in the folder from which the application is launched.
+These preferences are loaded at startup and saved when WatchDog closes.
+
+The preferences file location is defined by `USER_PREFS_FILE_PATH` in `MainApp`.
+The logging level is defined by `LOG_LEVEL` in `LogsCenter`; see the [Logging guide](Logging.md).
+Changing either setting in the source requires rebuilding the application.

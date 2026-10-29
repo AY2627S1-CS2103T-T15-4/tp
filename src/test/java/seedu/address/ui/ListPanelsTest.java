@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -103,6 +104,49 @@ public class ListPanelsTest {
             assertTrue(summary.isWrapText());
             assertTrue(summary.getHeight() > 20);
             assertTrue(summary.getBoundsInParent().getMaxY() <= card.getBoundsInLocal().getMaxY());
+        });
+    }
+
+    @Test
+    public void activityCard_displaysEnrolmentSummaryWhenProvided() throws Exception {
+        runOnFxThread(() -> {
+            Region card = new ActivityCard(ACTIVITY, "", "2. Buddy: 2028-03-01").getRoot();
+            assertEquals("2. Buddy: 2028-03-01", label(card, "enrolments"));
+            assertEquals("Schedule starts: 2028-02-29", label(card, "date"));
+        });
+    }
+
+    @Test
+    public void activityListPanel_refreshesEnrolmentSummaryWhenRecordsChange() throws Exception {
+        runOnFxThread(() -> {
+            ObservableList<Activity> activities = FXCollections.observableArrayList(ACTIVITY);
+            ObservableList<Enrolment> enrolments = FXCollections.observableArrayList();
+            ActivityListPanel panel = new ActivityListPanel(activities, enrolments,
+                    activity -> enrolments.isEmpty() ? "" : "2. Buddy: 2028-03-01");
+            ListView<Supplier<Region>> list = listView(panel);
+
+            assertEquals("Schedule starts: 2028-02-29", label(list.getItems().get(0).get(), "date"));
+            enrolments.add(new Enrolment(ACTIVITY.getId(), DOG.getId(), LocalDate.of(2028, 3, 1)));
+            assertEquals("2. Buddy: 2028-03-01", label(list.getItems().get(0).get(), "enrolments"));
+            enrolments.clear();
+            assertEquals("", label(list.getItems().get(0).get(), "enrolments"));
+        });
+    }
+
+    @Test
+    public void activityListPanel_refreshesRenderedCardWhenContextChanges() throws Exception {
+        runOnFxThread(() -> {
+            ObservableList<Activity> activities = FXCollections.observableArrayList(ACTIVITY);
+            SimpleIntegerProperty contextVersion = new SimpleIntegerProperty();
+            ActivityListPanel panel = new ActivityListPanel(activities, null, contextVersion,
+                    activity -> contextVersion.get() == 1 ? "2. Buddy: 2028-03-01" : "");
+            ListView<Supplier<Region>> list = listView(panel);
+
+            assertEquals("", label(list.getItems().get(0).get(), "enrolments"));
+            contextVersion.set(1);
+            assertEquals("2. Buddy: 2028-03-01", label(list.getItems().get(0).get(), "enrolments"));
+            contextVersion.set(2);
+            assertEquals("", label(list.getItems().get(0).get(), "enrolments"));
         });
     }
 

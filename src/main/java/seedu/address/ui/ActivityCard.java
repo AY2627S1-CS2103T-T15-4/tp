@@ -21,6 +21,8 @@ public class ActivityCard extends UiPart<Region> {
     private Label recurrence;
     @FXML
     private Label dogSummary;
+    @FXML
+    private Label enrolments;
 
     /**
      * Creates a card with the given activity and complete dog-summary label.
@@ -29,6 +31,11 @@ public class ActivityCard extends UiPart<Region> {
      * @param dogSummaryText Complete dated-booking summary.
      */
     public ActivityCard(Activity activity, String dogSummaryText) {
+        this(activity, dogSummaryText, "");
+    }
+
+    /** Creates a card with booking and search-specific enrolment summaries. */
+    public ActivityCard(Activity activity, String dogSummaryText, String enrolmentEntry) {
         super(FXML);
         id.setText(activity.getId() + ". ");
         name.setText(activity.getName().fullName);
@@ -36,5 +43,10 @@ public class ActivityCard extends UiPart<Region> {
         time.setText("Time: " + activity.getStartTime() + " - " + activity.getEndTime());
         recurrence.setText("Recurrence: " + activity.getRecurrence());
         dogSummary.setText(dogSummaryText);
+        dogSummary.setVisible(!dogSummaryText.isBlank());
+        dogSummary.setManaged(!dogSummaryText.isBlank());
+        enrolments.setText(enrolmentEntry);
+        enrolments.setVisible(!enrolmentEntry.isBlank());
+        enrolments.setManaged(!enrolmentEntry.isBlank());
     }
 }

@@ -34,7 +34,8 @@ relationships to refer to a record reliably even when the visible list changes.
 
 ### Customer–dog ownership
 
-`LinkCommandParser` accepts one customer ID followed by one or more distinct dog IDs.
+`LinkCommandParser` accepts `c/CUSTOMER_ID d/DOG_ID [DOG_ID]...`: one customer field followed by
+one dog field containing distinct, whitespace-separated IDs. Repeated `d/` prefixes are rejected.
 `LinkCommand` delegates the batch to `Model.linkDogs`; `ModelManager` forwards to `AddressBook`.
 The address book looks up persistent IDs in the complete lists and validates every endpoint and ownership
 constraint before publishing one replacement dog list. A rejected batch throws `LinkException` without
@@ -48,7 +49,8 @@ customers do not store a duplicate dog-ID list. A dog may be unlinked or have on
 may own any number of dogs. Linking an already-owned dog is rejected, including links to the same owner.
 Dog equality includes ownership, while identity remains the persistent dog ID.
 
-`UnlinkCommandParser` accepts either one customer ID or one or more distinct dog IDs; mixed prefixes
+`UnlinkCommandParser` accepts either `c/CUSTOMER_ID` or `d/DOG_ID [DOG_ID]...` with distinct,
+whitespace-separated dog IDs in one field; repeated dog prefixes and mixed prefixes
 are rejected. `UnlinkCommand` delegates to `Model.unlinkCustomerDogs` or `Model.unlinkDogs` and translates
 `UnlinkException` into command feedback. `AddressBook` validates every selected dog exists and has an owner
 before publishing one replacement list of unowned copies. Dogs may belong to different customers.
@@ -94,7 +96,7 @@ The following provides a quick overview of the main components and their interac
 
 **Main components of the architecture**
 
-**`Main`** (consisting of classes [`Main`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
+**`Main`** (consisting of classes [`Main`](https://github.com/AY2627S1-CS2103T-T15-4/tp/blob/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/AY2627S1-CS2103T-T15-4/tp/blob/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
 * At app launch, it initializes the other components in the correct sequence, and connects them up with each other.
 * At shut down, it shuts down the other components and invokes cleanup methods where necessary.
 
@@ -126,7 +128,7 @@ The sections below give more details of each component.
 
 ### UI component
 
-The **API** of this component is specified in [`Ui.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/ui/Ui.java)
+The **API** of this component is specified in [`Ui.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/blob/master/src/main/java/seedu/address/ui/Ui.java)
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
@@ -146,7 +148,7 @@ Customer and dog cards install their tooltips and copy menus through `CardIntera
 return a success result through `ClipboardWriter`, so the UI shows `Copied!` only after a successful write and
 shows failure feedback otherwise.
 
-The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
+The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T15-4/tp/blob/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T15-4/tp/blob/master/src/main/java/seedu/address/ui/MainWindow.java).
 
 The `UI` component,
 
@@ -157,7 +159,7 @@ The `UI` component,
 
 ### Logic component
 
-**API** : [`Logic.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/logic/Logic.java)
+**API** : [`Logic.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/blob/master/src/main/java/seedu/address/logic/Logic.java)
 
 Here's a (partial) class diagram of the `Logic` component:
 
@@ -190,7 +192,7 @@ How the parsing works:
 * All `XYZCommandParser` classes, such as `AddDogCommandParser` and `DeleteDogCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
 ### Model component
-**API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/model/Model.java)
+**API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/blob/master/src/main/java/seedu/address/model/Model.java)
 
 <puml src="diagrams/ModelClassDiagram.puml" width="450" />
 
@@ -206,7 +208,7 @@ The `Model` component,
 
 ### Storage component
 
-**API** : [`Storage.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/storage/Storage.java)
+**API** : [`Storage.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/blob/master/src/main/java/seedu/address/storage/Storage.java)
 
 <puml src="diagrams/StorageClassDiagram.puml" width="550" />
 
@@ -275,6 +277,14 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 <puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog through the application layers" />
 
+### Retired list commands
+
+The former list dog and list customer commands are no longer routed by AddressBookParser.
+Use reset to restore all customers and dogs and upcoming activities, or searchc/searchd
+to narrow the display. Retired list-dog source and tests are preserved under unused/@xandergoh/;
+list-customer source, parser, and tests are under unused/@its-shoutime/. These archives are
+excluded from Gradle source and test sets and retain authorship annotations.
+
 ### Retired select commands
 
 The former select dog and select customer implementations are retained under
@@ -289,7 +299,11 @@ cannot restore history. `LogicManager` keeps one undo snapshot and one redo snap
 with the original command text for feedback. A successful undoable command replaces the undo
 snapshot with the state captured before its execution and clears the redo snapshot. View-changing
 commands are undoable. `help`, `summary`, and `exit` preserve both slots, as do parse errors and
-commands rejected during execution. `clear` discards both snapshots and cannot itself be undone.
+commands rejected during execution. `clear` first puts `LogicManager` into a pending confirmation
+state and returns a warning without saving or changing history. The next input must be `Y` or `N`
+(case-insensitive, with surrounding whitespace accepted). Invalid answers leave confirmation pending;
+`N` cancels without changing data or history. `Y` executes `ClearCommand`, discards both snapshots,
+and cannot itself be undone. Confirmation is consumed even if saving the cleared data fails.
 
 `Model.createState()` copies the `AddressBook`, including its records and all three next-ID counters, and captures
 the active customer, dog and activity predicates and the selected record IDs. `Model.restoreState()`
@@ -378,7 +392,7 @@ interface, implemented by `StorageManager`. Concrete lifelines are shown to make
 ### Deleting an activity
 
 `AddressBookParser` routes `deleteactivity` to `DeleteActivityCommandParser`, which accepts one
-nonnegative persistent ID. The command finds the matching activity in `Model.getActivityList()` and
+positive persistent ID. The command finds the matching activity in `Model.getActivityList()` and
 passes it to `Model.deleteActivity`. `ModelManager` delegates to `AddressBook.removeActivity`, which
 checks that the activity is still stored, removes its enrolments, and then removes the activity.
 The next activity ID does not change, so deleted IDs are not reused. After the command returns its
@@ -390,13 +404,14 @@ success message, `LogicManager` saves the updated address book.
 
 `AddressBookParser` routes `editactivity` to `EditActivityCommandParser`. The parser requires a
 persistent activity ID and at least one replacement field. `EditActivityCommand` finds the stored
-activity by ID, builds an immutable replacement with the same ID, and calls
-`Model.setActivity`. Fields omitted from the command retain their stored values.
+activity by ID and rejects the edit if any enrolment references that activity, suggesting that the
+user create a new activity instead. Fields omitted from a permitted edit retain their stored values.
+For an activity with no enrolments, the command builds an immutable replacement with the same ID and
+calls `Model.setActivity`.
 
-`ModelManager` delegates the replacement to `AddressBook`. If the start date or recurrence changes,
-the address book removes that activity's enrolments. Otherwise it retains them after checking that
-the edited schedule does not overlap another activity attended by the same dog. The returned count
-of removed enrolments appears in the command feedback. `LogicManager` then saves the address book.
+`ModelManager` delegates the replacement to `AddressBook`, which checks that the activity is still
+stored and that the edited schedule does not overlap another activity attended by the same dog.
+Enrolments are never removed by editing. `LogicManager` then saves the address book.
 
 <puml src="diagrams/EditActivitySequenceDiagram.puml" alt="Parsing, executing and saving an editactivity command" />
 
@@ -415,6 +430,10 @@ so dog, customer, activity, and enrolment changes refresh the corresponding pane
 Each `Enrolment` stores its occurrence date. `searcha` with a date therefore shows only dogs enrolled on that
 specific occurrence, and shows their owners only when those dogs are visible. `searchd` shows a schedule when a
 matching dog is enrolled on a valid occurrence of that schedule.
+For `searchd`, the activity panel additionally receives a derived enrolment summary. It groups matching stored
+enrolments by dog ID, removes duplicate dates, sorts both dogs and dates deterministically, and displays the
+dates in ISO format. The summary includes past, present, and future dates; recurrence is never expanded into
+unstored dates. Other activity-card contexts retain the normal card format.
 Successful executions use the `Successfully searched dogs by` prefix and report only supplied fields. Invalid
 IDs and sizes use the `Error in searching dogs:` prefix with their specific validation messages.
 
@@ -425,7 +444,7 @@ IDs and sizes use the `Error in searching dogs:` prefix with their specific vali
 `AddressBookParser` routes `searchc` to `SearchCustomerCommandParser`. The parser accepts the optional
 lowercase fields `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/`. Names are normalised for case-insensitive substring
 matching, while contact numbers and email addresses use exact matching. Multiple dog IDs are parsed from
-the `d/` field and are retained as a set. The optional customer ID is parsed as a nonnegative integer and
+the `d/` field and are retained as a set. The optional customer ID is parsed as a positive integer and
 matched exactly against existing customer IDs.
 
 `SearchCustomerCommand` validates that the requested customer ID and every requested dog ID exist, then applies
@@ -434,6 +453,9 @@ derives ownership from each dog's stored `ownerId`; a customer
 matches a multi-dog filter only when they own every requested dog. After customer filtering, the command derives
 the matching customer IDs and applies a second predicate to the dog list, showing only dogs owned by those
 customers. Dog IDs in the success message are sorted numerically, and customer ID is reported only when supplied.
+It also filters the activity panel to activities with enrolments belonging to the matching customers and supplies
+the same per-dog enrolment summary used by `searchd`. An activity with no matching enrolment is omitted, so the
+activity panel cannot show unrelated cards or cards with misleading empty enrolment details.
 Invalid or nonexistent dog and customer IDs produce specific errors under the `Error in searching customers:` prefix.
 The parser stops field values at any field-like prefix, including unsupported prefixes, so inputs such as
 `searchc n/Anna x/value` are rejected rather than treating `x/value` as part of the name. `ModelManager`
@@ -583,7 +605,7 @@ The active category searches are `searcha`, `searchc`, and `searchd`. Each parse
 
 `SearchDogCommandParser` accepts `n/`, `b/`, `s/`, and `i/`; `SearchCustomerCommandParser` accepts `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/`; and `SearchActivityCommandParser` accepts `n/`, `d/`, `t/`, and `r/`. Unsupported prefixes, duplicate fields, invalid IDs, invalid sizes, and malformed values are rejected before execution.
 
-The global search command and its category compatibility routes have been retired. Use the field-based searchc, searchd, and searcha commands (i/ for persistent IDs). Retired global search code, tests, and orphaned helpers are preserved under unused/@Kenneth-Chia/. The list commands and resetdisplay remain available.
+The global search command and its category compatibility routes have been retired. Use the field-based searchc, searchd, and searcha commands (i/ for persistent IDs). Retired global search code, tests, and orphaned helpers are preserved under unused/@Kenneth-Chia/. The list commands and reset remain available.
 
 Search command tests cover parser validation, field combinations, related-record updates, persistent IDs, and unchanged stored records.
 
@@ -604,7 +626,7 @@ Search command tests cover parser validation, field combinations, related-record
 
 **Target user profile**:
 
-* Is a dog day care centre manager
+* Is a dog day care centre manager in Singapore
 * Has a need to manage multiple dogs and customers
 * Has a need to keep track of each dog’s information and schedule
 * Has a need to keep track of every dog’s owner and their information
@@ -629,16 +651,14 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | Dog day-care manager                                   | Edit customer details                                                      | I can keep customer information up to date                        |
 | `* * *`  | Dog day-care manager                                   | Edit dog details                                                           | I can record new or changed information                           |
 | `* * *`  | Dog day-care manager                                   | Create and edit activity records                                           | I can update activities when plans change                         |
-| `* * *`  | Forgetful dog day-care manager                         | Maintain a checklist for each dog                                          | I can ensure that all required tasks are completed                |
-| `* * *`  | Dog day-care manager managing multiple dogs            | Schedule activities for customers and their dogs                           | I can keep track of upcoming activities                           |
+| `* * *`  | Dog day-care manager managing multiple dogs            | Schedule activities for the dogs                                           | I can keep track of upcoming activities                           |
 | `* * *`  | Dog day-care manager preparing for the day             | View all activities scheduled for a particular day                         | I know what needs to be prepared each day                         |
-| `* * *`  | Dog day-care manager                                   | Mark scheduled activities as completed                                     | I can keep track of which tasks have been carried out             |
-| `* * *`  | Dog day-care manager                                   | View a list of dogs currently present                                      | I can monitor the dogs at the day-care centre                     |
 | `* * *`  | Dog day-care manager                                   | Record when a dog checks in and checks out                                 | I can accurately track which dogs are currently present           |
-| `* * *`  | Dog day-care manager responsible for dog safety        | Record multiple emergency contacts for each dog                            | I can contact someone if the owner is unavailable                 |
 | `* * *`  | Dog day-care manager entering information              | View clear error messages when invalid information or commands are entered | I can correct mistakes without crashing the program               |
+| `* *`    | Dog day-care manager                                   | Mark scheduled activities as completed                                     | I can keep track of which tasks have been carried out             |
+| `* *`    | Forgetful dog day-care manager                         | Maintain a checklist for each dog                                          | I can ensure that all required tasks are completed                |
 | `* *`    | Dog day-care manager                                   | View all dogs belonging to a specific customer                             | I can see every dog owned by that customer                        |
-| `* *`    | Busy dog day-care manager                              | Filter dogs by characteristics such as size, breed, or temperament         | I can quickly find dogs with specific characteristics             |
+| `* *`    | Busy dog day-care manager                              | Filter dogs by characteristics such as size or breed                       | I can quickly find dogs with specific characteristics             |
 | `* *`    | Busy dog day-care manager                              | Filter dogs based on their required activities                             | I can identify which dogs need a particular activity              |
 | `* *`    | Dog day-care manager                                   | Add new categories or filters                                              | I can customise searches as the business changes                  |
 | `* *`    | Forgetful dog day-care manager                         | View the total number of dogs enrolled for each day                        | I can determine whether there is enough capacity for new bookings |
@@ -695,8 +715,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  User requests to list dogs.
-2.  System shows a list of dogs.
+1.  User requests to restore the display using `reset`.
+2.  System shows all dogs and customers, plus upcoming activities.
 
     Use case ends.
 
@@ -775,7 +795,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **MSS**
 
 1.  User enters the command and the customer details to add a customer.
-2.  System validates the command and customer details.
+2.  System validates the command and customer details, including the uniqueness of the primary phone number and email address.
 3.  System adds the customer and displays a success message.
 
     Use case ends.
@@ -794,14 +814,23 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes from step 1.
 
+* 2b. System detects that the primary phone number or email address is already used by an existing customer,
+  including customers hidden by filters. Phone comparison ignores spaces; email comparison ignores letter case.
+
+    * 2b1. System identifies the duplicate contact field and displays an error without adding a customer or changing existing records.
+
+      Use case resumes from step 1.
+
+Shared backup contact numbers are allowed.
+
 
 
 **Use case: UC06 - View Customer**
 
 **MSS**
 
-1.  User requests to list customers.
-2.  System shows a list of customers.
+1.  User requests to restore the display using `reset`.
+2.  System shows all customers and dogs, plus upcoming activities.
 
     Use case ends.
 
@@ -820,31 +849,40 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **MSS**
 
 1.  User requests to <ins>list customers (UC06)</ins>.
-2.  User enters the command, customer details and the customer id for the customer to be edited.
-3.  System validates the command, customer details and customer id.
+2.  User enters the command, customer details and the customer ID for the customer to be edited.
+3.  System validates the command, customer details and positive customer ID, including the uniqueness of the resulting primary phone number and email address against other customers.
 4.  System edits the customer and displays a success message.
 
     Use case ends.
 
 **Extensions**
 
-* 1a. User enters an invalid command format.
+* 2a. User enters an invalid command format.
 
-    * 1a1. System displays an unknown-command message.
-
-      Use case resumes from step 1.
-
-* 2a. System detects invalid customer details.
-
-    * 2a1. System requests the correct details.
+    * 2a1. System displays an error message.
 
       Use case resumes from step 2.
 
-* 2b. System cannot find the specified customer id.
+* 3a. System detects invalid customer details or a non-positive customer ID.
 
-    * 2b1. System requests for an existing customer id.
+    * 3a1. System requests the correct details without changing existing records.
 
       Use case resumes from step 2.
+
+* 3b. System cannot find the specified customer ID.
+
+    * 3b1. System requests an existing customer ID without changing existing records.
+
+      Use case resumes from step 2.
+
+* 3c. System detects that the resulting primary phone number or email address is already used by another customer,
+  including customers hidden by filters. Phone comparison ignores spaces; email comparison ignores letter case.
+
+    * 3c1. System identifies the duplicate contact field and displays an error without changing existing records.
+
+      Use case resumes from step 2.
+
+Customers may retain their own primary phone number and email address. Shared backup contact numbers are allowed.
 
 
 
@@ -872,6 +910,75 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
     * 2a1. System requests for an existing customer id.
 
       Use case resumes from step 2.
+
+
+
+**Use case: UC09 - Edit Activity**
+
+**MSS**
+
+1.  User enters the command, the persistent activity ID and one or more activity details to edit.
+2.  System validates the command, activity ID and resulting activity details, and checks that the activity has no enrolments.
+3.  System updates the activity schedule, preserving its ID and unspecified details, and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. User enters an invalid command format or activity ID format, or provides no fields to edit.
+
+    * 2a1. System displays an error message without changing existing records.
+
+      Use case resumes from step 1.
+
+* 2b. System detects invalid activity details, including an end time that is not later than the start time on the same day.
+
+    * 2b1. System requests the correct details without changing existing records.
+
+      Use case resumes from step 1.
+
+* 2c. System cannot find the specified activity ID, including in activities hidden by filters.
+
+    * 2c1. System displays an error requesting an existing activity ID without changing existing records.
+
+      Use case resumes from step 1.
+
+* 2d. System detects that the activity has enrolments, including past occurrences.
+
+    * 2d1. System rejects the edit and asks the user to create a new activity instead, without changing existing records.
+
+      Use case ends.
+
+For recurring activities, the edit applies to the entire schedule rather than a single occurrence.
+
+
+
+**Use case: UC10 - Delete Activity**
+
+**MSS**
+
+1.  User enters the command and the persistent activity ID for the activity to be deleted.
+2.  System validates the command and activity ID and locates the activity, including activities hidden by filters.
+3.  System deletes the activity schedule and all its dog enrolments, including past occurrences, and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. User enters an invalid command format or activity ID format.
+
+    * 2a1. System displays an error message without changing existing records.
+
+      Use case resumes from step 1.
+
+* 2b. System cannot find the specified activity ID.
+
+    * 2b1. System displays an error requesting an existing activity ID without changing existing records.
+
+      Use case resumes from step 1.
+
+For recurring activities, deletion removes the entire schedule rather than a single occurrence.
+Dog and customer records, other activity schedules and their enrolments are preserved.
 
 
 
@@ -976,7 +1083,7 @@ appear as an undoable mutation.
 1. Add a dog, run `help`, then `undo`. The dog disappears; `help` is not the undone command.
 1. Run `help`, then `redo`. The dog returns. Repeat with `summary` instead of `help`.
 1. Undo again, then add another dog. `redo` reports no command to redo and does not replace the new dog.
-1. Link two dogs to different customers. Run `searchd n/Buddy`, `resetdisplay`, then `undo`.
+1. Link two dogs to different customers. Run `searchd n/Buddy`, `reset`, then `undo`.
    Only Buddy and Buddy's owner appear. Repeat using `searchc n/Alice`; only Alice and her dog appear.
 1. With disposable data, make the data file unwritable after a successful add, then run `undo`.
    The save reports an error, but the dog disappears from memory. Restore write access and run `redo`;

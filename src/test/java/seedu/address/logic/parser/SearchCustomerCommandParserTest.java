@@ -38,6 +38,7 @@ public class SearchCustomerCommandParserTest {
     @Test
     public void parse_invalidPhoneBackupOrId_throwsParseException() {
         for (String input : new String[]{"p/9123456", "bc/912345678", "d/0", "d/-1", "d/abc", "i/-1", "i/abc"}) {
+
             assertThrows(ParseException.class, () -> parser.parse(input));
         }
     }
