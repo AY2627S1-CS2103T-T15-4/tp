@@ -24,10 +24,10 @@ public class LinkCommand extends Command {
     private final int customerId;
     private final List<Integer> dogIds;
 
-    /** Creates a link request containing distinct nonnegative dog IDs and a nonnegative customer ID. */
+    /** Creates a link request containing distinct nonnegative dog IDs and a positive customer ID. */
     public LinkCommand(int customerId, List<Integer> dogIds) {
         this.dogIds = List.copyOf(dogIds);
-        checkArgument(customerId >= 0 && !dogIds.isEmpty()
+        checkArgument(customerId > 0 && !dogIds.isEmpty()
                 && dogIds.stream().allMatch(id -> id >= 0)
                 && new HashSet<>(dogIds).size() == dogIds.size(), "Invalid link IDs.");
         this.customerId = customerId;

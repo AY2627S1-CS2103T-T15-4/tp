@@ -128,6 +128,7 @@ public class LinkCommandTest {
         assertNotEquals(command, null);
         assertNotEquals(command, new Object());
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(-1, List.of(42)));
+        assertThrows(IllegalArgumentException.class, () -> new LinkCommand(0, List.of(42)));
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(7, List.of()));
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(7, List.of(-1)));
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(7, List.of(42, 42)));

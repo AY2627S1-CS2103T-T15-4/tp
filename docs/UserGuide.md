@@ -365,7 +365,7 @@ Example: `searchc n/Anna d/12 34`
 * Phone and backup contact numbers require exactly eight digits and use exact matching.
 * Email matching is case-insensitive and exact.
 * Dog IDs must exist. A customer must own all specified dog IDs to match.
-* Customer ID must be a nonnegative ID belonging to an existing customer; it matches that customer exactly.
+* Customer ID must be a positive ID belonging to an existing customer; it matches that customer exactly.
 * The dog panel is also filtered to show only dogs owned by the matching customers.
 * Dog IDs and customer ID appear in the success message only when supplied; dog IDs are displayed in ascending numeric order.
 * Only lowercase `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/` prefixes are accepted.

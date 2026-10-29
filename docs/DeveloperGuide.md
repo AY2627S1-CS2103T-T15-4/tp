@@ -428,7 +428,7 @@ IDs and sizes use the `Error in searching dogs:` prefix with their specific vali
 `AddressBookParser` routes `searchc` to `SearchCustomerCommandParser`. The parser accepts the optional
 lowercase fields `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/`. Names are normalised for case-insensitive substring
 matching, while contact numbers and email addresses use exact matching. Multiple dog IDs are parsed from
-the `d/` field and are retained as a set. The optional customer ID is parsed as a nonnegative integer and
+the `d/` field and are retained as a set. The optional customer ID is parsed as a positive integer and
 matched exactly against existing customer IDs.
 
 `SearchCustomerCommand` validates that the requested customer ID and every requested dog ID exist, then applies

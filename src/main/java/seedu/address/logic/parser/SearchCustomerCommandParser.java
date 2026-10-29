@@ -102,7 +102,7 @@ public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand
         }
         try {
             int customerId = Integer.parseInt(value);
-            if (customerId < 0) {
+            if (customerId <= 0) {
                 throw new NumberFormatException();
             }
             return customerId;
