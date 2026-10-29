@@ -35,4 +35,3 @@ public class ActivityNameTest {
         assertNotEquals(name, "Walk");
     }
 }
-// @@author

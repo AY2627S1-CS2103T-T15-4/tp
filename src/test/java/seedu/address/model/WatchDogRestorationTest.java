@@ -152,4 +152,3 @@ public class WatchDogRestorationTest {
                 LocalTime.of(endHour, 0), Recurrence.ONCE);
     }
 }
-// @@author

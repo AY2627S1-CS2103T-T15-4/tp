@@ -1,4 +1,3 @@
-// @@author Kenneth-Chia
 package seedu.address.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,23 +47,19 @@ public class ActivityIntegrationTest {
         assertEquals(List.of(first), view);
         assertEquals(1, changes.get());
         assertThrows(UnsupportedOperationException.class, () -> view.add(first));
-        // @@author
         WatchDog copy = new WatchDog(model.getWatchDog());
         assertEquals(model.getWatchDog(), copy);
         assertEquals(model.getWatchDog().hashCode(), copy.hashCode());
         assertEquals(2, copy.addActivity(NAME, DATE, START, END, Recurrence.DAILY).getId());
         assertFalse(copy.equals(model.getWatchDog()));
         model.setWatchDog(copy);
-        // @@author Kenneth-Chia
         assertEquals(copy.getActivityList(), view);
         assertEquals(3, model.addActivity(NAME, DATE, START, END, Recurrence.ONCE).getId());
     }
 
     @Test
     public void addActivity_invalidDetailsAndDuplicateIdentity_leaveStateUnchanged() {
-        // @@author
         WatchDog book = new WatchDog();
-        // @@author Kenneth-Chia
         assertThrows(IllegalArgumentException.class, () ->
                 book.addActivity(NAME, DATE, END, START, Recurrence.ONCE));
         assertThrows(NullPointerException.class, () ->
@@ -72,9 +67,7 @@ public class ActivityIntegrationTest {
         assertEquals(1, book.getNextActivityId());
         assertTrue(book.getActivityList().isEmpty());
         Activity activity = book.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
-        // @@author
         WatchDog before = new WatchDog(book);
-        // @@author Kenneth-Chia
         assertThrows(IllegalArgumentException.class, () ->
                 book.addActivityFromStorage(activity.withName(new ActivityName("Changed"))));
         assertThrows(NullPointerException.class, () -> book.addActivityFromStorage(null));
@@ -86,19 +79,14 @@ public class ActivityIntegrationTest {
 
     @Test
     public void addActivity_lastAvailableId_doesNotOverflow() {
-        // @@author
         WatchDog book = new WatchDog();
-        // @@author Kenneth-Chia
         book.setNextActivityId(Integer.MAX_VALUE);
         assertEquals(Integer.MAX_VALUE, book.addActivity(NAME, DATE, START, END, Recurrence.ONCE).getId());
         assertEquals((long) Integer.MAX_VALUE + 1, book.getNextActivityId());
-        // @@author
         WatchDog copy = new WatchDog(book);
-        // @@author Kenneth-Chia
         assertThrows(IllegalStateException.class, () ->
                 book.addActivity(NAME, DATE, START, END, Recurrence.ONCE));
         assertEquals(copy, book);
-        // @@author
         WatchDog differentCounter = new WatchDog();
         differentCounter.setNextActivityId(2);
         assertFalse(new WatchDog().equals(differentCounter));
@@ -110,7 +98,6 @@ public class ActivityIntegrationTest {
         Activity stored = book.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
         WatchDog before = new WatchDog(book);
         WatchDog duplicateIds = new WatchDog() {
-            // @@author Kenneth-Chia
             @Override
             public ObservableList<Activity> getActivityList() {
                 return FXCollections.observableArrayList(stored, stored);
@@ -118,9 +105,7 @@ public class ActivityIntegrationTest {
         };
         assertThrows(IllegalArgumentException.class, () -> book.resetData(duplicateIds));
         for (long counter : new long[]{0, (long) Integer.MAX_VALUE + 2}) {
-            // @@author
             WatchDog invalidCounter = new WatchDog() {
-                // @@author Kenneth-Chia
                 @Override
                 public long getNextActivityId() {
                     return counter;
@@ -133,18 +118,14 @@ public class ActivityIntegrationTest {
 
     @Test
     public void resetData_listenerCopiesBook_observesRestoredCounter() {
-        // @@author
         WatchDog target = new WatchDog();
         WatchDog source = new WatchDog();
         source.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
         AtomicReference<WatchDog> snapshot = new AtomicReference<>();
-        // @@author Kenneth-Chia
         AtomicReference<RuntimeException> failure = new AtomicReference<>();
         target.getActivityList().addListener((ListChangeListener<Activity>) change -> {
             try {
-                // @@author
                 snapshot.set(new WatchDog(target));
-            // @@author Kenneth-Chia
             } catch (RuntimeException e) {
                 failure.set(e);
             }
@@ -159,17 +140,14 @@ public class ActivityIntegrationTest {
 
     @Test
     public void resetData_activityAndEnrolmentListeners_observeCompleteRestoredState() throws Exception {
-        // @@author
         WatchDog target = new WatchDog();
         Activity oldActivity = target.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
         Dog oldDog = target.addDog(new Dog(new DogName("Cookie"), new Breed("Poodle"), new Size("small")));
         target.addEnrolmentFromStorage(new Enrolment(oldActivity.getId(), oldDog.getId(), DATE));
         WatchDog source = new WatchDog();
-        // @@author Kenneth-Chia
         source.setNextActivityId(5);
         Activity newActivity = source.addActivity(NAME, DATE, START, END, Recurrence.WEEKLY);
         Dog newDog = source.addDog(new Dog(new DogName("Biscuit"), new Breed("Poodle"), new Size("small")));
-        // @@author
         LocalDate bookingDate = newActivity.nextOccurrenceOnOrAfter(LocalDate.now()).orElseThrow();
         source.enrolDogs(newActivity.getId(), bookingDate, List.of(newDog.getId()));
         source.setNextDogId(20);
@@ -181,7 +159,6 @@ public class ActivityIntegrationTest {
         target.getEnrolmentList().addListener((ListChangeListener<Enrolment>) change ->
                 enrolmentSnapshot.set(new WatchDog(target)));
 
-        // @@author Kenneth-Chia
         target.resetData(source);
 
         assertEquals(source, activitySnapshot.get());
@@ -195,17 +172,14 @@ public class ActivityIntegrationTest {
 
     @Test
     public void equals_differentSchedulesWithSameCounter_notEqual() {
-        // @@author
         WatchDog first = new WatchDog();
         WatchDog second = new WatchDog();
-        // @@author Kenneth-Chia
         first.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
         second.addActivity(new ActivityName("Training"), DATE, START, END, Recurrence.ONCE);
 
         assertEquals(first.getNextActivityId(), second.getNextActivityId());
         assertFalse(first.equals(second));
         assertFalse(second.equals(first));
-        // @@author
         assertEquals(first, new WatchDog(first));
     }
 
@@ -214,7 +188,6 @@ public class ActivityIntegrationTest {
         WatchDog first = new WatchDog();
         first.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
         WatchDog second = new WatchDog(first);
-        // @@author Kenneth-Chia
         second.addCustomer(new Customer(new Name("Alice Tan"), new Phone("91234567"),
                 new Email("alice@example.com"), new BackupContact("98765432")));
 
@@ -224,4 +197,3 @@ public class ActivityIntegrationTest {
         assertFalse(second.equals(first));
     }
 }
-// @@author

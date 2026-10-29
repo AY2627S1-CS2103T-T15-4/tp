@@ -165,20 +165,16 @@ public class ModelManager implements Model {
     public List<Dog> getDogsEnrolledOn(LocalDate date) {
         requireNonNull(date);
         Set<Integer> enrolledDogIds = watchDog.getEnrolmentList().stream()
-                // @@author Kenneth-Chia
                 .filter(enrolment -> enrolment.getDate().equals(date))
                 .map(enrolment -> enrolment.getDogId())
                 .collect(Collectors.toSet());
-        // @@author
         return watchDog.getDogList().stream()
-                // @@author Kenneth-Chia
                 .filter(dog -> enrolledDogIds.contains(dog.getId()))
                 .toList();
     }
 
     @Override
     public void linkDogs(int customerId, List<Integer> dogIds) throws LinkException {
-        // @@author
         watchDog.linkDogs(customerId, dogIds);
         refreshDisplayedRecords();
     }

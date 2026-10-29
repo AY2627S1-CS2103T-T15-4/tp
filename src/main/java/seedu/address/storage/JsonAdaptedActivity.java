@@ -62,4 +62,3 @@ class JsonAdaptedActivity {
         }
     }
 }
-// @@author

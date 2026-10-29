@@ -10,4 +10,3 @@ public enum Recurrence {
     DAILY,
     WEEKLY
 }
-// @@author

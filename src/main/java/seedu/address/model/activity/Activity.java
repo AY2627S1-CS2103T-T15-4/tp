@@ -155,4 +155,3 @@ public final class Activity {
                 .add("startTime", startTime).add("endTime", endTime).add("recurrence", recurrence).toString();
     }
 }
-// @@author

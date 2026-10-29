@@ -68,7 +68,6 @@ public class WatchDog implements ReadOnlyWatchDog {
     public void resetData(ReadOnlyWatchDog newData) {
         requireNonNull(newData);
 
-        // @@author Kenneth-Chia
         List<Activity> restored = List.copyOf(newData.getActivityList());
         List<Enrolment> restoredEnrolments = List.copyOf(newData.getEnrolmentList());
         List<Dog> restoredDogs = List.copyOf(newData.getDogList());
@@ -80,17 +79,14 @@ public class WatchDog implements ReadOnlyWatchDog {
                 || nextId < minimumId || nextId > (long) Integer.MAX_VALUE + 1) {
             throw new IllegalArgumentException("Invalid activity IDs or next activity ID.");
         }
-        // @@author
         long minimumDogId = restoredDogs.stream().mapToLong(Dog::getId).max().orElse(0) + 1;
         long restoredNextDogId = newData.getNextDogId();
         long nextRestoredDogId = restoredNextDogId == -1 ? minimumDogId : restoredNextDogId;
         validateNextDogId(nextRestoredDogId, minimumDogId);
-        // @@author Kenneth-Chia
         validateRestoredRecords(restoredCustomers, restoredDogs, restored, restoredEnrolments);
         dogs.setDogs(restoredDogs);
         customers.setCustomers(restoredCustomers);
         nextActivityId = nextId;
-        // @@author
         nextDogId = nextRestoredDogId;
 
         long restoredNextCustomerId = newData.getNextCustomerId();
@@ -98,7 +94,6 @@ public class WatchDog implements ReadOnlyWatchDog {
                 ? restoredNextCustomerId
                 : customers.asUnmodifiableObservableList().stream()
                         .mapToLong(Customer::getId).max().orElse(0) + 1;
-        // @@author Kenneth-Chia
         activities.restore(restored, restoredEnrolments);
         assert activities.equals(restored) && enrolments.equals(restoredEnrolments)
                 : "Restoration must preserve the validated schedules and bookings.";
@@ -118,7 +113,6 @@ public class WatchDog implements ReadOnlyWatchDog {
     /** Delays activity notifications until the corresponding enrolments have also been restored. */
     private final class ActivityList extends ModifiableObservableListBase<Activity> {
         private final List<Activity> values = new ArrayList<>();
-        // @@author
 
         /** Replaces schedules and publishes one coherent change after enrolments have been restored. */
         // @@author Kenneth-Chia
@@ -161,11 +155,9 @@ public class WatchDog implements ReadOnlyWatchDog {
 
     /** Replaces customers only if every existing dog owner remains present. */
     public void setCustomers(List<Customer> customers) {
-        // @@author Kenneth-Chia
         List<Customer> replacements = List.copyOf(customers);
         validateDogOwners(getDogList(), replacements);
         this.customers.setCustomers(replacements);
-        // @@author
     }
 
     // @@author Kenneth-Chia
@@ -325,7 +317,6 @@ public class WatchDog implements ReadOnlyWatchDog {
      */
     public void removeCustomer(Customer key) {
         customers.remove(key);
-        // @@author Kenneth-Chia
         dogs.setDogs(getDogList().stream()
                 .map(dog -> dog.getOwnerId().filter(id -> id == key.getId()).isPresent()
                         ? dog.withoutOwner() : dog)
@@ -397,18 +388,15 @@ public class WatchDog implements ReadOnlyWatchDog {
      *
      * @throws LinkException if IDs repeat, endpoints are missing, or any dog already has an owner.
      */
-    // @@author Kenneth-Chia
     public void linkDogs(int customerId, List<Integer> dogIds) throws LinkException {
         requireNonNull(dogIds);
         if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
                 || new HashSet<>(dogIds).size() != dogIds.size()) {
             throw new LinkException("Specify at least one dog ID, with no repeated IDs.");
         }
-        // @@author
         if (dogIds.stream().anyMatch(dogId -> dogId < 1)) {
             throw new LinkException("Dog IDs must be positive.");
         }
-        // @@author Kenneth-Chia
         if (getCustomerList().stream().noneMatch(customer -> customer.getId() == customerId)) {
             throw new LinkException("Customer ID " + customerId + " does not exist.");
         }
@@ -426,7 +414,6 @@ public class WatchDog implements ReadOnlyWatchDog {
         // All endpoints were validated; a mismatch here means the internal update is defective.
         assert hasExpectedOwners(dogIds, customerId) : "Linked dogs must exist and belong to the requested customer.";
         logger.fine("Linked " + dogIds.size() + " dogs to customer ID " + customerId + ".");
-        // @@author
     }
 
     /**
@@ -437,18 +424,15 @@ public class WatchDog implements ReadOnlyWatchDog {
      * @throws UnlinkException if the batch is empty, IDs repeat, dogs are missing,
      *     or any dog has no owner.
      */
-    // @@author Kenneth-Chia
     public void unlinkDogs(List<Integer> dogIds) throws UnlinkException {
         requireNonNull(dogIds);
         if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
                 || new HashSet<>(dogIds).size() != dogIds.size()) {
             throw new UnlinkException("Specify at least one dog ID, with no repeated IDs.");
         }
-        // @@author
         if (dogIds.stream().anyMatch(dogId -> dogId < 1)) {
             throw new UnlinkException("Dog IDs must be positive.");
         }
-        // @@author Kenneth-Chia
         Map<Integer, Dog> replacements = new HashMap<>();
         for (int dogId : dogIds) {
             Dog dog = getDogList().stream().filter(candidate -> candidate.getId() == dogId).findFirst()
@@ -497,7 +481,6 @@ public class WatchDog implements ReadOnlyWatchDog {
         }
         unlinkDogs(dogIds);
     }
-    // @@author
 
     /**
      * Adds a new dog and assigns it the next available persistent ID.

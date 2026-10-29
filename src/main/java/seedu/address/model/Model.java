@@ -55,7 +55,6 @@ public interface Model {
 
     void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException;
 
-    // @@author Kenneth-Chia
     /**
      * Returns an unmodifiable snapshot of distinct stored dogs enrolled on {@code date}, in full dog-list order.
      * Matches persistent IDs independently of displayed filters. Later model mutations do not change the snapshot.
@@ -72,7 +71,6 @@ public interface Model {
 
     /** Unlinks all owned dogs; throws if the customer is missing or has no dogs. Preserves records and filters. */
     void unlinkCustomerDogs(int customerId) throws UnlinkException;
-    // @@author
 
     /**
      * Returns the user prefs.

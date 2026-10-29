@@ -18,4 +18,3 @@ class NextActivityIdDeserializer extends JsonDeserializer<Long> {
         return parser.getLongValue();
     }
 }
-// @@author

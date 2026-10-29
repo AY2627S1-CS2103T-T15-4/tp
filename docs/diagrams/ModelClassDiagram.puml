@@ -1,36 +1,15 @@
 @startuml
 !include style.puml
 skinparam arrowThickness 1.1
-/'
-// @@author Kenneth-Chia
-'/
 skinparam arrowColor MODEL_COLOR_T4
-/'
-// @@author
-'/
 skinparam classBackgroundColor MODEL_COLOR
-/'
-// @@author Kenneth-Chia
-'/
 show members
-/'
-// @@author
-'/
 
-/'
-// @@author Kenneth-Chia
-'/
 class "<<interface>>\nModel" as Model
 class ModelManager
 class "<<interface>>\nReadOnlyWatchDog" as ReadOnlyWatchDog
 class "<<interface>>\nReadOnlyUserPrefs" as ReadOnlyUserPrefs
-/'
-// @@author
-'/
 class WatchDog
-/'
-// @@author Kenneth-Chia
-'/
 class UserPrefs
 class UniqueCustomerList
 class UniqueDogList
@@ -48,14 +27,8 @@ class Enrolment {
   -activityId: int
   -dogId: int
   -date: LocalDate
-/'
-// @@author
-'/
 }
 
-/'
-// @@author Kenneth-Chia
-'/
 ModelManager .up.|> Model
 ModelManager --> "1" WatchDog : watchDog
 ModelManager --> "1" UserPrefs : userPrefs
@@ -82,7 +55,4 @@ note bottom of Dog
   not direct references to other records.
   Other record details and APIs are omitted.
 end note
-/'
-// @@author
-'/
 @enduml

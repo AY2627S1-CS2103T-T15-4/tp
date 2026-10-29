@@ -59,4 +59,3 @@ public class SummaryCommand extends Command {
         return SummaryCommand.class.hashCode();
     }
 }
-// @@author

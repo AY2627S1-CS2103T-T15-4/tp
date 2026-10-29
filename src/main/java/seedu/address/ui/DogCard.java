@@ -6,7 +6,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.layout.HBox;
-// @@author Kenneth-Chia
 import javafx.scene.layout.Region;
 import seedu.address.model.dog.Dog;
 
@@ -15,12 +14,10 @@ import seedu.address.model.dog.Dog;
  */
 public class DogCard extends UiPart<Region> {
     private static final String FXML = "DogListCard.fxml";
-    // @@author
     private static final String CUSTOMER_ICON = "\uD83D\uDC64";
 
     @FXML
     private HBox cardPane;
-    // @@author Kenneth-Chia
     @FXML
     private Label id;
     @FXML
@@ -31,7 +28,6 @@ public class DogCard extends UiPart<Region> {
     private Label size;
     @FXML
     private Label owner;
-    // @@author
     @FXML
     private HBox breedRow;
     @FXML
@@ -39,22 +35,18 @@ public class DogCard extends UiPart<Region> {
     @FXML
     private HBox ownerRow;
 
-    // @@author Kenneth-Chia
     /**
      * Creates a card with the given dog to display.
      */
     public DogCard(Dog dog) {
-        // @@author
         this(dog, CardInteractionUtil::copyToSystemClipboard);
     }
 
     /** Creates a dog card that sends copied values to the supplied clipboard writer. */
     DogCard(Dog dog, ClipboardWriter clipboardWriter) {
-        // @@author Kenneth-Chia
         super(FXML);
         id.setText(dog.getId() + ". ");
         name.setText(dog.getName().fullName);
-        // @@author
         String breedText = "Breed: " + dog.getBreed();
         String sizeText = "Size: " + dog.getSize();
         String customerId = dog.getOwnerId().map(String::valueOf).orElse("None");

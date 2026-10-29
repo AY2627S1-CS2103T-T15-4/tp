@@ -60,4 +60,3 @@ public class AddActivityCommand extends Command {
         return new ToStringBuilder(this).add("details", details).toString();
     }
 }
-// @@author
