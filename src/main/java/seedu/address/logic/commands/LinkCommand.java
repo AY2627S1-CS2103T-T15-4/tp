@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
@@ -28,10 +29,10 @@ public class LinkCommand extends Command {
     /** Creates a link request containing distinct positive dog IDs and a positive customer ID. */
     public LinkCommand(int customerId, List<Integer> dogIds) {
         this.dogIds = List.copyOf(dogIds);
-        checkArgument(customerId >= 1 && !dogIds.isEmpty()
-                && dogIds.stream().allMatch(id -> id >= 1)
+        checkArgument(customerId >= 1 && !this.dogIds.isEmpty()
+                && this.dogIds.stream().allMatch(id -> id >= 1)
 
-                && new HashSet<>(dogIds).size() == dogIds.size(), "Invalid link IDs.");
+                && new HashSet<>(this.dogIds).size() == this.dogIds.size(), "Invalid link IDs.");
         this.customerId = customerId;
     }
 
@@ -57,3 +58,4 @@ public class LinkCommand extends Command {
         return Objects.hash(customerId, dogIds);
     }
 }
+// @@author

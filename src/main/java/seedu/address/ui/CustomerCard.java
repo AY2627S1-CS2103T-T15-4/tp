@@ -1,3 +1,4 @@
+//@@author its-shoutime
 package seedu.address.ui;
 
 import static java.util.Objects.requireNonNull;
@@ -48,11 +49,13 @@ public class CustomerCard extends UiPart<Region> {
      * Creates a {@code CustomerCard} with the given {@code Customer} to display.
      */
     public CustomerCard(Customer customer) {
+        // @@author Kenneth-Chia
         this(customer, List.of());
     }
 
     /** Creates a customer card with the persistent IDs of all dogs owned by that customer. */
     public CustomerCard(Customer customer, List<Integer> ownedDogIds) {
+        // @@author
         this(customer, ownedDogIds, CardInteractionUtil::copyToSystemClipboard);
     }
 

@@ -1,5 +1,7 @@
 package seedu.address.logic.parser;
 
+import static java.util.Objects.requireNonNull;
+
 import seedu.address.logic.commands.FilterUnlinkedCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
@@ -10,6 +12,7 @@ public class FilterUnlinkedCommandParser implements Parser<FilterUnlinkedCommand
 
     @Override
     public FilterUnlinkedCommand parse(String args) throws ParseException {
+        requireNonNull(args);
         String category = args.trim();
         if (category.equals("dog")) {
             return new FilterUnlinkedCommand(true);

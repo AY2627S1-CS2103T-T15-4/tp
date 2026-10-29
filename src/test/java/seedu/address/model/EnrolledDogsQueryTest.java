@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,7 +58,9 @@ public class EnrolledDogsQueryTest {
         model.deleteDog(SECOND);
         assertEquals(List.of(FIRST, SECOND), snapshot);
         assertEquals(List.of(renamed), model.getDogsEnrolledOn(DATE));
+        // @@author
         model.setWatchDog(new WatchDog());
+        // @@author Kenneth-Chia
         assertEquals(List.of(FIRST, SECOND), snapshot);
         assertEquals(List.of(), model.getDogsEnrolledOn(DATE));
     }
@@ -68,7 +71,9 @@ public class EnrolledDogsQueryTest {
     }
 
     private static Model modelWithEnrolments() {
+        // @@author
         WatchDog book = new WatchDog();
+        // @@author Kenneth-Chia
         book.addDogFromStorage(FIRST);
         book.addDogFromStorage(SECOND);
         book.addDogFromStorage(OTHER_DATE);
@@ -89,3 +94,4 @@ public class EnrolledDogsQueryTest {
         return new Dog(id, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
     }
 }
+// @@author

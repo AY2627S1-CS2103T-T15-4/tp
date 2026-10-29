@@ -6,6 +6,7 @@ import static seedu.address.testutil.Assert.assertThrows;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -23,6 +24,22 @@ import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
 
 public class SearchCustomerCommandTest {
+    @Test
+    public void execute_callerChangesDogIds_preservesOriginalQueryAndLiveOwnership() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        Set<Integer> ids = new HashSet<>(Set.of(1));
+        SearchCustomerCommand command = new SearchCustomerCommand(null, null, null, null, ids);
+        ids.clear();
+        ids.add(3);
+
+        assertEquals("Successfully searched customers by dog ids: 1", command.execute(model).getFeedbackToUser());
+        assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
+        model.unlinkDogs(List.of(1));
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+        model.linkDogs(2, List.of(1));
+        assertEquals(List.of(model.getCustomerList().get(1)), model.getFilteredCustomerList());
+    }
+
     @Test
     public void execute_combinedFields_matchesAllRequestedFields() throws Exception {
         ModelManager model = modelWithCustomersAndDogs();
@@ -74,7 +91,7 @@ public class SearchCustomerCommandTest {
                     new SearchCustomerCommand(null, null, null, null, Set.of(1, id)));
         }
         for (int id : new int[]{999, Integer.MAX_VALUE}) {
-            assertThrows(CommandException.class, "Error in searching customers:\nPlease enter a valid dog index", () ->
+            assertThrows(CommandException.class, "Error in searching customers:\nPlease enter a valid dog ID", () ->
                     new SearchCustomerCommand(null, null, null, null, Set.of(1, id)).execute(model));
             assertThrows(CommandException.class, SearchCustomerCommand.MESSAGE_INVALID_CUSTOMER_ID, () ->
                     new SearchCustomerCommand(null, null, null, null, null, id).execute(model));

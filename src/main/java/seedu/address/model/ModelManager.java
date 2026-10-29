@@ -63,6 +63,7 @@ public class ModelManager implements Model {
         this(new WatchDog(), new UserPrefs());
     }
 
+    //@@author its-shoutime
     @Override
     public ModelState createState() {
         return new ModelState(new WatchDog(watchDog), activeCustomerPredicate, activeDogPredicate,
@@ -88,6 +89,7 @@ public class ModelManager implements Model {
         // Some restored predicates read another filtered list; re-evaluate after their source is installed.
         refreshDisplayedRecords();
     }
+    //@@author
 
     //=========== UserPrefs ==================================================================================
 
@@ -163,16 +165,20 @@ public class ModelManager implements Model {
     public List<Dog> getDogsEnrolledOn(LocalDate date) {
         requireNonNull(date);
         Set<Integer> enrolledDogIds = watchDog.getEnrolmentList().stream()
+                // @@author Kenneth-Chia
                 .filter(enrolment -> enrolment.getDate().equals(date))
                 .map(enrolment -> enrolment.getDogId())
                 .collect(Collectors.toSet());
+        // @@author
         return watchDog.getDogList().stream()
+                // @@author Kenneth-Chia
                 .filter(dog -> enrolledDogIds.contains(dog.getId()))
                 .toList();
     }
 
     @Override
     public void linkDogs(int customerId, List<Integer> dogIds) throws LinkException {
+        // @@author
         watchDog.linkDogs(customerId, dogIds);
         refreshDisplayedRecords();
     }
@@ -220,11 +226,13 @@ public class ModelManager implements Model {
         return watchDog.hasCustomer(customer);
     }
 
+    //@@author its-shoutime
     @Override
     public void deleteCustomer(Customer target) {
         watchDog.removeCustomer(target);
         refreshDisplayedRecords();
     }
+    //@@author
 
     @Override
     public void addCustomer(Customer customer) {
@@ -259,6 +267,7 @@ public class ModelManager implements Model {
         filteredDogs.setPredicate(predicate);
     }
 
+    //@@author its-shoutime
     @Override
     public ObservableList<Customer> getFilteredCustomerList() {
         return filteredCustomers;
@@ -270,6 +279,7 @@ public class ModelManager implements Model {
         activeCustomerPredicate = predicate;
         filteredCustomers.setPredicate(predicate);
     }
+    //@@author
 
     @Override
     public ObservableList<Activity> getFilteredActivityList() {

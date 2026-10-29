@@ -15,6 +15,7 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.WatchDog;
+// @@author Kenneth-Chia
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Recurrence;
@@ -60,12 +61,16 @@ public class AddActivityCommandTest {
 
     @Test
     public void execute_exhaustedIds_throwsWithoutMutation() {
+        // @@author
         WatchDog book = new WatchDog();
+        // @@author Kenneth-Chia
         book.setNextActivityId((long) Integer.MAX_VALUE + 1);
         ModelManager model = new ModelManager(book, new UserPrefs());
         assertThrows(CommandException.class, "No activity IDs remain available.", () ->
                 command(Recurrence.ONCE).execute(model));
+        // @@author
         assertEquals(book, model.getWatchDog());
+        // @@author Kenneth-Chia
         assertThrows(NullPointerException.class, () -> command(Recurrence.ONCE).execute(null));
     }
 
@@ -87,3 +92,4 @@ public class AddActivityCommandTest {
         return new AddActivityCommand(NAME, DATE, START, END, recurrence);
     }
 }
+// @@author

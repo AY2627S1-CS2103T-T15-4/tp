@@ -45,6 +45,7 @@ public class MainApp extends Application {
     protected Storage storage;
     protected Model model;
 
+    // @@author Kenneth-Chia
     private final Path userPrefsFilePath;
     private final Path dataFilePath;
 
@@ -62,6 +63,7 @@ public class MainApp extends Application {
         this.userPrefsFilePath = requireNonNull(userPrefsFilePath);
         this.dataFilePath = requireNonNull(dataFilePath);
     }
+    // @@author
 
     @Override
     public void init() throws Exception {

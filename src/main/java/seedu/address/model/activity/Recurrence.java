@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.model.activity;
 
 /**
@@ -9,3 +10,4 @@ public enum Recurrence {
     DAILY,
     WEEKLY
 }
+// @@author
