@@ -331,15 +331,15 @@ public class ListPanelsTest {
             CustomerListPanel panel = new CustomerListPanel(model.getFilteredCustomerList(), model.getDogList());
             ListView<Supplier<Region>> list = listView(panel);
 
-            assertEquals("Dog IDs: None", label(list.getItems().get(0).get(), "dogIds"));
+            assertEquals("None", label(list.getItems().get(0).get(), "dogIds"));
             try {
                 model.linkDogs(1, List.of(2, 3));
             } catch (LinkException e) {
                 throw new AssertionError(e);
             }
-            assertEquals("Dog IDs: 2, 3", label(list.getItems().get(0).get(), "dogIds"));
+            assertEquals("2, 3", label(list.getItems().get(0).get(), "dogIds"));
             model.deleteDog(model.getDogList().get(0));
-            assertEquals("Dog IDs: 3", label(list.getItems().get(0).get(), "dogIds"));
+            assertEquals("3", label(list.getItems().get(0).get(), "dogIds"));
         });
     }
 
@@ -355,14 +355,14 @@ public class ListPanelsTest {
                         model.getDogList());
                 DogListPanel dogs = new DogListPanel(model.getFilteredDogList());
 
-                assertEquals("Dog IDs: 2", label(listView(customers).getItems().get(0).get(), "dogIds"));
+                assertEquals("2", label(listView(customers).getItems().get(0).get(), "dogIds"));
                 try {
                     command.execute(model);
                 } catch (CommandException e) {
                     throw new AssertionError(e);
                 }
-                assertEquals("Dog IDs: None", label(listView(customers).getItems().get(0).get(), "dogIds"));
-                assertEquals("Owner ID: None", label(listView(dogs).getItems().get(0).get(), "owner"));
+                assertEquals("None", label(listView(customers).getItems().get(0).get(), "dogIds"));
+                assertEquals("👤 None", label(listView(dogs).getItems().get(0).get(), "owner"));
                 assertEquals(1, model.getCustomerList().size());
                 assertEquals(1, model.getDogList().size());
             });
@@ -382,9 +382,9 @@ public class ListPanelsTest {
             } catch (LinkException e) {
                 throw new AssertionError(e);
             }
-            assertEquals("Owner ID: 1", label(listView(panel).getItems().get(0).get(), "owner"));
+            assertEquals("👤 1", label(listView(panel).getItems().get(0).get(), "owner"));
             model.deleteCustomer(CUSTOMER);
-            assertEquals("Owner ID: None", label(listView(panel).getItems().get(0).get(), "owner"));
+            assertEquals("👤 None", label(listView(panel).getItems().get(0).get(), "owner"));
             assertEquals("Buddy", label(listView(panel).getItems().get(0).get(), "name"));
         });
     }
