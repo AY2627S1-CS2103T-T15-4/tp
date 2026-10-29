@@ -46,6 +46,11 @@ public class HelpCommandParserTest {
     }
 
     @Test
+    public void parse_nullArgs_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new HelpCommandParser().parse(null));
+    }
+
+    @Test
     public void parse_unknownTopicOrCommandArguments_throwsHelpfulError() {
         for (String topic : new String[] {"3", "unknown", "Summary", "summary today", "adddog n/Cookie",
             "delete dog 1", "list cat", "list", "list dog", "list customer", "resetdisplay", "search", "select"}) {

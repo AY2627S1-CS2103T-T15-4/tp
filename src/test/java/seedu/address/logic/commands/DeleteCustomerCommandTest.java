@@ -64,6 +64,11 @@ public class DeleteCustomerCommandTest {
     }
 
     @Test
+    public void hashCode_sameId_matches() {
+        assertEquals(new DeleteCustomerCommand(21).hashCode(), new DeleteCustomerCommand(21).hashCode());
+    }
+
+    @Test
     public void equals_sameId_returnsTrue() {
         assertTrue(new DeleteCustomerCommand(21).equals(new DeleteCustomerCommand(21)));
     }

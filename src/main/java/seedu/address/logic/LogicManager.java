@@ -59,6 +59,7 @@ public class LogicManager implements Logic {
 
     @Override
     public CommandResult execute(String commandText) throws CommandException, ParseException {
+        requireNonNull(commandText);
         logger.info("----------------[USER COMMAND][" + commandText + "]");
         if (awaitingClearConfirmation) {
             return executeClearConfirmation(commandText);

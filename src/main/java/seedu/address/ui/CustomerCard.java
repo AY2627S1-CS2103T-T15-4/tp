@@ -60,6 +60,7 @@ public class CustomerCard extends UiPart<Region> {
     CustomerCard(Customer customer, List<Integer> ownedDogIds, ClipboardWriter clipboardWriter) {
         super(FXML);
         requireNonNull(customer);
+        requireNonNull(clipboardWriter);
         requireAllNonNull(ownedDogIds);
         this.customer = customer;
         id.setText(customer.getId() + ". ");

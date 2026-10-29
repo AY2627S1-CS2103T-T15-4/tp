@@ -55,6 +55,11 @@ public class DeleteCustomerCommand extends Command {
     }
 
     @Override
+    public int hashCode() {
+        return Integer.hashCode(customerId);
+    }
+
+    @Override
     public String toString() {
         return new ToStringBuilder(this).add("customerId", customerId).toString();
     }
