@@ -59,7 +59,7 @@ public class EditCustomerCommandTest {
 
         Customer expected = new Customer(1, new Name("Alice Lee"), new Phone("98765432"),
                 new Email("alice.lee@example.com"), new BackupContact("92345678"));
-        assertEquals(expected, model.getAddressBook().getCustomerList().get(0));
+        assertEquals(expected, model.getWatchDog().getCustomerList().get(0));
         assertTrue(model.getFilteredCustomerList().isEmpty());
     }
 

@@ -5,11 +5,11 @@ skinparam ParticipantFontColor #FFFFFF
 skinparam maxMessageSize 230
 
 participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":WatchDogParser" as Router LOGIC_COLOR
 participant ":AddActivityCommandParser" as Parser LOGIC_COLOR
 participant "command:AddActivityCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
-participant ":AddressBook" as Book MODEL_COLOR
+participant ":WatchDog" as Book MODEL_COLOR
 participant ":StorageManager" as Storage STORAGE_COLOR
 
 [-> Logic : execute("addactivity ...")
@@ -47,14 +47,14 @@ deactivate Model
 Command --> Logic : CommandResult with assigned ID and details
 deactivate Command
 
-Logic -> Model : getAddressBook()
+Logic -> Model : getWatchDog()
 activate Model
-Model --> Logic : addressBook
+Model --> Logic : watchDog
 deactivate Model
-Logic -> Storage : saveAddressBook(addressBook)
+Logic -> Storage : saveWatchDog(watchDog)
 activate Storage
 note right of Storage
-  Delegates to JsonAddressBookStorage.
+  Delegates to JsonWatchDogStorage.
   Saves activities and nextActivityId as JSON.
 end note
 Storage --> Logic

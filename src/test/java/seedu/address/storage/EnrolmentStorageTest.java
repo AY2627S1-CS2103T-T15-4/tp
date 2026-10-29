@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.commons.util.JsonUtil;
-import seedu.address.model.AddressBook;
+import seedu.address.model.WatchDog;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Enrolment;
@@ -25,14 +25,14 @@ import seedu.address.model.dog.Size;
 public class EnrolmentStorageTest {
     @Test
     public void roundTrip_enrolments_preservesRecords() throws Exception {
-        AddressBook source = new AddressBook();
+        WatchDog source = new WatchDog();
         Activity activity = source.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         source.addDogFromStorage(new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
         source.enrolDogs(activity.getId(), activity.getStartDate(), List.of(7));
 
-        AddressBook restored = JsonUtil.fromJsonString(JsonUtil.toJsonString(new JsonSerializableAddressBook(source)),
-                JsonSerializableAddressBook.class).toModelType();
+        WatchDog restored = JsonUtil.fromJsonString(JsonUtil.toJsonString(new JsonSerializableWatchDog(source)),
+                JsonSerializableWatchDog.class).toModelType();
 
         assertEquals(source.getEnrolmentList(), restored.getEnrolmentList());
         assertEquals(source, restored);
@@ -40,15 +40,15 @@ public class EnrolmentStorageTest {
 
     @Test
     public void roundTrip_deletedActivity_doesNotRestoreActivityOrEnrolment() throws Exception {
-        AddressBook source = new AddressBook();
+        WatchDog source = new WatchDog();
         Activity activity = source.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.WEEKLY);
         source.addDogFromStorage(new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
         source.enrolDogs(activity.getId(), activity.getStartDate(), List.of(7));
         source.removeActivity(activity);
 
-        AddressBook restored = JsonUtil.fromJsonString(JsonUtil.toJsonString(new JsonSerializableAddressBook(source)),
-                JsonSerializableAddressBook.class).toModelType();
+        WatchDog restored = JsonUtil.fromJsonString(JsonUtil.toJsonString(new JsonSerializableWatchDog(source)),
+                JsonSerializableWatchDog.class).toModelType();
 
         assertEquals(List.of(), restored.getActivityList());
         assertEquals(List.of(), restored.getEnrolmentList());
@@ -65,13 +65,13 @@ public class EnrolmentStorageTest {
                 new JsonAdaptedEnrolment(0, 7, LocalDate.of(2028, 2, 29)).toModelType());
         JsonAdaptedEnrolment valid = new JsonAdaptedEnrolment(1, 7, LocalDate.of(2028, 2, 29));
 
-        assertThrows(IllegalValueException.class, () -> new JsonSerializableAddressBook(
+        assertThrows(IllegalValueException.class, () -> new JsonSerializableWatchDog(
                 null, List.of(dog), null, null, List.of(activity), List.of(valid, valid), 2L).toModelType());
-        assertThrows(IllegalValueException.class, () -> new JsonSerializableAddressBook(
+        assertThrows(IllegalValueException.class, () -> new JsonSerializableWatchDog(
                 null, List.of(dog), null, null, List.of(activity),
                 List.of(new JsonAdaptedEnrolment(1, 8, LocalDate.of(2028, 2, 29))),
                 2L).toModelType());
-        assertThrows(IllegalValueException.class, () -> new JsonSerializableAddressBook(
+        assertThrows(IllegalValueException.class, () -> new JsonSerializableWatchDog(
                 null, List.of(dog), null, null, List.of(activity),
                 List.of(new JsonAdaptedEnrolment(null, 7, LocalDate.of(2028, 2, 29))),
                 2L).toModelType());
@@ -83,7 +83,7 @@ public class EnrolmentStorageTest {
                 "09:00", "10:00", "ONCE");
         JsonAdaptedDog dog = new JsonAdaptedDog(7, "Buddy", "Poodle", "Small", null);
 
-        AddressBook restored = new JsonSerializableAddressBook(null, List.of(dog), null, null,
+        WatchDog restored = new JsonSerializableWatchDog(null, List.of(dog), null, null,
                 List.of(activity), List.of(new JsonAdaptedEnrolment(1, 7)), 2L).toModelType();
 
         assertEquals(List.of(new Enrolment(1, 7, LocalDate.of(2028, 2, 29))), restored.getEnrolmentList());

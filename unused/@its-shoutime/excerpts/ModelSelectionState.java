@@ -3,7 +3,7 @@
 // at base 39316339edadcf928b135d07858d62a2d06ae177. They were retired with the
 // select workflow; these excerpts are not part of the active command surface.
 
-record ModelState(ReadOnlyAddressBook addressBook, Predicate<Customer> customerPredicate,
+record ModelState(ReadOnlyWatchDog watchDog, Predicate<Customer> customerPredicate,
         Predicate<Dog> dogPredicate, Predicate<Activity> activityPredicate,
         Integer selectedDogId, Integer selectedCustomerId) {
 }

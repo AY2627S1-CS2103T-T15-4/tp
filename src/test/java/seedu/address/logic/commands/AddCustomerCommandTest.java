@@ -19,8 +19,8 @@ import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
-import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
+import seedu.address.model.ReadOnlyWatchDog;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Recurrence;
@@ -161,10 +161,10 @@ public class AddCustomerCommandTest {
         @Override public void setGuiSettings(GuiSettings guiSettings) {
             throw unused();
         }
-        @Override public void setAddressBook(ReadOnlyAddressBook addressBook) {
+        @Override public void setWatchDog(ReadOnlyWatchDog watchDog) {
             throw unused();
         }
-        @Override public ReadOnlyAddressBook getAddressBook() {
+        @Override public ReadOnlyWatchDog getWatchDog() {
             throw unused();
         }
         @Override public void deleteCustomer(Customer customer) {
@@ -186,12 +186,6 @@ public class AddCustomerCommandTest {
             throw unused();
         }
         @Override public void deleteDog(Dog dog) {
-            throw unused();
-        }
-        @Override public void selectDog(int dogId) {
-            throw unused();
-        }
-        @Override public void selectCustomer(int customerId) {
             throw unused();
         }
         @Override public void setDog(Dog target, Dog editedDog) {

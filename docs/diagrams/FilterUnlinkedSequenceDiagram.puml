@@ -4,7 +4,7 @@ skinparam arrowColor LOGIC_COLOR_T4
 
 actor User
 participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":WatchDogParser" as Router LOGIC_COLOR
 participant ":FilterUnlinkedCommandParser" as Parser LOGIC_COLOR
 participant "command:FilterUnlinkedCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR

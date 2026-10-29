@@ -13,19 +13,19 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import seedu.address.logic.parser.AddressBookParser;
+import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.CustomerSearchPredicate;
-import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.storage.JsonWatchDogStorage;
 
 /** Exercises customer search parsing and execution against the real model. */
 public class SearchCustomerCommandTest {
-    private final AddressBookParser parser = new AddressBookParser();
+    private final WatchDogParser parser = new WatchDogParser();
     private final Model model = new ModelManager();
 
     @Test
@@ -36,7 +36,7 @@ public class SearchCustomerCommandTest {
         model.addCustomer(first);
         model.addCustomer(second);
         model.addCustomer(third);
-        AddressBook before = new AddressBook(model.getAddressBook());
+        WatchDog before = new WatchDog(model.getWatchDog());
 
         assertEquals("3 customers found.", execute("search customer n/aLeX"));
         assertEquals(List.of(first, second, third), model.getFilteredCustomerList());
@@ -44,7 +44,7 @@ public class SearchCustomerCommandTest {
         assertEquals(List.of(first, second), model.getFilteredCustomerList());
         assertEquals("0 customers found.", execute("search customer n/alex  tan"));
         assertEquals(List.of(), model.getFilteredCustomerList());
-        assertEquals(before, model.getAddressBook());
+        assertEquals(before, model.getWatchDog());
     }
 
     @Test
@@ -75,19 +75,19 @@ public class SearchCustomerCommandTest {
         Customer alex = customer(42, "Alex Tan");
         model.addCustomer(alex);
         execute("search customer n/alex");
-        AddressBook before = new AddressBook(model.getAddressBook());
+        WatchDog before = new WatchDog(model.getWatchDog());
         assertThrows(ParseException.class, () -> parser.parseCommand("search customer id/-1"));
         assertEquals(List.of(alex), model.getFilteredCustomerList());
-        assertEquals(before, model.getAddressBook());
+        assertEquals(before, model.getWatchDog());
     }
 
     @Test
     public void execute_loadedCustomer_searchesPersistedId(@TempDir Path directory) throws Exception {
         Customer customer = customer(42, "Alex Tan");
         model.addCustomer(customer);
-        JsonAddressBookStorage storage = new JsonAddressBookStorage(directory.resolve("addressbook.json"));
-        storage.saveAddressBook(model.getAddressBook());
-        Model loadedModel = new ModelManager(storage.readAddressBook().orElseThrow(),
+        JsonWatchDogStorage storage = new JsonWatchDogStorage(directory.resolve("addressbook.json"));
+        storage.saveWatchDog(model.getWatchDog());
+        Model loadedModel = new ModelManager(storage.readWatchDog().orElseThrow(),
                 new UserPrefs());
         parser.parseCommand("search customer id/42").execute(loadedModel);
         assertEquals(List.of(customer), loadedModel.getFilteredCustomerList());

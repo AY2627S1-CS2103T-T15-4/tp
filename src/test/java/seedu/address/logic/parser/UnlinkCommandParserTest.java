@@ -21,8 +21,8 @@ public class UnlinkCommandParserTest {
                 parser.parse("\t d/01  02\t 2147483647  "));
 
         assertEquals(new UnlinkCommand(List.of(2, 3)),
-                new AddressBookParser().parseCommand("unlink d/2 3"));
-        assertEquals(new UnlinkCommand(1), new AddressBookParser().parseCommand("unlink c/1"));
+                new WatchDogParser().parseCommand("unlink d/2 3"));
+        assertEquals(new UnlinkCommand(1), new WatchDogParser().parseCommand("unlink c/1"));
         assertEquals(new UnlinkCommand(1), parser.parse(" c/01 "));
         assertEquals(new UnlinkCommand(Integer.MAX_VALUE), parser.parse("c/2147483647"));
     }

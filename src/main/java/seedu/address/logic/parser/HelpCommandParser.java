@@ -1,5 +1,7 @@
 package seedu.address.logic.parser;
 
+import static java.util.Objects.requireNonNull;
+
 import seedu.address.logic.commands.CommandHelp;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -11,6 +13,7 @@ public class HelpCommandParser implements Parser<HelpCommand> {
 
     @Override
     public HelpCommand parse(String args) throws ParseException {
+        requireNonNull(args);
         String topic = args.trim().replaceAll("\\s+", " ");
         if (topic.isEmpty()) {
             return new HelpCommand();

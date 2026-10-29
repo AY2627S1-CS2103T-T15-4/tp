@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
+import seedu.address.model.WatchDog;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 
@@ -52,12 +52,12 @@ public class CommandTestUtil {
     public static void assertCommandFailure(Command command, Model actualModel, String expectedMessage) {
         // we are unable to defensively copy the model for comparison later, so we can
         // only do so by copying its components.
-        AddressBook expectedAddressBook = new AddressBook(actualModel.getAddressBook());
+        WatchDog expectedWatchDog = new WatchDog(actualModel.getWatchDog());
         List<Customer> expectedCustomers = new ArrayList<>(actualModel.getFilteredCustomerList());
         List<Dog> expectedDogs = new ArrayList<>(actualModel.getFilteredDogList());
 
         assertThrows(CommandException.class, expectedMessage, () -> command.execute(actualModel));
-        assertEquals(expectedAddressBook, actualModel.getAddressBook());
+        assertEquals(expectedWatchDog, actualModel.getWatchDog());
         assertEquals(expectedCustomers, actualModel.getFilteredCustomerList());
         assertEquals(expectedDogs, actualModel.getFilteredDogList());
     }

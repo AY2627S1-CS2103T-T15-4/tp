@@ -47,19 +47,19 @@ public class ActivityIntegrationTest {
         assertEquals(List.of(first), view);
         assertEquals(1, changes.get());
         assertThrows(UnsupportedOperationException.class, () -> view.add(first));
-        AddressBook copy = new AddressBook(model.getAddressBook());
-        assertEquals(model.getAddressBook(), copy);
-        assertEquals(model.getAddressBook().hashCode(), copy.hashCode());
+        WatchDog copy = new WatchDog(model.getWatchDog());
+        assertEquals(model.getWatchDog(), copy);
+        assertEquals(model.getWatchDog().hashCode(), copy.hashCode());
         assertEquals(2, copy.addActivity(NAME, DATE, START, END, Recurrence.DAILY).getId());
-        assertFalse(copy.equals(model.getAddressBook()));
-        model.setAddressBook(copy);
+        assertFalse(copy.equals(model.getWatchDog()));
+        model.setWatchDog(copy);
         assertEquals(copy.getActivityList(), view);
         assertEquals(3, model.addActivity(NAME, DATE, START, END, Recurrence.ONCE).getId());
     }
 
     @Test
     public void addActivity_invalidDetailsAndDuplicateIdentity_leaveStateUnchanged() {
-        AddressBook book = new AddressBook();
+        WatchDog book = new WatchDog();
         assertThrows(IllegalArgumentException.class, () ->
                 book.addActivity(NAME, DATE, END, START, Recurrence.ONCE));
         assertThrows(NullPointerException.class, () ->
@@ -67,7 +67,7 @@ public class ActivityIntegrationTest {
         assertEquals(1, book.getNextActivityId());
         assertTrue(book.getActivityList().isEmpty());
         Activity activity = book.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
-        AddressBook before = new AddressBook(book);
+        WatchDog before = new WatchDog(book);
         assertThrows(IllegalArgumentException.class, () ->
                 book.addActivityFromStorage(activity.withName(new ActivityName("Changed"))));
         assertThrows(NullPointerException.class, () -> book.addActivityFromStorage(null));
@@ -79,25 +79,25 @@ public class ActivityIntegrationTest {
 
     @Test
     public void addActivity_lastAvailableId_doesNotOverflow() {
-        AddressBook book = new AddressBook();
+        WatchDog book = new WatchDog();
         book.setNextActivityId(Integer.MAX_VALUE);
         assertEquals(Integer.MAX_VALUE, book.addActivity(NAME, DATE, START, END, Recurrence.ONCE).getId());
         assertEquals((long) Integer.MAX_VALUE + 1, book.getNextActivityId());
-        AddressBook copy = new AddressBook(book);
+        WatchDog copy = new WatchDog(book);
         assertThrows(IllegalStateException.class, () ->
                 book.addActivity(NAME, DATE, START, END, Recurrence.ONCE));
         assertEquals(copy, book);
-        AddressBook differentCounter = new AddressBook();
+        WatchDog differentCounter = new WatchDog();
         differentCounter.setNextActivityId(2);
-        assertFalse(new AddressBook().equals(differentCounter));
+        assertFalse(new WatchDog().equals(differentCounter));
     }
 
     @Test
     public void resetData_invalidActivityIdentityOrCounter_leavesBookUnchanged() {
-        AddressBook book = new AddressBook();
+        WatchDog book = new WatchDog();
         Activity stored = book.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
-        AddressBook before = new AddressBook(book);
-        AddressBook duplicateIds = new AddressBook() {
+        WatchDog before = new WatchDog(book);
+        WatchDog duplicateIds = new WatchDog() {
             @Override
             public ObservableList<Activity> getActivityList() {
                 return FXCollections.observableArrayList(stored, stored);
@@ -105,7 +105,7 @@ public class ActivityIntegrationTest {
         };
         assertThrows(IllegalArgumentException.class, () -> book.resetData(duplicateIds));
         for (long counter : new long[]{0, (long) Integer.MAX_VALUE + 2}) {
-            AddressBook invalidCounter = new AddressBook() {
+            WatchDog invalidCounter = new WatchDog() {
                 @Override
                 public long getNextActivityId() {
                     return counter;
@@ -118,14 +118,14 @@ public class ActivityIntegrationTest {
 
     @Test
     public void resetData_listenerCopiesBook_observesRestoredCounter() {
-        AddressBook target = new AddressBook();
-        AddressBook source = new AddressBook();
+        WatchDog target = new WatchDog();
+        WatchDog source = new WatchDog();
         source.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
-        AtomicReference<AddressBook> snapshot = new AtomicReference<>();
+        AtomicReference<WatchDog> snapshot = new AtomicReference<>();
         AtomicReference<RuntimeException> failure = new AtomicReference<>();
         target.getActivityList().addListener((ListChangeListener<Activity>) change -> {
             try {
-                snapshot.set(new AddressBook(target));
+                snapshot.set(new WatchDog(target));
             } catch (RuntimeException e) {
                 failure.set(e);
             }
@@ -140,11 +140,11 @@ public class ActivityIntegrationTest {
 
     @Test
     public void resetData_activityAndEnrolmentListeners_observeCompleteRestoredState() throws Exception {
-        AddressBook target = new AddressBook();
+        WatchDog target = new WatchDog();
         Activity oldActivity = target.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
         Dog oldDog = target.addDog(new Dog(new DogName("Cookie"), new Breed("Poodle"), new Size("small")));
         target.addEnrolmentFromStorage(new Enrolment(oldActivity.getId(), oldDog.getId(), DATE));
-        AddressBook source = new AddressBook();
+        WatchDog source = new WatchDog();
         source.setNextActivityId(5);
         Activity newActivity = source.addActivity(NAME, DATE, START, END, Recurrence.WEEKLY);
         Dog newDog = source.addDog(new Dog(new DogName("Biscuit"), new Breed("Poodle"), new Size("small")));
@@ -152,12 +152,12 @@ public class ActivityIntegrationTest {
         source.enrolDogs(newActivity.getId(), bookingDate, List.of(newDog.getId()));
         source.setNextDogId(20);
         source.setNextCustomerId(30);
-        AtomicReference<AddressBook> activitySnapshot = new AtomicReference<>();
-        AtomicReference<AddressBook> enrolmentSnapshot = new AtomicReference<>();
+        AtomicReference<WatchDog> activitySnapshot = new AtomicReference<>();
+        AtomicReference<WatchDog> enrolmentSnapshot = new AtomicReference<>();
         target.getActivityList().addListener((ListChangeListener<Activity>) change ->
-                activitySnapshot.set(new AddressBook(target)));
+                activitySnapshot.set(new WatchDog(target)));
         target.getEnrolmentList().addListener((ListChangeListener<Enrolment>) change ->
-                enrolmentSnapshot.set(new AddressBook(target)));
+                enrolmentSnapshot.set(new WatchDog(target)));
 
         target.resetData(source);
 
@@ -172,22 +172,22 @@ public class ActivityIntegrationTest {
 
     @Test
     public void equals_differentSchedulesWithSameCounter_notEqual() {
-        AddressBook first = new AddressBook();
-        AddressBook second = new AddressBook();
+        WatchDog first = new WatchDog();
+        WatchDog second = new WatchDog();
         first.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
         second.addActivity(new ActivityName("Training"), DATE, START, END, Recurrence.ONCE);
 
         assertEquals(first.getNextActivityId(), second.getNextActivityId());
         assertFalse(first.equals(second));
         assertFalse(second.equals(first));
-        assertEquals(first, new AddressBook(first));
+        assertEquals(first, new WatchDog(first));
     }
 
     @Test
     public void equals_differentCustomersWithSameActivities_notEqual() {
-        AddressBook first = new AddressBook();
+        WatchDog first = new WatchDog();
         first.addActivity(NAME, DATE, START, END, Recurrence.ONCE);
-        AddressBook second = new AddressBook(first);
+        WatchDog second = new WatchDog(first);
         second.addCustomer(new Customer(new Name("Alice Tan"), new Phone("91234567"),
                 new Email("alice@example.com"), new BackupContact("98765432")));
 

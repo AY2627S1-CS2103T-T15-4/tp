@@ -32,17 +32,24 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import seedu.address.model.AddressBook;
+import seedu.address.logic.commands.ResetDisplayCommand;
+import seedu.address.logic.commands.SearchCustomerCommand;
+import seedu.address.logic.commands.SearchDogCommand;
+import seedu.address.logic.commands.UnlinkCommand;
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
+import seedu.address.model.customer.CustomerSearchPredicate;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
+import seedu.address.model.dog.DogSearchPredicate;
 import seedu.address.model.dog.Size;
 import seedu.address.model.dog.exceptions.LinkException;
 import seedu.address.model.dog.exceptions.UnlinkException;
@@ -230,7 +237,7 @@ public class ListPanelsTest {
     @Test
     public void customerAndDogCopyMenus_refreshAfterLinkAndUnlink() throws Exception {
         runOnFxThread(() -> {
-            AddressBook book = new AddressBook();
+            WatchDog book = new WatchDog();
             book.addCustomer(CUSTOMER);
             book.addDogFromStorage(DOG);
             ModelManager model = new ModelManager(book, new UserPrefs());
@@ -311,6 +318,113 @@ public class ListPanelsTest {
                     CardInteractionUtil.getCopyMenu(dogCard).getItems().get(3)));
         });
     }
+
+    @Test
+    public void customerListPanel_includesHiddenDogsAndRefreshesAfterLinkAndDelete() throws Exception {
+        runOnFxThread(() -> {
+            WatchDog book = new WatchDog();
+            book.addCustomer(CUSTOMER);
+            book.addDogFromStorage(DOG);
+            book.addDogFromStorage(new Dog(3, new DogName("Max"), new Breed("Poodle"), new Size("small")));
+            ModelManager model = new ModelManager(book, new UserPrefs());
+            model.updateFilteredDogList(dog -> false);
+            CustomerListPanel panel = new CustomerListPanel(model.getFilteredCustomerList(), model.getDogList());
+            ListView<Supplier<Region>> list = listView(panel);
+
+            assertEquals("None", label(list.getItems().get(0).get(), "dogIds"));
+            try {
+                model.linkDogs(1, List.of(2, 3));
+            } catch (LinkException e) {
+                throw new AssertionError(e);
+            }
+            assertEquals("2, 3", label(list.getItems().get(0).get(), "dogIds"));
+            model.deleteDog(model.getDogList().get(0));
+            assertEquals("3", label(list.getItems().get(0).get(), "dogIds"));
+        });
+    }
+
+    @Test
+    public void unlink_updatesCustomerAndDogPanels() throws Exception {
+        for (UnlinkCommand command : List.of(new UnlinkCommand(List.of(2)), new UnlinkCommand(1))) {
+            runOnFxThread(() -> {
+                WatchDog book = new WatchDog();
+                book.addCustomer(CUSTOMER);
+                book.addDogFromStorage(DOG.withOwner(1));
+                ModelManager model = new ModelManager(book, new UserPrefs());
+                CustomerListPanel customers = new CustomerListPanel(model.getFilteredCustomerList(),
+                        model.getDogList());
+                DogListPanel dogs = new DogListPanel(model.getFilteredDogList());
+
+                assertEquals("2", label(listView(customers).getItems().get(0).get(), "dogIds"));
+                try {
+                    command.execute(model);
+                } catch (CommandException e) {
+                    throw new AssertionError(e);
+                }
+                assertEquals("None", label(listView(customers).getItems().get(0).get(), "dogIds"));
+                assertEquals("👤 None", label(listView(dogs).getItems().get(0).get(), "owner"));
+                assertEquals(1, model.getCustomerList().size());
+                assertEquals(1, model.getDogList().size());
+            });
+        }
+    }
+
+    @Test
+    public void dogListPanel_customerDeletionClearsOwner() throws Exception {
+        runOnFxThread(() -> {
+            WatchDog book = new WatchDog();
+            book.addCustomer(CUSTOMER);
+            book.addDogFromStorage(DOG);
+            ModelManager model = new ModelManager(book, new UserPrefs());
+            DogListPanel panel = new DogListPanel(model.getFilteredDogList());
+            try {
+                model.linkDogs(1, List.of(2));
+            } catch (LinkException e) {
+                throw new AssertionError(e);
+            }
+            assertEquals("👤 1", label(listView(panel).getItems().get(0).get(), "owner"));
+            model.deleteCustomer(CUSTOMER);
+            assertEquals("👤 None", label(listView(panel).getItems().get(0).get(), "owner"));
+            assertEquals("Buddy", label(listView(panel).getItems().get(0).get(), "name"));
+        });
+    }
+
+    @Test
+    public void searchAndReset_filterEachPanelIndependently() throws Exception {
+        runOnFxThread(() -> {
+            WatchDog book = new WatchDog();
+            book.addCustomer(CUSTOMER);
+            book.addCustomer(new Customer(4, "Beth Tan", "92345678", "beth@example.com", "97654321"));
+            book.addDogFromStorage(DOG);
+            book.addDogFromStorage(new Dog(5, new DogName("Max"), new Breed("Poodle"), new Size("small")));
+            ModelManager model = new ModelManager(book, new UserPrefs());
+            try {
+                model.linkDogs(1, List.of(2));
+            } catch (LinkException e) {
+                throw new AssertionError(e);
+            }
+            CustomerListPanel customers = new CustomerListPanel(model.getFilteredCustomerList(), model.getDogList());
+            DogListPanel dogs = new DogListPanel(model.getFilteredDogList());
+
+            execute(new SearchDogCommand(new DogSearchPredicate("bud")), model);
+            assertEquals(1, listView(dogs).getItems().size());
+            assertEquals("Buddy", label(listView(dogs).getItems().get(0).get(), "name"));
+            assertEquals(1, listView(customers).getItems().size());
+            assertEquals("Alex Tan", label(listView(customers).getItems().get(0).get(), "name"));
+
+            execute(new SearchCustomerCommand(new CustomerSearchPredicate("beth")), model);
+            assertEquals(1, listView(customers).getItems().size());
+            assertEquals("Beth Tan", label(listView(customers).getItems().get(0).get(), "name"));
+            assertTrue(listView(dogs).getItems().isEmpty());
+            new ResetDisplayCommand().execute(model);
+            assertEquals(2, model.getFilteredCustomerList().size());
+            assertEquals(2, model.getFilteredDogList().size());
+            assertEquals(2, listView(customers).getItems().size());
+            assertEquals(2, listView(dogs).getItems().size());
+            assertEquals(1, model.getDogList().get(0).getOwnerId().orElseThrow());
+        });
+    }
+
 
     @Test
     public void activityListPanel_displaysAndRefreshesActivities() throws Exception {
@@ -437,6 +551,14 @@ public class ListPanelsTest {
             assertEquals("No activities today.", ((Label) listView(today).getPlaceholder()).getText());
             assertTrue(listView(customers).getPlaceholder().getStyleClass().contains("empty-state"));
         });
+    }
+
+    private static void execute(seedu.address.logic.commands.Command command, ModelManager model) {
+        try {
+            command.execute(model);
+        } catch (CommandException exception) {
+            throw new AssertionError(exception);
+        }
     }
 
     private static String label(Region card, String id) {

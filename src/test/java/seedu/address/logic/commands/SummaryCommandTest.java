@@ -15,10 +15,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
@@ -50,13 +50,13 @@ public class SummaryCommandTest {
         model.updateFilteredDogList(unused -> false);
         model.updateFilteredCustomerList(unused -> false);
         model.updateFilteredActivityList(unused -> false);
-        AddressBook before = new AddressBook(model.getAddressBook());
+        WatchDog before = new WatchDog(model.getWatchDog());
 
         assertEquals("Overall: 3 dogs | 2 customers\n"
                 + "Activity schedules: 7 total | 6 from today onwards\n"
                 + "Today (2026-10-24): 3 activities | 2 distinct dogs enrolled",
                 new SummaryCommand(CLOCK).execute(model).getFeedbackToUser());
-        assertEquals(before, model.getAddressBook());
+        assertEquals(before, model.getWatchDog());
         assertEquals(List.of(), model.getFilteredDogList());
         assertEquals(List.of(), model.getFilteredCustomerList());
         assertEquals(List.of(), model.getFilteredActivityList());
@@ -138,7 +138,7 @@ public class SummaryCommandTest {
     }
 
     private static Model mixedModel() throws Exception {
-        AddressBook book = new AddressBook();
+        WatchDog book = new WatchDog();
         book.addDogFromStorage(dog(9));
         book.addDogFromStorage(dog(4));
         book.addDogFromStorage(dog(7));

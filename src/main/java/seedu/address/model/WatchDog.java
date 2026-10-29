@@ -34,8 +34,8 @@ import seedu.address.model.dog.exceptions.UnlinkException;
  * Wraps all data at the address-book level.
  * Stores customers and dogs with unique persistent identities.
  */
-public class AddressBook implements ReadOnlyAddressBook {
-    private static final Logger logger = LogsCenter.getLogger(AddressBook.class);
+public class WatchDog implements ReadOnlyWatchDog {
+    private static final Logger logger = LogsCenter.getLogger(WatchDog.class);
 
     private final UniqueDogList dogs = new UniqueDogList();
     private final UniqueCustomerList customers = new UniqueCustomerList();
@@ -47,14 +47,14 @@ public class AddressBook implements ReadOnlyAddressBook {
     private long nextCustomerId = 1;
 
 
-    /** Creates an empty address book. */
-    public AddressBook() {
+    /** Creates an empty WatchDog data file. */
+    public WatchDog() {
     }
 
     /**
-     * Creates an AddressBook using the records in the {@code toBeCopied}
+     * Creates a WatchDog using the records in the {@code toBeCopied}
      */
-    public AddressBook(ReadOnlyAddressBook toBeCopied) {
+    public WatchDog(ReadOnlyWatchDog toBeCopied) {
         this();
         resetData(toBeCopied);
     }
@@ -62,10 +62,10 @@ public class AddressBook implements ReadOnlyAddressBook {
     //// list overwrite operations
 
     /**
-     * Resets the existing data of this {@code AddressBook} with {@code newData}.
+     * Resets the existing data of this {@code WatchDog} with {@code newData}.
      * Rejects dog owners missing from the incoming customers before changing any records.
      */
-    public void resetData(ReadOnlyAddressBook newData) {
+    public void resetData(ReadOnlyWatchDog newData) {
         requireNonNull(newData);
 
         List<Activity> restored = List.copyOf(newData.getActivityList());
@@ -290,7 +290,7 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     /**
      * Removes {@code key} and clears ownership of that customer's dogs without deleting them.
-     * {@code key} must exist in the address book. Other customers and dogs are unaffected.
+     * {@code key} must exist in WatchDog. Other customers and dogs are unaffected.
      */
     public void removeCustomer(Customer key) {
         customers.remove(key);
@@ -692,17 +692,17 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
 
         // instanceof handles nulls
-        if (!(other instanceof AddressBook otherAddressBook)) {
+        if (!(other instanceof WatchDog otherWatchDog)) {
             return false;
         }
 
-        return dogs.equals(otherAddressBook.dogs)
-                && customers.equals(otherAddressBook.customers)
-                && activities.equals(otherAddressBook.activities)
-                && enrolments.equals(otherAddressBook.enrolments)
-                && nextDogId == otherAddressBook.nextDogId
-                && nextCustomerId == otherAddressBook.nextCustomerId
-                && nextActivityId == otherAddressBook.nextActivityId;
+        return dogs.equals(otherWatchDog.dogs)
+                && customers.equals(otherWatchDog.customers)
+                && activities.equals(otherWatchDog.activities)
+                && enrolments.equals(otherWatchDog.enrolments)
+                && nextDogId == otherWatchDog.nextDogId
+                && nextCustomerId == otherWatchDog.nextCustomerId
+                && nextActivityId == otherWatchDog.nextActivityId;
     }
 
     @Override

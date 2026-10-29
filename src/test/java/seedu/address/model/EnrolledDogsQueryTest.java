@@ -57,7 +57,7 @@ public class EnrolledDogsQueryTest {
         model.deleteDog(SECOND);
         assertEquals(List.of(FIRST, SECOND), snapshot);
         assertEquals(List.of(renamed), model.getDogsEnrolledOn(DATE));
-        model.setAddressBook(new AddressBook());
+        model.setWatchDog(new WatchDog());
         assertEquals(List.of(FIRST, SECOND), snapshot);
         assertEquals(List.of(), model.getDogsEnrolledOn(DATE));
     }
@@ -68,7 +68,7 @@ public class EnrolledDogsQueryTest {
     }
 
     private static Model modelWithEnrolments() {
-        AddressBook book = new AddressBook();
+        WatchDog book = new WatchDog();
         book.addDogFromStorage(FIRST);
         book.addDogFromStorage(SECOND);
         book.addDogFromStorage(OTHER_DATE);

@@ -30,12 +30,12 @@ class ModelManager {
   +updateFilteredActivityList(predicate)
 }
 
-interface ReadOnlyAddressBook {
+interface ReadOnlyWatchDog {
   +getActivityList(): ObservableList<Activity>
   +getNextActivityId(): long
 }
 
-class AddressBook {
+class WatchDog {
   -nextActivityId: long
   +addActivity(name, date, start, end, recurrence): Activity
   +removeActivity(activity: Activity): void
@@ -79,17 +79,17 @@ enum Recurrence {
 }
 
 ModelManager .up.|> Model
-ModelManager --> "1" AddressBook : addressBook
-Model ..> ReadOnlyAddressBook : exposes
-AddressBook .up.|> ReadOnlyAddressBook
-AddressBook --> "0..*" Activity : activities
-AddressBook --> "0..*" Enrolment : enrolments
+ModelManager --> "1" WatchDog : watchDog
+Model ..> ReadOnlyWatchDog : exposes
+WatchDog .up.|> ReadOnlyWatchDog
+WatchDog --> "0..*" Activity : activities
+WatchDog --> "0..*" Enrolment : enrolments
 Enrolment --> "1" Activity
 Enrolment --> "1" Dog
 Activity --> "1" ActivityName : name
 Activity --> "1" Recurrence : recurrence
 
-note bottom of AddressBook
+note bottom of WatchDog
   Assigns IDs and exposes an unmodifiable observable list.
   Dog deletion removes that dog's enrolments before its record.
   Deletion removes the activity and its enrolments without reusing the ID.

@@ -8,10 +8,10 @@ import static seedu.address.testutil.Assert.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.customer.Customer;
 
 /** Contains tests for {@link DeleteCustomerCommand}. */
@@ -28,7 +28,7 @@ public class DeleteCustomerCommandTest {
 
     @Test
     public void execute_existingCustomer_deletesCustomer() throws Exception {
-        Model model = new ModelManager(new AddressBook(), new UserPrefs());
+        Model model = new ModelManager(new WatchDog(), new UserPrefs());
         model.addCustomer(LILY);
 
         CommandResult result = new DeleteCustomerCommand(LILY.getId()).execute(model);
@@ -40,7 +40,7 @@ public class DeleteCustomerCommandTest {
 
     @Test
     public void execute_secondCustomer_deletesMatchingCustomer() throws Exception {
-        Model model = new ModelManager(new AddressBook(), new UserPrefs());
+        Model model = new ModelManager(new WatchDog(), new UserPrefs());
         model.addCustomer(LILY);
         model.addCustomer(JOHN);
 
@@ -52,7 +52,7 @@ public class DeleteCustomerCommandTest {
 
     @Test
     public void execute_missingCustomer_throwsCommandException() {
-        Model model = new ModelManager(new AddressBook(), new UserPrefs());
+        Model model = new ModelManager(new WatchDog(), new UserPrefs());
 
         assertThrows(CommandException.class, DeleteCustomerCommand.MESSAGE_INVALID_ID, () ->
                 new DeleteCustomerCommand(99).execute(model));
@@ -61,6 +61,11 @@ public class DeleteCustomerCommandTest {
     @Test
     public void execute_nullModel_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new DeleteCustomerCommand(21).execute(null));
+    }
+
+    @Test
+    public void hashCode_sameId_matches() {
+        assertEquals(new DeleteCustomerCommand(21).hashCode(), new DeleteCustomerCommand(21).hashCode());
     }
 
     @Test
