@@ -659,8 +659,8 @@ and automated testing.
 
 Customer search commands and predicates copy their query dog IDs, preventing a caller from changing an
 existing query through its original set. The predicate retains the live stored-dog view so later ownership
-changes still refresh the results. Restoration asserts that validated schedules and bookings are preserved;
-summary asserts that today's activities are a subset of upcoming and total schedules. Their `FINE`
+changes still refresh the results. Restoration asserts that validated schedules and bookings are preserved.
+Recurrence and summary tests check date boundaries and schedule counts. Their `FINE`
 diagnostics contain counts and dates rather than customer contacts.
 
 `LogicManager` records each command. `WatchDog` logs successful enrolment changes and dog deletion at

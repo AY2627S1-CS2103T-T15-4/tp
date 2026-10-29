@@ -18,6 +18,19 @@ public class ActivityTest {
     private static final LocalTime END = LocalTime.of(11, 0);
     private static final ActivityName NAME = new ActivityName("Training");
 
+    @Test
+    public void nextOccurrence_everyWeekdayAndOffset_returnsFirstValidOccurrence() {
+        LocalDate monday = LocalDate.of(2028, 1, 3);
+        for (int weekday = 0; weekday < 7; weekday++) {
+            LocalDate first = monday.plusDays(weekday);
+            Activity weekly = new Activity(1, NAME, first, START, END, Recurrence.WEEKLY);
+            for (int offset = 1; offset <= 7; offset++) {
+                assertEquals(Optional.of(first.plusWeeks(1)),
+                        weekly.nextOccurrenceOnOrAfter(first.plusDays(offset)));
+            }
+        }
+    }
+
     private Activity activity(Recurrence recurrence) {
         return new Activity(12, NAME, FIRST_DATE, START, END, recurrence);
     }

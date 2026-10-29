@@ -41,8 +41,6 @@ public class SummaryCommand extends Command {
         long upcomingSchedules = activities.stream()
                 .filter(activity -> activity.nextOccurrenceOnOrAfter(today).isPresent()).count();
         long todaysActivities = activities.stream().filter(activity -> activity.occursOn(today)).count();
-        assert todaysActivities <= upcomingSchedules && upcomingSchedules <= activities.size()
-                : "Today's activities must be a subset of upcoming and total schedules.";
         logger.fine("Summary for " + today + ": " + activities.size() + " schedules, "
                 + upcomingSchedules + " upcoming, " + todaysActivities + " occurring today.");
         return new CommandResult(String.format(MESSAGE_SUCCESS, model.getDogList().size(),

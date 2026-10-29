@@ -102,7 +102,6 @@ public final class Activity {
             case WEEKLY -> {
                 int daysUntil = Math.floorMod(startDate.getDayOfWeek().getValue()
                         - date.getDayOfWeek().getValue(), 7);
-                assert daysUntil >= 0 && daysUntil < 7 : "Weekly offset must be within one week.";
                 if (LocalDate.MAX.toEpochDay() - date.toEpochDay() < daysUntil) {
                     yield Optional.empty();
                 }

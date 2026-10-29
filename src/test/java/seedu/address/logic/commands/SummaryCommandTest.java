@@ -34,6 +34,22 @@ public class SummaryCommandTest {
     private static final Clock CLOCK = Clock.fixed(Instant.parse("2026-10-24T23:59:59Z"), ZoneOffset.UTC);
 
     @Test
+    public void execute_dateRangeEndpoints_countsAllRecurrenceModes() {
+        for (LocalDate date : List.of(LocalDate.MIN, LocalDate.MAX)) {
+            Model model = new ModelManager();
+            for (Recurrence recurrence : Recurrence.values()) {
+                addActivity(model, date, recurrence);
+            }
+            Clock clock = Clock.fixed(date.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
+
+            assertEquals("Overall: 0 dogs | 0 customers\n"
+                    + "Activity schedules: 3 total | 3 from today onwards\n"
+                    + "Today (" + date + "): 3 activities | 0 distinct dogs enrolled",
+                    new SummaryCommand(clock).execute(model).getFeedbackToUser());
+        }
+    }
+
+    @Test
     public void execute_emptyData_showsSixZeroCountsAndDate() {
         CommandResult result = new SummaryCommand(CLOCK).execute(new ModelManager());
 
