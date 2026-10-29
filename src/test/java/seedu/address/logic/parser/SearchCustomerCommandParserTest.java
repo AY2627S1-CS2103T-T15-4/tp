@@ -46,12 +46,12 @@ public class SearchCustomerCommandParserTest {
     @Test
     public void parse_invalidDogOrCustomerId_includesSearchingErrorPrefix() {
         for (String value : new String[]{"-1", "0", "00", "not-a-number", "2147483648", "-2147483649"}) {
-            assertThrows(ParseException.class, "Error in searching customers:\nPlease enter a valid dog index", () ->
+            assertThrows(ParseException.class, "Error in searching customers:\nPlease enter a valid dog ID", () ->
                     parser.parse("d/" + value));
-            assertThrows(ParseException.class, "Error in searching customers:\nPlease enter a valid dog index", () ->
+            assertThrows(ParseException.class, "Error in searching customers:\nPlease enter a valid dog ID", () ->
                     parser.parse("d/1 " + value));
             assertThrows(ParseException.class,
-                    "Error in searching customers:\nPlease enter a valid customer index", () ->
+                    "Error in searching customers:\nPlease enter a valid customer ID", () ->
                     parser.parse("i/" + value));
         }
     }
