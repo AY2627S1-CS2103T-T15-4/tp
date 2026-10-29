@@ -196,6 +196,9 @@ before `@`.
 
 The contact number and backup contact number must each contain exactly eight digits. You may enter
 spaces between digits; the spaces are removed when the number is stored. All four fields are required.
+Each customer's primary phone number and email address must be unique across all customers, including
+those hidden by filters. Email uniqueness ignores letter case. Backup contact numbers may be shared,
+including with another customer's primary phone number.
 If fields are missing, WatchDog lists them and shows the command format. If a value is invalid, it
 reports the first invalid field and its constraints.
 
@@ -276,6 +279,8 @@ Example: `editcustomer 1 p/91234567 e/johndoe@example.com`
 
 * `CUSTOMER_ID` must identify an existing customer.
 * Any supplied field replaces its existing value.
+* The resulting primary phone number and email address must not belong to another customer. You may
+  keep your existing phone number and email address. Backup contact numbers need not be unique.
 * Supplied names, phone numbers, backup contacts, and email addresses follow the same validation rules
   as `addcustomer`.
 

@@ -67,7 +67,7 @@ public class EditCustomerCommandTest {
     public void execute_secondCustomerId_editsOnlyMatchingCustomer() throws Exception {
         Model model = new ModelManager();
         Customer first = customer(1, "Alice Tan", "91234567");
-        Customer second = customer(2, "Bob Lim", "92345678");
+        Customer second = new Customer(2, "Bob Lim", "92345678", "bob@example.com", "98765432");
         model.addCustomer(first);
         model.addCustomer(second);
         EditCustomerDescriptor descriptor = new EditCustomerDescriptor();
@@ -76,7 +76,8 @@ public class EditCustomerCommandTest {
         new EditCustomerCommand(2, descriptor).execute(model);
 
         assertEquals(first, model.getFilteredCustomerList().get(0));
-        assertEquals(customer(2, "Bob Lee", "92345678"), model.getFilteredCustomerList().get(1));
+        assertEquals(new Customer(2, "Bob Lee", "92345678", "bob@example.com", "98765432"),
+                model.getFilteredCustomerList().get(1));
     }
 
     @Test

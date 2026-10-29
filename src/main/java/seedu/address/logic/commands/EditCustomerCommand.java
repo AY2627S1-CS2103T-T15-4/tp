@@ -70,6 +70,7 @@ public class EditCustomerCommand extends Command {
                 .orElseThrow(() -> new CommandException(MESSAGE_CUSTOMER_NOT_FOUND));
         Customer editedCustomer = createEditedCustomer(customerToEdit, editCustomerDescriptor);
 
+        CustomerContactValidator.validate(editedCustomer, model.getCustomerList(), customerId);
         model.setCustomer(customerToEdit, editedCustomer);
         return new CommandResult(String.format(MESSAGE_EDIT_CUSTOMER_SUCCESS, Messages.format(editedCustomer)));
     }
