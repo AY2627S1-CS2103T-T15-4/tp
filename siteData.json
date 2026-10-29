@@ -86,6 +86,10 @@
         "enrolling-and-unenrolling-dogs": "Enrolling and unenrolling dogs",
         "card-details-copying-and-scrolling": "Card details, copying, and scrolling",
         "deleting-a-dog": "Deleting a dog",
+        "customer-records-and-ownership": "Customer records and ownership",
+        "activity-records-and-booking-cards": "Activity records and booking cards",
+        "searches-today-unlinked-filters-and-reset": "Searches, today, unlinked filters, and reset",
+        "help-and-clear-confirmation": "Help and clear confirmation",
         "saving-data": "Saving data"
       },
       "headingKeywords": {}
@@ -152,8 +156,8 @@
         "enrolling-dogs-in-activities-enrol-and-unenrol": "Enrolling dogs in activities: enrol and unenrol",
         "filtering-unlinked-records-filterun": "Filtering unlinked records: filterun",
         "searching-customers-searchc": "Searching customers: searchc",
-        "deleting-a-dog-delete-dog": "Deleting a dog: delete dog",
-        "deleting-a-customer-delete-customer": "Deleting a customer: delete customer",
+        "deleting-a-dog-deletedog": "Deleting a dog: deletedog",
+        "deleting-a-customer-deletecustomer": "Deleting a customer: deletecustomer",
         "customer-and-dog-cards": "Customer and dog cards",
         "clearing-all-entries-clear": "Clearing all entries: clear",
         "undoing-and-redoing-a-command-undo-redo": "Undoing and redoing a command: undo, redo",
