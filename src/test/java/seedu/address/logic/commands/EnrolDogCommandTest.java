@@ -99,5 +99,9 @@ public class EnrolDogCommandTest {
                 LocalDate.of(2028, 1, 1), List.of(-2)));
         assertThrows(IllegalArgumentException.class, () -> new EnrolDogCommand(1,
                 LocalDate.of(2028, 1, 1), List.of(2, 2)));
+        assertThrows(NullPointerException.class, () -> new EnrolDogCommand(1,
+                LocalDate.of(2028, 1, 1), null));
+        assertThrows(IllegalArgumentException.class, () -> new EnrolDogCommand(1,
+                LocalDate.of(2028, 1, 1), java.util.Arrays.asList(1, null)));
     }
 }

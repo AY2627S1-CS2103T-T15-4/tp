@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -80,6 +81,17 @@ public class UniqueDogListTest {
         assertEquals(uniqueDogList.hashCode(), anotherList.hashCode());
         assertTrue(uniqueDogList.toString().contains("Cookie"));
         assertEquals(1, uniqueDogList.iterator().next().getId());
+    }
+
+    @Test
+    public void iterator_remove_throwsUnsupportedOperationException() {
+        Dog dog = new Dog(1, new DogName("Cookie"), new Breed("Poodle"), new Size("Small"));
+        uniqueDogList.add(dog);
+        Iterator<Dog> iterator = uniqueDogList.iterator();
+        iterator.next();
+
+        assertThrows(UnsupportedOperationException.class, iterator::remove);
+        assertEquals(List.of(dog), uniqueDogList.asUnmodifiableObservableList());
     }
 
 }

@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.EditDogCommand.EditDogDescriptor;
@@ -89,6 +92,8 @@ public class EditDogCommandTest {
 
         assertTrue(command.equals(command));
         assertTrue(command.equals(new EditDogCommand(1, descriptor)));
+        assertEquals(command.hashCode(), new EditDogCommand(1, descriptor).hashCode());
+        assertTrue(Set.of(command).contains(new EditDogCommand(1, descriptor)));
         assertFalse(command.equals(null));
         assertFalse(command.equals("command"));
         assertFalse(command.equals(new EditDogCommand(2, descriptor)));
@@ -110,6 +115,7 @@ public class EditDogCommandTest {
         EditDogDescriptor copy = new EditDogDescriptor(descriptor);
         assertTrue(descriptor.isAnyFieldEdited());
         assertEquals(descriptor, copy);
+        assertTrue(new HashSet<>(Set.of(descriptor)).contains(copy));
         assertTrue(descriptor.equals(descriptor));
         assertFalse(descriptor.equals(null));
         assertFalse(descriptor.equals("descriptor"));

@@ -93,7 +93,7 @@ public class UniqueDogList implements Iterable<Dog> {
 
     @Override
     public Iterator<Dog> iterator() {
-        return internalList.iterator();
+        return internalUnmodifiableList.iterator();
     }
 
     @Override
