@@ -94,7 +94,7 @@ public class MainWindowTest {
             assertEquals(1, todaysActivities.getItems().size());
             assertEquals("Today walk", label(todaysActivities.getItems().get(0).get(), "name"));
 
-            window.executeCommand("resetdisplay");
+            window.executeCommand("reset");
             assertEquals(1, customers.getItems().size());
             assertEquals("Lily Koh", label(customers.getItems().get(0).get(), "name"));
 
@@ -140,7 +140,7 @@ public class MainWindowTest {
 
             window.executeCommand("searchd n/Cookie");
             assertTrue(customers.getItems().isEmpty());
-            window.executeCommand("resetdisplay");
+            window.executeCommand("reset");
 
             assertEquals(1, customers.getItems().size());
             assertEquals(1, dogs.getItems().size());

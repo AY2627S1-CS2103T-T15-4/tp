@@ -9,7 +9,9 @@ import seedu.address.logic.commands.EditCustomerCommand;
 import seedu.address.logic.commands.EditCustomerCommand.EditCustomerDescriptor;
 import seedu.address.logic.parser.exceptions.ParseException;
 
-/** Parses input arguments and creates an {@link EditCustomerCommand}. */
+/**
+ * Parses input arguments and creates an {@link EditCustomerCommand}.
+ */
 public class EditCustomerCommandParser implements Parser<EditCustomerCommand> {
 
     @Override

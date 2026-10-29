@@ -46,6 +46,19 @@ public class CustomerIdAssignmentTest {
     }
 
     @Test
+    public void resetData_zeroNextCustomerId_recomputesPositiveId() {
+        AddressBook addressBook = new AddressBook(new AddressBook() {
+            @Override
+            public int getNextCustomerId() {
+                return 0;
+            }
+        });
+
+        assertEquals(1, addressBook.getNextCustomerId());
+        assertEquals(1, addressBook.addCustomer(customer("Alice")).getId());
+    }
+
+    @Test
     public void setNextCustomerId_rejectsNonPositiveId() {
         AddressBook addressBook = new AddressBook();
 

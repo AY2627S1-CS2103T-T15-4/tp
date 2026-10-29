@@ -36,6 +36,14 @@ public class JsonAdaptedDogTest {
     }
 
     @Test
+    public void toModelType_nonPositiveOwnerId_throwsIllegalValueException() {
+        for (int ownerId : new int[]{-1, 0}) {
+            JsonAdaptedDog dog = new JsonAdaptedDog(1, "Cookie", "Poodle", "Large", ownerId);
+            assertThrows(IllegalValueException.class, "Dog owner ID must be positive.", dog::toModelType);
+        }
+    }
+
+    @Test
     public void toModelType_invalidOrMissingName_throwsIllegalValueException() {
         assertThrows(IllegalValueException.class, DogName.MESSAGE_CONSTRAINTS,
                 new JsonAdaptedDog(1, "", "Poodle", "Large", null)::toModelType);

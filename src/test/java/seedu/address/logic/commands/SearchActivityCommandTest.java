@@ -74,14 +74,14 @@ public class SearchActivityCommandTest {
     @Test
     public void execute_matchingActivities_showsEnrolledDogsAndOwners() throws Exception {
         ModelManager model = new ModelManager();
-        model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
-        model.addCustomer(new Customer(1, "Beth", "92345678", "beth@example.com", "97654321"));
+        model.addCustomer(new Customer(1, "Anna", "91234567", "anna@example.com", "98765432"));
+        model.addCustomer(new Customer(2, "Beth", "92345678", "beth@example.com", "97654321"));
         Dog firstDog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
         Dog secondDog = model.addDog(new Dog(new DogName("Max"), new Breed("Labrador"), new Size("Large")));
         Dog unrelatedDog = model.addDog(new Dog(new DogName("Luna"), new Breed("Beagle"), new Size("Medium")));
         model.addDog(new Dog(new DogName("Unowned"), new Breed("Beagle"), new Size("Small")));
-        model.linkDogs(0, List.of(firstDog.getId(), secondDog.getId()));
-        model.linkDogs(1, List.of(unrelatedDog.getId()));
+        model.linkDogs(1, List.of(firstDog.getId(), secondDog.getId()));
+        model.linkDogs(2, List.of(unrelatedDog.getId()));
         var matchingActivity = model.addActivity(new ActivityName("Group walk"), ENROL_DATE, LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
         model.addActivity(new ActivityName("Training"), ENROL_DATE, LocalTime.of(10, 0), LocalTime.of(11, 0),
@@ -98,9 +98,9 @@ public class SearchActivityCommandTest {
     @Test
     public void execute_noMatchingActivities_clearsDogsAndOwners() throws Exception {
         ModelManager model = new ModelManager();
-        model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
+        model.addCustomer(new Customer(1, "Anna", "91234567", "anna@example.com", "98765432"));
         Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
-        model.linkDogs(0, List.of(dog.getId()));
+        model.linkDogs(1, List.of(dog.getId()));
         var activity = model.addActivity(new ActivityName("Walk"), ENROL_DATE, LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
         model.enrolDogs(activity.getId(), ENROL_DATE, List.of(dog.getId()));
@@ -115,9 +115,9 @@ public class SearchActivityCommandTest {
     @Test
     public void execute_activeFilter_refreshesDogsAndOwnersAfterEnrolment() throws Exception {
         ModelManager model = new ModelManager();
-        model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
+        model.addCustomer(new Customer(1, "Anna", "91234567", "anna@example.com", "98765432"));
         Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
-        model.linkDogs(0, List.of(dog.getId()));
+        model.linkDogs(1, List.of(dog.getId()));
         var activity = model.addActivity(new ActivityName("Walk"), ENROL_DATE, LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
 
@@ -134,9 +134,9 @@ public class SearchActivityCommandTest {
     @Test
     public void execute_activeFilter_removesDogAndOwnerAfterUnenrolment() throws Exception {
         ModelManager model = new ModelManager();
-        model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
+        model.addCustomer(new Customer(1, "Anna", "91234567", "anna@example.com", "98765432"));
         Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
-        model.linkDogs(0, List.of(dog.getId()));
+        model.linkDogs(1, List.of(dog.getId()));
         var activity = model.addActivity(new ActivityName("Walk"), ENROL_DATE, LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
         model.enrolDogs(activity.getId(), ENROL_DATE, List.of(dog.getId()));
@@ -155,9 +155,9 @@ public class SearchActivityCommandTest {
     @Test
     public void execute_dateFilter_showsDogOnlyForEnrolledOccurrence() throws Exception {
         ModelManager model = new ModelManager();
-        model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
+        model.addCustomer(new Customer(1, "Anna", "91234567", "anna@example.com", "98765432"));
         Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
-        model.linkDogs(0, List.of(dog.getId()));
+        model.linkDogs(1, List.of(dog.getId()));
         var activity = model.addActivity(new ActivityName("Daily walk"), ENROL_DATE, LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.DAILY);
         model.enrolDogs(activity.getId(), ENROL_DATE, List.of(dog.getId()));
@@ -177,9 +177,9 @@ public class SearchActivityCommandTest {
     @Test
     public void execute_dogWithMatchingAndUnrelatedEnrolments_usesOnlyMatchingActivity() throws Exception {
         ModelManager model = new ModelManager();
-        model.addCustomer(new Customer(0, "Anna", "91234567", "anna@example.com", "98765432"));
+        model.addCustomer(new Customer(1, "Anna", "91234567", "anna@example.com", "98765432"));
         Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
-        model.linkDogs(0, List.of(dog.getId()));
+        model.linkDogs(1, List.of(dog.getId()));
         var matchingActivity = model.addActivity(new ActivityName("Group walk"), ENROL_DATE, LocalTime.NOON,
                 LocalTime.of(13, 0), Recurrence.ONCE);
         var unrelatedActivity = model.addActivity(new ActivityName("Training"), ENROL_DATE, LocalTime.of(14, 0),
