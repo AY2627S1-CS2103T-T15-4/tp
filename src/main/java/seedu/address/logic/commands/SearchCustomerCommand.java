@@ -43,7 +43,7 @@ public class SearchCustomerCommand extends Command {
     }
 
     /**
-     * Creates a customer search using the supplied fields and, when present, positive dog IDs.
+     * Creates a customer search, copying the supplied positive dog IDs to preserve the query.
      *
      * @throws IllegalArgumentException if any supplied dog ID is not positive
      */
@@ -55,7 +55,7 @@ public class SearchCustomerCommand extends Command {
         this.phone = phone;
         this.email = email;
         this.backupContact = backupContact;
-        this.dogIds = dogIds;
+        this.dogIds = dogIds == null ? null : Set.copyOf(dogIds);
         this.customerId = customerId;
         this.predicate = null;
     }
