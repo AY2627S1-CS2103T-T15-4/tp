@@ -12,7 +12,7 @@ import seedu.address.model.Model;
 public class ClearCommand extends Command {
 
     public static final String COMMAND_WORD = "clear";
-    public static final String MESSAGE_SUCCESS = "Address book has been cleared!";
+    public static final String MESSAGE_SUCCESS = "WatchDog data has been cleared!";
     public static final String MESSAGE_CONFIRMATION = "Clear all customers, dogs, activities and enrolments? "
             + "Warning: this action cannot be undone. Enter Y to confirm or N to cancel (Y/N).";
     public static final String MESSAGE_CANCELLED = "Clear cancelled. No data has been deleted.";
