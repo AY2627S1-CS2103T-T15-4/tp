@@ -58,79 +58,86 @@ public class LogicManager implements Logic {
     @Override
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
-
-        CommandResult commandResult;
-        Command command;
         if (awaitingClearConfirmation) {
-            String response = commandText.trim();
-            if (response.equalsIgnoreCase("n")) {
-                awaitingClearConfirmation = false;
-                return new CommandResult(ClearCommand.MESSAGE_CANCELLED);
-            }
-            if (!response.equalsIgnoreCase("y")) {
-                throw new CommandException(ClearCommand.MESSAGE_INVALID_CONFIRMATION);
-            }
-            awaitingClearConfirmation = false;
-            command = new ClearCommand();
-        } else {
-            command = addressBookParser.parseCommand(commandText);
-            if (command instanceof ClearCommand) {
-                awaitingClearConfirmation = true;
-                return new CommandResult(ClearCommand.MESSAGE_CONFIRMATION);
-            }
+            return executeClearConfirmation(commandText);
         }
 
+        Command command = addressBookParser.parseCommand(commandText);
+        if (command instanceof ClearCommand) {
+            awaitingClearConfirmation = true;
+            return new CommandResult(ClearCommand.MESSAGE_CONFIRMATION);
+        }
         if (command instanceof UndoCommand) {
-            if (undoState == null) {
-                throw new CommandException(UndoCommand.MESSAGE_NO_COMMAND);
-            }
-            ModelState state = undoState;
-            String undoneCommand = undoCommandText;
-            ModelState stateAfterUndo = model.createState();
-            model.restoreState(state);
-            undoState = null;
-            undoCommandText = null;
-            redoState = stateAfterUndo;
-            redoCommandText = undoneCommand;
-            try {
-                storage.saveAddressBook(model.getAddressBook());
-            } catch (AccessDeniedException e) {
-                throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
-            } catch (IOException ioe) {
-                throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
-            }
-            return new CommandResult(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, undoneCommand));
+            return executeUndo();
         }
-
         if (command instanceof RedoCommand) {
-            if (redoState == null) {
-                throw new CommandException(RedoCommand.MESSAGE_NO_COMMAND);
-            }
-            ModelState stateBeforeRedo = model.createState();
-            ModelState state = redoState;
-            String redoneCommand = redoCommandText;
-            model.restoreState(state);
-            undoState = stateBeforeRedo;
-            undoCommandText = redoneCommand;
-            redoState = null;
-            redoCommandText = null;
-            try {
-                storage.saveAddressBook(model.getAddressBook());
-            } catch (AccessDeniedException e) {
-                throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
-            } catch (IOException ioe) {
-                throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
-            }
-            return new CommandResult(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, redoneCommand));
+            return executeRedo();
         }
+        return executeParsedCommand(command, commandText);
+    }
 
+    private CommandResult executeClearConfirmation(String commandText) throws CommandException {
+        String response = commandText.trim();
+        if (response.equalsIgnoreCase("n")) {
+            awaitingClearConfirmation = false;
+            return new CommandResult(ClearCommand.MESSAGE_CANCELLED);
+        }
+        if (!response.equalsIgnoreCase("y")) {
+            throw new CommandException(ClearCommand.MESSAGE_INVALID_CONFIRMATION);
+        }
+        awaitingClearConfirmation = false;
+        return executeParsedCommand(new ClearCommand(), commandText);
+    }
+
+    private CommandResult executeUndo() throws CommandException {
+        if (undoState == null) {
+            throw new CommandException(UndoCommand.MESSAGE_NO_COMMAND);
+        }
+        ModelState state = undoState;
+        String undoneCommand = undoCommandText;
+        ModelState stateAfterUndo = model.createState();
+        model.restoreState(state);
+        undoState = null;
+        undoCommandText = null;
+        redoState = stateAfterUndo;
+        redoCommandText = undoneCommand;
+        saveAddressBook(true);
+        return new CommandResult(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, undoneCommand));
+    }
+
+    private CommandResult executeRedo() throws CommandException {
+        if (redoState == null) {
+            throw new CommandException(RedoCommand.MESSAGE_NO_COMMAND);
+        }
+        ModelState stateBeforeRedo = model.createState();
+        ModelState state = redoState;
+        String redoneCommand = redoCommandText;
+        model.restoreState(state);
+        undoState = stateBeforeRedo;
+        undoCommandText = redoneCommand;
+        redoState = null;
+        redoCommandText = null;
+        saveAddressBook(true);
+        return new CommandResult(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, redoneCommand));
+    }
+
+    /**
+     * Runs a parsed command. History is updated from the in-memory result before saving.
+     * Help, summary and exit still return their result when saving fails.
+     */
+    private CommandResult executeParsedCommand(Command command, String commandText) throws CommandException {
         boolean isClear = command instanceof ClearCommand;
         boolean isHistoryNeutral = command instanceof HelpCommand || command instanceof SummaryCommand
                 || command instanceof ExitCommand;
         ModelState stateBeforeCommand = isClear || isHistoryNeutral ? null : model.createState();
-        commandResult = command.execute(model);
+        CommandResult commandResult = command.execute(model);
+        recordHistory(isClear, isHistoryNeutral, stateBeforeCommand, commandText);
+        saveAddressBook(!isHistoryNeutral);
+        return commandResult;
+    }
 
-        // Execution can change memory even when saving fails; history must describe that live state.
+    private void recordHistory(boolean isClear, boolean isHistoryNeutral, ModelState stateBeforeCommand,
+            String commandText) {
         if (isClear) {
             undoState = null;
             undoCommandText = null;
@@ -142,20 +149,28 @@ public class LogicManager implements Logic {
             redoState = null;
             redoCommandText = null;
         }
+    }
 
+    /**
+     * Saves the current address book. A required save reports the failure to the caller.
+     * History has already been updated from the in-memory state when this is called.
+     */
+    private void saveAddressBook(boolean required) throws CommandException {
         try {
             storage.saveAddressBook(model.getAddressBook());
         } catch (AccessDeniedException e) {
-            logger.warning("Command executed, but saving was denied by file or folder permissions. "
-                    + "The in-memory changes have not been saved.");
-            throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
+            logger.warning("Saving was denied by file or folder permissions. "
+                    + "The in-memory records have not been saved.");
+            if (required) {
+                throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
+            }
         } catch (IOException ioe) {
-            logger.warning("Command executed, but saving failed with " + ioe.getClass().getSimpleName()
-                    + ". The in-memory changes have not been saved.");
-            throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
+            logger.warning("Saving failed with " + ioe.getClass().getSimpleName()
+                    + ". The in-memory records have not been saved.");
+            if (required) {
+                throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
+            }
         }
-
-        return commandResult;
     }
 
     @Override

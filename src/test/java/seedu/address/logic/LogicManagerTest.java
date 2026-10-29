@@ -2,6 +2,7 @@ package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.testutil.Assert.assertThrows;
 
@@ -21,6 +22,7 @@ import javafx.collections.ObservableList;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteDogCommand;
+import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.UndoCommand;
@@ -93,20 +95,38 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_summaryStorageFailure_reportsSaveErrorWithoutChangingRecords() {
+    public void execute_historyNeutralStorageFailure_returnsResultAndPreservesHistory() throws Exception {
         for (IOException exception : List.of(DUMMY_IO_EXCEPTION, DUMMY_AD_EXCEPTION)) {
+            setUp();
+            boolean[] failSave = {false};
             JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("summary.json")) {
                 @Override
                 public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
-                    throw exception;
+                    if (failSave[0]) {
+                        throw exception;
+                    }
+                    super.saveAddressBook(addressBook);
                 }
             };
+            model = new ModelManager();
             logic = new LogicManager(model, new StorageManager(storage,
                     new JsonUserPrefsStorage(temporaryFolder.resolve("summaryPrefs.json"))));
-            String expected = exception instanceof AccessDeniedException
-                    ? String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, exception.getMessage())
-                    : String.format(LogicManager.FILE_OPS_ERROR_FORMAT, exception.getMessage());
-            assertCommandFailure("summary", CommandException.class, expected);
+            assertEquals(List.of(), logic.getDogList());
+            logic.execute("adddog n/Buddy b/Poodle s/small");
+            assertEquals(1, logic.getDogList().size());
+            logic.execute("undo");
+            failSave[0] = true;
+            assertEquals(List.of(), logic.getDogList());
+
+            assertEquals("Overall: 0 dogs | 0 customers\n"
+                    + "Activity schedules: 0 total | 0 from today onwards\n"
+                    + "Today (" + LocalDate.now() + "): 0 activities | 0 distinct dogs enrolled",
+                    logic.execute("summary").getFeedbackToUser());
+            assertEquals(HelpCommand.SHOWING_HELP_MESSAGE, logic.execute("help").getFeedbackToUser());
+            assertTrue(logic.execute("exit").isExit());
+            failSave[0] = false;
+            logic.execute("redo");
+            assertEquals("Buddy", logic.getDogList().get(0).getName().toString());
         }
     }
 
