@@ -4,23 +4,47 @@ skinparam arrowThickness 1.1
 skinparam arrowColor LOGIC_COLOR_T4
 
 package Logic as LogicPackage {
+/'
+// @@author Kenneth-Chia
+'/
 class "<<interface>>\nLogic" as Logic LOGIC_COLOR
 class LogicManager LOGIC_COLOR
+/'
+// @@author
+'/
 }
 
 package Model as ModelPackage {
+/'
+// @@author Kenneth-Chia
+'/
 class "<<interface>>\nModel" as Model MODEL_COLOR
 class ModelManager MODEL_COLOR
+/'
+// @@author
+'/
 }
 
 package Storage as StoragePackage {
+/'
+// @@author Kenneth-Chia
+'/
 class "<<interface>>\nStorage" as Storage STORAGE_COLOR
 class StorageManager STORAGE_COLOR
+/'
+// @@author
+'/
 }
 
 LogicManager .up.|> Logic
 ModelManager .up.|> Model
 StorageManager .up.|> Storage
+/'
+// @@author Kenneth-Chia
+'/
 LogicManager --> "1" Model : model
 LogicManager --> "1" Storage : storage
+/'
+// @@author
+'/
 @enduml

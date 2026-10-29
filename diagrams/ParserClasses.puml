@@ -4,6 +4,9 @@ skinparam arrowThickness 1.1
 skinparam arrowColor LOGIC_COLOR_T4
 skinparam classBackgroundColor LOGIC_COLOR
 
+/'
+// @@author Kenneth-Chia
+'/
 class WatchDogParser
 class "<<interface>>\nParser" as Parser
 class AddDogCommandParser
@@ -13,7 +16,13 @@ class ParserUtil
 class ArgumentMultimap
 class ArgumentTokenizer
 class Prefix
+/'
+// @@author
+'/
 
+/'
+// @@author Kenneth-Chia
+'/
 WatchDogParser ..> AddDogCommandParser : creates
 AddDogCommandParser .up.|> Parser
 AddDogCommandParser ..> AddDogCommand : creates
@@ -25,5 +34,8 @@ ArgumentTokenizer ..> ArgumentMultimap : creates
 ArgumentTokenizer ..> Prefix
 ArgumentMultimap --> "*" Prefix : keys
 CliSyntax ..> Prefix : defines constants
+/'
+// @@author
+'/
 
 @enduml
