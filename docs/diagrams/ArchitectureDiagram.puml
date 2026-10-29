@@ -1,6 +1,9 @@
 @startuml
 !include style.puml
 
+/'
+// @@author Kenneth-Chia
+'/
 skinparam componentStyle uml2
 skinparam componentFontColor #FFFFFF
 skinparam componentFontSize 15
@@ -12,7 +15,13 @@ component Logic LOGIC_COLOR
 component Model MODEL_COLOR
 component Storage STORAGE_COLOR
 component Commons LOGIC_COLOR_T2
+/'
+// @@author
+'/
 
+/'
+// @@author Kenneth-Chia
+'/
 Main ..> UI : initialises
 Main ..> Logic : initialises
 Main ..> Model : initialises
@@ -22,11 +31,26 @@ UI ..> Model
 Logic ..> Model
 Logic ..> Storage
 Storage ..> Model
+/'
+// @@author
+'/
 
+/'
+// @@author Kenneth-Chia
+'/
 note bottom of Commons
   Shared utilities used across components.
   These dependencies are omitted for clarity.
 end note
+/'
+// @@author
+'/
 
+/'
+// @@author Kenneth-Chia
+'/
 Commons -[hidden]up- Model
+/'
+// @@author
+'/
 @enduml

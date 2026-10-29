@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +35,9 @@ public class AddActivityCommandParserTest {
         assertEquals(parser.parse(VALID), parser.parse(
                 " r/weekly end/10:00 n/  Training   start/09:00 date/2028-02-29"));
         ModelManager model = new ModelManager();
+        // @@author
         new WatchDogParser().parseCommand("addactivity" + VALID).execute(model);
+        // @@author Kenneth-Chia
         Activity stored = model.getActivityList().get(0);
         assertEquals(1, stored.getId());
         assertEquals(LocalDate.of(2028, 2, 29), stored.getStartDate());
@@ -127,3 +130,4 @@ public class AddActivityCommandParserTest {
         assertEquals(expectedMessage, exception.getMessage(), input);
     }
 }
+// @@author

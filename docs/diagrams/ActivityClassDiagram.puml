@@ -1,14 +1,29 @@
+/'
+// @@author Kenneth-Chia
+'/
 @startuml
 !include style.puml
 skinparam arrowColor MODEL_COLOR_T4
 skinparam classBackgroundColor MODEL_COLOR
 skinparam ArrowFontStyle plain
 show members
+/'
+// @@author
+'/
 
 class WatchDog {
+/'
+// @@author Kenneth-Chia
+'/
   -nextActivityId: long
   +addActivity(...): Activity
+/'
+// @@author
+'/
   +removeActivity(activity: Activity): void
+/'
+// @@author Kenneth-Chia
+'/
   +setActivity(target, editedActivity): void
   +enrolDogs(activityId, date, dogIds): void
   +unenrolDogs(activityId, date, dogIds): void
@@ -24,11 +39,17 @@ class Activity {
 }
 
 class Enrolment {
+/'
+// @@author
+'/
   -activityId: int
   -dogId: int
   -date: LocalDate
 }
 
+/'
+// @@author Kenneth-Chia
+'/
 class ActivityName {
   +fullName: String
 }
@@ -55,3 +76,6 @@ note bottom of Activity
   enrolments are stored separately.
 end note
 @enduml
+/'
+// @@author
+'/

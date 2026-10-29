@@ -1,6 +1,9 @@
 @startuml
 !include style.puml
 skinparam ArrowFontStyle plain
+/'
+// @@author Kenneth-Chia
+'/
 skinparam ParticipantFontColor #FFFFFF
 skinparam maxMessageSize 180
 
@@ -41,4 +44,7 @@ legend bottom
   Parser construction is expanded in the Logic sequence.
   Observable-list updates refresh the UI; notifications are omitted.
 endlegend
+/'
+// @@author
+'/
 @enduml

@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,10 +19,12 @@ public class LinkCommandParserTest {
         assertEquals(new LinkCommand(1, List.of(1, 2, 3, 4, 5)), parser.parse("c/1 d/1 2 3 4 5"));
         assertEquals(new LinkCommand(1, List.of(2)), parser.parse(" c/1 d/2 "));
         assertEquals(new LinkCommand(Integer.MAX_VALUE, List.of(1)), parser.parse("c/2147483647 d/1"));
+        // @@author
         assertEquals(new LinkCommand(1, List.of(2, Integer.MAX_VALUE)),
                 parser.parse("\t c/01  d/02\t 2147483647  "));
         assertEquals(new LinkCommand(1, List.of(2, 3)),
                 new WatchDogParser().parseCommand("link c/1 d/2 3"));
+        // @@author Kenneth-Chia
     }
 
     @Test
@@ -32,6 +35,7 @@ public class LinkCommandParserTest {
                 "prefix c/1 d/2", "c/1 d/2 extra",
                 "d/2 c/1", "C/1 d/2", "c/1 D/2", "c/1d/2", "c/ 1 d/2", "c/1 d/ 2",
                 "c/0 d/2", "c/-1 d/2", "c/1 d/-2", "c/+1 d/2", "c/1 d/2.0", "c/a d/2", "c/1 d/a",
+                // @@author
                 "c/2147483648 d/2", "c/1 d/0", "c/1 d/2147483648", "c/1 d/999999999999999999999")) {
 
             assertThrows(ParseException.class, () -> parser.parse(input), input);

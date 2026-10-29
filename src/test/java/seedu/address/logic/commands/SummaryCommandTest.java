@@ -19,6 +19,7 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.WatchDog;
+// @@author Kenneth-Chia
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
@@ -66,18 +67,24 @@ public class SummaryCommandTest {
         model.updateFilteredDogList(unused -> false);
         model.updateFilteredCustomerList(unused -> false);
         model.updateFilteredActivityList(unused -> false);
+        // @@author
         WatchDog before = new WatchDog(model.getWatchDog());
 
+        // @@author Kenneth-Chia
         assertEquals("Overall: 3 dogs | 2 customers\n"
                 + "Activity schedules: 7 total | 6 from today onwards\n"
                 + "Today (2026-10-24): 3 activities | 2 distinct dogs enrolled",
                 new SummaryCommand(CLOCK).execute(model).getFeedbackToUser());
+        // @@author
         assertEquals(before, model.getWatchDog());
+        // @@author Kenneth-Chia
         assertEquals(List.of(), model.getFilteredDogList());
         assertEquals(List.of(), model.getFilteredCustomerList());
         assertEquals(List.of(), model.getFilteredActivityList());
         // The predicates must remain active when later records are added.
+        // @@author
         model.addDog(dog(1));
+        // @@author Kenneth-Chia
         addActivity(model, TODAY, Recurrence.ONCE);
         assertEquals(List.of(), model.getFilteredDogList());
         assertEquals(List.of(), model.getFilteredActivityList());
@@ -112,7 +119,9 @@ public class SummaryCommandTest {
                 + "Today (2026-10-25): 0 activities | 0 distinct dogs enrolled",
                 command.execute(model).getFeedbackToUser());
         assertEquals(1, clock.reads);
+        // @@author
         model.addDog(dog(1));
+        // @@author Kenneth-Chia
         addActivity(model, TODAY.plusDays(2), Recurrence.DAILY);
         clock.instant = Instant.parse("2026-10-25T16:00:00Z");
         assertEquals("Overall: 1 dogs | 0 customers\n"
@@ -166,7 +175,9 @@ public class SummaryCommandTest {
     }
 
     private static Model mixedModel() throws Exception {
+        // @@author
         WatchDog book = new WatchDog();
+        // @@author Kenneth-Chia
         book.addDogFromStorage(dog(9));
         book.addDogFromStorage(dog(4));
         book.addDogFromStorage(dog(7));
@@ -243,3 +254,4 @@ public class SummaryCommandTest {
         }
     }
 }
+// @@author

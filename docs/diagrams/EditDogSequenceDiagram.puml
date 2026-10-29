@@ -1,12 +1,21 @@
 @startuml
 !include style.puml
+/'
+// @@author Kenneth-Chia
+'/
 skinparam ArrowFontStyle plain
 skinparam ParticipantFontColor #FFFFFF
 skinparam maxMessageSize 180
+/'
+// @@author
+'/
 
 participant "command:EditDogCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
 
+/'
+// @@author Kenneth-Chia
+'/
 [-> Command : execute(model)
 Command -> Model : getDogList()
 Model --> Command : dogs
@@ -15,7 +24,13 @@ note over Command
   Builds editedDog with the same ID
   and owner, replacing its size.
 end note
+/'
+// @@author
+'/
 Command -> Model : setDog(target, editedDog)
+/'
+// @@author Kenneth-Chia
+'/
 [<-- Command : commandResult
 
 legend bottom
@@ -23,4 +38,7 @@ legend bottom
   Parsing and saving follow the shared Logic flow.
   Successful execution only; validation failures are omitted.
 endlegend
+/'
+// @@author
+'/
 @enduml

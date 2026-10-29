@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
@@ -70,3 +71,4 @@ public class UnlinkCommand extends Command {
         return Objects.hash(customerId, dogIds);
     }
 }
+// @@author
