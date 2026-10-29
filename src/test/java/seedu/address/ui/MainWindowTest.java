@@ -287,6 +287,8 @@ public class MainWindowTest {
 
             assertEquals("What would you like to do? Type help to get started.", command.getPromptText());
             assertEquals("Command results will appear here.", result.getPromptText());
+            assertEquals(11 * 96.0 / 72.0, command.getFont().getSize(), 0.01);
+            assertEquals(12 * 96.0 / 72.0, result.getFont().getSize(), 0.01);
             assertTrue(result.isWrapText());
             assertEquals(100, resultArea.getMinHeight());
             assertEquals(100, resultArea.getPrefHeight());

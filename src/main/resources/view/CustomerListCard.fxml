@@ -15,7 +15,7 @@
     </columnConstraints>
     <VBox alignment="CENTER_LEFT" minHeight="105" spacing="2" GridPane.columnIndex="0">
       <padding>
-        <Insets top="5" right="5" bottom="5" left="15" />
+        <Insets top="10" right="14" bottom="10" left="14" />
       </padding>
       <HBox spacing="0.5" alignment="TOP_LEFT">
         <Label fx:id="id" styleClass="cell_big_label">
@@ -26,17 +26,17 @@
         <Label fx:id="name" lineSpacing="1" maxWidth="Infinity" text="\$name"
             styleClass="cell_big_label" textOverrun="ELLIPSIS" wrapText="true" HBox.hgrow="ALWAYS" />
       </HBox>
-      <HBox alignment="CENTER_LEFT" spacing="6">
+      <HBox fx:id="phoneRow" alignment="CENTER_LEFT" spacing="6">
         <Region fx:id="phoneIcon" styleClass="contact-icon" />
         <Label fx:id="phone" maxWidth="Infinity" styleClass="cell_small_label" text="\$phone"
             textOverrun="ELLIPSIS" HBox.hgrow="ALWAYS" />
       </HBox>
-      <HBox alignment="CENTER_LEFT" spacing="6">
+      <HBox fx:id="emailRow" alignment="CENTER_LEFT" spacing="6">
         <Region fx:id="emailIcon" styleClass="contact-icon" />
         <Label fx:id="email" maxWidth="Infinity" styleClass="cell_small_label" text="\$email"
             textOverrun="ELLIPSIS" HBox.hgrow="ALWAYS" />
       </HBox>
-      <HBox alignment="CENTER_LEFT" spacing="4">
+      <HBox fx:id="backupContactRow" alignment="CENTER_LEFT" spacing="4">
         <Label fx:id="backupContactLabel" styleClass="backup-contact-label" text="Backup Contact:" />
         <Label fx:id="backupContact" maxWidth="Infinity" styleClass="cell_small_label" text="\$backup"
             textOverrun="ELLIPSIS" HBox.hgrow="ALWAYS" />

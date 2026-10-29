@@ -1,6 +1,7 @@
 package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -16,10 +18,13 @@ import org.junit.jupiter.api.Test;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -74,10 +79,62 @@ public class RecordListPanelTest {
             assertEquals("\uD83D\uDC64 None", label(card, "owner"));
             assertTrue(((Label) card.lookup("#name")).isWrapText());
             assertEquals(1, ((Label) card.lookup("#name")).getLineSpacing());
-            assertEquals("\uD83D\uDC64 None", ((Label) card.lookup("#owner")).getTooltip().getText());
+            Tooltip breedTooltip = CardInteractionUtil.getFullValueTooltip(card.lookup("#breedRow"));
+            Tooltip ownerTooltip = CardInteractionUtil.getFullValueTooltip(card.lookup("#ownerRow"));
+            assertEquals("Breed: Poodle", breedTooltip.getText());
+            assertEquals("Customer ID: None", ownerTooltip.getText());
             HBox nameRow = (HBox) card.lookup("#name").getParent();
             assertEquals(Pos.TOP_LEFT, nameRow.getAlignment());
             assertEquals(2, ((VBox) nameRow.getParent()).getSpacing());
+            assertEquals(new Insets(10, 14, 10, 14), ((VBox) nameRow.getParent()).getPadding());
+            assertTrue(CardInteractionUtil.getCopyMenu(card).getItems().get(1).isDisable());
+        });
+    }
+
+    @Test
+    public void dogCard_copyMenu_copiesIndividualAndLabelledDogDetails() throws Exception {
+        runOnFxThread(() -> {
+            AtomicReference<String> copiedText = new AtomicReference<>();
+            Dog linkedDog = BUDDY.withOwner(7);
+            DogCard dogCard = new DogCard(linkedDog, copiedText::set);
+            Region card = dogCard.getRoot();
+            ContextMenu copyMenu = CardInteractionUtil.getCopyMenu(card);
+
+            assertTrue(card.getOnContextMenuRequested() != null);
+            assertEquals(4, copyMenu.getItems().size());
+            assertEquals("Copy breed", copyMenu.getItems().get(0).getText());
+            assertEquals("Copy customer ID", copyMenu.getItems().get(1).getText());
+            assertTrue(!copyMenu.getItems().get(1).isDisable());
+            assertTrue(copyMenu.getItems().get(2).getStyleClass().contains("separator-menu-item"));
+            assertEquals("Copy all dog details", copyMenu.getItems().get(3).getText());
+
+            copyMenu.getItems().get(0).fire();
+            assertEquals("Poodle", copiedText.get());
+            copyMenu.getItems().get(1).fire();
+            assertEquals("7", copiedText.get());
+            copyMenu.getItems().get(3).fire();
+            assertEquals(CardCopyFormatter.formatDog(linkedDog), copiedText.get());
+        });
+    }
+
+    @Test
+    public void dogCard_copyMenu_preservesLongValuesAndIgnoresDisabledCustomerCopy() throws Exception {
+        runOnFxThread(() -> {
+            String longBreed = "German-Shepherd-Mixed-With-Very-Long-Breed-Name";
+            Dog longValueDog = new Dog(43, new DogName("O'Neil-Dog"), new Breed(longBreed), new Size("Large"));
+            AtomicReference<String> copiedText = new AtomicReference<>("unchanged");
+            ContextMenu copyMenu = CardInteractionUtil.getCopyMenu(
+                    new DogCard(longValueDog, copiedText::set).getRoot());
+
+            copyMenu.getItems().get(0).fire();
+            assertEquals(longBreed, copiedText.get());
+            copiedText.set("unchanged");
+            assertTrue(copyMenu.getItems().get(1).isDisable());
+            copyMenu.getItems().get(1).fire();
+            assertEquals("unchanged", copiedText.get());
+            assertFalse(copyMenu.getItems().get(3).isDisable());
+            copyMenu.getItems().get(3).fire();
+            assertEquals(CardCopyFormatter.formatDog(longValueDog), copiedText.get());
         });
     }
 

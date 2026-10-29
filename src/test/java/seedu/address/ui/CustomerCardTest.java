@@ -5,20 +5,30 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
+import javafx.css.PseudoClass;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.util.Duration;
 import seedu.address.model.customer.Customer;
 
 public class CustomerCardTest {
@@ -57,14 +67,21 @@ public class CustomerCardTest {
             assertTrue(card.lookup("#emailIcon") instanceof Region);
             assertTrue(((Label) card.lookup("#name")).isWrapText());
             assertEquals(1, ((Label) card.lookup("#name")).getLineSpacing());
-            assertEquals("91234567", ((Label) card.lookup("#phone")).getTooltip().getText());
-            assertEquals("alex@example.com", ((Label) card.lookup("#email")).getTooltip().getText());
+            Tooltip phoneTooltip = CardInteractionUtil.getFullValueTooltip(card.lookup("#phoneRow"));
+            Tooltip emailTooltip = CardInteractionUtil.getFullValueTooltip(card.lookup("#emailRow"));
+            assertEquals("91234567", phoneTooltip.getText());
+            assertEquals("alex@example.com", emailTooltip.getText());
+            assertEquals(Duration.millis(300), emailTooltip.getShowDelay());
+            assertEquals(320, emailTooltip.getMaxWidth());
+            assertTrue(emailTooltip.isWrapText());
+            assertTrue(emailTooltip.getStyleClass().contains("card-tooltip"));
             assertTrue(card.lookup("#backupContactLabel").getStyleClass().contains("backup-contact-label"));
             assertTrue(card.lookup("#phone").getParent() instanceof HBox);
 
             HBox nameRow = (HBox) card.lookup("#name").getParent();
             assertEquals(Pos.TOP_LEFT, nameRow.getAlignment());
             assertEquals(2, ((VBox) nameRow.getParent()).getSpacing());
+            assertEquals(new Insets(10, 14, 10, 14), ((VBox) nameRow.getParent()).getPadding());
 
             Scene scene = new Scene(card, 300, 250);
             scene.getStylesheets().add(getClass().getResource("/view/DarkTheme.css").toExternalForm());
@@ -73,6 +90,97 @@ public class CustomerCardTest {
             assertTrue(dogIcon.getStyleClass().contains("dog-icon"));
             assertNotNull(dogIcon.getShape());
         });
+    }
+
+    @Test
+    public void copyMenu_copiesIndividualAndLabelledCustomerDetails() throws Exception {
+        runOnFxThread(() -> {
+            AtomicReference<String> copiedText = new AtomicReference<>();
+            CustomerCard customerCard = new CustomerCard(ALEX, List.of(4, 2), copiedText::set);
+            Region card = customerCard.getRoot();
+            ContextMenu copyMenu = CardInteractionUtil.getCopyMenu(card);
+
+            assertNotNull(card.getOnContextMenuRequested());
+            assertEquals(5, copyMenu.getItems().size());
+            assertEquals("Copy phone number", copyMenu.getItems().get(0).getText());
+            assertEquals("Copy email address", copyMenu.getItems().get(1).getText());
+            assertEquals("Copy backup contact", copyMenu.getItems().get(2).getText());
+            assertTrue(copyMenu.getItems().get(3).getStyleClass().contains("separator-menu-item"));
+            assertEquals("Copy all customer details", copyMenu.getItems().get(4).getText());
+
+            copyMenu.getItems().get(0).fire();
+            assertEquals("91234567", copiedText.get());
+            copyMenu.getItems().get(1).fire();
+            assertEquals("alex@example.com", copiedText.get());
+            copyMenu.getItems().get(2).fire();
+            assertEquals("98765432", copiedText.get());
+            copyMenu.getItems().get(4).fire();
+            assertEquals(CardCopyFormatter.formatCustomer(ALEX, List.of(4, 2)), copiedText.get());
+        });
+    }
+
+    @Test
+    public void copyMenu_longValuesAndRepeatedCopies_preserveCompleteLatestValue() throws Exception {
+        runOnFxThread(() -> {
+            String longEmail = "Very.Long.Email.Address.With.Many.Parts@example-domain.com";
+            Customer longValueCustomer = new Customer(8, "Casey Tan", "00123456789", longEmail, "000987654");
+            Customer otherCustomer = new Customer(9, "Beth Tan", "99887766", "Beth.Tan@example.com", "88776655");
+            AtomicReference<String> copiedText = new AtomicReference<>();
+            ContextMenu longValueMenu = CardInteractionUtil.getCopyMenu(
+                    new CustomerCard(longValueCustomer, List.of(), copiedText::set).getRoot());
+            ContextMenu otherMenu = CardInteractionUtil.getCopyMenu(
+                    new CustomerCard(otherCustomer, List.of(), copiedText::set).getRoot());
+
+            longValueMenu.getItems().get(0).fire();
+            assertEquals("00123456789", copiedText.get());
+            longValueMenu.getItems().get(1).fire();
+            assertEquals(longEmail, copiedText.get());
+            longValueMenu.getItems().get(2).fire();
+            assertEquals("000987654", copiedText.get());
+            otherMenu.getItems().get(1).fire();
+            assertEquals("Beth.Tan@example.com", copiedText.get());
+            longValueMenu.getItems().get(4).fire();
+            assertEquals(CardCopyFormatter.formatCustomer(longValueCustomer, List.of()), copiedText.get());
+        });
+    }
+
+    @Test
+    public void cardHover_reservesBorderSpaceForRegularAndTodayCards() throws Exception {
+        runOnFxThread(() -> {
+            assertHoverKeepsCardSize(false, Color.rgb(9, 107, 104, 0.65));
+            assertHoverKeepsCardSize(true, Color.rgb(144, 209, 202, 0.85));
+        });
+    }
+
+    private static void assertHoverKeepsCardSize(boolean todayCard, Color expectedHoverColor) {
+        Region card = new CustomerCard(ALEX).getRoot();
+        ListCell<Object> cell = new ListCell<>();
+        cell.setGraphic(card);
+        StackPane panel = new StackPane(cell);
+        if (todayCard) {
+            panel.getStyleClass().add("today-panel");
+        }
+        Scene scene = new Scene(panel, 300, 250);
+        scene.getStylesheets().add(CustomerCardTest.class.getResource("/view/DarkTheme.css").toExternalForm());
+        panel.applyCss();
+        panel.layout();
+
+        double normalHeight = card.prefHeight(300);
+        var normalBorder = card.getBorder().getStrokes().get(0);
+        assertEquals(Color.TRANSPARENT, normalBorder.getTopStroke());
+        assertEquals(1, normalBorder.getWidths().getTop());
+
+        cell.pseudoClassStateChanged(PseudoClass.getPseudoClass("hover"), true);
+        panel.applyCss();
+        panel.layout();
+
+        var hoverBorder = card.getBorder().getStrokes().get(0);
+        assertEquals(expectedHoverColor, hoverBorder.getTopStroke());
+        assertEquals(normalBorder.getWidths().getTop(), hoverBorder.getWidths().getTop());
+        assertEquals(normalBorder.getWidths().getRight(), hoverBorder.getWidths().getRight());
+        assertEquals(normalBorder.getWidths().getBottom(), hoverBorder.getWidths().getBottom());
+        assertEquals(normalBorder.getWidths().getLeft(), hoverBorder.getWidths().getLeft());
+        assertEquals(normalHeight, card.prefHeight(300), 0.01);
     }
 
     private static String label(Region card, String id) {

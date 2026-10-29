@@ -1,6 +1,7 @@
 package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -9,6 +10,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -21,11 +23,15 @@ import org.junit.jupiter.api.Test;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import seedu.address.model.AddressBook;
+import seedu.address.model.ModelManager;
+import seedu.address.model.UserPrefs;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Enrolment;
@@ -35,6 +41,8 @@ import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
+import seedu.address.model.dog.exceptions.LinkException;
+import seedu.address.model.dog.exceptions.UnlinkException;
 
 /** Tests the customer, dog and activity list panels. */
 public class ListPanelsTest {
@@ -76,6 +84,7 @@ public class ListPanelsTest {
             assertTrue(dogSummary.isWrapText());
             assertEquals(1, dogSummary.getLineSpacing());
             assertEquals(2, ((VBox) dogSummary.getParent()).getSpacing());
+            assertEquals(new Insets(10, 14, 10, 14), ((VBox) dogSummary.getParent()).getPadding());
         });
     }
 
@@ -130,6 +139,91 @@ public class ListPanelsTest {
             assertEquals("Milo", label(list.getItems().get(1).get(), "name"));
             dogs.clear();
             assertTrue(list.getItems().isEmpty());
+        });
+    }
+
+    @Test
+    public void customerAndDogCopyMenus_refreshAfterLinkAndUnlink() throws Exception {
+        runOnFxThread(() -> {
+            AddressBook book = new AddressBook();
+            book.addCustomer(CUSTOMER);
+            book.addDogFromStorage(DOG);
+            ModelManager model = new ModelManager(book, new UserPrefs());
+            CustomerListPanel customerPanel = new CustomerListPanel(model.getFilteredCustomerList(),
+                    model.getDogList());
+            DogListPanel dogPanel = new DogListPanel(model.getFilteredDogList());
+            ListView<Supplier<Region>> customers = listView(customerPanel);
+            ListView<Supplier<Region>> dogs = listView(dogPanel);
+
+            Region customerCard = customers.getItems().get(0).get();
+            Region dogCard = dogs.getItems().get(0).get();
+            assertEquals(CardCopyFormatter.formatCustomer(CUSTOMER, List.of()),
+                    CardInteractionUtil.getCopyValue(
+                            CardInteractionUtil.getCopyMenu(customerCard).getItems().get(4)));
+            assertTrue(CardInteractionUtil.getCopyMenu(dogCard).getItems().get(1).isDisable());
+            assertEquals(CardCopyFormatter.formatDog(DOG), CardInteractionUtil.getCopyValue(
+                    CardInteractionUtil.getCopyMenu(dogCard).getItems().get(3)));
+
+            try {
+                model.linkDogs(1, List.of(2));
+            } catch (LinkException exception) {
+                throw new AssertionError(exception);
+            }
+
+            customerCard = customers.getItems().get(0).get();
+            dogCard = dogs.getItems().get(0).get();
+            assertEquals(CardCopyFormatter.formatCustomer(CUSTOMER, List.of(2)),
+                    CardInteractionUtil.getCopyValue(
+                            CardInteractionUtil.getCopyMenu(customerCard).getItems().get(4)));
+            assertFalse(CardInteractionUtil.getCopyMenu(dogCard).getItems().get(1).isDisable());
+            assertEquals("1", CardInteractionUtil.getCopyValue(
+                    CardInteractionUtil.getCopyMenu(dogCard).getItems().get(1)));
+            assertEquals(CardCopyFormatter.formatDog(DOG.withOwner(1)), CardInteractionUtil.getCopyValue(
+                    CardInteractionUtil.getCopyMenu(dogCard).getItems().get(3)));
+
+            model.updateFilteredDogList(dog -> false);
+            assertTrue(dogs.getItems().isEmpty());
+            customerCard = customers.getItems().get(0).get();
+            assertEquals(CardCopyFormatter.formatCustomer(CUSTOMER, List.of(2)),
+                    CardInteractionUtil.getCopyValue(
+                            CardInteractionUtil.getCopyMenu(customerCard).getItems().get(4)));
+            model.updateFilteredDogList(dog -> true);
+
+            try {
+                model.unlinkDogs(List.of(2));
+            } catch (UnlinkException exception) {
+                throw new AssertionError(exception);
+            }
+
+            customerCard = customers.getItems().get(0).get();
+            dogCard = dogs.getItems().get(0).get();
+            assertEquals(CardCopyFormatter.formatCustomer(CUSTOMER, List.of()),
+                    CardInteractionUtil.getCopyValue(
+                            CardInteractionUtil.getCopyMenu(customerCard).getItems().get(4)));
+            assertTrue(CardInteractionUtil.getCopyMenu(dogCard).getItems().get(1).isDisable());
+            assertEquals(CardCopyFormatter.formatDog(DOG), CardInteractionUtil.getCopyValue(
+                    CardInteractionUtil.getCopyMenu(dogCard).getItems().get(3)));
+
+            Customer editedCustomer = new Customer(1, "Alex Tan", "00112233",
+                    "Updated.Email@example.com", "00998877");
+            Dog editedDog = new Dog(2, new DogName("Buddy-O'Neil"),
+                    new Breed("German-Shepherd-Mix"), new Size("Large"));
+            model.setCustomer(CUSTOMER, editedCustomer);
+            model.setDog(DOG, editedDog);
+
+            customerCard = customers.getItems().get(0).get();
+            dogCard = dogs.getItems().get(0).get();
+            assertEquals("00112233", CardInteractionUtil.getCopyValue(
+                    CardInteractionUtil.getCopyMenu(customerCard).getItems().get(0)));
+            assertEquals("Updated.Email@example.com", CardInteractionUtil.getCopyValue(
+                    CardInteractionUtil.getCopyMenu(customerCard).getItems().get(1)));
+            assertEquals(CardCopyFormatter.formatCustomer(editedCustomer, List.of()),
+                    CardInteractionUtil.getCopyValue(
+                            CardInteractionUtil.getCopyMenu(customerCard).getItems().get(4)));
+            assertEquals("German-Shepherd-Mix", CardInteractionUtil.getCopyValue(
+                    CardInteractionUtil.getCopyMenu(dogCard).getItems().get(0)));
+            assertEquals(CardCopyFormatter.formatDog(editedDog), CardInteractionUtil.getCopyValue(
+                    CardInteractionUtil.getCopyMenu(dogCard).getItems().get(3)));
         });
     }
 

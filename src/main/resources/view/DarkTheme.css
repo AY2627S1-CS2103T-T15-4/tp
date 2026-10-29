@@ -16,7 +16,7 @@
     -fx-border-color: rgba(9, 107, 104, 0.65);
     -fx-border-width: 1;
     -fx-border-radius: 10;
-    -fx-background-insets: 1;
+    -fx-background-insets: 0;
     -fx-background-radius: 10;
     -fx-effect: dropshadow(gaussian, rgba(9, 107, 104, 0.35), 9, 0.1, 0, 2);
 }
@@ -25,7 +25,7 @@
     -fx-border-color: rgba(144, 209, 202, 0.85);
     -fx-border-width: 1;
     -fx-border-radius: 10;
-    -fx-background-insets: 1;
+    -fx-background-insets: 0;
     -fx-background-radius: 10;
     -fx-effect: dropshadow(gaussian, rgba(9, 107, 104, 0.28), 8, 0.05, 0, 2);
 }
@@ -71,7 +71,35 @@
     -fx-text-fill: #096B68;
     -fx-opacity: 0.70;
 }
-#cardPane { -fx-background-color: #FEF9EF; -fx-background-insets: 0; -fx-background-radius: 10; -fx-border-radius: 10; -fx-effect: dropshadow(gaussian, rgba(18, 153, 144, 0.22), 7, 0.0, 0, 2); }
+.tooltip.card-tooltip {
+    -fx-background-color: #FEF9EF;
+    -fx-border-color: #90D1CA;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 7 9 7 9;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 11px;
+    -fx-text-fill: #096B68;
+}
+.tooltip.copy-confirmation {
+    -fx-background-color: #096B68;
+    -fx-border-color: #90D1CA;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 6 9 6 9;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-font-size: 11px;
+    -fx-text-fill: #FEF9EF;
+}
+#cardPane {
+    -fx-background-color: #FEF9EF;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-border-color: transparent;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(18, 153, 144, 0.22), 7, 0.0, 0, 2);
+}
 
 .stack-pane { -fx-background-color: #90D1CA; }
 .record-lists { -fx-background-color: transparent; -fx-padding: 10 24 10 24; }
@@ -132,6 +160,6 @@
 .scroll-bar .increment-arrow, .scroll-bar .decrement-arrow { -fx-shape: " "; }
 
 #commandTypeLabel { -fx-font-size: 11px; -fx-text-fill: #129990; }
-#commandTextField { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-width: 0; -fx-background-radius: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-padding: 2 6 2 6; -fx-font-family: "Segoe UI Semibold"; -fx-font-weight: bold; -fx-font-size: 12pt; -fx-text-fill: #096B68; -fx-prompt-text-fill: rgba(18, 153, 144, 0.58); }
+#commandTextField { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-width: 0; -fx-background-radius: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-padding: 2 6 2 6; -fx-font-family: "Segoe UI Semibold"; -fx-font-weight: bold; -fx-font-size: 11pt; -fx-text-fill: #096B68; -fx-prompt-text-fill: rgba(18, 153, 144, 0.58); }
 #resultDisplay .content { -fx-background-color: transparent; }
 .error { -fx-text-fill: #129990 !important; }
