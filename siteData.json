@@ -169,7 +169,20 @@
         "archiving-data-files-coming-in-v2-0": "Archiving data files [coming in v2.0]",
         "faq": "FAQ",
         "known-issues": "Known issues",
-        "command-summary": "Command summary"
+        "command-summary": "Command summary",
+        "instructions-for-manual-testing": "Instructions for Manual Testing",
+        "launching-and-preparing-test-records": "Launching and preparing test records",
+        "customer-and-dog-validation-and-editing": "Customer and dog validation and editing",
+        "linking-and-unlinking-ownership": "Linking and unlinking ownership",
+        "creating-and-editing-activity-schedules": "Creating and editing activity schedules",
+        "booking-and-cancelling-dated-occurrences": "Booking and cancelling dated occurrences",
+        "searching-filtering-today-s-view-and-statistics": "Searching, filtering, today's view, and statistics",
+        "card-details-copying-and-scrolling": "Card details, copying, and scrolling",
+        "help-and-single-step-undo-redo": "Help and single-step undo/redo",
+        "saving-shutdown-and-restart": "Saving, shutdown, and restart",
+        "deleting-records-and-checking-related-data": "Deleting records and checking related data",
+        "clear-confirmation-and-retained-filters": "Clear confirmation and retained filters",
+        "loading-edited-or-invalid-data": "Loading edited or invalid data"
       },
       "headingKeywords": {}
     },
