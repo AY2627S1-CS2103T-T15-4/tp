@@ -51,7 +51,12 @@ public class AddDogCommand extends Command {
         if (model.hasDog(toAdd)) {
             throw new CommandException(MESSAGE_DUPLICATE_DOG);
         }
-        Dog addedDog = model.addDog(toAdd);
+        Dog addedDog;
+        try {
+            addedDog = model.addDog(toAdd);
+        } catch (IllegalStateException e) {
+            throw new CommandException(e.getMessage(), e);
+        }
         return new CommandResult(String.format(MESSAGE_SUCCESS, Messages.format(addedDog)));
     }
 

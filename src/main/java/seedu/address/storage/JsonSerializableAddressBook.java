@@ -33,13 +33,14 @@ class JsonSerializableAddressBook {
     private final List<JsonAdaptedActivity> activities = new ArrayList<>();
     private final List<JsonAdaptedEnrolment> enrolments = new ArrayList<>();
     private final Long nextActivityId;
-    private final Integer nextDogId;
+    private final Long nextDogId;
     private final Integer nextCustomerId;
     /** Constructs a serializable address book from JSON fields. */
     @JsonCreator
     public JsonSerializableAddressBook(@JsonProperty("customers") List<JsonAdaptedCustomer> customers,
             @JsonProperty("dogs") List<JsonAdaptedDog> dogs,
-            @JsonProperty("nextDogId") Integer nextDogId,
+            @JsonProperty("nextDogId")
+            @JsonDeserialize(using = NextDogIdDeserializer.class) Long nextDogId,
             @JsonProperty("nextCustomerId") Integer nextCustomerId,
             @JsonProperty("activities") List<JsonAdaptedActivity> activities,
             @JsonProperty("enrolments") List<JsonAdaptedEnrolment> enrolments,
@@ -64,7 +65,7 @@ class JsonSerializableAddressBook {
 
     /** Backwards-compatible constructor for data without enrolments. */
     public JsonSerializableAddressBook(List<JsonAdaptedCustomer> customers, List<JsonAdaptedDog> dogs,
-            Integer nextDogId, Integer nextCustomerId, List<JsonAdaptedActivity> activities, Long nextActivityId) {
+            Long nextDogId, Integer nextCustomerId, List<JsonAdaptedActivity> activities, Long nextActivityId) {
         this(customers, dogs, nextDogId, nextCustomerId, activities, null, nextActivityId);
     }
 
@@ -112,8 +113,12 @@ class JsonSerializableAddressBook {
             }
         }
 
-        if (nextDogId != null && nextDogId >= 1) {
-            addressBook.setNextDogId(nextDogId);
+        if (nextDogId != null) {
+            try {
+                addressBook.setNextDogId(nextDogId);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalValueException(e.getMessage(), e);
+            }
         }
         if (nextCustomerId != null && nextCustomerId >= 1) {
             addressBook.setNextCustomerId(nextCustomerId);

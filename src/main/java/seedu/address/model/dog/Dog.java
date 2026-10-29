@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import seedu.address.commons.util.ToStringBuilder;
-//@@author Umaiza-15
+
 /**
  * Represents a dog in the address book.
  * Guarantees: stored dogs have positive IDs; details are present and not null, field values are validated, immutable.

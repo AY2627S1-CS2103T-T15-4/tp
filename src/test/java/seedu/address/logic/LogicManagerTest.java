@@ -198,18 +198,22 @@ public class LogicManagerTest {
 
         logic.execute(addCommand);
         Dog buddy = dogs.get(0);
+        assertEquals(2, model.getAddressBook().getNextDogId());
         assertEquals(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, addCommand.trim()),
                 logic.execute("undo").getFeedbackToUser());
         assertEquals(List.of(), dogs);
+        assertEquals(1, model.getAddressBook().getNextDogId());
         assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
 
         assertEquals(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, addCommand.trim()),
                 logic.execute("redo").getFeedbackToUser());
         assertEquals(List.of(buddy), dogs);
+        assertEquals(2, model.getAddressBook().getNextDogId());
         assertCommandException("redo", RedoCommand.MESSAGE_NO_COMMAND);
 
         logic.execute("undo");
         assertEquals(List.of(), dogs);
+        assertEquals(1, model.getAddressBook().getNextDogId());
     }
 
     @Test

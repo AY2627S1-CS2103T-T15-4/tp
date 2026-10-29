@@ -1,3 +1,4 @@
+// @@author Umaiza-15
 package seedu.address.model.dog;
 
 import static java.util.Objects.requireNonNull;

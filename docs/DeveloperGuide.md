@@ -237,8 +237,18 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 The address book assigns the dog a persistent ID when it is added. The ID is allocated from a
 monotonically increasing counter rather than from the dog's position in the list, so deleting a dog
-does not change the identities of the remaining dogs. The counter and dog IDs are persisted so that
-new dogs continue to receive unique IDs after the application restarts.
+does not change the identities of the remaining dogs and deleted IDs are never reused. The counter
+and dog IDs are persisted so that new dogs continue to receive unique IDs after the application
+restarts.
+
+Dog IDs remain positive `int` values, while the next-ID counter is a `long`. A counter value of
+`Integer.MAX_VALUE + 1` represents exhaustion; `adddog` then fails without changing the stored dogs
+or counter. A missing counter in legacy data is derived as one more than the largest stored dog ID,
+or one for an empty dog list. An explicit stored counter must be greater than every stored dog ID and
+cannot exceed the exhaustion value. Zero, negative, fractional, string-valued, out-of-range, or
+otherwise inconsistent counters are rejected rather than silently repaired. A counter may validly be
+more than one above the largest current dog ID because higher-ID dogs might previously have been
+deleted.
 
 The following diagram shows the add-dog command flow. The important part of this flow is that the
 persistent dog ID is assigned by the address book only

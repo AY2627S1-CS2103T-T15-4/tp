@@ -43,7 +43,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     private final ObservableList<Activity> activityView = FXCollections.unmodifiableObservableList(activities);
     private final ObservableList<Enrolment> enrolments = FXCollections.observableArrayList();
     private long nextActivityId = 1;
-    private int nextDogId = 1;
+    private long nextDogId = 1;
     private int nextCustomerId = 1;
 
 
@@ -79,15 +79,14 @@ public class AddressBook implements ReadOnlyAddressBook {
                 || nextId < minimumId || nextId > (long) Integer.MAX_VALUE + 1) {
             throw new IllegalArgumentException("Invalid activity IDs or next activity ID.");
         }
+        long minimumDogId = restoredDogs.stream().mapToLong(Dog::getId).max().orElse(0) + 1;
+        long restoredNextDogId = newData.getNextDogId();
+        long nextRestoredDogId = restoredNextDogId == -1 ? minimumDogId : restoredNextDogId;
+        validateNextDogId(nextRestoredDogId, minimumDogId);
         dogs.setDogs(restoredDogs);
         customers.setCustomers(restoredCustomers);
         nextActivityId = nextId;
-
-        int restoredNextDogId = newData.getNextDogId();
-        this.nextDogId = restoredNextDogId >= 1
-                ? restoredNextDogId
-                : dogs.asUnmodifiableObservableList().stream()
-                        .mapToInt(Dog::getId).max().orElse(0) + 1;
+        nextDogId = nextRestoredDogId;
 
         int restoredNextCustomerId = newData.getNextCustomerId();
         this.nextCustomerId = restoredNextCustomerId >= 0
@@ -461,13 +460,18 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     /**
      * Adds a new dog and assigns it the next available persistent ID.
+     * The counter is consumed only after the dog is stored successfully.
      *
      * @param dog dog details without an assigned ID
      * @return the identified dog that was stored
+     * @throws IllegalStateException if all positive {@code int} dog IDs have been allocated
      */
     public Dog addDog(Dog dog) {
         requireNonNull(dog);
-        Dog newDog = new Dog(nextDogId, dog.getName(), dog.getBreed(), dog.getSize());
+        if (nextDogId > Integer.MAX_VALUE) {
+            throw new IllegalStateException("No more dog IDs are available.");
+        }
+        Dog newDog = new Dog((int) nextDogId, dog.getName(), dog.getBreed(), dog.getSize());
         dogs.add(newDog);
         nextDogId++;
         return newDog;
@@ -484,12 +488,12 @@ public class AddressBook implements ReadOnlyAddressBook {
         requireNonNull(identified);
         validateDogOwners(List.of(identified), getCustomerList());
         dogs.add(identified);
-        nextDogId = Math.max(nextDogId, identified.getId() + 1);
+        nextDogId = Math.max(nextDogId, (long) identified.getId() + 1);
         return identified;
     }
 
     @Override
-    public int getNextDogId() {
+    public long getNextDogId() {
         return nextDogId;
     }
 
@@ -499,15 +503,21 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Restores the next unused positive dog ID from persistent storage.
+     * Restores a counter above all stored dog IDs. {@code Integer.MAX_VALUE + 1} represents exhaustion.
      *
-     * @throws IllegalArgumentException if {@code nextDogId} is not positive
+     * @throws IllegalArgumentException if {@code nextDogId} does not exceed all stored IDs or is out of range
      */
-    public void setNextDogId(int nextDogId) {
-        if (nextDogId < 1) {
-            throw new IllegalArgumentException("Next dog ID must be positive.");
-        }
+    public void setNextDogId(long nextDogId) {
+        long minimumDogId = getDogList().stream().mapToLong(Dog::getId).max().orElse(0) + 1;
+        validateNextDogId(nextDogId, minimumDogId);
         this.nextDogId = nextDogId;
+    }
+
+    private static void validateNextDogId(long nextDogId, long minimumDogId) {
+        if (nextDogId < minimumDogId || nextDogId > (long) Integer.MAX_VALUE + 1) {
+            throw new IllegalArgumentException(
+                    "Next dog ID must be positive, exceed all stored dog IDs, and be within range.");
+        }
     }
 
     /** Restores the next unused customer ID from persistent storage. */
@@ -684,11 +694,14 @@ public class AddressBook implements ReadOnlyAddressBook {
                 && customers.equals(otherAddressBook.customers)
                 && activities.equals(otherAddressBook.activities)
                 && enrolments.equals(otherAddressBook.enrolments)
+                && nextDogId == otherAddressBook.nextDogId
+                && nextCustomerId == otherAddressBook.nextCustomerId
                 && nextActivityId == otherAddressBook.nextActivityId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dogs, customers, activities, enrolments, nextActivityId);
+        return Objects.hash(dogs, customers, activities, enrolments,
+                nextDogId, nextCustomerId, nextActivityId);
     }
 }

@@ -170,7 +170,11 @@ public interface Model {
      */
     void selectCustomer(int customerId);
 
-    /** Adds a dog and returns the dog with its assigned persistent ID. */
+    /**
+     * Adds a dog and returns the dog with its assigned persistent ID.
+     *
+     * @throws IllegalStateException if all supported dog IDs have been allocated
+     */
     Dog addDog(Dog dog);
 
     /** Returns whether a dog with the same persistent ID exists. */

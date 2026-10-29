@@ -98,7 +98,7 @@ public class AddressBookOwnershipTest {
             }
 
             @Override
-            public int getNextDogId() {
+            public long getNextDogId() {
                 return 100;
             }
 
@@ -147,7 +147,7 @@ public class AddressBookOwnershipTest {
         book.addDogFromStorage(dog(1));
         book.addDogFromStorage(dog(127));
         book.addDogFromStorage(dog(128));
-        int nextDogId = book.getNextDogId();
+        long nextDogId = book.getNextDogId();
         int nextCustomerId = book.getNextCustomerId();
 
         book.linkDogs(0, List.of(1));
