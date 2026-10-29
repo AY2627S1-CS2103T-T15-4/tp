@@ -76,7 +76,8 @@ Use the customer and dog commands described below.
 
 ### Viewing help: `help`
 
-Shows a message explaining how to access the help page.
+Opens a help window containing the link to this User Guide. Use `help COMMAND` to display a specific
+command's format, example, and specifications directly in the result section.
 
 ![help message](images/helpMessage.png)
 
@@ -164,6 +165,8 @@ leave the activity and enrolments unchanged.
 
 Edits an activity with the specified persistent ID. An activity can be edited only when it has no enrolments.
 If dogs are enrolled, the command leaves the activity unchanged and suggests creating a new activity instead.
+Supply at least one field to change; omitted fields retain their current values. For a recurring activity,
+the changes apply to the entire schedule.
 
 Format: `editactivity ACTIVITY_ID [n/NAME] [date/YYYY-MM-DD] [start/HH:mm] [end/HH:mm] [r/once|daily|weekly]`
 
@@ -295,8 +298,8 @@ Today (2026-10-24): 5 activities | 12 distinct dogs enrolled
   Yesterday's and tomorrow's enrolments are excluded. Enrolment does not indicate attendance.
 
 The date shown is read once when the command runs, using the computer's local date.
-Like other successful commands, `summary` is followed by the application's normal save attempt;
-a storage permission or save error can therefore appear instead of the statistics.
+WatchDog attempts to save after running `summary`. If saving fails, the statistics are still displayed
+and the failure is recorded in the application log.
 
 ### Editing a dog: `editdog`
 
@@ -327,6 +330,9 @@ Example: `editcustomer 1 p/91234567 e/johndoe@example.com`
 
 ### Linking dogs to a customer: `link`
 
+Assigns one or more existing, unowned dogs to an existing customer. Use this to record who owns each dog;
+one command can link several dogs to the same customer.
+
 Format: `link c/CUSTOMER_ID d/DOG_ID [DOG_ID]...`
 
 Example: `link c/1 d/2 3` links dogs 2 and 3 to customer 1.
@@ -351,6 +357,9 @@ Example: `link c/1 d/2 3` links dogs 2 and 3 to customer 1.
   Other customers' dogs and unlinked dogs are unaffected. Deleting a dog does not delete its customer.
 
 ### Unlinking dogs from a customer: `unlink`
+
+Removes ownership links from selected dogs or from all dogs belonging to one customer. The dogs and
+customers remain in WatchDog, so you can subsequently link the dogs to another customer.
 
 Formats: `unlink d/DOG_ID [DOG_ID]...` or `unlink c/CUSTOMER_ID`
 
@@ -398,6 +407,16 @@ Example: `searchd b/Golden Retriever s/Medium`
 
 ### Enrolling dogs in activities: `enrol` and `unenrol`
 
+`enrol` books one or more existing dogs into a specific dated occurrence of an existing activity.
+Create the dogs and activity first, then supply their persistent IDs and the date to book.
+For a daily or weekly activity, each command books only the supplied date; it does not automatically
+book the dogs into every future occurrence. Dogs can be enrolled whether or not they have an owner.
+
+`unenrol` cancels the selected dogs' bookings for that activity on the supplied date. Bookings for
+other dates and activities remain. The activity schedule and the dog and customer records also remain,
+so you can use `enrol` again to book another occurrence. Enrolments represent planned participation,
+not attendance or check-in.
+
 Formats: `enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]` and
 `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]`.
 
@@ -414,11 +433,23 @@ The `a/`, `date/`, and `d/` fields may appear in any order and must each appear 
 by one or more spaces, must be positive integers, and must not repeat; commas and `d/0` are rejected. Activity IDs
 must also be positive integers and are supplied separately using `a/`.
 
+* The date must be an occurrence of the selected activity: its start date for a one-time activity,
+  or a date on or after its start date that follows its daily or weekly recurrence.
+* `enrol` rejects a dog already booked into that occurrence or booked into another activity with an
+  overlapping time on the same date. Adjacent activities, where one ends exactly when another starts,
+  are allowed.
+* `unenrol` requires every selected dog to have a booking for that exact activity and date.
+* Both commands apply to the whole batch: if any dog or booking is invalid, none of the requested
+  bookings are added or removed. Existing search filters remain active, and affected cards refresh.
+
 Invalid input reports the specific field or formatting problem, followed by the complete command format and an
 example. `enrol` rejects past dates and states that the date must be today or later. `unenrol` permits past dates so
 that a historical enrolment can be corrected, provided the activity occurred and the dog was enrolled on that date.
 
 ### Filtering unlinked records: `filterun`
+
+Finds incomplete ownership records by showing either dogs without owners or customers without dogs.
+This changes the displayed records and keeps the filter active as ownership changes.
 
 Format: `filterun dog` or `filterun customer`
 
@@ -486,7 +517,9 @@ If the ID does not exist, WatchDog displays:
 
 ### Deleting a customer: `deletecustomer`
 
-Deletes a customer using its persistent customer ID.
+Deletes an existing customer using its persistent ID and removes their dogs' ownership links.
+The dogs and their activity bookings remain, and the dogs can be linked to another customer.
+The customer can be deleted even when hidden by a search or filter.
 
 Format: `deletecustomer ID`
 
@@ -558,7 +591,8 @@ available where applicable, but the data file may not contain that change.
 
 ### Exiting the program: `exit`
 
-Exits the program.
+Closes WatchDog. Record changes are saved automatically after commands; window preferences are saved
+when the application shuts down. Undo and redo history is not retained after exiting.
 
 Format: `exit`
 
