@@ -587,7 +587,7 @@ Search command tests cover parser validation, field combinations, related-record
 
 **Target user profile**:
 
-* Is a dog day care centre manager
+* Is a dog day care centre manager in Singapore
 * Has a need to manage multiple dogs and customers
 * Has a need to keep track of each dog’s information and schedule
 * Has a need to keep track of every dog’s owner and their information
@@ -612,16 +612,14 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | Dog day-care manager                                   | Edit customer details                                                      | I can keep customer information up to date                        |
 | `* * *`  | Dog day-care manager                                   | Edit dog details                                                           | I can record new or changed information                           |
 | `* * *`  | Dog day-care manager                                   | Create and edit activity records                                           | I can update activities when plans change                         |
-| `* * *`  | Forgetful dog day-care manager                         | Maintain a checklist for each dog                                          | I can ensure that all required tasks are completed                |
-| `* * *`  | Dog day-care manager managing multiple dogs            | Schedule activities for customers and their dogs                           | I can keep track of upcoming activities                           |
+| `* * *`  | Dog day-care manager managing multiple dogs            | Schedule activities for the dogs                                           | I can keep track of upcoming activities                           |
 | `* * *`  | Dog day-care manager preparing for the day             | View all activities scheduled for a particular day                         | I know what needs to be prepared each day                         |
-| `* * *`  | Dog day-care manager                                   | Mark scheduled activities as completed                                     | I can keep track of which tasks have been carried out             |
-| `* * *`  | Dog day-care manager                                   | View a list of dogs currently present                                      | I can monitor the dogs at the day-care centre                     |
 | `* * *`  | Dog day-care manager                                   | Record when a dog checks in and checks out                                 | I can accurately track which dogs are currently present           |
-| `* * *`  | Dog day-care manager responsible for dog safety        | Record multiple emergency contacts for each dog                            | I can contact someone if the owner is unavailable                 |
 | `* * *`  | Dog day-care manager entering information              | View clear error messages when invalid information or commands are entered | I can correct mistakes without crashing the program               |
+| `* *`    | Dog day-care manager                                   | Mark scheduled activities as completed                                     | I can keep track of which tasks have been carried out             |
+| `* *`    | Forgetful dog day-care manager                         | Maintain a checklist for each dog                                          | I can ensure that all required tasks are completed                |
 | `* *`    | Dog day-care manager                                   | View all dogs belonging to a specific customer                             | I can see every dog owned by that customer                        |
-| `* *`    | Busy dog day-care manager                              | Filter dogs by characteristics such as size, breed, or temperament         | I can quickly find dogs with specific characteristics             |
+| `* *`    | Busy dog day-care manager                              | Filter dogs by characteristics such as size or breed                       | I can quickly find dogs with specific characteristics             |
 | `* *`    | Busy dog day-care manager                              | Filter dogs based on their required activities                             | I can identify which dogs need a particular activity              |
 | `* *`    | Dog day-care manager                                   | Add new categories or filters                                              | I can customise searches as the business changes                  |
 | `* *`    | Forgetful dog day-care manager                         | View the total number of dogs enrolled for each day                        | I can determine whether there is enough capacity for new bookings |
@@ -873,6 +871,75 @@ Customers may retain their own primary phone number and email address. Shared ba
     * 2a1. System requests for an existing customer id.
 
       Use case resumes from step 2.
+
+
+
+**Use case: UC09 - Edit Activity**
+
+**MSS**
+
+1.  User enters the command, the persistent activity ID and one or more activity details to edit.
+2.  System validates the command, activity ID and resulting activity details, and checks that the activity has no enrolments.
+3.  System updates the activity schedule, preserving its ID and unspecified details, and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. User enters an invalid command format or activity ID format, or provides no fields to edit.
+
+    * 2a1. System displays an error message without changing existing records.
+
+      Use case resumes from step 1.
+
+* 2b. System detects invalid activity details, including an end time that is not later than the start time on the same day.
+
+    * 2b1. System requests the correct details without changing existing records.
+
+      Use case resumes from step 1.
+
+* 2c. System cannot find the specified activity ID, including in activities hidden by filters.
+
+    * 2c1. System displays an error requesting an existing activity ID without changing existing records.
+
+      Use case resumes from step 1.
+
+* 2d. System detects that the activity has enrolments, including past occurrences.
+
+    * 2d1. System rejects the edit and asks the user to create a new activity instead, without changing existing records.
+
+      Use case ends.
+
+For recurring activities, the edit applies to the entire schedule rather than a single occurrence.
+
+
+
+**Use case: UC10 - Delete Activity**
+
+**MSS**
+
+1.  User enters the command and the persistent activity ID for the activity to be deleted.
+2.  System validates the command and activity ID and locates the activity, including activities hidden by filters.
+3.  System deletes the activity schedule and all its dog enrolments, including past occurrences, and displays a success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. User enters an invalid command format or activity ID format.
+
+    * 2a1. System displays an error message without changing existing records.
+
+      Use case resumes from step 1.
+
+* 2b. System cannot find the specified activity ID.
+
+    * 2b1. System displays an error requesting an existing activity ID without changing existing records.
+
+      Use case resumes from step 1.
+
+For recurring activities, deletion removes the entire schedule rather than a single occurrence.
+Dog and customer records, other activity schedules and their enrolments are preserved.
 
 
 
