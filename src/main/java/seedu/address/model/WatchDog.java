@@ -619,7 +619,7 @@ public class WatchDog implements ReadOnlyWatchDog {
                 .toString();
     }
 
-    // @@author XanderGoh
+    // @@author Umaiza-15
     @Override
     public ObservableList<Dog> getDogList() {
         return dogs.asUnmodifiableObservableList();

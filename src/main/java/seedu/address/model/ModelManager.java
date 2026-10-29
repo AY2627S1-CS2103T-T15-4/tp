@@ -171,6 +171,7 @@ public class ModelManager implements Model {
     //=========== Dog Operations ============================================================================
     @Override
     public void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
+        // @@author Umaiza-15
         watchDog.enrolDogs(activityId, date, dogIds);
         // @@author XanderGoh
         refreshDisplayedRecords();
@@ -179,6 +180,7 @@ public class ModelManager implements Model {
 
     @Override
     public void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
+        // @@author Umaiza-15
         watchDog.unenrolDogs(activityId, date, dogIds);
         // @@author XanderGoh
         refreshDisplayedRecords();
@@ -236,6 +238,7 @@ public class ModelManager implements Model {
 
     @Override
     public void setDog(Dog target, Dog editedDog) {
+        // @@author Umaiza-15
         watchDog.setDog(target, editedDog);
         // @@author XanderGoh
         refreshDisplayedRecords();
@@ -244,11 +247,14 @@ public class ModelManager implements Model {
 
     @Override
     public Dog addDog(Dog dog) {
+        // @@author Umaiza-15
         Dog addedDog = watchDog.addDog(dog);
         // @@author XanderGoh
         refreshDisplayedRecords();
         // @@author
+        // @@author Umaiza-15
         return addedDog;
+        // @@author
     }
 
     //===========Customer related methods==================================
