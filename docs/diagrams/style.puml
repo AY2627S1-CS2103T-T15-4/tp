@@ -29,13 +29,7 @@
 !define STORAGE_COLOR_T1 #FFE374
 !define STORAGE_COLOR_T2 #EDC520
 !define STORAGE_COLOR_T3 #806600
-/'
-// @@author Kenneth-Chia
-'/
 !define STORAGE_COLOR_T4 #544400
-/'
-// @@author
-'/
 
 !define USER_COLOR #000000
 
@@ -69,35 +63,17 @@ skinparam Sequence {
 }
 
 skinparam Participant {
-/'
-// @@author Kenneth-Chia
-'/
     FontColor #FFFFFF
-/'
-// @@author
-'/
     Padding 20
 }
 
-/'
-// @@author Kenneth-Chia
-'/
 skinparam ArrowFontStyle plain
 skinparam classAttributeFontColor #FFFFFF
 skinparam classMethodFontColor #FFFFFF
-/'
-// @@author
-'/
 skinparam MinClassWidth 50
 skinparam ParticipantPadding 10
 skinparam Shadowing false
-/'
-// @@author Kenneth-Chia
-'/
 skinparam classAttributeIconSize 0
-/'
-// @@author
-'/
 skinparam DefaultTextAlignment center
 skinparam packageStyle Rectangle
 

@@ -49,4 +49,3 @@ public class LinkCommandParser implements Parser<LinkCommand> {
         return new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, LinkCommand.MESSAGE_USAGE));
     }
 }
-// @@author

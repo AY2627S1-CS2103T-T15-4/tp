@@ -7,4 +7,3 @@ public class LinkException extends Exception {
         super(message);
     }
 }
-// @@author

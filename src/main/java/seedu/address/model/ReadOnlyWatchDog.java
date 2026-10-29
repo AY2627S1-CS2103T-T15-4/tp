@@ -29,12 +29,10 @@ public interface ReadOnlyWatchDog {
         return -1;
     }
 
-    // @@author Kenneth-Chia
     /** Returns an unmodifiable observable collection of activity schedules. */
     default ObservableList<Activity> getActivityList() {
         return FXCollections.emptyObservableList();
     }
-    // @@author
 
     /**
      * Returns a live unmodifiable observable collection of dated enrolments.

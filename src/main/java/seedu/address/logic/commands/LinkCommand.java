@@ -58,4 +58,3 @@ public class LinkCommand extends Command {
         return Objects.hash(customerId, dogIds);
     }
 }
-// @@author

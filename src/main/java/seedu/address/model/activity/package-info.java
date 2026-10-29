@@ -22,4 +22,3 @@
  * use the model rather than mutate schedules.
  */
 package seedu.address.model.activity;
-// @@author

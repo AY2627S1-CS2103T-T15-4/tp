@@ -1,4 +1,3 @@
-// @@author Kenneth-Chia
 package seedu.address.storage;
 
 import java.io.IOException;
@@ -18,4 +17,3 @@ class OwnerIdDeserializer extends JsonDeserializer<Integer> {
         return parser.getIntValue();
     }
 }
-// @@author

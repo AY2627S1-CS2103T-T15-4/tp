@@ -1,4 +1,3 @@
-// @@author Kenneth-Chia
 package seedu.address.model.dog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,7 +65,6 @@ public class DogOwnershipTest {
     }
 
     @Test
-    // @@author
     public void withOwner_nonPositiveId_rejected() {
         assertThrows(IllegalArgumentException.class, () -> unlinked.withOwner(0));
         assertThrows(IllegalArgumentException.class, () -> unlinked.withOwner(-1));

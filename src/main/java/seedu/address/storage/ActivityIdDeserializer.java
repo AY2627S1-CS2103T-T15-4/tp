@@ -18,4 +18,3 @@ class ActivityIdDeserializer extends JsonDeserializer<Integer> {
         return parser.getIntValue();
     }
 }
-// @@author

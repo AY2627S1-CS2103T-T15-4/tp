@@ -32,6 +32,3 @@ legend bottom
   Successful execution only; validation failures are omitted.
 endlegend
 @enduml
-/'
-// @@author
-'/

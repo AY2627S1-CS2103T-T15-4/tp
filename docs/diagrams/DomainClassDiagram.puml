@@ -20,6 +20,3 @@ Dog "1" -- "*" Enrolment
 Enrolment "*" -- "1" Activity : books an occurrence of
 
 @enduml
-/'
-// @@author
-'/

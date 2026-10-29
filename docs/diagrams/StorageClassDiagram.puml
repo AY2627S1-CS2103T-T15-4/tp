@@ -1,17 +1,8 @@
 @startuml
 !include style.puml
 skinparam arrowThickness 1.1
-/'
-// @@author Kenneth-Chia
-'/
 skinparam arrowColor STORAGE_COLOR_T4
-/'
-// @@author
-'/
 skinparam classBackgroundColor STORAGE_COLOR
-/'
-// @@author Kenneth-Chia
-'/
 show members
 
 class "<<interface>>\nStorage" as Storage
@@ -22,27 +13,15 @@ class JsonSerializableWatchDog
 class JsonAdaptedCustomer
 class JsonAdaptedDog {
   -ownerId: Integer
-/'
-// @@author
-'/
 }
-/'
-// @@author Kenneth-Chia
-'/
 class JsonAdaptedActivity
 class JsonAdaptedEnrolment {
   -activityId: Integer
   -dogId: Integer
   -date: LocalDate
-/'
-// @@author
-'/
 }
 
 StorageManager .up.|> Storage
-/'
-// @@author Kenneth-Chia
-'/
 StorageManager --> "1" JsonUserPrefsStorage : userPrefsStorage
 StorageManager --> "1" JsonWatchDogStorage : watchDogStorage
 JsonWatchDogStorage ..> JsonSerializableWatchDog : reads / writes
@@ -50,8 +29,5 @@ JsonSerializableWatchDog --> "*" JsonAdaptedCustomer : customers
 JsonSerializableWatchDog --> "*" JsonAdaptedDog : dogs
 JsonSerializableWatchDog --> "*" JsonAdaptedActivity : activities
 JsonSerializableWatchDog --> "*" JsonAdaptedEnrolment : enrolments
-/'
-// @@author
-'/
 
 @enduml

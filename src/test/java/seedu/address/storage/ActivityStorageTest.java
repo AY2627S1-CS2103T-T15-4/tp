@@ -24,7 +24,6 @@ import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyWatchDog;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.WatchDog;
-// @@author Kenneth-Chia
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Recurrence;
@@ -36,9 +35,7 @@ public class ActivityStorageTest {
     @Test
     public void execute_saveAndReload_preservesAllModesAndNextId() throws Exception {
         Path file = temporaryFolder.resolve("activities.json");
-        // @@author
         JsonWatchDogStorage storage = new JsonWatchDogStorage(file);
-        // @@author Kenneth-Chia
         ModelManager model = new ModelManager();
         LogicManager logic = new LogicManager(model, new StorageManager(storage,
                 new JsonUserPrefsStorage(temporaryFolder.resolve("prefs.json"))));
@@ -48,18 +45,14 @@ public class ActivityStorageTest {
         for (String recurrence : List.of("once", "daily", "weekly")) {
             logic.execute("addactivity n/Training date/2028-02-29 start/09:00 end/10:00 r/" + recurrence);
         }
-        // @@author
         ReadOnlyWatchDog saved = storage.readWatchDog().get();
         assertEquals(model.getWatchDog(), saved);
-        // @@author Kenneth-Chia
         assertEquals(4, saved.getNextActivityId());
         String jsonBefore = Files.readString(file);
         assertThrows(ParseException.class, () -> logic.execute(
                 "addactivity n/Invalid date/2027-02-29 start/09:00 end/10:00 r/once"));
         assertEquals(jsonBefore, Files.readString(file));
-        // @@author
         assertEquals(saved, model.getWatchDog());
-        // @@author Kenneth-Chia
         ModelManager reloaded = new ModelManager(saved, new UserPrefs());
         assertEquals(4, reloaded.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 3, 1),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE).getId());
@@ -73,9 +66,7 @@ public class ActivityStorageTest {
                 "dogs":[{"id":3,"name":"Cookie","breed":"Poodle","size":"small","ownerId":1}],
                 "persons":[],"nextDogId":12}
                 """;
-        // @@author
         WatchDog book = JsonUtil.fromJsonString(legacy, JsonSerializableWatchDog.class).toModelType();
-        // @@author Kenneth-Chia
         assertTrue(book.getActivityList().isEmpty());
         assertEquals(1, book.getNextActivityId());
         assertEquals(12, book.getNextDogId());
@@ -83,14 +74,11 @@ public class ActivityStorageTest {
         assertEquals(1, book.getDogList().get(0).getOwnerId().get());
         assertEquals(3, book.getDogList().get(0).getId());
         Activity activity = activity(7);
-        // @@author
         WatchDog restored = data(List.of(new JsonAdaptedActivity(activity)), null).toModelType();
-        // @@author Kenneth-Chia
         assertEquals(List.of(activity), restored.getActivityList());
         assertEquals(8, restored.getNextActivityId());
         assertEquals(20, data(List.of(new JsonAdaptedActivity(activity)), 20L).toModelType().getNextActivityId());
     }
-    // @@author
 
     @Test
     public void adaptedActivity_legacyCompletionField_isIgnoredAndNotResaved() throws Exception {
@@ -107,7 +95,6 @@ public class ActivityStorageTest {
         assertFalse(savedJson.contains("completed"));
     }
 
-    // @@author Kenneth-Chia
     @Test
     public void toModelType_invalidCollectionOrCounter_rejected() {
         JsonAdaptedActivity activity = new JsonAdaptedActivity(activity(7));
@@ -140,22 +127,18 @@ public class ActivityStorageTest {
 
     @Test
     public void toModelType_exhaustedCounter_roundTripsWithoutOverflow() throws Exception {
-        // @@author
         WatchDog book = new WatchDog();
         book.addActivityFromStorage(activity(Integer.MAX_VALUE));
         WatchDog restored = JsonUtil.fromJsonString(JsonUtil.toJsonString(new JsonSerializableWatchDog(book)),
                 JsonSerializableWatchDog.class).toModelType();
-        // @@author Kenneth-Chia
         assertEquals(book, restored);
         assertEquals((long) Integer.MAX_VALUE + 1, restored.getNextActivityId());
     }
 
     @Test
-    // @@author
     public void readWatchDog_nonIntegerActivityIdOrCounter_rejectedWithoutRewritingFile() throws Exception {
         Path file = temporaryFolder.resolve("invalid-activity-ids.json");
         JsonWatchDogStorage storage = new JsonWatchDogStorage(file);
-        // @@author Kenneth-Chia
         String template = """
                 {"activities":[{"id":%s,"name":"Walk","startDate":"2028-02-29",
                 "startTime":"09:00","endTime":"10:00","recurrence":"ONCE"}],"nextActivityId":%s}
@@ -164,7 +147,6 @@ public class ActivityStorageTest {
                 "9223372036854775808")) {
             for (String json : List.of(template.formatted(value, "2"), template.formatted("1", value))) {
                 Files.writeString(file, json);
-                // @@author
                 assertThrows(DataLoadingException.class, storage::readWatchDog);
                 assertEquals(json, Files.readString(file));
             }
@@ -179,7 +161,6 @@ public class ActivityStorageTest {
 
     private JsonSerializableWatchDog data(List<JsonAdaptedActivity> activities, Long nextId) {
         return new JsonSerializableWatchDog(null, null, null, null, activities, nextId);
-        // @@author Kenneth-Chia
     }
 
     private Activity activity(int id) {
@@ -187,4 +168,3 @@ public class ActivityStorageTest {
                 LocalTime.of(10, 0), Recurrence.WEEKLY);
     }
 }
-// @@author
