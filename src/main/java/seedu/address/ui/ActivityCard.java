@@ -20,6 +20,8 @@ public class ActivityCard extends UiPart<Region> {
     @FXML
     private Label recurrence;
     @FXML
+    private Label enrolmentsHeading;
+    @FXML
     private Label enrolments;
 
     /** Creates a card with the given activity to display. */
@@ -35,7 +37,9 @@ public class ActivityCard extends UiPart<Region> {
         date.setText((enrolmentEntry.isBlank() ? "Date: " : "Schedule starts: ") + activity.getStartDate());
         time.setText("Time: " + activity.getStartTime() + " - " + activity.getEndTime());
         recurrence.setText("Recurrence: " + activity.getRecurrence());
-        enrolments.setText(enrolmentEntry);
+        enrolmentsHeading.setVisible(!enrolmentEntry.isBlank());
+        enrolmentsHeading.setManaged(!enrolmentEntry.isBlank());
+        enrolments.setText(enrolmentEntry.substring(enrolmentEntry.indexOf('\n') + 1));
         enrolments.setVisible(!enrolmentEntry.isBlank());
         enrolments.setManaged(!enrolmentEntry.isBlank());
     }

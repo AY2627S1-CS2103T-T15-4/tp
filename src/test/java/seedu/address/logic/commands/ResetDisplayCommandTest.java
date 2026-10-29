@@ -63,7 +63,7 @@ public class ResetDisplayCommandTest {
     }
 
     @Test
-    public void execute_afterActivityFilter_keepsUpcomingViewAfterNewActivity() {
+    public void execute_afterActivityFilter_keepsUpcomingViewAfterNewActivity() throws Exception {
         ModelManager model = new ModelManager();
         Activity upcoming = addActivity(model, TODAY.plusDays(1), Recurrence.ONCE);
         new SearchActivityCommand("not present", null, null).execute(model);

@@ -27,6 +27,27 @@ public class SearchDogCommandTest {
     private static final LocalDate ENROL_DATE = LocalDate.now().plusDays(7);
 
     @Test
+    public void execute_invalidIds_preservesPreviousDisplay() throws Exception {
+        ModelManager model = modelWithDogs();
+        Activity activity = model.addActivity(new ActivityName("Walk"), ENROL_DATE,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        model.enrolDogs(activity.getId(), ENROL_DATE, List.of(1));
+        new SearchDogCommand(null, null, null, 1).execute(model);
+        var customers = List.copyOf(model.getFilteredCustomerList());
+        var dogs = List.copyOf(model.getFilteredDogList());
+        String summary = model.getActivityEnrolmentSummary(activity);
+
+        for (int id : new int[]{-1, 0, 999, Integer.MAX_VALUE}) {
+            assertThrows(CommandException.class, "Error in searching dogs:\nPlease enter a valid dog index", () ->
+                    new SearchDogCommand(null, null, null, id).execute(model));
+            assertEquals(customers, model.getFilteredCustomerList());
+            assertEquals(dogs, model.getFilteredDogList());
+            assertEquals(List.of(activity), model.getFilteredActivityList());
+            assertEquals(summary, model.getActivityEnrolmentSummary(activity));
+        }
+    }
+
+    @Test
     public void execute_combinedFields_filtersDogsAndLinkedCustomers() throws Exception {
         ModelManager model = modelWithDogs();
 

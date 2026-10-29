@@ -6,22 +6,29 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.function.Predicate;
 
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
+import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivitySearchPredicate;
 import seedu.address.model.activity.Recurrence;
 
-/** Searches activities by name, date, time, and/or recurrence. */
+/** Searches activities by name, date, time, recurrence, and/or ID. */
 public class SearchActivityCommand extends Command {
     public static final String COMMAND_WORD = "searcha";
-    private static final String MESSAGE_SUCCESS_PREFIX = "Successfully searched activities by ";
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + " [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]: Searches activities by activity fields.";
+            + " [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE] [i/ACTIVITY_ID]: "
+            + "Searches activities by activity fields.";
+    public static final String MESSAGE_INVALID_ID = "Error in searching activities:\n"
+            + "Please enter a valid activity index";
+    private static final String MESSAGE_SUCCESS_PREFIX = "Successfully searched activities by ";
 
     private final String name;
     private final LocalDate date;
     private final LocalTime time;
     private final Recurrence recurrence;
+    private final Integer activityId;
 
     /** Creates a command containing any combination of activity filter fields. */
     public SearchActivityCommand(String name, LocalDate date, LocalTime time) {
@@ -30,16 +37,29 @@ public class SearchActivityCommand extends Command {
 
     /** Creates a command containing any combination of activity filter fields. */
     public SearchActivityCommand(String name, LocalDate date, LocalTime time, Recurrence recurrence) {
+        this(name, date, time, recurrence, null);
+    }
+
+    /** Creates a search combining all supplied fields, including an optional activity ID. */
+    public SearchActivityCommand(String name, LocalDate date, LocalTime time, Recurrence recurrence,
+            Integer activityId) {
         this.name = name;
         this.date = date;
         this.time = time;
         this.recurrence = recurrence;
+        this.activityId = activityId;
     }
 
     @Override
-    public CommandResult execute(Model model) {
+    public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        ActivitySearchPredicate predicate = new ActivitySearchPredicate(name, date, time, recurrence);
+        if (activityId != null && model.getActivityList().stream()
+                .noneMatch(activity -> activity.getId() == activityId)) {
+            throw new CommandException(MESSAGE_INVALID_ID);
+        }
+        ActivitySearchPredicate fields = new ActivitySearchPredicate(name, date, time, recurrence);
+        Predicate<Activity> predicate = activity -> fields.test(activity)
+                && (activityId == null || activity.getId() == activityId);
         model.updateFilteredActivityList(predicate);
         model.updateFilteredDogList(dog -> isEnrolledInMatchingActivity(model, dog.getId(), predicate, date));
         model.updateFilteredCustomerList(customer -> model.getDogList().stream()
@@ -49,7 +69,7 @@ public class SearchActivityCommand extends Command {
     }
 
     private static boolean isEnrolledInMatchingActivity(Model model, int dogId,
-            ActivitySearchPredicate predicate, LocalDate date) {
+            Predicate<Activity> predicate, LocalDate date) {
         assert dogId >= 0 : "Stored dog IDs must be nonnegative.";
         return model.getAddressBook().getEnrolmentList().stream().anyMatch(enrolment ->
                 enrolment.getDogId() == dogId && (date == null || enrolment.getDate().equals(date))
@@ -72,6 +92,9 @@ public class SearchActivityCommand extends Command {
         if (recurrence != null) {
             fields.add("recurrence: " + formatRecurrence(recurrence));
         }
+        if (activityId != null) {
+            fields.add("activity id: " + activityId);
+        }
         return MESSAGE_SUCCESS_PREFIX + fields;
     }
 
@@ -91,12 +114,13 @@ public class SearchActivityCommand extends Command {
         return Objects.equals(name, otherCommand.name)
                 && Objects.equals(date, otherCommand.date)
                 && Objects.equals(time, otherCommand.time)
-                && recurrence == otherCommand.recurrence;
+                && recurrence == otherCommand.recurrence
+                && Objects.equals(activityId, otherCommand.activityId);
     }
 
     @Override
     public String toString() {
-        return String.format("SearchActivityCommand{name=%s, date=%s, time=%s, recurrence=%s}",
-                name, date, time, recurrence);
+        return String.format("SearchActivityCommand{name=%s, date=%s, time=%s, recurrence=%s, activityId=%s}",
+                name, date, time, recurrence, activityId);
     }
 }

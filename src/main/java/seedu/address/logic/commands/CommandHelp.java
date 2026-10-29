@@ -86,7 +86,8 @@ public final class CommandHelp {
                     "Deletes an existing activity's entire series and all its enrolments. "
                             + "Dogs and other activities remain; deleted activity IDs are not reused. " + IDS),
             entry(SearchActivityCommand.COMMAND_WORD,
-                    "searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]", "searcha n/Dog run t/16:00",
+                    "searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE] [i/ACTIVITY_ID]",
+                    "searcha n/Dog run t/16:00",
                     "Supply at least one field; all supplied fields must match. Name matching ignores case "
                             + "and repeated spaces. Date includes recurring occurrences; time matches inclusively "
                             + "between start and end. Recurrence is Once, Weekly or Daily, ignoring case. "

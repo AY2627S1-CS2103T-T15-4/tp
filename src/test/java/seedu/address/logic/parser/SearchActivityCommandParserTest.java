@@ -16,6 +16,26 @@ public class SearchActivityCommandParserTest {
     private final SearchActivityCommandParser parser = new SearchActivityCommandParser();
 
     @Test
+    public void parse_activityId_acceptsSingleAndCombinedFields() throws Exception {
+        assertEquals(new SearchActivityCommand(null, null, null, null, 12), parser.parse(" i/ 12 "));
+        assertEquals(new SearchActivityCommand("dog run", LocalDate.of(2026, 10, 20),
+                LocalTime.NOON, Recurrence.WEEKLY, 12),
+                parser.parse("i/12 n/Dog   run d/2026-10-20 t/12:00 r/Weekly"));
+        for (String input : new String[]{"i/1 i/2", "i/", "I/1", "extra i/1"}) {
+            assertThrows(ParseException.class, () -> parser.parse(input));
+        }
+    }
+
+    @Test
+    public void parse_invalidActivityId_usesSpecificError() {
+        for (String value : new String[]{"0", "-1", "abc", "2147483648", "-2147483649", "1 2"}) {
+            assertThrows(ParseException.class,
+                    "Error in searching activities:\nPlease enter a valid activity index", () ->
+                    parser.parse("i/" + value));
+        }
+    }
+
+    @Test
     public void parse_validFields_success() throws Exception {
         SearchActivityCommand expected = new SearchActivityCommand(
                 "dog run", LocalDate.of(2026, 10, 20), LocalTime.of(16, 0), Recurrence.WEEKLY);
