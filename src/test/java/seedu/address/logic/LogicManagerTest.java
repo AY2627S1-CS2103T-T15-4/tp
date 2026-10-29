@@ -340,6 +340,50 @@ public class LogicManagerTest {
         assertEquals(List.of(buddy), logic.getDogList());
     }
 
+    @Test
+    public void execute_help_preservesUndoAndRedoHistory() throws Exception {
+        String add = "adddog n/Cookie b/Chihuahua s/Small";
+        logic.execute(add);
+        Dog cookie = logic.getDogList().get(0);
+        for (String help : List.of("help", "help summary", "help adddog", "help delete dog")) {
+            logic.execute(help);
+        }
+        assertEquals(List.of(cookie), logic.getDogList());
+        assertEquals(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, add),
+                logic.execute("undo").getFeedbackToUser());
+        assertEquals(List.of(), logic.getDogList());
+        for (String help : List.of("help", "help summary", "help adddog", "help delete dog")) {
+            logic.execute(help);
+        }
+        assertEquals(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, add),
+                logic.execute("redo").getFeedbackToUser());
+        assertEquals(List.of(cookie), logic.getDogList());
+    }
+
+    @Test
+    public void execute_helpOnly_doesNotCreateHistory() throws Exception {
+        logic.execute("help adddog");
+        logic.execute("help summary");
+        assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
+        assertCommandException("redo", RedoCommand.MESSAGE_NO_COMMAND);
+    }
+
+    @Test
+    public void execute_help_preservesFiltersAndFailedHelpPreservesHistory() throws Exception {
+        logic.execute("adddog n/Cookie b/Chihuahua s/Small");
+        Dog cookie = logic.getDogList().get(0);
+        logic.execute("searchd n/Absent");
+        logic.execute("help resetdisplay");
+        assertEquals(List.of(), logic.getFilteredDogList());
+        assertEquals(List.of(cookie), logic.getDogList());
+        assertThrows(ParseException.class, () -> logic.execute("help unknown"));
+        logic.execute("undo");
+        assertEquals(List.of(cookie), logic.getFilteredDogList());
+        assertThrows(ParseException.class, () -> logic.execute("help summary today"));
+        logic.execute("redo");
+        assertEquals(List.of(), logic.getFilteredDogList());
+    }
+
     private void assertHistoryStorageFailure(IOException failure, boolean undo) throws Exception {
         model = new ModelManager();
         boolean[] failSave = {false};
