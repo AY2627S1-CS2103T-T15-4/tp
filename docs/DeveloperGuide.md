@@ -34,7 +34,8 @@ relationships to refer to a record reliably even when the visible list changes.
 
 ### Customer–dog ownership
 
-`LinkCommandParser` accepts one customer ID followed by one or more distinct dog IDs.
+`LinkCommandParser` accepts `c/CUSTOMER_ID d/DOG_ID [DOG_ID]...`: one customer field followed by
+one dog field containing distinct, whitespace-separated IDs. Repeated `d/` prefixes are rejected.
 `LinkCommand` delegates the batch to `Model.linkDogs`; `ModelManager` forwards to `AddressBook`.
 The address book looks up persistent IDs in the complete lists and validates every endpoint and ownership
 constraint before publishing one replacement dog list. A rejected batch throws `LinkException` without
@@ -48,7 +49,8 @@ customers do not store a duplicate dog-ID list. A dog may be unlinked or have on
 may own any number of dogs. Linking an already-owned dog is rejected, including links to the same owner.
 Dog equality includes ownership, while identity remains the persistent dog ID.
 
-`UnlinkCommandParser` accepts either one customer ID or one or more distinct dog IDs; mixed prefixes
+`UnlinkCommandParser` accepts either `c/CUSTOMER_ID` or `d/DOG_ID [DOG_ID]...` with distinct,
+whitespace-separated dog IDs in one field; repeated dog prefixes and mixed prefixes
 are rejected. `UnlinkCommand` delegates to `Model.unlinkCustomerDogs` or `Model.unlinkDogs` and translates
 `UnlinkException` into command feedback. `AddressBook` validates every selected dog exists and has an owner
 before publishing one replacement list of unowned copies. Dogs may belong to different customers.
@@ -259,6 +261,14 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 <puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog through the application layers" />
 
+### Retired list commands
+
+The former list dog and list customer commands are no longer routed by AddressBookParser.
+Use reset to restore all customers and dogs and upcoming activities, or searchc/searchd
+to narrow the display. Retired list-dog source and tests are preserved under unused/@xandergoh/;
+list-customer source, parser, and tests are under unused/@its-shoutime/. These archives are
+excluded from Gradle source and test sets and retain authorship annotations.
+
 ### Retired select commands
 
 The former select dog and select customer implementations are retained under
@@ -366,7 +376,7 @@ interface, implemented by `StorageManager`. Concrete lifelines are shown to make
 ### Deleting an activity
 
 `AddressBookParser` routes `deleteactivity` to `DeleteActivityCommandParser`, which accepts one
-nonnegative persistent ID. The command finds the matching activity in `Model.getActivityList()` and
+positive persistent ID. The command finds the matching activity in `Model.getActivityList()` and
 passes it to `Model.deleteActivity`. `ModelManager` delegates to `AddressBook.removeActivity`, which
 checks that the activity is still stored, removes its enrolments, and then removes the activity.
 The next activity ID does not change, so deleted IDs are not reused. After the command returns its
@@ -668,8 +678,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  User requests to list dogs.
-2.  System shows a list of dogs.
+1.  User requests to restore the display using `reset`.
+2.  System shows all dogs and customers, plus upcoming activities.
 
     Use case ends.
 
@@ -782,8 +792,8 @@ Shared backup contact numbers are allowed.
 
 **MSS**
 
-1.  User requests to list customers.
-2.  System shows a list of customers.
+1.  User requests to restore the display using `reset`.
+2.  System shows all customers and dogs, plus upcoming activities.
 
     Use case ends.
 

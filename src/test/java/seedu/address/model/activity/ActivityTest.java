@@ -31,13 +31,15 @@ public class ActivityTest {
         assertEquals(START, activity.getStartTime());
         assertEquals(END, activity.getEndTime());
         assertEquals(Recurrence.WEEKLY, activity.getRecurrence());
-        assertEquals(0, new Activity(0, NAME, FIRST_DATE, START, END, Recurrence.ONCE).getId());
+        assertEquals(1, new Activity(1, NAME, FIRST_DATE, START, END, Recurrence.ONCE).getId());
     }
 
     @Test
     public void constructor_invalidDetails_throws() {
         assertThrows(IllegalArgumentException.class, () ->
                 new Activity(-1, NAME, FIRST_DATE, START, END, Recurrence.ONCE));
+        assertThrows(IllegalArgumentException.class, () ->
+                new Activity(0, NAME, FIRST_DATE, START, END, Recurrence.ONCE));
         assertThrows(IllegalArgumentException.class, () ->
                 new Activity(1, NAME, FIRST_DATE, START, START, Recurrence.ONCE));
         assertThrows(IllegalArgumentException.class, () ->

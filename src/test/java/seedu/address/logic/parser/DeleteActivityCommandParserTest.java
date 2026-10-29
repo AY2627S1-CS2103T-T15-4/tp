@@ -15,12 +15,12 @@ public class DeleteActivityCommandParserTest {
     @Test
     public void parse_validId_returnsCommand() throws Exception {
         assertEquals(new DeleteActivityCommand(21), parser.parse(" 21 "));
-        assertEquals(new DeleteActivityCommand(0), new AddressBookParser().parseCommand("deleteactivity 0"));
+        assertEquals(new DeleteActivityCommand(1), new AddressBookParser().parseCommand("deleteactivity 1"));
     }
 
     @Test
     public void parse_missingNegativeOverflowOrExtraText_rejected() {
-        for (String input : new String[]{"", "-1", "2147483648", "1 2", "1 n/Walk", "one"}) {
+        for (String input : new String[]{"", "0", "-1", "2147483648", "1 2", "1 n/Walk", "one"}) {
             assertThrows(ParseException.class, () -> parser.parse(input));
         }
     }

@@ -18,7 +18,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 1. Ensure that Java `25` or later is installed on your computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-1. Download the latest `.jar` file from [here](https://github.com/se-edu/addressbook-level3/releases).
+1. Download the latest `.jar` file from [here](https://github.com/AY2627S1-CS2103T-T15-4/tp/releases).
 
 1. Copy the file to the folder you want to use as the _home folder_ for WatchDog.
 
@@ -29,9 +29,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
    Some example commands you can try:
 
-   * `list customer` : Lists all customers.
 
-   * `list dog` : Lists all dogs.
 
    * `reset` : Shows all customers and dogs, plus activities occurring today or later.
 
@@ -53,6 +51,8 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 
 **Notes about the command format:**<br>
 
+* Activity IDs are persistent positive integers from `1` to `2147483647`. Activity ID `0` is invalid.
+
 * Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
   For example, in `adddog n/NAME b/BREED s/SIZE`, replace `NAME` with a value such as `John Doe`.
 
@@ -60,7 +60,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
   For example, `editdog ID [n/NAME] [b/BREED] [s/SIZE]` allows you to specify only the fields to change.
 
 * Items followed by `...` can appear zero or more times.<br>
-  For example, `link c/7 d/42 d/51` links multiple dogs to one customer.
+  For example, `link c/7 d/42 51` links multiple dogs to one customer.
 
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
@@ -121,7 +121,7 @@ Format: `deleteactivity ACTIVITY_ID`
 
 Example: `deleteactivity 21`
 
-The ID must be a nonnegative integer belonging to an existing activity. Invalid or missing IDs
+The ID must be a positive integer (1 to 2147483647) belonging to an existing activity. Invalid or missing IDs
 leave the activity and enrolments unchanged.
 
 ### Editing an activity: `editactivity`
@@ -209,22 +209,6 @@ including with another customer's primary phone number.
 If fields are missing, WatchDog lists them and shows the command format. If a value is invalid, it
 reports the first invalid field and its constraints.
 
-### Listing all customers: `list customer`
-
-Shows a list of all customers in the address book.
-
-Format: `list customer`
-
-If there are no customers, WatchDog displays `There are no customers to display.`
-
-### Listing all dogs: `list dog`
-
-Shows a list of all dogs in the address book.
-
-Format: `list dog`
-
-If there are no dogs, WatchDog displays `There are no dogs to display.`
-
 ### Resetting the display: `reset`
 
 Shows all stored customers and dogs, plus activities with an occurrence today or later according to
@@ -293,22 +277,22 @@ Example: `editcustomer 1 p/91234567 e/johndoe@example.com`
 
 ### Linking dogs to a customer: `link`
 
-Format: `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`
+Format: `link c/CUSTOMER_ID d/DOG_ID [DOG_ID]...`
 
-Example: `link c/1 d/2 d/3` links dogs 2 and 3 to customer 1.
+Example: `link c/1 d/2 3` links dogs 2 and 3 to customer 1.
 
 * Use persistent record IDs, including records hidden by a search. IDs range from 0 to 2147483647.
-* Put exactly one `c/` field first, followed by one or more `d/` fields, separated by whitespace.
+* Put exactly one `c/` field first, followed by exactly one `d/` field containing one or more dog IDs separated by whitespace.
   Prefixes are lowercase, and there must be no space between a prefix and its ID.
 * Each customer can own multiple dogs; each dog can have only one owner. Unlinked records are allowed.
 * Editing a dog's name, breed, or size preserves its owner. Use `unlink` to remove ownership.
-* Dog IDs must not repeat. Unknown fields, missing IDs, negative IDs and non-integer IDs are rejected.
+* Dog IDs and the `d/` prefix must not repeat. Unknown fields, missing IDs, negative IDs and non-integer IDs are rejected.
 * If the customer or any dog does not exist, or any dog already has an owner (even the same customer),
   the entire command fails and no records change. Linking does not reassign dogs.
 * A successful command reports the linked IDs. Dog cards show `Owner ID: CUSTOMER_ID`, or `Owner ID: None`.
   Customer cards show `Dog IDs: 2, 3` below backup contact, or `Dog IDs: None` if no dogs are linked.
   This field includes all owned dogs, even when search filters hide their cards.
-  Existing search filters stay active; use `list dog` to see all dogs.
+  Existing search filters stay active; use `reset` to see all dogs and customers, plus upcoming activities.
 * Links are saved automatically and survive restarting the application.
 * **Deleting a customer unlinks their dogs without deleting them**, including dogs hidden by a search.
   These dogs keep their IDs and details, show `Owner ID: None`, and can be linked to another customer.
@@ -316,15 +300,16 @@ Example: `link c/1 d/2 d/3` links dogs 2 and 3 to customer 1.
 
 ### Unlinking dogs from a customer: `unlink`
 
-Formats: `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`
+Formats: `unlink d/DOG_ID [DOG_ID]...` or `unlink c/CUSTOMER_ID`
 
 Examples:
 
-* `unlink d/1 d/2 d/3` removes ownership from dogs 1, 2 and 3, even if they have different owners.
+* `unlink d/1 2 3` removes ownership from dogs 1, 2 and 3, even if they have different owners.
 * `unlink c/1` removes ownership from every dog belonging to customer 1, including hidden dogs.
 
 * Use persistent IDs from `0` to `2147483647`, lowercase prefixes, and whitespace between fields.
-  Do not put whitespace after the slash. Repeated dog IDs (including `d/2 d/02`) are rejected.
+  Do not put whitespace after the slash. Separate dog IDs with whitespace in a single `d/` field.
+  Repeated dog IDs (including `d/2 02`) and repeated `d/` prefixes are rejected.
 * Do not mix customer and dog prefixes. The customer form accepts exactly one customer ID.
 * For the dog form, every dog must exist and have an owner. If any dog is missing or unowned,
   the whole batch fails without changing anything.
@@ -520,8 +505,8 @@ Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Clear**  | `clear`, then `Y` to confirm or `N` to cancel (case-insensitive). Cannot be undone.
 **Daycare summary** | `summary`<br>Overall dogs/customers, total/upcoming schedules, and today's activities/distinct enrolled dogs.
-**Link dogs** | `link c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...`<br> e.g., `link c/1 d/2 d/3`
-**Unlink dogs** | `unlink d/DOG_ID [d/DOG_ID]...` or `unlink c/CUSTOMER_ID`<br> e.g., `unlink d/2 d/3` or `unlink c/1`
+**Link dogs** | `link c/CUSTOMER_ID d/DOG_ID [DOG_ID]...`<br> e.g., `link c/1 d/2 3`
+**Unlink dogs** | `unlink d/DOG_ID [DOG_ID]...` or `unlink c/CUSTOMER_ID`<br> e.g., `unlink d/2 3` or `unlink c/1`
 **Search customers** | `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`<br> e.g., `searchc n/alex i/42`
 **Search dogs** | `searchd [n/NAME] [b/BREED] [s/SIZE] [i/DOG_ID]`<br> e.g., `searchd n/bud s/small`
 **Add activity** | `addactivity n/NAME date/YYYY-MM-DD start/HH:mm end/HH:mm r/once`<br>Use `r/daily` or `r/weekly` for recurrence.
@@ -535,8 +520,6 @@ Action     | Format, Examples
 **Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 **Edit dog** | `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`<br>e.g., `editdog 1 s/Large`
 **Edit customer** | `editcustomer CUSTOMER_ID [n/NAME] [p/PHONE] [e/EMAIL] [bc/BACKUP_CONTACT]`<br>e.g., `editcustomer 1 p/91234567`
-**List customers** | `list customer`
-**List dogs** | `list dog`
 **Delete dog** | `delete dog ID`<br>e.g., `delete dog 0`
 **Delete customer** | `delete customer ID`<br>e.g., `delete customer 21`
 **Undo** | `undo`

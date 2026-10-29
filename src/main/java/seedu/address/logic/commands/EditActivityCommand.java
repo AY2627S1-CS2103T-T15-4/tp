@@ -42,8 +42,8 @@ public class EditActivityCommand extends Command {
 
     /** Creates a command to edit the activity with {@code activityId}. */
     public EditActivityCommand(int activityId, EditActivityDescriptor editActivityDescriptor) {
-        if (activityId < 0) {
-            throw new IllegalArgumentException("Activity ID must be nonnegative.");
+        if (activityId <= 0) {
+            throw new IllegalArgumentException("Activity ID must be positive.");
         }
         requireNonNull(editActivityDescriptor);
         this.activityId = activityId;

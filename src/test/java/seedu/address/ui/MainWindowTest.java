@@ -94,7 +94,7 @@ public class MainWindowTest {
             assertEquals(1, todaysActivities.getItems().size());
             assertEquals("Today walk", label(todaysActivities.getItems().get(0).get(), "name"));
 
-            window.executeCommand("list customer");
+            window.executeCommand("reset");
             assertEquals(1, customers.getItems().size());
             assertEquals("Lily Koh", label(customers.getItems().get(0).get(), "name"));
 
@@ -106,7 +106,7 @@ public class MainWindowTest {
             assertEquals(1, customers.getItems().size());
             assertEquals("Lily Koh", label(customers.getItems().get(0).get(), "name"));
 
-            window.executeCommand("list dog");
+            window.executeCommand("searchd n/Cookie");
             assertEquals(1, dogs.getItems().size());
             assertEquals("Cookie", label(dogs.getItems().get(0).get(), "name"));
         });
@@ -138,7 +138,7 @@ public class MainWindowTest {
             ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
             ListView<Supplier<Region>> activities = listView(window.getActivityListPanel());
 
-            window.executeCommand("list dog");
+            window.executeCommand("searchd n/Cookie");
             assertTrue(customers.getItems().isEmpty());
             window.executeCommand("reset");
 

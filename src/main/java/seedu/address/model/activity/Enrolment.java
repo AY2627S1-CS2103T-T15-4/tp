@@ -12,8 +12,8 @@ public class Enrolment {
     /** Creates an enrolment record. */
     public Enrolment(int activityId, int dogId, LocalDate date) {
         Objects.requireNonNull(date);
-        if (activityId < 0 || dogId < 0) {
-            throw new IllegalArgumentException("Enrolment IDs must be nonnegative.");
+        if (activityId <= 0 || dogId < 0) {
+            throw new IllegalArgumentException("Activity IDs must be positive and dog IDs nonnegative.");
         }
         this.activityId = activityId;
         this.dogId = dogId;

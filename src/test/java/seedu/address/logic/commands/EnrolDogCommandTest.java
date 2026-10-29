@@ -24,6 +24,12 @@ import seedu.address.model.dog.Size;
 /** Contains tests for {@link EnrolDogCommand}. */
 public class EnrolDogCommandTest {
     @Test
+    public void constructor_zeroActivityId_rejected() {
+        assertThrows(IllegalArgumentException.class, () ->
+                new EnrolDogCommand(0, LocalDate.of(2028, 1, 1), List.of(1)));
+    }
+
+    @Test
     public void execute_validDogs_enrolsDogs() throws Exception {
         AddressBook book = new AddressBook();
         book.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 1, 1),

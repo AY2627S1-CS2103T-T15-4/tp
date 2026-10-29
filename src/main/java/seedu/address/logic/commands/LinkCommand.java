@@ -15,10 +15,10 @@ import seedu.address.model.dog.exceptions.LinkException;
 public class LinkCommand extends Command {
     public static final String COMMAND_WORD = "link";
     public static final String MESSAGE_USAGE = "link: Links one or more unowned dogs to a customer.\n"
-            + "Parameters: c/CUSTOMER_ID d/DOG_ID [d/DOG_ID]...\n"
+            + "Parameters: c/CUSTOMER_ID d/DOG_ID [DOG_ID]...\n"
             + "IDs must be integers from 0 to 2147483647; dog IDs must not repeat.\n"
             + "The entire batch is rejected if any record is missing or any dog already has an owner.\n"
-            + "Example: link c/1 d/2 d/3";
+            + "Example: link c/1 d/2 3";
     public static final String MESSAGE_SUCCESS = "Linked dog IDs %s to customer ID %d.";
 
     private final int customerId;
