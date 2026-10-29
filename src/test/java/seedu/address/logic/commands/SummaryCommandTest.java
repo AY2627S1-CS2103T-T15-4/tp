@@ -137,6 +137,18 @@ public class SummaryCommandTest {
         assertNotEquals(command, null);
     }
 
+    @Test
+    public void execute_lastRepresentableDate_handlesWeeklyScheduleWithoutFutureOccurrence() {
+        Model model = new ModelManager();
+        addActivity(model, LocalDate.MAX.minusDays(1), Recurrence.WEEKLY);
+        addActivity(model, LocalDate.MAX, Recurrence.ONCE);
+        Clock lastDate = Clock.fixed(LocalDate.MAX.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC);
+        assertEquals("Overall: 0 dogs | 0 customers\n"
+                + "Activity schedules: 2 total | 1 from today onwards\n"
+                + "Today (+999999999-12-31): 1 activities | 0 distinct dogs enrolled",
+                new SummaryCommand(lastDate).execute(model).getFeedbackToUser());
+    }
+
     private static Model mixedModel() throws Exception {
         WatchDog book = new WatchDog();
         book.addDogFromStorage(dog(9));
