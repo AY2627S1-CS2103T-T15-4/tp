@@ -107,7 +107,7 @@ dependencies {
 }
 
 shadowJar {
-    archiveFileName = 'addressbook.jar'
+    archiveFileName = 'WatchDog.jar'
 }
 
 defaultTasks 'clean', 'test'
