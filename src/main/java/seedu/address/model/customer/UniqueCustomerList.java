@@ -49,6 +49,7 @@ public class UniqueCustomerList implements Iterable<Customer> {
         internalList.add(toAdd);
     }
 
+    // @@author lilosy
     /**
      * Replaces the customer {@code target} in the list with {@code editedCustomer}.
      * {@code target} must exist in the list.
@@ -68,6 +69,7 @@ public class UniqueCustomerList implements Iterable<Customer> {
 
         internalList.set(index, editedCustomer);
     }
+    // @@author its-shoutime
 
     /**
      * Removes the equivalent customer from the list.
