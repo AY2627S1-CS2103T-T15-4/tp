@@ -13,8 +13,9 @@ public final class CommandHelp {
             + "punctuation must be followed by a letter or number. Email must be valid. "
             + "Primary phone and email must be unique across customers (email ignores case); "
             + "backup contacts may be shared.";
-    private static final String IDS = "Use persistent record IDs, including hidden records; "
-            + "Dog and customer IDs range from 0 to 2147483647; activity IDs from 1 to 2147483647.";
+    private static final String IDS = "Use persistent record IDs, including hidden records. "
+            + "Dog IDs range from 0 to 2147483647. "
+            + "Customer and activity IDs range from 1 to 2147483647.";
     private static final String ACTIVITY_FIELDS = "Dates use YYYY-MM-DD and times use 24-hour HH:mm. "
             + "End must be later than start on the same day. Recurrence is lowercase once, daily or weekly.";
 
