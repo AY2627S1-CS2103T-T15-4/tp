@@ -81,6 +81,8 @@ public class ListPanelsTest {
             assertEquals("Walk", label(card, "name"));
             assertEquals("Schedule starts: 2028-02-29", label(card, "date"));
             assertEquals("Time: 09:00 - 10:00", label(card, "time"));
+            assertFalse(((Label) card.lookup("#headerTime")).isManaged());
+            assertFalse(((Label) card.lookup("#name")).isWrapText());
             assertEquals("Recurrence: WEEKLY", label(card, "recurrence"));
             assertEquals("Dogs with upcoming bookings: 2, 10", label(card, "dogSummary"));
             Label dogSummary = (Label) card.lookup("#dogSummary");
@@ -88,6 +90,52 @@ public class ListPanelsTest {
             assertEquals(1, dogSummary.getLineSpacing());
             assertEquals(2, ((VBox) dogSummary.getParent()).getSpacing());
             assertEquals(new Insets(10, 14, 10, 14), ((VBox) dogSummary.getParent()).getPadding());
+        });
+    }
+
+    @Test
+    public void activityCard_todayCard_showsTimeOnHeaderLine() throws Exception {
+        runOnFxThread(() -> {
+            Region card = new ActivityCard(ACTIVITY, "", "", true).getRoot();
+            Scene scene = new Scene(card, 450, 250);
+            scene.getRoot().applyCss();
+            scene.getRoot().layout();
+            Label name = (Label) card.lookup("#name");
+            Label headerTime = (Label) card.lookup("#headerTime");
+
+            assertEquals("09:00–10:00", headerTime.getText());
+            assertTrue(headerTime.isManaged());
+            assertFalse(((Label) card.lookup("#time")).isManaged());
+            assertEquals(name.localToScene(name.getBoundsInLocal()).getMinY(),
+                    headerTime.localToScene(headerTime.getBoundsInLocal()).getMinY(), 1);
+            assertTrue(headerTime.localToScene(headerTime.getBoundsInLocal()).getMinX()
+                    > name.localToScene(name.getBoundsInLocal()).getMinX());
+        });
+    }
+
+    @Test
+    public void activityCard_todayCard_wrappedNameStartsAlongsideIdAndTime() throws Exception {
+        runOnFxThread(() -> {
+            Activity longNameActivity = new Activity(3,
+                    new ActivityName("Morning grooming and training session"), ACTIVITY.getStartDate(),
+                    ACTIVITY.getStartTime(), ACTIVITY.getEndTime(), Recurrence.WEEKLY);
+            Region card = new ActivityCard(longNameActivity, "", "", true).getRoot();
+            Scene scene = new Scene(card, 320, 250);
+            scene.getRoot().applyCss();
+            scene.getRoot().layout();
+            Label id = (Label) card.lookup("#id");
+            Label name = (Label) card.lookup("#name");
+            Label headerTime = (Label) card.lookup("#headerTime");
+
+            assertTrue(name.getHeight() > id.getHeight());
+            assertEquals(id.localToScene(id.getBoundsInLocal()).getMinY(),
+                    name.localToScene(name.getBoundsInLocal()).getMinY(), 1);
+            assertEquals(id.localToScene(id.getBoundsInLocal()).getMinY(),
+                    headerTime.localToScene(headerTime.getBoundsInLocal()).getMinY(), 1);
+            assertTrue(name.localToScene(name.getBoundsInLocal()).getMinX()
+                    > id.localToScene(id.getBoundsInLocal()).getMinX());
+            assertTrue(headerTime.localToScene(headerTime.getBoundsInLocal()).getMinX()
+                    - name.localToScene(name.getBoundsInLocal()).getMaxX() >= 16);
         });
     }
 
@@ -356,6 +404,16 @@ public class ListPanelsTest {
             assertEquals("Today training", label(list.getItems().get(1).get(), "name"));
             assertEquals("Dogs enrolled on 2026-10-28: None",
                     label(list.getItems().get(1).get(), "dogSummary"));
+
+            activities.add(new Activity(8, new ActivityName("Early visit"), TODAY,
+                    LocalTime.of(8, 0), LocalTime.of(8, 30), Recurrence.ONCE));
+            activities.add(new Activity(4, new ActivityName("Same time"), TODAY,
+                    LocalTime.of(9, 0), LocalTime.of(9, 30), Recurrence.ONCE));
+            assertEquals("Early visit", label(list.getItems().get(0).get(), "name"));
+            assertEquals("Same time", label(list.getItems().get(1).get(), "name"));
+            assertEquals("Today walk", label(list.getItems().get(2).get(), "name"));
+            assertEquals("09:00–09:30", label(list.getItems().get(1).get(), "headerTime"));
+            assertFalse(((Label) list.getItems().get(1).get().lookup("#time")).isManaged());
         });
     }
 
