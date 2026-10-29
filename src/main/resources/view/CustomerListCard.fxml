@@ -13,22 +13,39 @@
     <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" minWidth="10" prefWidth="150" />
     </columnConstraints>
-    <VBox alignment="CENTER_LEFT" minHeight="105" GridPane.columnIndex="0">
+    <VBox alignment="CENTER_LEFT" minHeight="105" spacing="2" GridPane.columnIndex="0">
       <padding>
         <Insets top="5" right="5" bottom="5" left="15" />
       </padding>
-      <HBox spacing="0.5" alignment="CENTER_LEFT">
+      <HBox spacing="0.5" alignment="TOP_LEFT">
         <Label fx:id="id" styleClass="cell_big_label">
           <minWidth>
             <Region fx:constant="USE_PREF_SIZE" />
           </minWidth>
         </Label>
-        <Label fx:id="name" text="\$name" styleClass="cell_big_label" />
+        <Label fx:id="name" lineSpacing="1" maxWidth="Infinity" text="\$name"
+            styleClass="cell_big_label" textOverrun="ELLIPSIS" wrapText="true" HBox.hgrow="ALWAYS" />
       </HBox>
-      <Label fx:id="phone" styleClass="cell_small_label" text="\$phone" />
-      <Label fx:id="email" styleClass="cell_small_label" text="\$email" />
-      <Label fx:id="backupContact" styleClass="cell_small_label" text="\$backup" />
-      <Label fx:id="dogIds" styleClass="cell_small_label" text="\$dogIds" wrapText="true" />
+      <HBox alignment="CENTER_LEFT" spacing="6">
+        <Region fx:id="phoneIcon" styleClass="contact-icon" />
+        <Label fx:id="phone" maxWidth="Infinity" styleClass="cell_small_label" text="\$phone"
+            textOverrun="ELLIPSIS" HBox.hgrow="ALWAYS" />
+      </HBox>
+      <HBox alignment="CENTER_LEFT" spacing="6">
+        <Region fx:id="emailIcon" styleClass="contact-icon" />
+        <Label fx:id="email" maxWidth="Infinity" styleClass="cell_small_label" text="\$email"
+            textOverrun="ELLIPSIS" HBox.hgrow="ALWAYS" />
+      </HBox>
+      <HBox alignment="CENTER_LEFT" spacing="4">
+        <Label fx:id="backupContactLabel" styleClass="backup-contact-label" text="Backup Contact:" />
+        <Label fx:id="backupContact" maxWidth="Infinity" styleClass="cell_small_label" text="\$backup"
+            textOverrun="ELLIPSIS" HBox.hgrow="ALWAYS" />
+      </HBox>
+      <HBox alignment="TOP_LEFT" spacing="6">
+        <Region fx:id="dogIcon" styleClass="dog-icon" />
+        <Label fx:id="dogIds" lineSpacing="1" maxWidth="Infinity" styleClass="cell_small_label"
+            text="\$dogIds" wrapText="true" HBox.hgrow="ALWAYS" />
+      </HBox>
     </VBox>
   </GridPane>
 </HBox>

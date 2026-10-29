@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import seedu.address.model.customer.Customer;
@@ -46,10 +47,15 @@ public class CustomerCard extends UiPart<Region> {
         this.customer = customer;
         id.setText(customer.getId() + ". ");
         name.setText(customer.getName().fullName);
-        phone.setText("Phone Number: " + customer.getPhone().value);
-        email.setText("Email: " + customer.getEmail().value);
-        backupContact.setText("Backup Contact: " + customer.getBackupContact().value);
+        setSingleLineValue(phone, customer.getPhone().value);
+        setSingleLineValue(email, customer.getEmail().value);
+        setSingleLineValue(backupContact, customer.getBackupContact().value);
         String ids = ownedDogIds.stream().sorted().map(String::valueOf).collect(Collectors.joining(", "));
-        dogIds.setText("Dog IDs: " + (ids.isEmpty() ? "None" : ids));
+        dogIds.setText(ids.isEmpty() ? "None" : ids);
+    }
+
+    private static void setSingleLineValue(Label label, String value) {
+        label.setText(value);
+        label.setTooltip(new Tooltip(value));
     }
 }

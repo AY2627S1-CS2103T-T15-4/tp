@@ -1,6 +1,7 @@
 package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -20,12 +21,20 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
+import javafx.css.PseudoClass;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Ellipse;
 import javafx.stage.Stage;
@@ -255,6 +264,85 @@ public class MainWindowTest {
 
             assertTrue(pawPattern.getChildren().size() > initialPawCount);
             window.getPrimaryStage().close();
+        });
+    }
+
+    @Test
+    public void fillInnerParts_usesFriendlyInputAndResultPlaceholders() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-placeholders");
+        Logic logic = new LogicManager(new ModelManager(), new StorageManager(
+                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            window.fillInnerParts();
+            TextField command = (TextField) window.getPrimaryStage().getScene().lookup("#commandTextField");
+            TextArea result = (TextArea) window.getPrimaryStage().getScene().lookup("#resultDisplay");
+            StackPane resultArea = (StackPane) window.getPrimaryStage().getScene()
+                    .lookup("#resultDisplayPlaceholder");
+
+            window.show();
+            window.getPrimaryStage().getScene().getRoot().applyCss();
+
+            assertEquals("What would you like to do? Type help to get started.", command.getPromptText());
+            assertEquals("Command results will appear here.", result.getPromptText());
+            assertTrue(result.isWrapText());
+            assertEquals(100, resultArea.getMinHeight());
+            assertEquals(100, resultArea.getPrefHeight());
+            assertEquals(100, resultArea.getMaxHeight());
+            assertEquals(0.70, listView(window.getCustomerListPanel()).getPlaceholder().getOpacity());
+            assertEquals(0.70, listView(window.getDogListPanel()).getPlaceholder().getOpacity());
+            assertEquals(0.70, listView(window.getActivityListPanel()).getPlaceholder().getOpacity());
+            window.getPrimaryStage().close();
+        });
+    }
+
+    @Test
+    public void menuDropdowns_useReadableThemeColorsForNormalHoverAndFocusStates() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-menu-theme");
+        Logic logic = new LogicManager(new ModelManager(), new StorageManager(
+                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            window.fillInnerParts();
+            window.show();
+            try {
+                MenuBar menuBar = (MenuBar) window.getPrimaryStage().getScene().lookup("#menuBar");
+                for (Menu menu : menuBar.getMenus()) {
+                    menu.show();
+                    MenuItem item = menu.getItems().get(0);
+                    Node itemNode = item.getStyleableNode();
+                    assertNotNull(itemNode);
+                    itemNode.getScene().getRoot().applyCss();
+                    Label itemLabel = (Label) itemNode.lookup(".label");
+                    Region itemRegion = (Region) itemNode;
+
+                    assertNotNull(itemLabel);
+                    assertEquals(Color.web("#096B68"), itemLabel.getTextFill());
+
+                    PseudoClass hover = PseudoClass.getPseudoClass("hover");
+                    itemNode.pseudoClassStateChanged(hover, true);
+                    itemNode.applyCss();
+                    assertEquals(Color.web("#90D1CA"), itemRegion.getBackground()
+                            .getFills().get(0).getFill());
+                    assertEquals(Color.web("#096B68"), itemLabel.getTextFill());
+                    itemNode.pseudoClassStateChanged(hover, false);
+
+                    PseudoClass focused = PseudoClass.getPseudoClass("focused");
+                    itemNode.pseudoClassStateChanged(focused, true);
+                    itemNode.applyCss();
+                    assertEquals(Color.web("#90D1CA"), itemRegion.getBackground()
+                            .getFills().get(0).getFill());
+                    assertEquals(Color.web("#096B68"), itemLabel.getTextFill());
+                    itemNode.pseudoClassStateChanged(focused, false);
+                    menu.hide();
+                }
+            } finally {
+                window.getPrimaryStage().close();
+            }
         });
     }
 

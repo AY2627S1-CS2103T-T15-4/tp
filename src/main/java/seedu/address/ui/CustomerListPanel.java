@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
@@ -28,6 +29,7 @@ public class CustomerListPanel extends UiPart<Region> {
         super(FXML);
         this.customers = customers;
         this.allDogs = allDogs;
+        recordListView.setPlaceholder(createEmptyState("No customers to display."));
         recordListView.setCellFactory(listView -> new RecordListViewCell());
         customers.addListener((ListChangeListener<Customer>) change -> updateCustomers());
         allDogs.addListener((ListChangeListener<Dog>) change -> updateCustomers());
@@ -40,6 +42,12 @@ public class CustomerListPanel extends UiPart<Region> {
                 .filter(dog -> dog.getOwnerId().filter(ownerId -> ownerId == customer.getId()).isPresent())
                 .map(Dog::getId).toList()).getRoot()));
         recordListView.getItems().setAll(cards);
+    }
+
+    private static Label createEmptyState(String message) {
+        Label placeholder = new Label(message);
+        placeholder.getStyleClass().add("empty-state");
+        return placeholder;
     }
 
     private static class RecordListViewCell extends ListCell<Supplier<Region>> {

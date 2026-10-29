@@ -13,7 +13,7 @@
     <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" minWidth="10" prefWidth="150" />
     </columnConstraints>
-    <VBox alignment="CENTER_LEFT" minHeight="105" GridPane.columnIndex="0">
+    <VBox alignment="CENTER_LEFT" minHeight="105" spacing="2" GridPane.columnIndex="0">
       <padding>
         <Insets top="5" right="5" bottom="5" left="15" />
       </padding>
@@ -28,7 +28,8 @@
       <Label fx:id="date" styleClass="cell_small_label" />
       <Label fx:id="time" styleClass="cell_small_label" />
       <Label fx:id="recurrence" styleClass="cell_small_label" />
-      <Label fx:id="dogSummary" styleClass="cell_small_label" wrapText="true" maxWidth="Infinity" />
+      <Label fx:id="dogSummary" lineSpacing="1" styleClass="cell_small_label" wrapText="true"
+          maxWidth="Infinity" />
     </VBox>
   </GridPane>
 </HBox>

@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
@@ -54,6 +55,9 @@ public class ActivityListPanel extends UiPart<Region> {
         this.enrolments = requireNonNull(enrolments);
         this.clock = requireNonNull(clock);
         this.todayPanel = todayPanel;
+        recordListView.setPlaceholder(createEmptyState(todayPanel
+                ? "No activities today."
+                : "No activities to display."));
         recordListView.setCellFactory(listView -> new RecordListViewCell());
         activities.addListener((ListChangeListener<Activity>) change -> refresh());
         enrolments.addListener((ListChangeListener<Enrolment>) change -> refresh());
@@ -82,6 +86,12 @@ public class ActivityListPanel extends UiPart<Region> {
                     cards.add(() -> new ActivityCard(activity, summary).getRoot());
                 });
         recordListView.getItems().setAll(cards);
+    }
+
+    private static Label createEmptyState(String message) {
+        Label placeholder = new Label(message);
+        placeholder.getStyleClass().add("empty-state");
+        return placeholder;
     }
 
     private static class RecordListViewCell extends ListCell<Supplier<Region>> {

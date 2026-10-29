@@ -25,6 +25,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Enrolment;
@@ -71,7 +72,10 @@ public class ListPanelsTest {
             assertEquals("Time: 09:00 - 10:00", label(card, "time"));
             assertEquals("Recurrence: WEEKLY", label(card, "recurrence"));
             assertEquals("Dogs with upcoming bookings: 2, 10", label(card, "dogSummary"));
-            assertTrue(((Label) card.lookup("#dogSummary")).isWrapText());
+            Label dogSummary = (Label) card.lookup("#dogSummary");
+            assertTrue(dogSummary.isWrapText());
+            assertEquals(1, dogSummary.getLineSpacing());
+            assertEquals(2, ((VBox) dogSummary.getParent()).getSpacing());
         });
     }
 
@@ -101,13 +105,13 @@ public class ListPanelsTest {
 
             assertEquals(1, list.getItems().size());
             assertEquals("Alex Tan", label(list.getItems().get(0).get(), "name"));
-            assertEquals("Dog IDs: 2", label(list.getItems().get(0).get(), "dogIds"));
+            assertEquals("2", label(list.getItems().get(0).get(), "dogIds"));
             show(panel);
 
             customers.add(new Customer(4, "Beth Tan", "92345678", "beth@example.com", "97654321"));
             assertEquals(2, list.getItems().size());
             dogs.set(0, DOG);
-            assertEquals("Dog IDs: None", label(list.getItems().get(0).get(), "dogIds"));
+            assertEquals("None", label(list.getItems().get(0).get(), "dogIds"));
         });
     }
 
@@ -217,13 +221,22 @@ public class ListPanelsTest {
             DogListPanel dogs = new DogListPanel(FXCollections.observableArrayList());
             ActivityListPanel activities = new ActivityListPanel(FXCollections.observableArrayList(),
                     FXCollections.observableArrayList());
+            TodayActivityListPanel today = new TodayActivityListPanel(FXCollections.observableArrayList(),
+                    FXCollections.observableArrayList(), CLOCK);
 
             show(customers);
             show(dogs);
             show(activities);
+            show(today);
             assertTrue(listView(customers).getItems().isEmpty());
             assertTrue(listView(dogs).getItems().isEmpty());
             assertTrue(listView(activities).getItems().isEmpty());
+            assertTrue(listView(today).getItems().isEmpty());
+            assertEquals("No customers to display.", ((Label) listView(customers).getPlaceholder()).getText());
+            assertEquals("No dogs to display.", ((Label) listView(dogs).getPlaceholder()).getText());
+            assertEquals("No activities to display.", ((Label) listView(activities).getPlaceholder()).getText());
+            assertEquals("No activities today.", ((Label) listView(today).getPlaceholder()).getText());
+            assertTrue(listView(customers).getPlaceholder().getStyleClass().contains("empty-state"));
         });
     }
 

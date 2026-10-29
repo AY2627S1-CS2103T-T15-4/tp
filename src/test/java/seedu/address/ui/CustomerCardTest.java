@@ -1,6 +1,7 @@
 package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -12,8 +13,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import seedu.address.model.customer.Customer;
 
 public class CustomerCardTest {
@@ -43,9 +48,30 @@ public class CustomerCardTest {
 
             assertEquals("7. ", label(card, "id"));
             assertEquals("Alex Tan", label(card, "name"));
-            assertEquals("Phone Number: 91234567", label(card, "phone"));
-            assertEquals("Email: alex@example.com", label(card, "email"));
-            assertEquals("Backup Contact: 98765432", label(card, "backupContact"));
+            assertEquals("91234567", label(card, "phone"));
+            assertEquals("alex@example.com", label(card, "email"));
+            assertEquals("Backup Contact:", label(card, "backupContactLabel"));
+            assertEquals("98765432", label(card, "backupContact"));
+            assertEquals("None", label(card, "dogIds"));
+            assertTrue(card.lookup("#phoneIcon") instanceof Region);
+            assertTrue(card.lookup("#emailIcon") instanceof Region);
+            assertTrue(((Label) card.lookup("#name")).isWrapText());
+            assertEquals(1, ((Label) card.lookup("#name")).getLineSpacing());
+            assertEquals("91234567", ((Label) card.lookup("#phone")).getTooltip().getText());
+            assertEquals("alex@example.com", ((Label) card.lookup("#email")).getTooltip().getText());
+            assertTrue(card.lookup("#backupContactLabel").getStyleClass().contains("backup-contact-label"));
+            assertTrue(card.lookup("#phone").getParent() instanceof HBox);
+
+            HBox nameRow = (HBox) card.lookup("#name").getParent();
+            assertEquals(Pos.TOP_LEFT, nameRow.getAlignment());
+            assertEquals(2, ((VBox) nameRow.getParent()).getSpacing());
+
+            Scene scene = new Scene(card, 300, 250);
+            scene.getStylesheets().add(getClass().getResource("/view/DarkTheme.css").toExternalForm());
+            scene.getRoot().applyCss();
+            Region dogIcon = (Region) card.lookup("#dogIcon");
+            assertTrue(dogIcon.getStyleClass().contains("dog-icon"));
+            assertNotNull(dogIcon.getShape());
         });
     }
 

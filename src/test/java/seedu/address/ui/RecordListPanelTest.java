@@ -16,10 +16,13 @@ import org.junit.jupiter.api.Test;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.ListDogCommand;
@@ -68,7 +71,13 @@ public class RecordListPanelTest {
             assertEquals("Buddy", label(card, "name"));
             assertEquals("Breed: Poodle", label(card, "breed"));
             assertEquals("Size: small", label(card, "size"));
-            assertEquals("Owner ID: None", label(card, "owner"));
+            assertEquals("\uD83D\uDC64 None", label(card, "owner"));
+            assertTrue(((Label) card.lookup("#name")).isWrapText());
+            assertEquals(1, ((Label) card.lookup("#name")).getLineSpacing());
+            assertEquals("\uD83D\uDC64 None", ((Label) card.lookup("#owner")).getTooltip().getText());
+            HBox nameRow = (HBox) card.lookup("#name").getParent();
+            assertEquals(Pos.TOP_LEFT, nameRow.getAlignment());
+            assertEquals(2, ((VBox) nameRow.getParent()).getSpacing());
         });
     }
 
@@ -84,21 +93,22 @@ public class RecordListPanelTest {
             var list = listView(new RecordListPanel(model.getFilteredCustomerList(), model.getFilteredDogList(),
                     model.getDogList()));
             Region initialCard = list.getItems().get(0).get();
-            assertEquals("Dog IDs: None", label(initialCard, "dogIds"));
-            var fields = initialCard.lookup("#backupContact").getParent().getChildrenUnmodifiable();
-            assertEquals(fields.indexOf(initialCard.lookup("#backupContact")) + 1,
-                    fields.indexOf(initialCard.lookup("#dogIds")));
+            assertEquals("None", label(initialCard, "dogIds"));
+            var backupContactRow = initialCard.lookup("#backupContact").getParent();
+            var fields = backupContactRow.getParent().getChildrenUnmodifiable();
+            assertEquals(fields.indexOf(backupContactRow) + 1,
+                    fields.indexOf(initialCard.lookup("#dogIds").getParent()));
             try {
                 model.linkDogs(7, List.of(42, 3));
             } catch (LinkException e) {
                 throw new AssertionError(e);
             }
             assertEquals(1, list.getItems().size());
-            assertEquals("Dog IDs: 3, 42", label(list.getItems().get(0).get(), "dogIds"));
+            assertEquals("3, 42", label(list.getItems().get(0).get(), "dogIds"));
             model.deleteDog(model.getDogList().get(0));
-            assertEquals("Dog IDs: 3", label(list.getItems().get(0).get(), "dogIds"));
+            assertEquals("3", label(list.getItems().get(0).get(), "dogIds"));
             model.deleteDog(model.getDogList().get(0));
-            assertEquals("Dog IDs: None", label(list.getItems().get(0).get(), "dogIds"));
+            assertEquals("None", label(list.getItems().get(0).get(), "dogIds"));
         });
     }
 
@@ -112,15 +122,15 @@ public class RecordListPanelTest {
                 ModelManager model = new ModelManager(book, new UserPrefs());
                 var list = listView(new RecordListPanel(model.getFilteredCustomerList(), model.getFilteredDogList(),
                         model.getDogList()));
-                assertEquals("Dog IDs: 42", label(list.getItems().get(0).get(), "dogIds"));
+                assertEquals("42", label(list.getItems().get(0).get(), "dogIds"));
                 try {
                     command.execute(model);
                 } catch (CommandException e) {
                     throw new AssertionError(e);
                 }
                 assertEquals(2, list.getItems().size());
-                assertEquals("Dog IDs: None", label(list.getItems().get(0).get(), "dogIds"));
-                assertEquals("Owner ID: None", label(list.getItems().get(1).get(), "owner"));
+                assertEquals("None", label(list.getItems().get(0).get(), "dogIds"));
+                assertEquals("\uD83D\uDC64 None", label(list.getItems().get(1).get(), "owner"));
             });
         }
     }
@@ -138,11 +148,11 @@ public class RecordListPanelTest {
             } catch (LinkException e) {
                 throw new AssertionError(e);
             }
-            assertEquals("Owner ID: 7", label(list.getItems().get(1).get(), "owner"));
+            assertEquals("\uD83D\uDC64 7", label(list.getItems().get(1).get(), "owner"));
             model.deleteCustomer(ALEX);
             assertEquals(1, list.getItems().size());
             assertEquals("Buddy", label(list.getItems().get(0).get(), "name"));
-            assertEquals("Owner ID: None", label(list.getItems().get(0).get(), "owner"));
+            assertEquals("\uD83D\uDC64 None", label(list.getItems().get(0).get(), "owner"));
         });
     }
 
@@ -155,9 +165,10 @@ public class RecordListPanelTest {
             assertEquals(2, list.getItems().size());
             Region customer = list.getItems().get(0).get();
             assertEquals("Alex", label(customer, "name"));
-            assertEquals("Phone Number: 91234567", label(customer, "phone"));
-            assertEquals("Email: alex@example.com", label(customer, "email"));
-            assertEquals("Backup Contact: 98765432", label(customer, "backupContact"));
+            assertEquals("91234567", label(customer, "phone"));
+            assertEquals("alex@example.com", label(customer, "email"));
+            assertEquals("Backup Contact:", label(customer, "backupContactLabel"));
+            assertEquals("98765432", label(customer, "backupContact"));
             assertEquals("Buddy", label(list.getItems().get(1).get(), "name"));
 
             new Scene(panel.getRoot(), 450, 600);
