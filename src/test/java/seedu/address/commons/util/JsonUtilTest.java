@@ -1,12 +1,14 @@
 package seedu.address.commons.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static seedu.address.testutil.Assert.assertThrows;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.testutil.SerializableTestClass;
 import seedu.address.testutil.TestUtil;
 
@@ -47,6 +49,14 @@ public class JsonUtilTest {
         assertEquals(SerializableTestClass.getNameTestValue(), result.getName());
         assertEquals(SerializableTestClass.getListTestValues(), result.getListOfLocalDateTimes());
         assertEquals(SerializableTestClass.getHashMapTestValues(), result.getMapOfIntegerToString());
+    }
+
+    @Test
+    public void readJsonFile_nullJson_throwsDataLoadingException() throws IOException {
+        Path nullJson = TestUtil.getFilePathInSandboxFolder("null.json");
+        FileUtil.writeToFile(nullJson, "null");
+
+        assertThrows(DataLoadingException.class, () -> JsonUtil.readJsonFile(nullJson, SerializableTestClass.class));
     }
 
     @Test

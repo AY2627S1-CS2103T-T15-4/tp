@@ -93,6 +93,9 @@ class JsonSerializableAddressBook {
     public AddressBook toModelType() throws IllegalValueException {
         AddressBook addressBook = new AddressBook();
         for (JsonAdaptedCustomer jsonAdaptedCustomer : customers) {
+            if (jsonAdaptedCustomer == null) {
+                throw new IllegalValueException("Customers list must not contain null entries.");
+            }
             Customer customer = jsonAdaptedCustomer.toModelType();
             if (addressBook.hasCustomer(customer)) {
                 throw new IllegalValueException(MESSAGE_DUPLICATE_CUSTOMER);
@@ -101,6 +104,9 @@ class JsonSerializableAddressBook {
         }
 
         for (JsonAdaptedDog jsonAdaptedDog : dogs) {
+            if (jsonAdaptedDog == null) {
+                throw new IllegalValueException("Dog list must not contain null entries.");
+            }
             Dog dog = jsonAdaptedDog.toModelType();
             if (addressBook.hasDog(dog)) {
                 throw new IllegalValueException(MESSAGE_DUPLICATE_DOG);

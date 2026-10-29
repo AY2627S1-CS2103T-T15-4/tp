@@ -69,6 +69,14 @@ public class JsonSerializableAddressBookTest {
     }
 
     @Test
+    public void toModelType_nullCustomerOrDog_throwsIllegalValueException() throws Exception {
+        assertThrows(IllegalValueException.class, "Customers list must not contain null entries.", () ->
+                JsonUtil.fromJsonString("{\"customers\":[null]}", JsonSerializableAddressBook.class).toModelType());
+        assertThrows(IllegalValueException.class, "Dog list must not contain null entries.", () ->
+                JsonUtil.fromJsonString("{\"dogs\":[null]}", JsonSerializableAddressBook.class).toModelType());
+    }
+
+    @Test
     public void toModelType_duplicateCustomers_throwsIllegalValueException() {
         Customer customer = customer(1, "Alice Tan");
         JsonSerializableAddressBook data = new JsonSerializableAddressBook(
