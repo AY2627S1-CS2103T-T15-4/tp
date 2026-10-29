@@ -19,7 +19,7 @@ Logic -> Router : parseCommand(commandText)
 activate Router
 Router -> Parser : parse(" 21")
 activate Parser
-Parser -> Parser : validate nonnegative activity ID
+Parser -> Parser : validate positive activity ID
 Parser -> Command : new DeleteActivityCommand(21)
 Parser --> Router : command
 deactivate Parser
