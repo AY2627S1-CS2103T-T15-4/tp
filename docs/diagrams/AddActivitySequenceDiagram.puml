@@ -9,7 +9,7 @@ participant ":ModelManager" as Model MODEL_COLOR
 
 [-> Command : execute(model)
 note over Command
-  Holds validated schedule details with unused ID 0.
+  Holds validated schedule details with a placeholder ID.
   Parsing has not consumed a persistent ID.
 end note
 Command -> Model : addActivity(name, date, start, end, recurrence)
