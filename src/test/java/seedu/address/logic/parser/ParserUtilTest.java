@@ -24,7 +24,8 @@ public class ParserUtilTest {
     @Test
     public void parseCustomerId_invalidOrOutOfRange_throwsParseException() {
         for (String input : new String[] {"", "0", "-1", "1 a", "2147483648"}) {
-            assertThrows(ParseException.class, () -> ParserUtil.parseCustomerId(input));
+            assertThrows(ParseException.class, "Please provide a valid positive customer ID", () ->
+                    ParserUtil.parseCustomerId(input));
         }
     }
 
