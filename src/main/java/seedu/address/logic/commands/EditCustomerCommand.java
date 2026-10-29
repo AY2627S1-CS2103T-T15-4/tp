@@ -135,10 +135,10 @@ public class EditCustomerCommand extends Command {
          */
         public EditCustomerDescriptor(EditCustomerDescriptor toCopy) {
             requireNonNull(toCopy);
-            setName(toCopy.name);
-            setPhone(toCopy.phone);
-            setEmail(toCopy.email);
-            setBackupContact(toCopy.backupContact);
+            name = toCopy.name;
+            phone = toCopy.phone;
+            email = toCopy.email;
+            backupContact = toCopy.backupContact;
         }
 
         /**

@@ -114,10 +114,12 @@ public class DeleteActivityCommandTest {
             }
         };
 
-        assertThrows(CommandException.class, DeleteActivityCommand.MESSAGE_INVALID_ACTIVITY_LIST,
+        CommandException nullListException = assertThrows(CommandException.class,
                 () -> new DeleteActivityCommand(1).execute(nullListModel));
-        assertThrows(CommandException.class, DeleteActivityCommand.MESSAGE_INVALID_ACTIVITY_LIST,
+        CommandException nullEntryException = assertThrows(CommandException.class,
                 () -> new DeleteActivityCommand(1).execute(nullEntryModel));
+        assertEquals(DeleteActivityCommand.MESSAGE_INVALID_ACTIVITY_LIST, nullListException.getMessage());
+        assertEquals(DeleteActivityCommand.MESSAGE_INVALID_ACTIVITY_LIST, nullEntryException.getMessage());
     }
 
     @Test
