@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static seedu.address.testutil.TypicalWatchDog.getTypicalAddressBook;
+import static seedu.address.testutil.TypicalWatchDog.getTypicalWatchDog;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,12 +23,12 @@ import org.junit.jupiter.api.io.TempDir;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import seedu.address.commons.core.GuiSettings;
-import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.util.SampleDataUtil;
-import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
+import seedu.address.storage.JsonWatchDogStorage;
 import seedu.address.storage.StorageManager;
 
 public class MainAppTest {
@@ -40,36 +40,36 @@ public class MainAppTest {
         MainApp app = createApp();
         app.init();
 
-        assertEquals(SampleDataUtil.getSampleAddressBook(), app.model.getAddressBook());
+        assertEquals(SampleDataUtil.getSampleWatchDog(), app.model.getWatchDog());
         assertEquals(new UserPrefs(), app.model.getUserPrefs());
         assertEquals(new UserPrefs(), prefsStorage().readUserPrefs().orElseThrow());
-        assertEquals(dataPath(), app.storage.getAddressBookFilePath());
+        assertEquals(dataPath(), app.storage.getWatchDogFilePath());
         assertEquals(prefsPath(), app.storage.getUserPrefsFilePath());
         assertFalse(Files.exists(dataPath()));
 
         app.logic.execute("adddog n/Cookie b/Poodle s/Small");
-        AddressBook saved = new AddressBook(app.model.getAddressBook());
+        WatchDog saved = new WatchDog(app.model.getWatchDog());
         long nextDogId = saved.getNextDogId();
-        assertEquals(saved, dataStorage().readAddressBook().orElseThrow());
+        assertEquals(saved, dataStorage().readWatchDog().orElseThrow());
 
         MainApp restarted = createApp();
         restarted.init();
-        assertEquals(saved, restarted.model.getAddressBook());
-        assertEquals(nextDogId, restarted.model.getAddressBook().getNextDogId());
+        assertEquals(saved, restarted.model.getWatchDog());
+        assertEquals(nextDogId, restarted.model.getWatchDog().getNextDogId());
     }
 
     @Test
     public void init_savedFiles_restoresRecordsAndPreferencesWithoutChangingDataFile() throws Exception {
-        AddressBook saved = getTypicalAddressBook();
+        WatchDog saved = getTypicalWatchDog();
         UserPrefs preferences = customPrefs();
-        dataStorage().saveAddressBook(saved);
+        dataStorage().saveWatchDog(saved);
         prefsStorage().saveUserPrefs(preferences);
         byte[] originalData = Files.readAllBytes(dataPath());
 
         MainApp app = createApp();
         app.init();
 
-        assertEquals(saved, app.model.getAddressBook());
+        assertEquals(saved, app.model.getWatchDog());
         assertEquals(preferences, app.model.getUserPrefs());
         assertArrayEquals(originalData, Files.readAllBytes(dataPath()));
     }
@@ -83,24 +83,24 @@ public class MainAppTest {
         MainApp app = createApp();
         app.init();
 
-        assertEquals(new AddressBook(), app.model.getAddressBook());
+        assertEquals(new WatchDog(), app.model.getWatchDog());
         assertEquals(invalidData, Files.readString(dataPath()));
 
         app.logic.execute("adddog n/Cookie b/Poodle s/Small");
         assertEquals(1, app.model.getDogList().size());
-        assertEquals(app.model.getAddressBook(), dataStorage().readAddressBook().orElseThrow());
+        assertEquals(app.model.getWatchDog(), dataStorage().readWatchDog().orElseThrow());
     }
 
     @Test
     public void init_malformedPreferences_keepsRecordsAndWritesDefaultPreferences() throws Exception {
-        AddressBook saved = getTypicalAddressBook();
-        dataStorage().saveAddressBook(saved);
+        WatchDog saved = getTypicalWatchDog();
+        dataStorage().saveWatchDog(saved);
         Files.writeString(prefsPath(), "{not valid json");
 
         MainApp app = createApp();
         app.init();
 
-        assertEquals(saved, app.model.getAddressBook());
+        assertEquals(saved, app.model.getWatchDog());
         assertEquals(new UserPrefs(), app.model.getUserPrefs());
         assertEquals(new UserPrefs(), prefsStorage().readUserPrefs().orElseThrow());
     }
@@ -157,7 +157,7 @@ public class MainAppTest {
         app.init();
         UserPrefs preferences = customPrefs();
         app.model.setGuiSettings(preferences.getGuiSettings());
-        AddressBook originalData = new AddressBook(app.model.getAddressBook());
+        WatchDog originalData = new WatchDog(app.model.getWatchDog());
         byte[] originalPreferences = Files.readAllBytes(prefsPath());
         FailingUserPrefsStorage failingStorage = new FailingUserPrefsStorage(prefsPath());
         app.storage = new StorageManager(dataStorage(), failingStorage);
@@ -166,7 +166,7 @@ public class MainAppTest {
 
         assertEquals(preferences, failingStorage.attemptedPreferences);
         assertEquals(preferences, app.model.getUserPrefs());
-        assertEquals(originalData, app.model.getAddressBook());
+        assertEquals(originalData, app.model.getWatchDog());
         assertArrayEquals(originalPreferences, Files.readAllBytes(prefsPath()));
     }
 
@@ -186,8 +186,8 @@ public class MainAppTest {
         return new JsonUserPrefsStorage(prefsPath());
     }
 
-    private JsonAddressBookStorage dataStorage() {
-        return new JsonAddressBookStorage(dataPath());
+    private JsonWatchDogStorage dataStorage() {
+        return new JsonWatchDogStorage(dataPath());
     }
 
     private static UserPrefs customPrefs() {

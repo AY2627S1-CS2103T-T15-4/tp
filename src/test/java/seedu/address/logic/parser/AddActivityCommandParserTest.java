@@ -34,7 +34,7 @@ public class AddActivityCommandParserTest {
         assertEquals(parser.parse(VALID), parser.parse(
                 " r/weekly end/10:00 n/  Training   start/09:00 date/2028-02-29"));
         ModelManager model = new ModelManager();
-        new AddressBookParser().parseCommand("addactivity" + VALID).execute(model);
+        new WatchDogParser().parseCommand("addactivity" + VALID).execute(model);
         Activity stored = model.getActivityList().get(0);
         assertEquals(1, stored.getId());
         assertEquals(LocalDate.of(2028, 2, 29), stored.getStartDate());

@@ -11,9 +11,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.model.AddressBook;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.dog.Breed;
@@ -31,7 +31,7 @@ public class EnrolDogCommandTest {
 
     @Test
     public void execute_validDogs_enrolsDogs() throws Exception {
-        AddressBook book = new AddressBook();
+        WatchDog book = new WatchDog();
         book.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 1, 1),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         book.addDogFromStorage(new Dog(1, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
@@ -40,7 +40,7 @@ public class EnrolDogCommandTest {
         CommandResult result = new EnrolDogCommand(1, LocalDate.of(2028, 1, 1), List.of(1)).execute(model);
 
         assertEquals("Enrolled dog IDs [1] to activity ID 1 on 2028-01-01.", result.getFeedbackToUser());
-        assertEquals(1, model.getAddressBook().getEnrolmentList().size());
+        assertEquals(1, model.getWatchDog().getEnrolmentList().size());
     }
 
     @Test
@@ -68,7 +68,7 @@ public class EnrolDogCommandTest {
 
     @Test
     public void execute_duplicateEnrolment_throwsCommandException() throws Exception {
-        ModelManager model = new ModelManager(new AddressBook(), new UserPrefs());
+        ModelManager model = new ModelManager(new WatchDog(), new UserPrefs());
         model.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 1, 1),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));

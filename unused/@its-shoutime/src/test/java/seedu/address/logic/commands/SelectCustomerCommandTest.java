@@ -13,11 +13,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.AddressBookParser;
-import seedu.address.model.AddressBook;
+import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Recurrence;
@@ -29,8 +29,8 @@ import seedu.address.model.dog.Size;
 
 /** Exercises selecting a customer and the related dogs and activities. */
 public class SelectCustomerCommandTest {
-    private final AddressBookParser parser = new AddressBookParser();
-    private final Model model = new ModelManager(new AddressBook(), new UserPrefs());
+    private final WatchDogParser parser = new WatchDogParser();
+    private final Model model = new ModelManager(new WatchDog(), new UserPrefs());
 
     @Test
     public void execute_linkedDogs_filtersDogsAndCurrentOrFutureActivities() throws Exception {

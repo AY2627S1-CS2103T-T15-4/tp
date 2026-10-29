@@ -13,11 +13,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.AddressBookParser;
-import seedu.address.model.AddressBook;
+import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Recurrence;
@@ -29,8 +29,8 @@ import seedu.address.model.dog.Size;
 
 /** Exercises selecting a dog and the related owner and activity columns. */
 public class SelectDogCommandTest {
-    private final AddressBookParser parser = new AddressBookParser();
-    private final Model model = new ModelManager(new AddressBook(), new UserPrefs());
+    private final WatchDogParser parser = new WatchDogParser();
+    private final Model model = new ModelManager(new WatchDog(), new UserPrefs());
 
     @Test
     public void execute_linkedDog_filtersOwnerAndCurrentOrFutureActivities() throws Exception {
@@ -55,14 +55,14 @@ public class SelectDogCommandTest {
         model.enrolDogs(daily.getId(), today, List.of(buddy.getId()));
         model.enrolDogs(weekly.getId(), today, List.of(buddy.getId()));
         model.enrolDogs(otherDog.getId(), otherDog.getStartDate(), List.of(max.getId()));
-        AddressBook before = new AddressBook(model.getAddressBook());
+        WatchDog before = new WatchDog(model.getWatchDog());
 
         assertEquals("Selected dog " + buddy.getId() + ": Buddy", execute("select dog " + buddy.getId()));
         assertEquals(List.of(buddy.getId()), model.getFilteredDogList().stream().map(Dog::getId).toList());
         assertEquals(List.of(owner), model.getFilteredCustomerList());
         assertEquals(List.of(current.getId(), future.getId(), daily.getId(), weekly.getId()),
                 model.getFilteredActivityList().stream().map(Activity::getId).toList());
-        assertEquals(before, model.getAddressBook());
+        assertEquals(before, model.getWatchDog());
     }
 
     @Test

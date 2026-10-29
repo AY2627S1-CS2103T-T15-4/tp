@@ -11,19 +11,19 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import seedu.address.commons.exceptions.IllegalValueException;
-import seedu.address.model.AddressBook;
-import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.ReadOnlyWatchDog;
+import seedu.address.model.WatchDog;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.Enrolment;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 
 /**
- * An Immutable AddressBook that is serializable to JSON format.
+ * An Immutable WatchDog that is serializable to JSON format.
  */
-@JsonRootName(value = "addressbook")
+@JsonRootName(value = "watchdog")
 @JsonIgnoreProperties("persons")
-class JsonSerializableAddressBook {
+class JsonSerializableWatchDog {
 
     public static final String MESSAGE_DUPLICATE_CUSTOMER = "Customers list contains duplicate customer(s).";
     public static final String MESSAGE_DUPLICATE_DOG = "Dog list contains duplicate dog(s).";
@@ -35,9 +35,9 @@ class JsonSerializableAddressBook {
     private final Long nextActivityId;
     private final Long nextDogId;
     private final Long nextCustomerId;
-    /** Constructs a serializable address book from JSON fields. */
+    /** Constructs a serializable WatchDog from JSON fields. */
     @JsonCreator
-    public JsonSerializableAddressBook(@JsonProperty("customers") List<JsonAdaptedCustomer> customers,
+    public JsonSerializableWatchDog(@JsonProperty("customers") List<JsonAdaptedCustomer> customers,
             @JsonProperty("dogs") List<JsonAdaptedDog> dogs,
             @JsonProperty("nextDogId")
             @JsonDeserialize(using = NextDogIdDeserializer.class) Long nextDogId,
@@ -64,17 +64,17 @@ class JsonSerializableAddressBook {
     }
 
     /** Backwards-compatible constructor for data without enrolments. */
-    public JsonSerializableAddressBook(List<JsonAdaptedCustomer> customers, List<JsonAdaptedDog> dogs,
+    public JsonSerializableWatchDog(List<JsonAdaptedCustomer> customers, List<JsonAdaptedDog> dogs,
             Long nextDogId, Long nextCustomerId, List<JsonAdaptedActivity> activities, Long nextActivityId) {
         this(customers, dogs, nextDogId, nextCustomerId, activities, null, nextActivityId);
     }
 
     /**
-     * Converts a given {@code ReadOnlyAddressBook} into this class for Jackson use.
+     * Converts a given {@code ReadOnlyWatchDog} into this class for Jackson use.
      *
-     * @param source future changes to this will not affect the created {@code JsonSerializableAddressBook}.
+     * @param source future changes to this will not affect the created {@code JsonSerializableWatchDog}.
      */
-    public JsonSerializableAddressBook(ReadOnlyAddressBook source) {
+    public JsonSerializableWatchDog(ReadOnlyWatchDog source) {
         customers.addAll(source.getCustomerList().stream()
                 .map(JsonAdaptedCustomer::new)
                 .collect(Collectors.toList()));
@@ -87,21 +87,21 @@ class JsonSerializableAddressBook {
     }
 
     /**
-     * Converts this address book into the model's {@code AddressBook} object.
+     * Converts this WatchDog into the model's {@code WatchDog} object.
      *
      * @throws IllegalValueException if there were any data constraints violated.
      */
-    public AddressBook toModelType() throws IllegalValueException {
-        AddressBook addressBook = new AddressBook();
+    public WatchDog toModelType() throws IllegalValueException {
+        WatchDog watchDog = new WatchDog();
         for (JsonAdaptedCustomer jsonAdaptedCustomer : customers) {
             if (jsonAdaptedCustomer == null) {
                 throw new IllegalValueException("Customers list must not contain null entries.");
             }
             Customer customer = jsonAdaptedCustomer.toModelType();
-            if (addressBook.hasCustomer(customer)) {
+            if (watchDog.hasCustomer(customer)) {
                 throw new IllegalValueException(MESSAGE_DUPLICATE_CUSTOMER);
             }
-            addressBook.addCustomer(customer);
+            watchDog.addCustomer(customer);
         }
 
         for (JsonAdaptedDog jsonAdaptedDog : dogs) {
@@ -109,11 +109,11 @@ class JsonSerializableAddressBook {
                 throw new IllegalValueException("Dog list must not contain null entries.");
             }
             Dog dog = jsonAdaptedDog.toModelType();
-            if (addressBook.hasDog(dog)) {
+            if (watchDog.hasDog(dog)) {
                 throw new IllegalValueException(MESSAGE_DUPLICATE_DOG);
             }
             try {
-                addressBook.addDogFromStorage(dog);
+                watchDog.addDogFromStorage(dog);
             } catch (IllegalArgumentException e) {
                 throw new IllegalValueException(e.getMessage(), e);
             }
@@ -121,7 +121,7 @@ class JsonSerializableAddressBook {
 
         if (nextDogId != null) {
             try {
-                addressBook.setNextDogId(nextDogId);
+                watchDog.setNextDogId(nextDogId);
             } catch (IllegalArgumentException e) {
                 throw new IllegalValueException(e.getMessage(), e);
             }
@@ -129,7 +129,7 @@ class JsonSerializableAddressBook {
         if (nextCustomerId != null && nextCustomerId >= 1) {
             try {
                 // Older versions could persist MAX_VALUE even after assigning it.
-                addressBook.setNextCustomerId(Math.max(nextCustomerId, addressBook.getNextCustomerId()));
+                watchDog.setNextCustomerId(Math.max(nextCustomerId, watchDog.getNextCustomerId()));
             } catch (IllegalArgumentException e) {
                 throw new IllegalValueException(e.getMessage(), e);
             }
@@ -141,14 +141,14 @@ class JsonSerializableAddressBook {
             }
             Activity activity = adapted.toModelType();
             try {
-                addressBook.addActivityFromStorage(activity);
+                watchDog.addActivityFromStorage(activity);
             } catch (IllegalArgumentException e) {
                 throw new IllegalValueException(e.getMessage(), e);
             }
         }
         if (nextActivityId != null) {
             try {
-                addressBook.setNextActivityId(nextActivityId);
+                watchDog.setNextActivityId(nextActivityId);
             } catch (IllegalArgumentException e) {
                 throw new IllegalValueException(e.getMessage(), e);
             }
@@ -157,7 +157,7 @@ class JsonSerializableAddressBook {
             if (adapted == null) {
                 throw new IllegalValueException("Enrolments list must not contain null entries.");
             }
-            Activity activity = adapted.getActivityId() == null ? null : addressBook.getActivityList().stream()
+            Activity activity = adapted.getActivityId() == null ? null : watchDog.getActivityList().stream()
                     .filter(candidate -> candidate.getId() == adapted.getActivityId())
                     .findFirst()
                     .orElse(null);
@@ -166,12 +166,12 @@ class JsonSerializableAddressBook {
             }
             Enrolment enrolment = adapted.toModelType(activity.getStartDate());
             try {
-                addressBook.addEnrolmentFromStorage(enrolment);
+                watchDog.addEnrolmentFromStorage(enrolment);
             } catch (IllegalArgumentException e) {
                 throw new IllegalValueException(e.getMessage(), e);
             }
         }
-        return addressBook;
+        return watchDog;
     }
 
 }

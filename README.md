@@ -9,4 +9,4 @@
   * It comes with a **reasonable level of user and developer documentation**.
 * It is named `WatchDog` to reflect the function of a dog daycare, as well as the role of its manager in 'watching over' the dogs.
 * For the detailed documentation of this project, see the **[WatchDog Product Website](https://ay2627s1-cs2103t-t15-4.github.io/tp/)**.
-* This project is based on the AddressBook-Level3 project created by the [SE-EDU initiative](https://se-education.org).
+* This project is based on the WatchDog-Level3 project created by the [SE-EDU initiative](https://se-education.org).

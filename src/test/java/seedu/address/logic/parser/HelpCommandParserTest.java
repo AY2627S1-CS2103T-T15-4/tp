@@ -13,7 +13,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.ModelManager;
 
 public class HelpCommandParserTest {
-    private final AddressBookParser parser = new AddressBookParser();
+    private final WatchDogParser parser = new WatchDogParser();
 
     @Test
     public void parse_emptyTopic_opensOriginalHelpWindow() throws Exception {

@@ -11,12 +11,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.logic.parser.AddressBookParser;
+import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
@@ -25,8 +25,8 @@ import seedu.address.model.dog.Size;
 
 /** Exercises search parsing and execution against the real model. */
 public class SearchDogCommandTest {
-    private final AddressBookParser parser = new AddressBookParser();
-    private final Model model = new ModelManager(new AddressBook(), new UserPrefs());
+    private final WatchDogParser parser = new WatchDogParser();
+    private final Model model = new ModelManager(new WatchDog(), new UserPrefs());
 
     @Test
     public void execute_nameSearch_filtersMatchingDogsWithoutChangingRecords() throws Exception {
@@ -34,7 +34,7 @@ public class SearchDogCommandTest {
         Dog second = model.addDog(dog("Buddy"));
         Dog third = model.addDog(dog("Little Bud"));
         model.addDog(dog("Max"));
-        AddressBook before = new AddressBook(model.getAddressBook());
+        WatchDog before = new WatchDog(model.getWatchDog());
 
         assertEquals("3 dogs found.",
                 execute("search dog n/bUd"));
@@ -43,7 +43,7 @@ public class SearchDogCommandTest {
         assertEquals(List.of(third), model.getFilteredDogList());
         assertEquals("0 dogs found.", execute("search dog n/little  bud"));
         assertEquals(List.of(), model.getFilteredDogList());
-        assertEquals(before, model.getAddressBook());
+        assertEquals(before, model.getWatchDog());
     }
 
     @Test
@@ -60,10 +60,10 @@ public class SearchDogCommandTest {
 
     @Test
     public void execute_nonSequentialStoredId_doesNotUseListPosition() throws Exception {
-        AddressBook storedBook = new AddressBook();
+        WatchDog storedBook = new WatchDog();
         Dog storedDog = new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small"));
         storedBook.addDogFromStorage(storedDog);
-        model.setAddressBook(storedBook);
+        model.setWatchDog(storedBook);
         assertEquals("1 dogs found.", execute("search dog id/42"));
         assertEquals("0 dogs found.", execute("search dog id/0"));
         assertEquals("0 dogs found.", execute("search dog id/1"));
@@ -78,9 +78,9 @@ public class SearchDogCommandTest {
     @Test
     public void parse_invalidInput_doesNotChangeRecords() {
         model.addDog(dog("Buddy"));
-        AddressBook before = new AddressBook(model.getAddressBook());
+        WatchDog before = new WatchDog(model.getWatchDog());
         assertThrows(ParseException.class, () -> parser.parseCommand("search dog id/-1"));
-        assertEquals(before, model.getAddressBook());
+        assertEquals(before, model.getWatchDog());
     }
 
     @Test

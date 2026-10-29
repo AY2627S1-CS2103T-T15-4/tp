@@ -10,23 +10,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.AddressBookParser;
-import seedu.address.model.AddressBook;
+import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.customer.Customer;
-import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.storage.JsonWatchDogStorage;
 
 public class AddCustomerCommandIntegrationTest {
 
-    private final AddressBookParser parser = new AddressBookParser();
+    private final WatchDogParser parser = new WatchDogParser();
 
     @Test
     public void execute_exhaustedIds_reportsErrorAfterDeletionAndReload(@TempDir Path directory) throws Exception {
-        AddressBook addressBook = new AddressBook();
-        addressBook.setNextCustomerId(Integer.MAX_VALUE);
-        Model model = new ModelManager(addressBook, new UserPrefs());
+        WatchDog watchDog = new WatchDog();
+        watchDog.setNextCustomerId(Integer.MAX_VALUE);
+        Model model = new ModelManager(watchDog, new UserPrefs());
         execute(model, "Alice Tan", "91234567", "alice@example.com");
         assertEquals(Integer.MAX_VALUE, model.getCustomerList().get(0).getId());
 
@@ -35,9 +35,9 @@ public class AddCustomerCommandIntegrationTest {
         assertEquals(1, model.getCustomerList().size());
 
         model.deleteCustomer(model.getCustomerList().get(0));
-        JsonAddressBookStorage storage = new JsonAddressBookStorage(directory.resolve("addressbook.json"));
-        storage.saveAddressBook(model.getAddressBook());
-        Model reloadedModel = new ModelManager(storage.readAddressBook().orElseThrow(), new UserPrefs());
+        JsonWatchDogStorage storage = new JsonWatchDogStorage(directory.resolve("addressbook.json"));
+        storage.saveWatchDog(model.getWatchDog());
+        Model reloadedModel = new ModelManager(storage.readWatchDog().orElseThrow(), new UserPrefs());
 
         assertThrows(CommandException.class,
                 "No more customer IDs are available", () -> execute(
@@ -57,9 +57,9 @@ public class AddCustomerCommandIntegrationTest {
 
         assertEquals(List.of(2, 3), model.getFilteredCustomerList().stream().map(Customer::getId).toList());
 
-        JsonAddressBookStorage storage = new JsonAddressBookStorage(directory.resolve("data").resolve("watchdog.json"));
-        storage.saveAddressBook(model.getAddressBook());
-        Model reloadedModel = new ModelManager(storage.readAddressBook().orElseThrow(), new UserPrefs());
+        JsonWatchDogStorage storage = new JsonWatchDogStorage(directory.resolve("data").resolve("watchdog.json"));
+        storage.saveWatchDog(model.getWatchDog());
+        Model reloadedModel = new ModelManager(storage.readWatchDog().orElseThrow(), new UserPrefs());
 
         execute(reloadedModel, "David Tan", "94567890", "david@example.com");
         assertEquals(List.of(2, 3, 4), reloadedModel.getFilteredCustomerList().stream()

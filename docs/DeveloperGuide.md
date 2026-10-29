@@ -28,7 +28,7 @@ Refer to the guide [_Setting up and getting started_](SettingUp.md).
 ### Persistent identities
 
 Customers, dogs and activities use persistent IDs as their identities. These IDs are assigned by the
-address book and are stored with the records, so they remain stable across application restarts and
+WatchDog and are stored with the records, so they remain stable across application restarts and
 are not affected by filtering, list positions or deletion of other records. This allows commands and
 relationships to refer to a record reliably even when the visible list changes.
 
@@ -36,8 +36,8 @@ relationships to refer to a record reliably even when the visible list changes.
 
 `LinkCommandParser` accepts `c/CUSTOMER_ID d/DOG_ID [DOG_ID]...`: one customer field followed by
 one dog field containing distinct, whitespace-separated IDs. Repeated `d/` prefixes are rejected.
-`LinkCommand` delegates the batch to `Model.linkDogs`; `ModelManager` forwards to `AddressBook`.
-The address book looks up persistent IDs in the complete lists and validates every endpoint and ownership
+`LinkCommand` delegates the batch to `Model.linkDogs`; `ModelManager` forwards to `WatchDog`.
+The WatchDog looks up persistent IDs in the complete lists and validates every endpoint and ownership
 constraint before publishing one replacement dog list. A rejected batch throws `LinkException` without
 changing records or filters; the command translates it to `CommandException` for user feedback.
 After successful link or unlink publication, an internal assertion checks that every requested dog ID
@@ -52,14 +52,14 @@ Dog equality includes ownership, while identity remains the persistent dog ID.
 `UnlinkCommandParser` accepts either `c/CUSTOMER_ID` or `d/DOG_ID [DOG_ID]...` with distinct,
 whitespace-separated dog IDs in one field; repeated dog prefixes and mixed prefixes
 are rejected. `UnlinkCommand` delegates to `Model.unlinkCustomerDogs` or `Model.unlinkDogs` and translates
-`UnlinkException` into command feedback. `AddressBook` validates every selected dog exists and has an owner
+`UnlinkException` into command feedback. `WatchDog` validates every selected dog exists and has an owner
 before publishing one replacement list of unowned copies. Dogs may belong to different customers.
 The customer form validates the customer, selects all their dogs from the complete list, and uses the
 same atomic batch operation. Missing customers and customers with no linked dogs are rejected.
 Unlinking preserves records and filters, including a customer's last dog, and uses the existing nullable
 `ownerId` storage field without a schema change.
 
-`AddressBook.removeCustomer` clears ownership of that customer's dogs, regardless of filters,
+`WatchDog.removeCustomer` clears ownership of that customer's dogs, regardless of filters,
 preserving their persistent IDs and details. Unowned dog cards show a person icon followed by `None`.
 Removing a dog leaves its customer intact. Customer edits must preserve persistent IDs to keep links valid.
 Observable list updates refresh dog cards, which display customer IDs without changing search filters.
@@ -68,7 +68,7 @@ as well as visible customers, so these IDs remain accurate when dog cards are fi
 
 `JsonAdaptedDog` persists `ownerId`. A missing or null field means unlinked, preserving compatibility
 with older files. Negative owner IDs and references to missing customers are rejected on load;
-customers are restored before dogs. Copies of the address book retain ownership through immutable dogs.
+customers are restored before dogs. Copies of WatchDog retain ownership through immutable dogs.
 The shared model boundaries also reject dangling owner IDs: `setDog` validates the replacement,
 `setCustomers` checks that existing owners remain present, and `resetData` validates ownership against
 snapshots of the incoming dogs and customers before changing records. Customer deletion uses its explicit
@@ -177,7 +177,7 @@ The sequence diagram below illustrates the interactions within the `Logic` compo
 
 How the `Logic` component works:
 
-1. When `Logic` is called upon to execute a command, the command is passed to an `AddressBookParser` object, which in turn creates a parser that matches the command (e.g., `DeleteDogCommandParser`) and uses it to parse the command.
+1. When `Logic` is called upon to execute a command, the command is passed to an `WatchDogParser` object, which in turn creates a parser that matches the command (e.g., `DeleteDogCommandParser`) and uses it to parse the command.
 1. This results in a `Command` object (more precisely, an object of one of its subclasses e.g., `DeleteDogCommand`) which is executed by the `LogicManager`.
 1. The command can communicate with the `Model` when it is executed (e.g. to delete a dog).<br>
    Note that although this is shown as a single step in the diagram above for simplicity, the code can require several interactions between the command object and the `Model` to complete the operation.
@@ -188,7 +188,7 @@ Here are the other classes in `Logic` (omitted from the class diagram above) tha
 <puml src="diagrams/ParserClasses.puml" width="600"/>
 
 How the parsing works:
-* When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddDogCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddDogCommand`). The `AddressBookParser` returns that object as a `Command` object.
+* When called upon to parse a user command, the `WatchDogParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddDogCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddDogCommand`). The `WatchDogParser` returns that object as a `Command` object.
 * All `XYZCommandParser` classes, such as `AddDogCommandParser` and `DeleteDogCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
 ### Model component
@@ -213,15 +213,15 @@ The `Model` component,
 <puml src="diagrams/StorageClassDiagram.puml" width="550" />
 
 The `Storage` component,
-* can save both address book data and user preference data in JSON format, and read them back into corresponding objects.
-* is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonAddressBookStorage` and `JsonUserPrefsStorage` (one class per data file).
+* can save both WatchDog data and user preference data in JSON format, and read them back into corresponding objects.
+* is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonWatchDogStorage` and `JsonUserPrefsStorage` (one class per data file).
 * depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
 
 ### Removal of the legacy person feature
 
 WatchDog uses customer and dog records. The original AB3 person records, tags, person-only
 commands (`add`, `edit`, `delete INDEX` and `find`), person storage adapters and unused list panels
-have been removed. Shared components such as `AddressBook`, preferences, parsing utilities,
+have been removed. Shared components such as `WatchDog`, preferences, parsing utilities,
 help, `clear` and JSON storage remain in use.
 
 Existing JSON files may contain a legacy `persons` field. It is ignored on loading and omitted
@@ -241,9 +241,9 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 `AddDogCommandParser` validates the dog details supplied by the user and creates an
 `AddDogCommand`. The command delegates to `Model`, which forwards the request through
-`ModelManager` to `AddressBook`.
+`ModelManager` to `WatchDog`.
 
-The address book assigns the dog a persistent ID when it is added. The ID is allocated from a
+The WatchDog assigns the dog a persistent ID when it is added. The ID is allocated from a
 monotonically increasing counter rather than from the dog's position in the list, so deleting a dog
 does not change the identities of the remaining dogs and deleted IDs are never reused. The counter
 and dog IDs are persisted so that new dogs continue to receive unique IDs after the application
@@ -259,7 +259,7 @@ more than one above the largest current dog ID because higher-ID dogs might prev
 deleted.
 
 The following diagram shows the add-dog command flow. The important part of this flow is that the
-persistent dog ID is assigned by the address book only
+persistent dog ID is assigned by WatchDog only
 after the command reaches the model layer.
 
 <puml src="diagrams/AddDogSequenceDiagram.puml" alt="Adding a dog through the application layers" />
@@ -268,7 +268,7 @@ after the command reaches the model layer.
 
 `EditDogCommandParser` parses the persistent dog ID and the fields to be edited. The command uses
 the ID to locate the dog in the complete dog list rather than relying on a filtered-list position.
-`AddressBook` validates the replacement details and publishes the updated dog while preserving its
+`WatchDog` validates the replacement details and publishes the updated dog while preserving its
 persistent ID and current owner relationship.
 
 The following diagram shows the edit-dog command flow. The command locates the dog using its
@@ -279,7 +279,7 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 ### Retired list commands
 
-The former list dog and list customer commands are no longer routed by AddressBookParser.
+The former list dog and list customer commands are no longer routed by WatchDogParser.
 Use reset to restore all customers and dogs and upcoming activities, or searchc/searchd
 to narrow the display. Retired list-dog source and tests are preserved under unused/@xandergoh/;
 list-customer source, parser, and tests are under unused/@its-shoutime/. These archives are
@@ -289,11 +289,11 @@ excluded from Gradle source and test sets and retain authorship annotations.
 
 The former select dog and select customer implementations are retained under
 unused/@its-shoutime/ for authorship reference only. They are not routed by the active
-AddressBookParser and are not supported by the final product.
+WatchDogParser and are not supported by the final product.
 
 ### Undo and redo
 
-`AddressBookParser` accepts `undo` and `redo` only without arguments. `LogicManager` handles these
+`WatchDogParser` accepts `undo` and `redo` only without arguments. `LogicManager` handles these
 commands before ordinary command execution; `UndoCommand.execute` and `RedoCommand.execute` alone
 cannot restore history. `LogicManager` keeps one undo snapshot and one redo snapshot, each paired
 with the original command text for feedback. A successful undoable command replaces the undo
@@ -305,16 +305,16 @@ state and returns a warning without saving or changing history. The next input m
 `N` cancels without changing data or history. `Y` executes `ClearCommand`, discards both snapshots,
 and cannot itself be undone. Confirmation is consumed even if saving the cleared data fails.
 
-`Model.createState()` copies the `AddressBook`, including its records and all three next-ID counters, and captures
+`Model.createState()` copies the `WatchDog`, including its records and all three next-ID counters, and captures
 the active customer, dog and activity predicates and the selected record IDs. `Model.restoreState()`
-resets the existing address book and reapplies the saved display state. Reusing the existing model
+resets the existing WatchDog and reapplies the saved display state. Reusing the existing model
 and observable lists lets UI listeners continue to see updates after a restoration. It refreshes
 predicates twice: the first pass installs source filters, and the second re-evaluates dependent filters.
 This handles both dog filters whose customer predicate reads filtered dogs and customer filters whose
 dog predicate reads filtered customers.
 
 On `undo`, `LogicManager` captures the current state for redo, restores the undo snapshot, moves
-the history slots, then saves the address book. `redo` symmetrically captures the current state for
+the history slots, then saves WatchDog. `redo` symmetrically captures the current state for
 undo, restores the redo snapshot, moves the slots, and saves. An ordinary command updates history
 immediately after successful execution and before saving. This ordering matches the existing policy
 of retaining in-memory changes when a save fails: the corresponding inverse remains available,
@@ -325,11 +325,11 @@ are reported as command errors. History is held only in memory and is unavailabl
 `LogicManagerTest` and `LogicManagerHistoryTest` cover the undo/redo cycle, neutral commands,
 invalidated history, `clear`, failed commands, dependent filters, and save failures.
 `ModelManagerTest` checks restoration of data, ID counters, relationships, filters, and selection, while
-`AddressBookParserTest` checks argument validation.
+`WatchDogParserTest` checks argument validation.
 
 ### Daycare summary
 
-`AddressBookParser` accepts `summary` with blank arguments only and constructs `SummaryCommand`.
+`WatchDogParser` accepts `summary` with blank arguments only and constructs `SummaryCommand`.
 At execution, the command captures `LocalDate.now(clock)` once and uses that date for every count
 and the feedback date. The default clock uses the system's local zone; tests inject a clock.
 Counts use the full model lists, so filters and dog/customer selection remain unchanged.
@@ -357,14 +357,14 @@ An activity represents a reusable schedule; its occurrence dates are calculated 
 
 <puml src="diagrams/ActivityClassDiagram.puml" alt="Activity schedule classes and model integration" />
 
-`AddressBookParser` routes `addactivity` to `AddActivityCommandParser`. The parser requires
+`WatchDogParser` routes `addactivity` to `AddActivityCommandParser`. The parser requires
 `n/`, `date/`, `start/`, `end/`, and `r/` exactly once, rejects unknown alphabetic prefixes,
 and validates strict calendar dates, minute-resolution 24-hour times and lowercase recurrence.
 The immutable command validates a details snapshot with an unused ID of zero. Parsing never allocates
 an ID. `execute` calls `Model.addActivity(ActivityName, LocalDate, LocalTime, LocalTime, Recurrence)`
 and reports the identified schedule returned by the model. No dog/customer filters change.
 
-`ModelManager` delegates to `AddressBook.addActivity`. The address book validates the complete
+`ModelManager` delegates to `WatchDog.addActivity`. The WatchDog validates the complete
 schedule before assigning the next ID and publishing it through `getActivityList()`, an unmodifiable
 observable view of all schedules. Creation allows identical details and overlapping empty schedules.
 The first allocated ID is one; the monotonically increasing counter is stored as a long so that
@@ -372,7 +372,7 @@ The first allocated ID is one; the monotonically increasing counter is stored as
 Copy/reset and equality include activities and the counter. Existing customer/dog APIs are unchanged.
 
 `JsonAdaptedActivity` stores the six schedule fields; dates/times use ISO strings and recurrence uses
-its enum name. `JsonSerializableAddressBook` stores `activities` and `nextActivityId`, validates
+its enum name. `JsonSerializableWatchDog` stores `activities` and `nextActivityId`, validates
 identities and the counter, and rejects invalid schedules or null entries. Older files with no
 activity fields load an empty collection. A missing counter is derived from the largest stored ID;
 an explicit counter must exceed every stored ID and cannot exceed the exhaustion sentinel.
@@ -391,33 +391,33 @@ interface, implemented by `StorageManager`. Concrete lifelines are shown to make
 
 ### Deleting an activity
 
-`AddressBookParser` routes `deleteactivity` to `DeleteActivityCommandParser`, which accepts one
+`WatchDogParser` routes `deleteactivity` to `DeleteActivityCommandParser`, which accepts one
 positive persistent ID. The command finds the matching activity in `Model.getActivityList()` and
-passes it to `Model.deleteActivity`. `ModelManager` delegates to `AddressBook.removeActivity`, which
+passes it to `Model.deleteActivity`. `ModelManager` delegates to `WatchDog.removeActivity`, which
 checks that the activity is still stored, removes its enrolments, and then removes the activity.
 The next activity ID does not change, so deleted IDs are not reused. After the command returns its
-success message, `LogicManager` saves the updated address book.
+success message, `LogicManager` saves the updated WatchDog.
 
 <puml src="diagrams/DeleteActivitySequenceDiagram.puml" alt="Parsing, executing and saving a deleteactivity command" />
 
 ### Editing an activity
 
-`AddressBookParser` routes `editactivity` to `EditActivityCommandParser`. The parser requires a
+`WatchDogParser` routes `editactivity` to `EditActivityCommandParser`. The parser requires a
 persistent activity ID and at least one replacement field. `EditActivityCommand` finds the stored
 activity by ID and rejects the edit if any enrolment references that activity, suggesting that the
 user create a new activity instead. Fields omitted from a permitted edit retain their stored values.
 For an activity with no enrolments, the command builds an immutable replacement with the same ID and
 calls `Model.setActivity`.
 
-`ModelManager` delegates the replacement to `AddressBook`, which checks that the activity is still
+`ModelManager` delegates the replacement to `WatchDog`, which checks that the activity is still
 stored and that the edited schedule does not overlap another activity attended by the same dog.
-Enrolments are never removed by editing. `LogicManager` then saves the address book.
+Enrolments are never removed by editing. `LogicManager` then saves WatchDog.
 
 <puml src="diagrams/EditActivitySequenceDiagram.puml" alt="Parsing, executing and saving an editactivity command" />
 
 ### Dog search
 
-`AddressBookParser` routes `searchd` to `SearchDogCommandParser`. The parser accepts the lowercase fields
+`WatchDogParser` routes `searchd` to `SearchDogCommandParser`. The parser accepts the lowercase fields
 `n/`, `b/`, `s/`, and `i/`, rejects duplicate or unknown fields, normalises whitespace, and validates sizes
 and positive dog IDs. `DogSearchPredicate` performs case-insensitive substring matching for names and breeds,
 case-insensitive exact matching for sizes, and exact matching for IDs.
@@ -441,7 +441,7 @@ IDs and sizes use the `Error in searching dogs:` prefix with their specific vali
 
 ### Customer search
 
-`AddressBookParser` routes `searchc` to `SearchCustomerCommandParser`. The parser accepts the optional
+`WatchDogParser` routes `searchc` to `SearchCustomerCommandParser`. The parser accepts the optional
 lowercase fields `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/`. Names are normalised for case-insensitive substring
 matching, while contact numbers and email addresses use exact matching. Multiple dog IDs are parsed from
 the `d/` field and are retained as a set. The optional customer ID is parsed as a positive integer and
@@ -465,7 +465,7 @@ both filtered views remain consistent.
 <puml src="diagrams/SearchCustomerSequenceDiagram.puml" alt="Searching customers and their owned dogs" />
 ### Activity search
 
-`AddressBookParser` routes `searcha` to `SearchActivityCommandParser`. The parser accepts at least one
+`WatchDogParser` routes `searcha` to `SearchActivityCommandParser`. The parser accepts at least one
 of the lowercase fields `n/`, `d/`, `t/`, and `r/`, rejects duplicate or unknown fields, and validates dates
 and times using strict `YYYY-MM-DD` and `HH:mm` formats. Recurrence is restricted to `Once`, `Weekly`,
 or `Daily`. Names are trimmed, internal whitespace is normalised, and matching is case-insensitive.
@@ -491,7 +491,7 @@ Gradle test execution enables Java assertions so internal model invariants are c
 <puml src="diagrams/SearchActivitySequenceDiagram.puml" alt="Searching activities and related dogs and owners" />
 ### Today command
 
-`AddressBookParser` routes the exact lowercase command `today` to `TodayCommandParser`, which rejects
+`WatchDogParser` routes the exact lowercase command `today` to `TodayCommandParser`, which rejects
 any additional arguments. `TodayCommand` delegates the filtering behavior to `SearchActivityCommand`
 with `LocalDate.now()` as the date criterion. This reuses the existing recurrence-aware activity
 matching and derives dogs from enrolments on today's exact occurrence, followed by their owners.
@@ -500,7 +500,7 @@ The command replaces the active activity, dog, and customer displays and returns
 
 ### Unlinked filtering
 
-`AddressBookParser` routes `filterun` to `FilterUnlinkedCommandParser`, which accepts only the lowercase
+`WatchDogParser` routes `filterun` to `FilterUnlinkedCommandParser`, which accepts only the lowercase
 categories `dog` and `customer`, with arbitrary surrounding whitespace. `FilterUnlinkedCommand` filters dogs
 whose `ownerId` is absent or customers with no owned dogs, and clears the related panel. Its predicates are
 stored by `ModelManager`, so the results refresh after later record or relationship changes.
@@ -524,15 +524,15 @@ The parsers accept the three required fields in any order and convert the activi
 whitespace-separated dog IDs into a command. Each field must appear exactly once, and activity and dog IDs must
 be positive. Parser errors identify the missing, invalid, repeated, or malformed field and append the command's
 complete format and example. Execution errors append the same guidance.
-The command delegates through `Model` and `ModelManager` to `AddressBook`, which verifies that the
+The command delegates through `Model` and `ModelManager` to `WatchDog`, which verifies that the
 activity and dogs exist, the date is a valid occurrence and is today or later, and the requested
 enrolments are valid before updating the enrolment list. A dog cannot be enrolled in another activity
 with an overlapping time on the same date; adjacent activities are allowed. Batch operations are
 atomic. Successful mutations are logged at `FINE` and guarded by postcondition assertions. Enrolment
-changes are persisted with the address book.
+changes are persisted with WatchDog.
 
 The activity-card overview follows a view policy rather than changing the schedule model. `Logic` exposes
-`getEnrolmentList()` as the same live unmodifiable observable view supplied by `AddressBook`; no dog IDs are
+`getEnrolmentList()` as the same live unmodifiable observable view supplied by `WatchDog`; no dog IDs are
 stored redundantly in `Activity`. `MainWindow` passes that view to both activity panels. The general panel
 formats distinct, numerically sorted dog IDs from enrolments whose date is today or later, while the Today
 panel uses only enrolments whose date equals the captured local date. Existing address-book invariants ensure
@@ -553,7 +553,7 @@ plumbing or storing view state in `Activity`.
 <puml src="diagrams/EnrolDogSequenceDiagram.puml" alt="Enrolling dogs into an activity" />
 
 Unenrolment follows the same parser and model delegation path. After validating the activity, date,
-dogs, and exact dated enrolments, the address book removes only the matching activity/dog/date records
+dogs, and exact dated enrolments, WatchDog removes only the matching activity/dog/date records
 instead of changing the activity schedule itself. Past dates may be unenrolled for correction. Successful
 removal is logged and checked with a postcondition assertion.
 
@@ -589,7 +589,7 @@ unenrolment, and dog deletion assert that the expected dated records are present
 mutation. The Gradle `run` and `test` tasks enable assertions so these checks are active during development
 and automated testing.
 
-`LogicManager` records each command. `AddressBook` logs successful enrolment changes and dog deletion at
+`LogicManager` records each command. `WatchDog` logs successful enrolment changes and dog deletion at
 `FINE`, including the number of enrolment records removed. An invalid enrolment restored from storage is
 logged at `WARNING` with its IDs, date, and validation reason before the load error is propagated. Expected
 user validation failures are returned through command feedback rather than logged as warnings, avoiding
@@ -1158,11 +1158,11 @@ Use a disposable copy of the app folder for these tests.
 
    1. Ensure the app is closed, then replace the contents of `data/addressbook.json` with text that is not
       valid JSON and launch the app.<br>
-      Expected: The app starts with an empty address book and records a data-loading warning in the log.
+      Expected: The app starts with an empty WatchDog data file and records a data-loading warning in the log.
 
 1. Invalid persisted dog counter
 
    1. Save at least one dog, close the app, and change `nextDogId` in `data/addressbook.json` to zero,
       a non-integer value, or a value not greater than every stored dog ID. Relaunch the app.<br>
-      Expected: The app rejects the inconsistent file, starts with an empty address book, and records a
+      Expected: The app rejects the inconsistent file, starts with an empty WatchDog data file, and records a
       data-loading warning. Restore the disposable file before continuing other tests.

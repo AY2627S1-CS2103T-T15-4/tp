@@ -8,7 +8,7 @@ import java.util.Optional;
 import seedu.address.commons.util.ToStringBuilder;
 
 /**
- * Represents a dog in the address book.
+ * Represents a dog in WatchDog.
  * Guarantees: stored dogs have positive IDs; details are present and not null, field values are validated, immutable.
  */
 public class Dog {
@@ -51,7 +51,7 @@ public class Dog {
     /**
      * Creates a dog without an assigned persistent ID.
      * This constructor is retained temporarily for existing parser/tests;
-     * new dogs should receive their ID through the model/address book.
+     * new dogs should receive their ID through the model/WatchDog.
      */
     public Dog(DogName name, Breed breed, Size size) {
         requireAllNonNull(name, breed, size);

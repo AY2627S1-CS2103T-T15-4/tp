@@ -20,7 +20,7 @@ public class LinkCommandParserTest {
         assertEquals(new LinkCommand(1, List.of(2, Integer.MAX_VALUE)),
                 parser.parse("\t c/01  d/02\t 2147483647  "));
         assertEquals(new LinkCommand(1, List.of(2, 3)),
-                new AddressBookParser().parseCommand("link c/1 d/2 3"));
+                new WatchDogParser().parseCommand("link c/1 d/2 3"));
     }
 
     @Test

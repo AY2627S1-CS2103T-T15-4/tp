@@ -20,14 +20,14 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
-import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.ReadOnlyWatchDog;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
-import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
+import seedu.address.storage.JsonWatchDogStorage;
 import seedu.address.storage.StorageManager;
 
 /** Regressions for one-level history and save failures after an in-memory change. */
@@ -207,8 +207,8 @@ public class LogicManagerHistoryTest {
         private final LogicManager logic;
 
         private Harness() {
-            Path addressBookPath = temporaryFolder.resolve("history-" + ++nextCase + ".json");
-            storage = new FailingStorage(addressBookPath);
+            Path watchDogPath = temporaryFolder.resolve("history-" + ++nextCase + ".json");
+            storage = new FailingStorage(watchDogPath);
             JsonUserPrefsStorage prefs = new JsonUserPrefsStorage(temporaryFolder.resolve("prefs-" + nextCase));
             logic = new LogicManager(model, new StorageManager(storage, prefs));
         }
@@ -218,7 +218,7 @@ public class LogicManagerHistoryTest {
         }
 
         private List<String> savedDogNames() throws Exception {
-            return storage.readAddressBook().orElseThrow().getDogList().stream()
+            return storage.readWatchDog().orElseThrow().getDogList().stream()
                     .map(dog -> dog.getName().toString()).toList();
         }
 
@@ -236,11 +236,11 @@ public class LogicManagerHistoryTest {
                     .map(customer -> customer.getName().toString()).toList());
             assertEquals(List.of("Buddy"), model.getFilteredDogList().stream()
                     .map(dog -> dog.getName().toString()).toList());
-            assertEquals(2, model.getAddressBook().getDogList().size());
+            assertEquals(2, model.getWatchDog().getDogList().size());
         }
     }
 
-    private static final class FailingStorage extends JsonAddressBookStorage {
+    private static final class FailingStorage extends JsonWatchDogStorage {
         private IOException failure;
 
         private FailingStorage(Path path) {
@@ -248,11 +248,11 @@ public class LogicManagerHistoryTest {
         }
 
         @Override
-        public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
+        public void saveWatchDog(ReadOnlyWatchDog watchDog) throws IOException {
             if (failure != null) {
                 throw failure;
             }
-            super.saveAddressBook(addressBook);
+            super.saveWatchDog(watchDog);
         }
     }
 }

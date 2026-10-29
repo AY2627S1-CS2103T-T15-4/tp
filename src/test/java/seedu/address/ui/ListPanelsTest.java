@@ -37,9 +37,9 @@ import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.commands.UnlinkCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.model.AddressBook;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Enrolment;
@@ -237,7 +237,7 @@ public class ListPanelsTest {
     @Test
     public void customerAndDogCopyMenus_refreshAfterLinkAndUnlink() throws Exception {
         runOnFxThread(() -> {
-            AddressBook book = new AddressBook();
+            WatchDog book = new WatchDog();
             book.addCustomer(CUSTOMER);
             book.addDogFromStorage(DOG);
             ModelManager model = new ModelManager(book, new UserPrefs());
@@ -322,7 +322,7 @@ public class ListPanelsTest {
     @Test
     public void customerListPanel_includesHiddenDogsAndRefreshesAfterLinkAndDelete() throws Exception {
         runOnFxThread(() -> {
-            AddressBook book = new AddressBook();
+            WatchDog book = new WatchDog();
             book.addCustomer(CUSTOMER);
             book.addDogFromStorage(DOG);
             book.addDogFromStorage(new Dog(3, new DogName("Max"), new Breed("Poodle"), new Size("small")));
@@ -347,7 +347,7 @@ public class ListPanelsTest {
     public void unlink_updatesCustomerAndDogPanels() throws Exception {
         for (UnlinkCommand command : List.of(new UnlinkCommand(List.of(2)), new UnlinkCommand(1))) {
             runOnFxThread(() -> {
-                AddressBook book = new AddressBook();
+                WatchDog book = new WatchDog();
                 book.addCustomer(CUSTOMER);
                 book.addDogFromStorage(DOG.withOwner(1));
                 ModelManager model = new ModelManager(book, new UserPrefs());
@@ -372,7 +372,7 @@ public class ListPanelsTest {
     @Test
     public void dogListPanel_customerDeletionClearsOwner() throws Exception {
         runOnFxThread(() -> {
-            AddressBook book = new AddressBook();
+            WatchDog book = new WatchDog();
             book.addCustomer(CUSTOMER);
             book.addDogFromStorage(DOG);
             ModelManager model = new ModelManager(book, new UserPrefs());
@@ -392,7 +392,7 @@ public class ListPanelsTest {
     @Test
     public void searchAndReset_filterEachPanelIndependently() throws Exception {
         runOnFxThread(() -> {
-            AddressBook book = new AddressBook();
+            WatchDog book = new WatchDog();
             book.addCustomer(CUSTOMER);
             book.addCustomer(new Customer(4, "Beth Tan", "92345678", "beth@example.com", "97654321"));
             book.addDogFromStorage(DOG);

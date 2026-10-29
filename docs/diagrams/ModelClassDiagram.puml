@@ -5,11 +5,11 @@ skinparam arrowColor MODEL_COLOR
 skinparam classBackgroundColor MODEL_COLOR
 
 package Model {
-interface ReadOnlyAddressBook
+interface ReadOnlyWatchDog
 interface ReadOnlyUserPrefs
 interface Model
 class ModelManager
-class AddressBook
+class WatchDog
 class UserPrefs
 class UniqueCustomerList
 class UniqueDogList
@@ -27,15 +27,15 @@ class Size
 }
 
 ModelManager ..|> Model
-ModelManager --> "1" AddressBook
+ModelManager --> "1" WatchDog
 ModelManager --> "1" UserPrefs
-Model ..> ReadOnlyAddressBook
+Model ..> ReadOnlyWatchDog
 Model ..> ReadOnlyUserPrefs
-AddressBook ..|> ReadOnlyAddressBook
+WatchDog ..|> ReadOnlyWatchDog
 UserPrefs ..|> ReadOnlyUserPrefs
-AddressBook *--> "1" UniqueCustomerList
-AddressBook *--> "1" UniqueDogList
-AddressBook *--> "0..*" Enrolment
+WatchDog *--> "1" UniqueCustomerList
+WatchDog *--> "1" UniqueDogList
+WatchDog *--> "0..*" Enrolment
 UniqueCustomerList --> "*" Customer
 UniqueDogList --> "*" Dog
 Customer *--> CustomerName

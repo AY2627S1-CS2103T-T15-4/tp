@@ -11,7 +11,7 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.dog.Dog;
 
-/** Adds a dog to the address book. */
+/** Adds a dog to WatchDog. */
 public class AddDogCommand extends Command {
 
     public static final String COMMAND_WORD = "adddog";

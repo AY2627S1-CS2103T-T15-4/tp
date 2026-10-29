@@ -37,7 +37,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 /**
  * Parses user input.
  */
-public class AddressBookParser {
+public class WatchDogParser {
 
     /**
      * Used for initial separation of command word and args.
@@ -47,7 +47,7 @@ public class AddressBookParser {
             "delete\\s+dog(?=\\s|$)(?<arguments>.*)");
     private static final Pattern DELETE_CUSTOMER_COMMAND_FORMAT = Pattern.compile(
             "delete\\s+customer(?=\\s|$)(?<arguments>.*)");
-    private static final Logger logger = LogsCenter.getLogger(AddressBookParser.class);
+    private static final Logger logger = LogsCenter.getLogger(WatchDogParser.class);
 
     /**
      * Parses user input into command for execution.

@@ -6,7 +6,7 @@ private Integer selectedDogId;
 private Integer selectedCustomerId;
 
 // Selection state was included in createState/restoreState and compared by equals.
-return new ModelState(new AddressBook(addressBook), activeCustomerPredicate, activeDogPredicate,
+return new ModelState(new WatchDog(watchDog), activeCustomerPredicate, activeDogPredicate,
         activeActivityPredicate, selectedDogId, selectedCustomerId);
 selectedDogId = state.selectedDogId();
 selectedCustomerId = state.selectedCustomerId();
@@ -66,7 +66,7 @@ selectedCustomerId = state.selectedCustomerId();
     }
 
     private Optional<Integer> ownerIdOf(int dogId) {
-        for (Dog dog : addressBook.getDogList()) {
+        for (Dog dog : watchDog.getDogList()) {
             if (dog.getId() == dogId) {
                 return dog.getOwnerId();
             }
@@ -77,7 +77,7 @@ selectedCustomerId = state.selectedCustomerId();
     private boolean isVisibleForSelectedDog(int dogId, Activity activity) {
         requireNonNull(activity);
         LocalDate today = LocalDate.now();
-        return addressBook.getEnrolmentList().stream().anyMatch(enrolment ->
+        return watchDog.getEnrolmentList().stream().anyMatch(enrolment ->
                 enrolment.getDogId() == dogId && enrolment.getActivityId() == activity.getId()
                         && !enrolment.getDate().isBefore(today) && activity.occursOn(enrolment.getDate()));
     }
@@ -90,7 +90,7 @@ selectedCustomerId = state.selectedCustomerId();
     }
 
     private boolean isVisibleForSelectedCustomer(int customerId, Activity activity) {
-        return addressBook.getDogList().stream()
+        return watchDog.getDogList().stream()
                 .filter(dog -> dog.getOwnerId().filter(ownerId -> ownerId == customerId).isPresent())
                 .anyMatch(dog -> isVisibleForSelectedDog(dog.getId(), activity));
     }

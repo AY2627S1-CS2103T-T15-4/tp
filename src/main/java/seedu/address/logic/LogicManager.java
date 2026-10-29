@@ -19,7 +19,7 @@ import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.SummaryCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.AddressBookParser;
+import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
 import seedu.address.model.Model.ModelState;
@@ -42,7 +42,7 @@ public class LogicManager implements Logic {
 
     private final Model model;
     private final Storage storage;
-    private final AddressBookParser addressBookParser;
+    private final WatchDogParser watchDogParser;
     private HistorySnapshot undoSnapshot;
     private HistorySnapshot redoSnapshot;
     private boolean awaitingClearConfirmation;
@@ -54,7 +54,7 @@ public class LogicManager implements Logic {
         requireAllNonNull(model, storage);
         this.model = model;
         this.storage = storage;
-        addressBookParser = new AddressBookParser();
+        watchDogParser = new WatchDogParser();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class LogicManager implements Logic {
             return executeClearConfirmation(commandText);
         }
 
-        Command command = addressBookParser.parseCommand(commandText);
+        Command command = watchDogParser.parseCommand(commandText);
         if (command instanceof ClearCommand) {
             awaitingClearConfirmation = true;
             return new CommandResult(ClearCommand.MESSAGE_CONFIRMATION);
@@ -102,7 +102,7 @@ public class LogicManager implements Logic {
         undoSnapshot = null;
         redoSnapshot = redo;
         logger.info("Undid the previous command and stored a redo snapshot.");
-        saveAddressBook(true);
+        saveWatchDog(true);
         return new CommandResult(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, undone.commandText()));
     }
 
@@ -117,7 +117,7 @@ public class LogicManager implements Logic {
         undoSnapshot = undo;
         redoSnapshot = null;
         logger.info("Redid the previous command and stored an undo snapshot.");
-        saveAddressBook(true);
+        saveWatchDog(true);
         return new CommandResult(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, redone.commandText()));
     }
 
@@ -132,7 +132,7 @@ public class LogicManager implements Logic {
         ModelState stateBeforeCommand = isClear || isHistoryNeutral ? null : model.createState();
         CommandResult commandResult = command.execute(model);
         recordHistory(isClear, isHistoryNeutral, stateBeforeCommand, commandText);
-        saveAddressBook(!isHistoryNeutral);
+        saveWatchDog(!isHistoryNeutral);
         return commandResult;
     }
 
@@ -163,12 +163,12 @@ public class LogicManager implements Logic {
     }
 
     /**
-     * Saves the current address book. A required save reports the failure to the caller.
+     * Saves the current WatchDog. A required save reports the failure to the caller.
      * History has already been updated from the in-memory state when this is called.
      */
-    private void saveAddressBook(boolean required) throws CommandException {
+    private void saveWatchDog(boolean required) throws CommandException {
         try {
-            storage.saveAddressBook(model.getAddressBook());
+            storage.saveWatchDog(model.getWatchDog());
         } catch (AccessDeniedException e) {
             logger.warning("Saving was denied by file or folder permissions. "
                     + "The in-memory records have not been saved.");
