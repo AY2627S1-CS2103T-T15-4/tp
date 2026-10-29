@@ -29,8 +29,8 @@ public class CustomerContactValidatorTest {
     public void validate_nullCustomerEntry_throwsNullPointerException() {
         List<Customer> customers = Arrays.asList((Customer) null);
 
-        assertThrows(NullPointerException.class,
-                () -> CustomerContactValidator.validate(customer(), customers, null));
+        assertThrows(NullPointerException.class, () ->
+                CustomerContactValidator.validate(customer(), customers, null));
     }
 
     private static Customer customer() {

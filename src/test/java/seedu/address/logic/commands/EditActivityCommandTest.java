@@ -162,10 +162,10 @@ public class EditActivityCommandTest {
             }
         };
 
-        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_INVALID_ACTIVITY_LIST,
-                () -> new EditActivityCommand(1, descriptor).execute(nullListModel));
-        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_INVALID_ACTIVITY_LIST,
-                () -> new EditActivityCommand(1, descriptor).execute(nullEntryModel));
+        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_INVALID_ACTIVITY_LIST, () ->
+                new EditActivityCommand(1, descriptor).execute(nullListModel));
+        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_INVALID_ACTIVITY_LIST, () ->
+                new EditActivityCommand(1, descriptor).execute(nullEntryModel));
     }
 
     @Test

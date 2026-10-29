@@ -65,8 +65,8 @@ public class AddCustomerCommandTest {
         Customer duplicateId = new Customer(1, new Name("Bob Lim"), new Phone("92345678"),
                 new Email("bob@example.com"), new BackupContact("93456789"));
 
-        assertThrows(CommandException.class, AddCustomerCommand.MESSAGE_DUPLICATE_CUSTOMER,
-                () -> new AddCustomerCommand(duplicateId).execute(model));
+        assertThrows(CommandException.class, AddCustomerCommand.MESSAGE_DUPLICATE_CUSTOMER, () ->
+                new AddCustomerCommand(duplicateId).execute(model));
         assertEquals(List.of(ALICE), model.getCustomerList());
     }
 

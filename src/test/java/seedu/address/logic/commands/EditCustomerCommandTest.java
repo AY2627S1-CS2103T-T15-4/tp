@@ -56,8 +56,8 @@ public class EditCustomerCommandTest {
         EditCustomerDescriptor descriptor = new EditCustomerDescriptor();
         descriptor.setName(new Name("Alice Lee"));
 
-        CommandException exception = org.junit.jupiter.api.Assertions.assertThrows(CommandException.class,
-                () -> new EditCustomerCommand(1, descriptor).execute(model));
+        CommandException exception = org.junit.jupiter.api.Assertions.assertThrows(CommandException.class, () ->
+                new EditCustomerCommand(1, descriptor).execute(model));
 
         assertEquals("Customer edit was rejected.", exception.getMessage());
     }
@@ -126,13 +126,13 @@ public class EditCustomerCommandTest {
     public void descriptor_nullInputs_throwsNullPointerException() {
         EditCustomerDescriptor descriptor = new EditCustomerDescriptor();
 
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class,
-                () -> new EditCustomerDescriptor(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () ->
+                new EditCustomerDescriptor(null));
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> descriptor.setName(null));
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> descriptor.setPhone(null));
         org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> descriptor.setEmail(null));
-        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class,
-                () -> descriptor.setBackupContact(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () ->
+                descriptor.setBackupContact(null));
     }
 
     @Test

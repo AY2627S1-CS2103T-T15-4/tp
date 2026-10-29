@@ -86,8 +86,8 @@ public class WatchDogParserTest {
     public void parseCommand_clear() throws Exception {
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD) instanceof ClearCommand);
         assertThrows(ParseException.class,
-                String.format(MESSAGE_INVALID_COMMAND_FORMAT, ClearCommand.MESSAGE_USAGE),
-                () -> parser.parseCommand(ClearCommand.COMMAND_WORD + " 3"));
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT, ClearCommand.MESSAGE_USAGE), () ->
+                parser.parseCommand(ClearCommand.COMMAND_WORD + " 3"));
     }
 
     @Test
