@@ -1,12 +1,17 @@
 @startuml
 !include style.puml
 
-class Main #grey
-class UI UI_COLOR
-class Logic LOGIC_COLOR
-class Model MODEL_COLOR
-class Storage STORAGE_COLOR
-class Commons LOGIC_COLOR_T2
+skinparam componentStyle uml2
+skinparam componentFontColor #FFFFFF
+skinparam componentFontSize 15
+skinparam componentFontName Arial
+
+component Main #grey
+component UI UI_COLOR
+component Logic LOGIC_COLOR
+component Model MODEL_COLOR
+component Storage STORAGE_COLOR
+component Commons LOGIC_COLOR_T2
 
 Main ..> UI : initialises
 Main ..> Logic : initialises
