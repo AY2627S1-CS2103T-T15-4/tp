@@ -1,5 +1,7 @@
 package seedu.address.logic.commands;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
 
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -21,7 +23,10 @@ final class CustomerContactValidator {
      */
     static void validate(Customer candidate, List<Customer> customers, Integer excludedCustomerId)
             throws CommandException {
+        requireNonNull(candidate);
+        requireNonNull(customers);
         for (Customer customer : customers) {
+            requireNonNull(customer, "Customer list must not contain null entries.");
             if (excludedCustomerId != null && customer.getId() == excludedCustomerId) {
                 continue;
             }
