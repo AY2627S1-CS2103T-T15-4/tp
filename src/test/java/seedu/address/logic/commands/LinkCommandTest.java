@@ -28,11 +28,14 @@ import seedu.address.model.dog.exceptions.LinkException;
 /** Tests batch ownership changes through the real parser and model. */
 public class LinkCommandTest {
     private final WatchDogParser parser = new WatchDogParser();
+    // @@author Kenneth-Chia
     private ModelManager model;
 
     @BeforeEach
     public void setUp() {
+        // @@author
         WatchDog book = new WatchDog();
+        // @@author Kenneth-Chia
         book.addCustomer(new Customer(7, "Alex", "91234567", "alex@example.com", "98765432"));
         book.addCustomer(new Customer(8, "Sam", "92345678", "sam@example.com", "98765432"));
         for (int id : List.of(42, 43, 44)) {
@@ -79,7 +82,9 @@ public class LinkCommandTest {
         Dog otherOwnersDog = model.getDogList().get(2);
         Dog unlinked = model.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("small")));
         model.updateFilteredDogList(dog -> false);
+        // @@author
         execute("deletecustomer 7");
+        // @@author Kenneth-Chia
         assertEquals(List.of(firstUnowned, secondUnowned, otherOwnersDog, unlinked), model.getDogList());
         assertTrue(model.getFilteredDogList().isEmpty());
         assertEquals(8, model.getCustomerList().get(0).getId());
@@ -105,6 +110,7 @@ public class LinkCommandTest {
         model.setCustomer(original, edited);
         assertEquals(Optional.of(7), model.getDogList().get(0).getOwnerId());
         assertEquals(edited, model.getCustomerList().get(0));
+        // @@author
         WatchDog before = new WatchDog(model.getWatchDog());
         Customer differentId = new Customer(9, "Alex Tan", "91234567", "alex@example.com", "98765432");
         assertThrows(IllegalArgumentException.class, () -> model.setCustomer(edited, differentId));
@@ -117,6 +123,7 @@ public class LinkCommandTest {
         assertThrows(LinkException.class, () -> model.linkDogs(7, List.of()));
         assertThrows(LinkException.class, () -> model.linkDogs(7, List.of(42, 42)));
         assertEquals(before, model.getWatchDog());
+        // @@author Kenneth-Chia
     }
 
     @Test
@@ -130,7 +137,9 @@ public class LinkCommandTest {
         assertNotEquals(command, null);
         assertNotEquals(command, new Object());
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(-1, List.of(42)));
+        // @@author
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(0, List.of(42)));
+        // @@author Kenneth-Chia
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(7, List.of()));
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(7, List.of(-1)));
         assertThrows(IllegalArgumentException.class, () -> new LinkCommand(7, List.of(42, 42)));
@@ -167,13 +176,17 @@ public class LinkCommandTest {
     }
 
     private void assertRejected(String input, String message) {
+        // @@author
         WatchDog before = new WatchDog(model.getWatchDog());
+        // @@author Kenneth-Chia
         var visibleDogs = List.copyOf(model.getFilteredDogList());
         var visibleCustomers = List.copyOf(model.getFilteredCustomerList());
         CommandException exception = assertThrows(CommandException.class, () -> execute(input));
         assertEquals(message, exception.getMessage());
         assertTrue(exception.getCause() instanceof LinkException);
+        // @@author
         assertEquals(before, model.getWatchDog());
+        // @@author Kenneth-Chia
         assertEquals(visibleDogs, model.getFilteredDogList());
         assertEquals(visibleCustomers, model.getFilteredCustomerList());
     }
@@ -182,3 +195,4 @@ public class LinkCommandTest {
         return parser.parseCommand(input).execute(model).getFeedbackToUser();
     }
 }
+// @@author

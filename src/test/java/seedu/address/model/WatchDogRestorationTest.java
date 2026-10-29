@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.model;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -151,3 +152,4 @@ public class WatchDogRestorationTest {
                 LocalTime.of(endHour, 0), Recurrence.ONCE);
     }
 }
+// @@author

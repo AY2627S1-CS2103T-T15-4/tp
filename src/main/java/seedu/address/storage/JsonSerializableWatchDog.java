@@ -135,19 +135,23 @@ class JsonSerializableWatchDog {
             }
         }
 
+        // @@author Kenneth-Chia
         for (JsonAdaptedActivity adapted : activities) {
             if (adapted == null) {
                 throw new IllegalValueException("Activities list must not contain null entries.");
             }
             Activity activity = adapted.toModelType();
             try {
+                // @@author
                 watchDog.addActivityFromStorage(activity);
+            // @@author Kenneth-Chia
             } catch (IllegalArgumentException e) {
                 throw new IllegalValueException(e.getMessage(), e);
             }
         }
         if (nextActivityId != null) {
             try {
+                // @@author
                 watchDog.setNextActivityId(nextActivityId);
             } catch (IllegalArgumentException e) {
                 throw new IllegalValueException(e.getMessage(), e);

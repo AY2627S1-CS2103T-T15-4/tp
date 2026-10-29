@@ -20,10 +20,12 @@ import seedu.address.model.dog.exceptions.UnlinkException;
 
 /** Tests ownership validation at shared model boundaries. */
 public class WatchDogOwnershipTest {
+    // @@author Kenneth-Chia
     private static final Customer FIRST_OWNER = new Customer(7, "Alex", "91234567",
             "alex@example.com", "98765432");
     private static final Customer SECOND_OWNER = new Customer(8, "Sam", "92345678",
             "sam@example.com", "98765432");
+    // @@author
     private final WatchDog watchDog = ownedBook();
 
     @Test
@@ -69,12 +71,14 @@ public class WatchDogOwnershipTest {
         assertSameState(before, watchDog);
         assertThrows(IllegalArgumentException.class, () -> watchDog.setCustomers(List.of()));
         assertSameState(before, watchDog);
+        // @@author Kenneth-Chia
     }
 
     @Test
     public void setCustomers_preservesOwnerIdentities_allowsDetailsChange() {
         Customer renamed = new Customer(FIRST_OWNER.getId(), "Alex Tan", "91234567",
                 "alex@example.com", "98765432");
+        // @@author
         List<Dog> beforeDogs = List.copyOf(watchDog.getDogList());
 
         watchDog.setCustomers(List.of(renamed, SECOND_OWNER));
@@ -87,6 +91,7 @@ public class WatchDogOwnershipTest {
     public void resetData_danglingOwner_rejectsBeforeReplacingRecordsOrCounters() {
         WatchDog before = new WatchDog(watchDog);
         ReadOnlyWatchDog invalid = new ReadOnlyWatchDog() {
+            // @@author Kenneth-Chia
             @Override
             public ObservableList<Customer> getCustomerList() {
                 return FXCollections.observableArrayList(SECOND_OWNER);
@@ -98,6 +103,7 @@ public class WatchDogOwnershipTest {
             }
 
             @Override
+            // @@author
             public long getNextDogId() {
                 return 100;
             }
@@ -116,12 +122,14 @@ public class WatchDogOwnershipTest {
     @Test
     public void resetData_validNewOwnership_validatesAgainstReplacementCustomers() {
         WatchDog replacement = new WatchDog();
+        // @@author Kenneth-Chia
         Customer newOwner = new Customer(9, "Beth", "93456789", "beth@example.com", "98765432");
         replacement.addCustomer(newOwner);
         replacement.addDogFromStorage(dog(52).withOwner(newOwner.getId()));
         replacement.addDogFromStorage(dog(53));
         replacement.setNextDogId(100);
         replacement.setNextCustomerId(200);
+        // @@author
 
         watchDog.resetData(replacement);
 
@@ -163,12 +171,14 @@ public class WatchDogOwnershipTest {
         assertEquals(List.of(dog(1), dog(127), dog(128)), book.getDogList());
         assertEquals(List.of(firstOwner, largeOwner), book.getCustomerList());
 
+        // @@author Kenneth-Chia
         assertEquals(nextDogId, book.getNextDogId());
         assertEquals(nextCustomerId, book.getNextCustomerId());
     }
 
     @Test
     public void linkDogs_nullEntry_rejectsEntireBatchWithoutMutation() {
+        // @@author
         WatchDog before = new WatchDog(watchDog);
 
         assertThrows(LinkException.class, () -> watchDog.linkDogs(7, Arrays.asList(44, null)));
@@ -199,6 +209,7 @@ public class WatchDogOwnershipTest {
 
     private static WatchDog ownedBook() {
         WatchDog book = new WatchDog();
+        // @@author Kenneth-Chia
         book.addCustomer(FIRST_OWNER);
         book.addCustomer(SECOND_OWNER);
         book.addDogFromStorage(dog(42).withOwner(FIRST_OWNER.getId()));
@@ -212,11 +223,14 @@ public class WatchDogOwnershipTest {
     private static Dog dog(int id) {
         return new Dog(id, new DogName("Buddy"), new Breed("Poodle"), new Size("small"));
     }
+    // @@author
 
     private static void assertSameState(WatchDog expected, WatchDog actual) {
+        // @@author Kenneth-Chia
         assertEquals(expected, actual);
         assertEquals(expected.getNextDogId(), actual.getNextDogId());
         assertEquals(expected.getNextCustomerId(), actual.getNextCustomerId());
         assertEquals(expected.getNextActivityId(), actual.getNextActivityId());
     }
 }
+// @@author

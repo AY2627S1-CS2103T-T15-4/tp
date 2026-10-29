@@ -29,6 +29,7 @@ import seedu.address.model.WatchDog;
 import seedu.address.model.util.SampleDataUtil;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.JsonWatchDogStorage;
+// @@author Kenneth-Chia
 import seedu.address.storage.StorageManager;
 
 public class MainAppTest {
@@ -39,15 +40,18 @@ public class MainAppTest {
     public void init_missingFiles_loadsSamplesAndPersistsCommandAcrossRestart() throws Exception {
         MainApp app = createApp();
         app.init();
+        // @@author
 
         assertEquals(SampleDataUtil.getSampleWatchDog(), app.model.getWatchDog());
         assertEquals(new UserPrefs(), app.model.getUserPrefs());
         assertEquals(new UserPrefs(), prefsStorage().readUserPrefs().orElseThrow());
         assertEquals(dataPath(), app.storage.getWatchDogFilePath());
+        // @@author Kenneth-Chia
         assertEquals(prefsPath(), app.storage.getUserPrefsFilePath());
         assertFalse(Files.exists(dataPath()));
 
         app.logic.execute("adddog n/Cookie b/Poodle s/Small");
+        // @@author
         WatchDog saved = new WatchDog(app.model.getWatchDog());
         long nextDogId = saved.getNextDogId();
         assertEquals(saved, dataStorage().readWatchDog().orElseThrow());
@@ -63,13 +67,16 @@ public class MainAppTest {
         WatchDog saved = getTypicalWatchDog();
         UserPrefs preferences = customPrefs();
         dataStorage().saveWatchDog(saved);
+        // @@author Kenneth-Chia
         prefsStorage().saveUserPrefs(preferences);
         byte[] originalData = Files.readAllBytes(dataPath());
 
         MainApp app = createApp();
         app.init();
+        // @@author
 
         assertEquals(saved, app.model.getWatchDog());
+        // @@author Kenneth-Chia
         assertEquals(preferences, app.model.getUserPrefs());
         assertArrayEquals(originalData, Files.readAllBytes(dataPath()));
     }
@@ -82,12 +89,15 @@ public class MainAppTest {
 
         MainApp app = createApp();
         app.init();
+        // @@author
 
         assertEquals(new WatchDog(), app.model.getWatchDog());
+        // @@author Kenneth-Chia
         assertEquals(invalidData, Files.readString(dataPath()));
 
         app.logic.execute("adddog n/Cookie b/Poodle s/Small");
         assertEquals(1, app.model.getDogList().size());
+        // @@author
         assertEquals(app.model.getWatchDog(), dataStorage().readWatchDog().orElseThrow());
     }
 
@@ -95,12 +105,15 @@ public class MainAppTest {
     public void init_malformedPreferences_keepsRecordsAndWritesDefaultPreferences() throws Exception {
         WatchDog saved = getTypicalWatchDog();
         dataStorage().saveWatchDog(saved);
+        // @@author Kenneth-Chia
         Files.writeString(prefsPath(), "{not valid json");
 
         MainApp app = createApp();
         app.init();
+        // @@author
 
         assertEquals(saved, app.model.getWatchDog());
+        // @@author Kenneth-Chia
         assertEquals(new UserPrefs(), app.model.getUserPrefs());
         assertEquals(new UserPrefs(), prefsStorage().readUserPrefs().orElseThrow());
     }
@@ -157,7 +170,9 @@ public class MainAppTest {
         app.init();
         UserPrefs preferences = customPrefs();
         app.model.setGuiSettings(preferences.getGuiSettings());
+        // @@author
         WatchDog originalData = new WatchDog(app.model.getWatchDog());
+        // @@author Kenneth-Chia
         byte[] originalPreferences = Files.readAllBytes(prefsPath());
         FailingUserPrefsStorage failingStorage = new FailingUserPrefsStorage(prefsPath());
         app.storage = new StorageManager(dataStorage(), failingStorage);
@@ -166,7 +181,9 @@ public class MainAppTest {
 
         assertEquals(preferences, failingStorage.attemptedPreferences);
         assertEquals(preferences, app.model.getUserPrefs());
+        // @@author
         assertEquals(originalData, app.model.getWatchDog());
+        // @@author Kenneth-Chia
         assertArrayEquals(originalPreferences, Files.readAllBytes(prefsPath()));
     }
 
@@ -185,9 +202,11 @@ public class MainAppTest {
     private JsonUserPrefsStorage prefsStorage() {
         return new JsonUserPrefsStorage(prefsPath());
     }
+    // @@author
 
     private JsonWatchDogStorage dataStorage() {
         return new JsonWatchDogStorage(dataPath());
+        // @@author Kenneth-Chia
     }
 
     private static UserPrefs customPrefs() {
@@ -225,3 +244,4 @@ public class MainAppTest {
         }
     }
 }
+// @@author

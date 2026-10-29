@@ -1,6 +1,9 @@
 @startuml
 !include style.puml
 skinparam ArrowFontStyle plain
+/'
+// @@author Kenneth-Chia
+'/
 skinparam ParticipantFontColor #FFFFFF
 skinparam maxMessageSize 180
 
@@ -20,4 +23,7 @@ legend bottom
   LogicManager then executes the returned command and saves.
   Validation failures, activation bars and disposal are omitted.
 endlegend
+/'
+// @@author
+'/
 @enduml
