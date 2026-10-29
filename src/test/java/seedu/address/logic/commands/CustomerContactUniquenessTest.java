@@ -108,7 +108,7 @@ public class CustomerContactUniquenessTest {
 
     @Test
     public void add_deletedCustomerContacts_allowed() throws Exception {
-        parser.parseCommand("delete customer 1").execute(model);
+        parser.parseCommand("deletecustomer 1").execute(model);
         parser.parseCommand("addcustomer n/Carol p/91234567 e/alice@example.com bc/98765432").execute(model);
 
         assertEquals(3, model.getCustomerList().get(1).getId());

@@ -97,34 +97,42 @@ public class AddressBookParserTest {
 
     @Test
     public void parseCommand_deleteDog() throws Exception {
-        DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("delete dog 12");
+        DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("deletedog 12");
         assertEquals(new DeleteDogCommand(12), command);
     }
 
     @Test
+    public void parseCommand_oldDeleteForms_rejected() {
+        for (String input : new String[] {"delete dog 12", "delete  dog   12", "delete customer 21",
+            "delete  customer   21", "delete\tdog\t12", "delete\tcustomer\t21"}) {
+            assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
+        }
+    }
+
+    @Test
     public void parseCommand_deleteDogWithMultipleSpaces() throws Exception {
-        DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("delete  dog   12");
+        DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("deletedog   12");
         assertEquals(new DeleteDogCommand(12), command);
     }
 
     @Test
     public void parseCommand_deleteCustomer() throws Exception {
-        DeleteCustomerCommand command = (DeleteCustomerCommand) parser.parseCommand("delete customer 21");
+        DeleteCustomerCommand command = (DeleteCustomerCommand) parser.parseCommand("deletecustomer 21");
         assertEquals(new DeleteCustomerCommand(21), command);
     }
 
     @Test
     public void parseCommand_deleteCustomerWithWhitespace() throws Exception {
-        for (String input : new String[] {"delete  customer 21", "delete    customer   21",
-            "  delete  customer 21  ", "\tdelete\t\tcustomer\t21\t"}) {
+        for (String input : new String[] {"deletecustomer 21", "deletecustomer   21",
+            "  deletecustomer 21  ", "\tdeletecustomer\t21\t"}) {
             assertEquals(new DeleteCustomerCommand(21), parser.parseCommand(input));
         }
     }
 
     @Test
     public void parseCommand_deleteCustomerWithInvalidArguments_throwsParseException() {
-        for (String input : new String[] {"delete  customer", "delete  customer -1",
-            "delete  customer abc", "delete  customer 21 22", "delete  customer21"}) {
+        for (String input : new String[] {"deletecustomer", "deletecustomer -1",
+            "deletecustomer abc", "deletecustomer 21 22", "deletecustomer21"}) {
             assertThrows(ParseException.class, () -> parser.parseCommand(input));
         }
     }

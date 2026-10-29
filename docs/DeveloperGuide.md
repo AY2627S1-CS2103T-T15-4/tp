@@ -111,7 +111,7 @@ The bulk of the app's work is done by the following four components:
 
 **How the architecture components interact with each other**
 
-The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete dog 1`.
+The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `deletedog 1`.
 
 <puml src="diagrams/ArchitectureSequenceDiagram.puml" width="574" />
 
@@ -165,9 +165,9 @@ Here's a (partial) class diagram of the `Logic` component:
 
 <puml src="diagrams/LogicClassDiagram.puml" width="550"/>
 
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete dog 1")` API call as an example.
+The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("deletedog 1")` API call as an example.
 
-<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `delete dog 1` Command" />
+<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `deletedog 1` Command" />
 
 <box type="info" seamless>
 
@@ -1104,12 +1104,7 @@ NFR-10. **Privacy**: WatchDog shall store dog and customer records locally and s
 * **Breed**: The recorded breed or breed mix of a dog, such as Chihuahua, Shiba Inu or a mixed breed.
 * **Dog size**: The dog's recorded size category: small, medium, large or giant, according to the size chart adopted by the team.
 * **Scheduled attendance**: A planned visit by a dog to the daycare. A scheduled dog is not necessarily currently present.
-* **Check-in / Check-out**: Recording a dog's arrival at or departure from the daycare.
-* **Present dog**: A dog that has checked in and has not yet checked out.
 * **Activity**: A care task planned for a dog, such as feeding, grooming or exercise.
-* **Aggressiveness**: Recorded tendency to show threatening or potentially harmful behaviour towards humans or other dogs, including any known triggers.
-* **Temperament**: A dog's usual behavioural tendencies, such as being calm, shy or friendly. This is broader than aggressiveness.
-* **Care instructions**: Recorded directions for looking after a particular dog, including feeding, exercise and special precautions.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -1226,7 +1221,7 @@ Use an existing activity occurrence on `TODAY` or a future date and two existing
 ### Deleting a dog
 
 1. Add a dog with `adddog n/Buddy b/Poodle s/small` and note its displayed ID.
-1. Run `delete dog ID` with that ID. The dog and all of its activity enrolments, including past occurrences,
+1. Run `deletedog ID` with that ID. The dog and all of its activity enrolments, including past occurrences,
    are removed; other dogs' enrolments and customer records remain intact.
 1. Repeat the command. It reports an invalid dog ID without changing stored records.
 1. Try `delete 1`. The retired person command reports an unknown command.
@@ -1254,7 +1249,7 @@ Replace the uppercase ID placeholders below with the persistent IDs reported by 
    despite their different owners. Repeat; expect failure without changing records.
 1. Link both dogs to Alice and run `unlink c/CUSTOMER_ID`. Expect both dogs to remain but have no owner.
    Repeat for Alice, then try a nonexistent customer ID; expect errors without changes.
-1. Relink both dogs to Alice. Hide Alice with `searchc n/Ben`, then run `delete customer CUSTOMER_ID`.
+1. Relink both dogs to Alice. Hide Alice with `searchc n/Ben`, then run `deletecustomer CUSTOMER_ID`.
    Run `reset`. Expect Alice to be gone and both dogs to remain unowned, retaining their IDs and details.
    Ben remains. Repeat the deletion; expect an invalid-ID error.
 
@@ -1319,7 +1314,7 @@ placeholders below with these fixture values. Refer to the UG for complete searc
 
 ### Help and clear confirmation
 
-1. Run `help adddog` and `help delete dog`. Expect guidance in the result area without executing either
+1. Run `help adddog` and `help deletedog`. Expect guidance in the result area without executing either
    command or changing records or filters. Run `help summary today`; expect an error listing supported commands.
 1. Run `help`, minimize its window, and run `help` again. Expect the existing window to restore and focus.
    Repeat via the Help menu and `F1`.

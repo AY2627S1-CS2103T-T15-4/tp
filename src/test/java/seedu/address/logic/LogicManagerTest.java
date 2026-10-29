@@ -71,7 +71,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_commandExecutionError_throwsCommandException() {
-        String deleteCommand = "delete dog 9";
+        String deleteCommand = "deletedog 9";
         assertCommandException(deleteCommand, DeleteDogCommand.MESSAGE_INVALID_ID);
     }
 
@@ -345,7 +345,7 @@ public class LogicManagerTest {
     @Test
     public void execute_failedCommand_preservesUndoHistory() throws Exception {
         logic.execute("adddog n/Buddy b/Poodle s/small");
-        assertCommandException("delete dog 9", DeleteDogCommand.MESSAGE_INVALID_ID);
+        assertCommandException("deletedog 9", DeleteDogCommand.MESSAGE_INVALID_ID);
 
         logic.execute("undo");
         assertEquals(List.of(), logic.getDogList());
@@ -387,14 +387,14 @@ public class LogicManagerTest {
         String add = "adddog n/Cookie b/Chihuahua s/Small";
         logic.execute(add);
         Dog cookie = logic.getDogList().get(0);
-        for (String help : List.of("help", "help summary", "help adddog", "help delete dog")) {
+        for (String help : List.of("help", "help summary", "help adddog", "help deletedog")) {
             logic.execute(help);
         }
         assertEquals(List.of(cookie), logic.getDogList());
         assertEquals(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, add),
                 logic.execute("undo").getFeedbackToUser());
         assertEquals(List.of(), logic.getDogList());
-        for (String help : List.of("help", "help summary", "help adddog", "help delete dog")) {
+        for (String help : List.of("help", "help summary", "help adddog", "help deletedog")) {
             logic.execute(help);
         }
         assertEquals(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, add),

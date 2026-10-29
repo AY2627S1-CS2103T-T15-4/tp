@@ -36,12 +36,10 @@ public final class CommandHelp {
                     "editcustomer 1 p/91234567 e/johndoe@example.com",
                     "Requires an existing customer and at least one field. Omitted fields are preserved. "
                             + IDS + " " + CUSTOMER_FIELDS),
-            entry("delete", "delete dog DOG_ID OR delete customer CUSTOMER_ID", "delete dog 0",
-                    "Specify the category and an existing persistent ID. " + IDS),
-            entry(DeleteDogCommand.COMMAND_WORD, "delete dog DOG_ID", "delete dog 0",
+            entry(DeleteDogCommand.COMMAND_WORD, "deletedog DOG_ID", "deletedog 1",
                     "Deletes the dog and all its activity enrolments, including past dates. "
                             + "Other dogs, customers and activity schedules remain. " + IDS),
-            entry(DeleteCustomerCommand.COMMAND_WORD, "delete customer CUSTOMER_ID", "delete customer 21",
+            entry(DeleteCustomerCommand.COMMAND_WORD, "deletecustomer CUSTOMER_ID", "deletecustomer 21",
                     "Deletes an existing customer and unlinks all their dogs without deleting the dogs. " + IDS),
             entry(LinkCommand.COMMAND_WORD, "link c/CUSTOMER_ID d/DOG_ID [DOG_ID]...", "link c/1 d/2 3",
                     "Put exactly one c/ field first, then one d/ field with distinct IDs separated by whitespace. "
@@ -133,8 +131,8 @@ public final class CommandHelp {
                             + "A redone command can be undone again."),
             entry(HelpCommand.COMMAND_WORD, "help [COMMAND]", "help summary",
                     "Without a command, opens the help window. With a command name, shows its format, example "
-                            + "and specifications here. Use lowercase names, including multiword names such as "
-                            + "delete dog. Do not include the target command's arguments. "
+                            + "and specifications here. Use lowercase command names such as "
+                            + "deletedog. Do not include the target command's arguments. "
                             + "Preserves undo/redo history."),
             entry(ExitCommand.COMMAND_WORD, "exit", "exit", "Exits the application."));
 
