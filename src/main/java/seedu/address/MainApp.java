@@ -1,5 +1,7 @@
 package seedu.address;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,14 +45,32 @@ public class MainApp extends Application {
     protected Storage storage;
     protected Model model;
 
+    private final Path userPrefsFilePath;
+    private final Path dataFilePath;
+
+    /**
+     * Creates an application using the default preferences and data files.
+     */
+    public MainApp() {
+        this(USER_PREFS_FILE_PATH, WATCHDOG_DATA_FILE_PATH);
+    }
+
+    /**
+     * Creates an application using the given preferences and data files.
+     */
+    MainApp(Path userPrefsFilePath, Path dataFilePath) {
+        this.userPrefsFilePath = requireNonNull(userPrefsFilePath);
+        this.dataFilePath = requireNonNull(dataFilePath);
+    }
+
     @Override
     public void init() throws Exception {
         logger.info("=============================[ Initializing WatchDog ]===========================");
         super.init();
 
-        JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(USER_PREFS_FILE_PATH);
+        JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(userPrefsFilePath);
         UserPrefs userPrefs = initPrefs(userPrefsStorage);
-        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(WATCHDOG_DATA_FILE_PATH);
+        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(dataFilePath);
         storage = new StorageManager(addressBookStorage, userPrefsStorage);
 
         model = initModelManager(storage, userPrefs);
