@@ -109,6 +109,7 @@ public interface Model {
     void deleteCustomer(Customer customer);
     //@@author
 
+    // @@author lilosy
     /**
      * Adds the given customer.
      * {@code customer} must not already exist in WatchDog.
@@ -121,6 +122,7 @@ public interface Model {
      * {@code editedCustomer} must preserve the target's persistent ID so that dog ownership stays valid.
      */
     void setCustomer(Customer target, Customer editedCustomer);
+    // @@author
 
     // @@author XanderGoh
     default ObservableList<Dog> getDogList() {
@@ -148,11 +150,13 @@ public interface Model {
     /** Adds an empty schedule and returns it with its persistent ID. */
     Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end, Recurrence recurrence);
 
+    // @@author lilosy
     /** Deletes the given activity. The activity must exist in WatchDog. */
     void deleteActivity(Activity activity);
 
     /** Replaces an activity with no enrolments. */
     void setActivity(Activity target, Activity editedActivity);
+    // @@author
 
     /** Returns all schedules, independently of dog/customer filters. */
     default ObservableList<Activity> getActivityList() {
@@ -168,8 +172,10 @@ public interface Model {
         return getWatchDog().getEnrolmentList();
     }
 
+    // @@author lilosy
     /** Returns an unmodifiable observable view of filtered activities. */
     ObservableList<Activity> getFilteredActivityList();
+    // @@author
 
     /** Updates the activity filter; the predicate must not be null. */
     void updateFilteredActivityList(Predicate<Activity> predicate);
@@ -185,8 +191,10 @@ public interface Model {
     Observable getActivityEnrolmentContextChanges();
     // @@author
 
+    // @@author lilosy
     /** Shows activities with an occurrence on or after the given date. */
     void showActivitiesOnOrAfter(LocalDate date);
+    // @@author
 
     /**
      * Adds a dog and returns the dog with its assigned persistent ID.

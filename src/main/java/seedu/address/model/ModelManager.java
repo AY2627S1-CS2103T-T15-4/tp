@@ -146,12 +146,13 @@ public class ModelManager implements Model {
         return activity;
     }
 
+    // @@author lilosy
     @Override
     public void setActivity(Activity target, Activity editedActivity) {
         watchDog.setActivity(target, editedActivity);
         // @@author XanderGoh
         refreshDisplayedRecords();
-        // @@author
+        // @@author lilosy
     }
 
     @Override
@@ -159,7 +160,7 @@ public class ModelManager implements Model {
         watchDog.removeActivity(target);
         // @@author XanderGoh
         refreshDisplayedRecords();
-        // @@author
+        // @@author lilosy
     }
 
     @Override
@@ -167,6 +168,7 @@ public class ModelManager implements Model {
         requireNonNull(date);
         updateFilteredActivityList(activity -> activity.nextOccurrenceOnOrAfter(date).isPresent());
     }
+    // @@author
 
     //=========== Dog Operations ============================================================================
     @Override
@@ -268,12 +270,13 @@ public class ModelManager implements Model {
     }
     //@@author
 
+    // @@author lilosy
     @Override
     public void addCustomer(Customer customer) {
         watchDog.addCustomer(customer);
         // @@author XanderGoh
         refreshDisplayedRecords();
-        // @@author
+        // @@author lilosy
     }
 
     @Override
@@ -283,8 +286,9 @@ public class ModelManager implements Model {
         watchDog.setCustomer(target, editedCustomer);
         // @@author XanderGoh
         refreshDisplayedRecords();
-        // @@author
+        // @@author lilosy
     }
+    // @@author
 
     //=========== Filtered Record List Accessors =============================================================
 

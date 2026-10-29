@@ -15,6 +15,7 @@ import seedu.address.model.dog.Size;
  */
 public class ParserUtil {
 
+    // @@author lilosy
     /** Parses a positive persistent customer ID. */
     public static int parseCustomerId(String customerId) throws ParseException {
         requireNonNull(customerId);
@@ -24,6 +25,7 @@ public class ParserUtil {
         }
         return Integer.parseInt(trimmedId);
     }
+    // @@author
 
     /**
      * Parses a string into a {@code DogName}.
@@ -71,6 +73,7 @@ public class ParserUtil {
         return new Size(trimmedSize);
     }
 
+    // @@author lilosy
     //==========================CUSTOMER RELATED====================================
     /**
      * Parses a {@code String name} into a {@code Name}.
@@ -141,6 +144,7 @@ public class ParserUtil {
         }
         return new ActivityName(trimmedName);
     }
+    // @@author
 
 
 
