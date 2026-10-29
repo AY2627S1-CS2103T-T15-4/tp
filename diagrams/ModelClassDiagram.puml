@@ -1,62 +1,58 @@
 @startuml
 !include style.puml
 skinparam arrowThickness 1.1
-skinparam arrowColor MODEL_COLOR
+skinparam arrowColor MODEL_COLOR_T4
 skinparam classBackgroundColor MODEL_COLOR
+show members
 
-package Model {
-interface ReadOnlyWatchDog
-interface ReadOnlyUserPrefs
-interface Model
+class "<<interface>>\nModel" as Model
 class ModelManager
+class "<<interface>>\nReadOnlyWatchDog" as ReadOnlyWatchDog
+class "<<interface>>\nReadOnlyUserPrefs" as ReadOnlyUserPrefs
 class WatchDog
 class UserPrefs
 class UniqueCustomerList
 class UniqueDogList
-class Enrolment
-class Activity
-class Customer
-class Dog
-class "customer.Name" as CustomerName
-class "customer.Phone" as CustomerPhone
-class "customer.Email" as CustomerEmail
-class BackupContact
-class DogName
-class Breed
-class Size
+class Customer {
+  -id: int
+}
+class Dog {
+  -id: int
+  -ownerId: Integer
+}
+class Activity {
+  -id: int
+}
+class Enrolment {
+  -activityId: int
+  -dogId: int
+  -date: LocalDate
 }
 
-ModelManager ..|> Model
-ModelManager --> "1" WatchDog
-ModelManager --> "1" UserPrefs
-Model ..> ReadOnlyWatchDog
-Model ..> ReadOnlyUserPrefs
-WatchDog ..|> ReadOnlyWatchDog
-UserPrefs ..|> ReadOnlyUserPrefs
-WatchDog *--> "1" UniqueCustomerList
-WatchDog *--> "1" UniqueDogList
-WatchDog *--> "0..*" Enrolment
+ModelManager .up.|> Model
+ModelManager --> "1" WatchDog : watchDog
+ModelManager --> "1" UserPrefs : userPrefs
+Model ..> ReadOnlyWatchDog : exposes
+Model ..> ReadOnlyUserPrefs : exposes
+WatchDog .up.|> ReadOnlyWatchDog
+UserPrefs .up.|> ReadOnlyUserPrefs
+WatchDog --> "1" UniqueCustomerList : customers
+WatchDog --> "1" UniqueDogList : dogs
+WatchDog --> "*" Activity : activities
+WatchDog --> "*" Enrolment : enrolments
 UniqueCustomerList --> "*" Customer
 UniqueDogList --> "*" Dog
-Customer *--> CustomerName
-Customer *--> CustomerPhone
-Customer *--> CustomerEmail
-Customer *--> BackupContact
-Dog *--> DogName
-Dog *--> Breed
-Dog *--> Size
-ModelManager --> "* filtered" Customer
-ModelManager --> "* filtered" Dog
-ModelManager --> "* filtered" Activity
-ModelManager ..> Enrolment : enrols dogs
 
-note bottom of Enrolment
-  Stores activity and dog IDs plus an
-  occurrence date, not object references.
+note bottom of ModelManager
+  Maintains filtered observable views of
+  customers, dogs and activities.
+  Views share the stored records.
 end note
 
 note bottom of Dog
-  Stores its persistent dog ID and an
-  optional customer ID for ownership.
+  ownerId is null for an unlinked dog.
+  Ownership and enrolment endpoints use IDs,
+  not direct references to other records.
+  Other record details and APIs are omitted.
 end note
 @enduml

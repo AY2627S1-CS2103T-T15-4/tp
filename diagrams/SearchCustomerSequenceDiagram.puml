@@ -1,31 +1,33 @@
 @startuml
 !include style.puml
-skinparam arrowColor LOGIC_COLOR_T4
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 180
 
-actor User
-participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":WatchDogParser" as Router LOGIC_COLOR
-participant ":SearchCustomerCommandParser" as Parser LOGIC_COLOR
 participant "command:SearchCustomerCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
-participant ":WatchDog" as Book MODEL_COLOR
 
-User -> Logic : execute("searchc n/Anna i/21")
-Logic -> Router : parseCommand(...)
-Router -> Parser : parse(...)
-Parser -> Command : new SearchCustomerCommand(...)
-Parser --> Router : command
-Router --> Logic : command
-Logic -> Command : execute(Model)
-Command -> Model : validate customer and dog IDs
-Command -> Model : updateFilteredCustomerList(customer predicate)
-Model -> Book : read current customers and dogs
-Book --> Model : customer and ownership records
-Command -> Model : updateFilteredDogList(owners of matching customers)
-Command -> Model : updateFilteredActivityList(has enrolments for matching customers)
-Command -> Model : set matching-owner display context
-Model --> Command : refresh filtered views and enrolment summaries
-Model --> Logic : activity cards show each matching dog and sorted stored dates
-Command --> Logic : CommandResult("Successfully searched customers by ...")
-Logic --> User : display success message and views
+[-> Command : execute(model)
+note over Command
+  Builds matchingCustomer for name Anna.
+  Related predicates follow current ownership
+  and dated enrolment records.
+end note
+Command -> Model : updateFilteredCustomerList(matchingCustomer)
+Command -> Model : updateFilteredDogList(ownedDogPredicate)
+Command -> Model : updateFilteredActivityList(enrolledActivityPredicate)
+Command -> Model : setActivityEnrolmentDogPredicate(ownedDogPredicate)
+note right of Model
+  Retains predicates for later refreshes.
+  Activity cards show matching dogs'
+  sorted stored enrolment dates.
+  Stored records are unchanged.
+end note
+[<-- Command : commandResult
+
+legend bottom
+  Searches by name without an ID criterion. Predicate evaluation is omitted.
+  Parsing and saving follow the shared Logic flow.
+  Successful execution only; validation failures are omitted.
+endlegend
 @enduml

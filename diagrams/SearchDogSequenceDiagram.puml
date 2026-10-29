@@ -1,30 +1,33 @@
 @startuml
 !include style.puml
-skinparam arrowColor LOGIC_COLOR_T4
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 180
 
-actor User
-participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":WatchDogParser" as Router LOGIC_COLOR
-participant ":SearchDogCommandParser" as Parser LOGIC_COLOR
 participant "command:SearchDogCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
-participant ":WatchDog" as Book MODEL_COLOR
 
-User -> Logic : execute("searchd n/Waffle")
-Logic -> Router : parseCommand(...)
-Router -> Parser : parse(" n/Waffle")
-Parser -> Command : new SearchDogCommand(...)
-Parser --> Router : command
-Router --> Logic : command
-Logic -> Command : execute(Model)
+[-> Command : execute(model)
+note over Command
+  Builds dogPredicate for name Waffle.
+  Related predicates follow current dog ownership
+  and dated enrolment records.
+end note
 Command -> Model : updateFilteredDogList(dogPredicate)
-Command -> Model : updateFilteredCustomerList(owner of matching dog)
-Command -> Model : updateFilteredActivityList(has matching enrolled dog)
-Model -> Book : get enrolment records
-Book --> Model : activity ID and dog ID pairs
-Command -> Model : set matching-dog display context
-Model --> Command : refresh filtered views and enrolment summaries
-Model --> Logic : activity cards show each matching dog and sorted stored dates
-Command --> Logic : CommandResult
-Logic --> User : display success message and views
+Command -> Model : updateFilteredCustomerList(ownerPredicate)
+Command -> Model : updateFilteredActivityList(enrolledActivityPredicate)
+Command -> Model : setActivityEnrolmentDogPredicate(dogPredicate)
+note right of Model
+  Retains predicates for later refreshes.
+  Activity cards show matching dogs'
+  sorted stored enrolment dates.
+  Stored records are unchanged.
+end note
+[<-- Command : commandResult
+
+legend bottom
+  Searches by name without an ID criterion. Predicate evaluation is omitted.
+  Parsing and saving follow the shared Logic flow.
+  Successful execution only; validation failures are omitted.
+endlegend
 @enduml
