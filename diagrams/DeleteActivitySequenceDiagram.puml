@@ -2,64 +2,28 @@
 !include style.puml
 skinparam ArrowFontStyle plain
 skinparam ParticipantFontColor #FFFFFF
-/'
-// @@author Kenneth-Chia
-'/
 skinparam maxMessageSize 180
-/'
-// @@author
-'/
 
 participant "command:DeleteActivityCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
 
-/'
-// @@author Kenneth-Chia
-'/
 [-> Command : execute(model)
-/'
-// @@author
-'/
 Command -> Model : getActivityList()
 Model --> Command : activities
-/'
-// @@author Kenneth-Chia
-'/
 note over Command
   Finds the activity with persistent ID 21.
 end note
-/'
-// @@author
-'/
 Command -> Model : deleteActivity(activityToDelete)
-/'
-// @@author Kenneth-Chia
-'/
 note right of Model
   Removes the schedule and all its enrolments.
   The next activity ID is unchanged;
   deleted IDs are not reused.
-/'
-// @@author
-'/
 end note
-/'
-// @@author Kenneth-Chia
-'/
 [<-- Command : commandResult
-/'
-// @@author
-'/
 
 legend bottom
-/'
-// @@author Kenneth-Chia
-'/
   Deletes activity 21. Model internals are omitted.
   Parsing and saving follow the shared Logic flow.
   Successful execution only; validation failures are omitted.
-/'
-// @@author
-'/
 endlegend
 @enduml

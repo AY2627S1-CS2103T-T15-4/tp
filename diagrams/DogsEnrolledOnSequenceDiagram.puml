@@ -31,6 +31,3 @@ legend bottom
   Returns an unmodifiable snapshot without changing filters or records.
 endlegend
 @enduml
-/'
-// @@author
-'/

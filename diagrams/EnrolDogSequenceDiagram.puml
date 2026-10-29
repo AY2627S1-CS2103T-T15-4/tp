@@ -1,21 +1,12 @@
 @startuml
 !include style.puml
-/'
-// @@author Kenneth-Chia
-'/
 skinparam ArrowFontStyle plain
 skinparam ParticipantFontColor #FFFFFF
 skinparam maxMessageSize 180
-/'
-// @@author
-'/
 
 participant "command:EnrolDogCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
 
-/'
-// @@author Kenneth-Chia
-'/
 [-> Command : execute(model)
 Command -> Model : enrolDogs(activityId, date, dogIds)
 note right of Model
@@ -31,7 +22,4 @@ legend bottom
   Parsing and saving follow the shared Logic flow.
   Successful execution only; validation failures are omitted.
 endlegend
-/'
-// @@author
-'/
 @enduml

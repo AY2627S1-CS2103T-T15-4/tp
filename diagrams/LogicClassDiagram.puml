@@ -5,9 +5,6 @@ skinparam arrowColor LOGIC_COLOR_T4
 skinparam classBackgroundColor LOGIC_COLOR
 
 package Logic as LogicPackage {
-/'
-// @@author Kenneth-Chia
-'/
 class "<<interface>>\nLogic" as Logic
 class LogicManager
 class WatchDogParser
@@ -15,14 +12,8 @@ class "{abstract}\nCommand" as Command
 class AddDogCommand
 class SummaryCommand
 class CommandResult
-/'
-// @@author
-'/
 }
 
-/'
-// @@author Kenneth-Chia
-'/
 class "<<interface>>\nModel" as Model MODEL_COLOR
 class "<<interface>>\nStorage" as Storage STORAGE_COLOR
 
@@ -48,7 +39,4 @@ note bottom of LogicManager
   Handles undo/redo snapshots and clear confirmation.
   History fields and commands are omitted.
 end note
-/'
-// @@author
-'/
 @enduml
