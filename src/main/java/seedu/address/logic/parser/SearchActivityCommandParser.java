@@ -35,6 +35,7 @@ public class SearchActivityCommandParser implements Parser<SearchActivityCommand
         LocalDate date = null;
         LocalTime time = null;
         Recurrence recurrence = null;
+        Integer activityId = null;
         int end = 0;
         Matcher matcher = FIELD_FORMAT.matcher(input);
         while (matcher.find()) {
@@ -70,6 +71,12 @@ public class SearchActivityCommandParser implements Parser<SearchActivityCommand
                     }
                     recurrence = parseRecurrence(value);
                 }
+                case "i" -> {
+                    if (activityId != null) {
+                        throw invalidFormat();
+                    }
+                    activityId = parseActivityId(value);
+                }
                 default -> throw invalidFormat();
             }
             end = matcher.end();
@@ -77,7 +84,19 @@ public class SearchActivityCommandParser implements Parser<SearchActivityCommand
         if (end == 0 || !input.substring(end).isBlank()) {
             throw invalidFormat();
         }
-        return new SearchActivityCommand(name, date, time, recurrence);
+        return new SearchActivityCommand(name, date, time, recurrence, activityId);
+    }
+
+    private static int parseActivityId(String value) throws ParseException {
+        try {
+            int id = Integer.parseInt(value);
+            if (id <= 0) {
+                throw new NumberFormatException();
+            }
+            return id;
+        } catch (NumberFormatException exception) {
+            throw new ParseException(SearchActivityCommand.MESSAGE_INVALID_ID, exception);
+        }
     }
 
     private static String normalizeName(String value) {

@@ -14,8 +14,6 @@ import seedu.address.model.dog.Size;
 public class SearchDogCommandParser implements Parser<SearchDogCommand> {
     private static final Pattern FIELD_FORMAT = Pattern.compile(
             "(?<prefix>n|b|s|i)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
-    private static final String MESSAGE_INVALID_INFO = "Error in searching dogs:\n"
-            + "Info is in the wrong format. Input in the correct format";
 
     @Override
     public SearchDogCommand parse(String args) throws ParseException {
@@ -78,7 +76,7 @@ public class SearchDogCommandParser implements Parser<SearchDogCommand> {
             }
             return parsed;
         } catch (NumberFormatException exception) {
-            throw new ParseException(MESSAGE_INVALID_INFO, exception);
+            throw new ParseException(SearchDogCommand.MESSAGE_INVALID_ID, exception);
         }
     }
 

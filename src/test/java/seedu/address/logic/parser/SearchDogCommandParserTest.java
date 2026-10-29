@@ -47,6 +47,14 @@ public class SearchDogCommandParserTest {
     }
 
     @Test
+    public void parse_invalidId_includesSearchingErrorMessage() {
+        for (String value : new String[]{"-1", "0", "00", "not-a-number", "2147483648", "-2147483649"}) {
+            assertThrows(ParseException.class, "Error in searching dogs:\nPlease enter a valid dog index", () ->
+                    parser.parse("i/" + value));
+        }
+    }
+
+    @Test
     public void parse_invalidSize_includesSearchingErrorMessage() {
         String expectedMessage = "Error in searching dogs:\n"
                 + "Invalid dog size. Please input small/medium/large/giant only.";

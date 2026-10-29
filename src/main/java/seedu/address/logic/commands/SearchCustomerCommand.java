@@ -23,9 +23,9 @@ public class SearchCustomerCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + " [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_IDS] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]";
     public static final String MESSAGE_INVALID_DOG_ID = "Error in searching customers:\n"
-            + "Invalid dog id. Please input a valid dog id.";
+            + "Please enter a valid dog index";
     public static final String MESSAGE_INVALID_CUSTOMER_ID = "Error in searching customers:\n"
-            + "Invalid customer id. Please input a valid customer id.";
+            + "Please enter a valid customer index";
     private static final String MESSAGE_SUCCESS_PREFIX = "Successfully searched customers by ";
 
     private final String name;

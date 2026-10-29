@@ -90,7 +90,7 @@ public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand
                 }
                 dogIds.add(id);
             } catch (NumberFormatException exception) {
-                throw new ParseException(MESSAGE_INVALID_INFO, exception);
+                throw new ParseException(SearchCustomerCommand.MESSAGE_INVALID_DOG_ID, exception);
             }
         }
         return dogIds;
@@ -107,7 +107,7 @@ public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand
             }
             return customerId;
         } catch (NumberFormatException exception) {
-            throw new ParseException(MESSAGE_INVALID_INFO, exception);
+            throw new ParseException(SearchCustomerCommand.MESSAGE_INVALID_CUSTOMER_ID, exception);
         }
     }
 

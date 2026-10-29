@@ -168,10 +168,10 @@ Format: `editactivity ACTIVITY_ID [n/NAME] [date/YYYY-MM-DD] [start/HH:mm] [end/
 
 ### Searching activities: `searcha`
 
-Searches activities by name, date, time, and/or recurrence. At least one field must be provided, and all supplied
+Searches activities by name, date, time, recurrence, and/or activity ID. At least one field must be provided, and all supplied
 fields must match.
 
-Format: `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`
+Format: `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE] [i/ACTIVITY_ID]`
 
 Example: `searcha n/Dog run t/16:00`
 
@@ -179,10 +179,14 @@ Example: `searcha n/Dog run t/16:00`
 * Date matching includes activities that occur on the specified date, including daily and weekly recurrences.
 * Time matching is inclusive: an activity matches when the specified time is between its start and end times.
 * Recurrence matching accepts `Once`, `Weekly`, or `Daily`, and is case-insensitive.
+* Activity ID must be a positive ID in the database and matches exactly. It combines with other fields using AND.
+  Invalid or nonexistent IDs display `Error in searching activities:` followed by
+  `Please enter a valid activity index`. Zero, negative, nonnumeric, and out-of-range IDs are invalid.
+  Invalid IDs reject the entire search and preserve the previous display. Repeated field prefixes are rejected.
 * Dates must use `YYYY-MM-DD`, and times must use 24-hour `HH:mm` format.
-* Only lowercase `n/`, `d/`, `t/`, and `r/` field prefixes are accepted.
+* Only lowercase `n/`, `d/`, `t/`, `r/`, and `i/` field prefixes are accepted.
 * A successful command displays `Successfully searched activities by` followed by the supplied values, in the form
-  `name: NAME`, `date: YYYY-MM-DD`, `time: HH:mm`, and `recurrence: Once|Weekly|Daily`. Unused fields are omitted.
+  `name: NAME`, `date: YYYY-MM-DD`, `time: HH:mm`, `recurrence: Once|Weekly|Daily`, and `activity id: ACTIVITY_ID`. Unused fields are omitted.
   If there are no matches, the activity panel is empty.
 * The dog panel shows dogs enrolled in the matching activities; when a date is supplied, only enrolments on that
   occurrence date are included. The customer panel shows owners of those dogs.
@@ -373,7 +377,7 @@ Example: `searchd b/Golden Retriever s/Medium`
 * ID matching is exact; dog IDs are positive integers and must belong to a dog in the database.
 * A successful command displays `Successfully searched dogs by` followed by only the supplied fields.
 * Invalid input displays `Error in searching dogs:` followed by the applicable error message. Invalid or nonexistent
-  dog IDs display `Invalid dog id. Please input a valid dog id.`
+  dog IDs display `Please enter a valid dog index`.
 * Invalid sizes display `Invalid dog size. Please input small/medium/large/giant only.`
 * The customer panel is also filtered to customers linked to the matching dogs.
 * The activity panel shows activities in which a matching dog is enrolled.
@@ -427,6 +431,9 @@ Example: `searchc n/Anna d/12 34`
 * Dog IDs and customer ID appear in the success message only when supplied; dog IDs are displayed in ascending numeric order.
 * Only lowercase `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/` prefixes are accepted.
 * Invalid field values display `Error in searching customers:` followed by the applicable error message. Invalid or nonexistent dog and customer IDs have specific messages.
+  Dog IDs display `Please enter a valid dog index`; customer IDs display `Please enter a valid customer index`.
+  Zero, negative, nonnumeric, and out-of-range IDs are invalid. If any ID is invalid, the entire search is rejected
+  and the previous display is preserved.
 * Unsupported field prefixes are rejected as invalid command formats.
 * If no customers match, the customer panel is empty.
 * The filter remains active while customers or their linked dogs are added, edited, deleted, linked, or unlinked.
@@ -583,7 +590,7 @@ Action     | Format, Examples
 **Unenrol dogs** | `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]`<br>Fields may appear in any order. Removes only the specified dated enrolments.
 **Delete activity** | `deleteactivity ACTIVITY_ID`<br>e.g., `deleteactivity 21`
 **Edit activity** | `editactivity ACTIVITY_ID [n/NAME] [date/YYYY-MM-DD] [start/HH:mm] [end/HH:mm] [r/RECURRENCE]`<br>e.g., `editactivity 21 n/Morning walk start/09:00 end/10:00`
-**Search activities** | `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`<br>e.g., `searcha n/Dog run t/16:00`
+**Search activities** | `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE] [i/ACTIVITY_ID]`<br>e.g., `searcha n/Dog run t/16:00`
 **Today** | `today`<br>Shows today's activities and the enrolled dogs and owners involved.
 **Search customers by fields** | `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`<br>e.g., `searchc n/Anna i/21`
 **Add dog** | `adddog n/NAME b/BREED s/SIZE`<br>e.g., `adddog n/Cookie b/Chihuahua s/Small`

@@ -22,6 +22,8 @@ public class ActivityCard extends UiPart<Region> {
     @FXML
     private Label dogSummary;
     @FXML
+    private Label enrolmentsHeading;
+    @FXML
     private Label enrolments;
 
     /**
@@ -45,7 +47,9 @@ public class ActivityCard extends UiPart<Region> {
         dogSummary.setText(dogSummaryText);
         dogSummary.setVisible(!dogSummaryText.isBlank());
         dogSummary.setManaged(!dogSummaryText.isBlank());
-        enrolments.setText(enrolmentEntry);
+        enrolmentsHeading.setVisible(!enrolmentEntry.isBlank());
+        enrolmentsHeading.setManaged(!enrolmentEntry.isBlank());
+        enrolments.setText(enrolmentEntry.substring(enrolmentEntry.indexOf('\n') + 1));
         enrolments.setVisible(!enrolmentEntry.isBlank());
         enrolments.setManaged(!enrolmentEntry.isBlank());
     }
