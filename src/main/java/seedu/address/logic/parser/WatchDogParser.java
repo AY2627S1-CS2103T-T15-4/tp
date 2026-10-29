@@ -89,6 +89,7 @@ public class WatchDogParser {
             case UnlinkCommand.COMMAND_WORD -> new UnlinkCommandParser().parse(arguments);
             case EnrolDogCommand.COMMAND_WORD -> new EnrolDogCommandParser().parse(arguments);
             case UnenrolDogCommand.COMMAND_WORD -> new UnenrolDogCommandParser().parse(arguments);
+            // @@author Kenneth-Chia
             case SummaryCommand.COMMAND_WORD -> {
                 if (!arguments.isBlank()) {
                     throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
@@ -96,6 +97,7 @@ public class WatchDogParser {
                 }
                 yield new SummaryCommand();
             }
+            // @@author
             case TodayCommand.COMMAND_WORD -> new TodayCommandParser().parse(arguments);
             case ResetDisplayCommand.COMMAND_WORD -> {
                 if (!arguments.isBlank()) {

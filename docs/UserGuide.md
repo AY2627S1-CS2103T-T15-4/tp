@@ -105,6 +105,7 @@ running `help adddog`, `undo` undoes the addition. Running help after `undo` als
 
 
 <!--@@author-->
+<!-- @@author Kenneth-Chia -->
 ### Adding an activity: `addactivity`
 
 Creates an activity schedule with zero dogs and reports its persistent ID. The schedule is saved
@@ -132,6 +133,7 @@ Examples:
 Invalid dates, times, recurrence values, missing or repeated fields produce an error.
 Creation does not book any dogs, so overlapping empty schedules are allowed. Dog booking commands
 and activity cards are separate features; this contribution reports creation in the command feedback.
+<!-- @@author -->
 
 ### Reading activity cards
 
@@ -281,6 +283,7 @@ Format: `summary` (no parameters; surrounding whitespace is accepted)
 
 Example: `summary` displays the statistics below using your stored records and the current local date.
 
+<!-- @@author Kenneth-Chia -->
 Example output:
 
 ```text
@@ -298,6 +301,7 @@ Today (2026-10-24): 5 activities | 12 distinct dogs enrolled
   All activity counts include empty activities and sessions that ended earlier today.
 * Today's distinct dogs enrolled counts each dog ID once across all activities on that date.
   Yesterday's and tomorrow's enrolments are excluded. Enrolment does not indicate attendance.
+<!-- @@author -->
 
 The date shown is read once when the command runs, using the computer's local date.
 WatchDog attempts to save after running `summary`. If saving fails, the statistics are still displayed
@@ -335,9 +339,11 @@ Example: `editcustomer 1 p/91234567 e/johndoe@example.com`
 Assigns one or more existing, unowned dogs to an existing customer. Use this to record who owns each dog;
 one command can link several dogs to the same customer.
 
+<!-- @@author Kenneth-Chia -->
 Format: `link c/CUSTOMER_ID d/DOG_ID [DOG_ID]...`
 
 Example: `link c/1 d/2 3` links dogs 2 and 3 to customer 1.
+<!-- @@author -->
 
 * Use persistent record IDs, including records hidden by a search. Dog IDs start at 1.
 * Put exactly one `c/` field first, followed by one `d/` field with space-separated dog IDs.
@@ -363,12 +369,14 @@ Example: `link c/1 d/2 3` links dogs 2 and 3 to customer 1.
 Removes ownership links from selected dogs or from all dogs belonging to one customer. The dogs and
 customers remain in WatchDog, so you can subsequently link the dogs to another customer.
 
+<!-- @@author Kenneth-Chia -->
 Formats: `unlink d/DOG_ID [DOG_ID]...` or `unlink c/CUSTOMER_ID`
 
 Examples:
 
 * `unlink d/1 2 3` removes ownership from dogs 1, 2 and 3, even if they have different owners.
 * `unlink c/1` removes ownership from every dog belonging to customer 1, including hidden dogs.
+<!-- @@author -->
 
 * Customer and dog IDs are positive integers. Use lowercase prefixes and whitespace between dog IDs.
   Do not put whitespace after the slash. Repeated dog IDs (including `d/2 02`) are rejected.

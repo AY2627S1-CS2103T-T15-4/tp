@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 /**
  * Activity schedule domain objects, independent of parsing, persistence, and presentation.
  *
@@ -21,3 +22,4 @@
  * use the model rather than mutate schedules.
  */
 package seedu.address.model.activity;
+// @@author

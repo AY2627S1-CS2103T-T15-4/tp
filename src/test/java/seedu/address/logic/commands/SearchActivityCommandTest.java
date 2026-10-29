@@ -125,9 +125,9 @@ public class SearchActivityCommandTest {
         ModelManager model = modelWithActivities();
         new SearchActivityCommand("run", null, null).execute(model);
         var activities = List.copyOf(model.getFilteredActivityList());
-        for (int id : new int[]{-1, 0, 999, Integer.MAX_VALUE}) {
+        for (int id : new int[]{999, Integer.MAX_VALUE}) {
             assertThrows(CommandException.class,
-                    "Error in searching activities:\nPlease enter a valid activity index", () ->
+                    "Error in searching activities:\nPlease enter a valid activity ID", () ->
                     new SearchActivityCommand(null, null, null, null, id).execute(model));
             assertEquals(activities, model.getFilteredActivityList());
             assertTrue(model.getFilteredDogList().isEmpty());

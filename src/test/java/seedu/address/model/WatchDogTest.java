@@ -16,6 +16,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
@@ -360,6 +361,53 @@ public class WatchDogTest {
     }
 
     @Test
+    public void removeDog_listenerRestoresEnrolment_assertsNoDanglingEnrolments() {
+        Dog dog = watchDog.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
+        LocalDate date = LocalDate.of(2028, 2, 29);
+        Activity activity = watchDog.addActivity(new ActivityName("Walk"), date,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        Enrolment enrolment = new Enrolment(activity.getId(), dog.getId(), date);
+        watchDog.addEnrolmentFromStorage(enrolment);
+        // Simulate a faulty observer restoring the deleted record and its booking.
+        ObservableList<Dog> observed = watchDog.getDogList();
+        ListChangeListener<Dog> listener = new ListChangeListener<>() {
+            @Override
+            public void onChanged(Change<? extends Dog> change) {
+                observed.removeListener(this);
+                watchDog.addDogFromStorage(dog);
+                watchDog.addEnrolmentFromStorage(enrolment);
+            }
+        };
+        observed.addListener(listener);
+
+        assertThrows(AssertionError.class, "Deleted dog must have no remaining enrolments.", () ->
+                watchDog.removeDog(dog));
+
+        assertEquals(List.of(dog), watchDog.getDogList());
+        assertEquals(List.of(enrolment), watchDog.getEnrolmentList());
+    }
+
+    @Test
+    public void removeDog_listenerRestoresDog_assertsDogWasRemoved() {
+        Dog dog = watchDog.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
+        // Simulate a faulty observer restoring the record during its removal notification.
+        ObservableList<Dog> observed = watchDog.getDogList();
+        ListChangeListener<Dog> listener = new ListChangeListener<>() {
+            @Override
+            public void onChanged(Change<? extends Dog> change) {
+                observed.removeListener(this);
+                watchDog.addDogFromStorage(dog);
+            }
+        };
+        observed.addListener(listener);
+
+        assertThrows(AssertionError.class, "Deleted dog must no longer be stored.", () -> watchDog.removeDog(dog));
+
+        assertEquals(List.of(dog), watchDog.getDogList());
+        assertTrue(watchDog.getEnrolmentList().isEmpty());
+    }
+
+    @Test
     public void getRecordLists_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> watchDog.getDogList().remove(0));
         assertThrows(UnsupportedOperationException.class, () -> watchDog.getCustomerList().remove(0));
@@ -370,9 +418,11 @@ public class WatchDogTest {
         WatchDog original = getTypicalWatchDog();
         WatchDog copy = new WatchDog(original);
 
+        // @@author Kenneth-Chia
         assertEquals(original, original);
         assertEquals(original, copy);
         assertEquals(copy, original);
+        // @@author
         assertEquals(new WatchDog(), new WatchDog());
     }
 
@@ -380,6 +430,7 @@ public class WatchDogTest {
     public void equals_differentDogs_returnsFalse() {
         WatchDog original = getTypicalWatchDog();
         WatchDog differentDogs = new WatchDog(original);
+        // @@author Kenneth-Chia
         differentDogs.removeDog(MAX);
 
         assertEquals(original.getCustomerList(), differentDogs.getCustomerList());
@@ -388,13 +439,16 @@ public class WatchDogTest {
 
     @Test
     public void equals_differentCustomers_returnsFalse() {
+        // @@author
         WatchDog original = getTypicalWatchDog();
         WatchDog differentCustomers = new WatchDog(original);
+        // @@author Kenneth-Chia
         differentCustomers.setCustomers(List.of(ALICE));
 
         assertEquals(original.getDogList(), differentCustomers.getDogList());
         assertNotEquals(original, differentCustomers);
     }
+    // @@author
 
     @Test
     public void equals_differentIdCounters_returnsFalse() {

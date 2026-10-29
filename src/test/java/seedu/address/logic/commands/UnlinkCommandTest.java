@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,16 +23,20 @@ import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
+import seedu.address.model.dog.exceptions.LinkException;
 import seedu.address.model.dog.exceptions.UnlinkException;
 
 /** Tests atomic unlinking through the real parser and model. */
 public class UnlinkCommandTest {
     private final WatchDogParser parser = new WatchDogParser();
+    // @@author Kenneth-Chia
     private ModelManager model;
 
     @BeforeEach
     public void setUp() throws Exception {
+        // @@author
         WatchDog book = new WatchDog();
+        // @@author Kenneth-Chia
         book.addCustomer(new Customer(7, "Alex", "91234567", "alex@example.com", "98765432"));
         book.addCustomer(new Customer(8, "Sam", "92345678", "sam@example.com", "98765432"));
         for (int id : List.of(42, 43, 44, 45)) {
@@ -103,10 +109,12 @@ public class UnlinkCommandTest {
 
     @Test
     public void unlinkDogs_emptyOrRepeatedIds_rejectsWithoutMutation() {
+        // @@author
         WatchDog before = new WatchDog(model.getWatchDog());
         assertThrows(UnlinkException.class, () -> model.unlinkDogs(List.of()));
         assertThrows(UnlinkException.class, () -> model.unlinkDogs(List.of(42, 42)));
         assertEquals(before, model.getWatchDog());
+        // @@author Kenneth-Chia
     }
 
     @Test
@@ -122,7 +130,9 @@ public class UnlinkCommandTest {
         assertNotEquals(command, null);
         assertNotEquals(command, new Object());
         assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(-1));
+        // @@author
         assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(0));
+        // @@author Kenneth-Chia
         assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(List.of()));
         assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(List.of(-1)));
         assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(List.of(42, 42)));
@@ -158,13 +168,49 @@ public class UnlinkCommandTest {
         assertNotEquals(new UnlinkCommand(7), new UnlinkCommand(List.of(7)));
     }
 
-    private void assertRejected(String input, String message) {
+    @Test
+    public void constructor_mutableInput_keepsOriginalBatch() throws Exception {
+        List<Integer> ids = new ArrayList<>(List.of(42));
+        UnlinkCommand command = new UnlinkCommand(ids);
+        ids.clear();
+        ids.add(44);
+        Dog unaffected = model.getDogList().get(2);
+        command.execute(model);
+        assertEquals(Optional.empty(), model.getDogList().get(0).getOwnerId());
+        assertEquals(unaffected, model.getDogList().get(2));
+    }
+
+    @Test
+    public void constructor_nullAndZeroInputs_rejectedIndependently() {
+        assertThrows(NullPointerException.class, () -> new UnlinkCommand(null));
+        assertThrows(NullPointerException.class, () -> new UnlinkCommand(Arrays.asList(42, null)));
+        assertThrows(IllegalArgumentException.class, () -> new UnlinkCommand(List.of(0)));
+    }
+
+    @Test
+    public void model_invalidIds_rejectsEachBatchWithoutMutation() {
         WatchDog before = new WatchDog(model.getWatchDog());
+        assertThrows(NullPointerException.class, () -> model.unlinkDogs(null));
+        for (List<Integer> ids : List.of(List.of(0), List.of(-1), List.of(Integer.MIN_VALUE),
+                Arrays.asList(42, null))) {
+            assertThrows(UnlinkException.class, () -> model.unlinkDogs(ids));
+            assertEquals(before, model.getWatchDog());
+        }
+    }
+
+    private void assertRejected(String input, String message) {
+        // @@author
+        WatchDog before = new WatchDog(model.getWatchDog());
+        // @@author Kenneth-Chia
         var visibleDogs = List.copyOf(model.getFilteredDogList());
         var visibleCustomers = List.copyOf(model.getFilteredCustomerList());
         CommandException exception = assertThrows(CommandException.class, () -> execute(input));
         assertEquals(message, exception.getMessage());
+        assertTrue(input.startsWith("link") ? exception.getCause() instanceof LinkException
+                : exception.getCause() instanceof UnlinkException);
+        // @@author
         assertEquals(before, model.getWatchDog());
+        // @@author Kenneth-Chia
         assertEquals(visibleDogs, model.getFilteredDogList());
         assertEquals(visibleCustomers, model.getFilteredCustomerList());
     }
@@ -173,3 +219,4 @@ public class UnlinkCommandTest {
         return parser.parseCommand(input).execute(model).getFeedbackToUser();
     }
 }
+// @@author

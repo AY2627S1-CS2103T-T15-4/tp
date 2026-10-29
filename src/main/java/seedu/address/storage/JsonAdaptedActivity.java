@@ -1,3 +1,4 @@
+// @@author Kenneth-Chia
 package seedu.address.storage;
 
 import java.time.DateTimeException;
@@ -61,3 +62,4 @@ class JsonAdaptedActivity {
         }
     }
 }
+// @@author

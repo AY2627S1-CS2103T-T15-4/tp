@@ -35,11 +35,13 @@ public interface Logic {
     ObservableList<Customer> getFilteredCustomerList();
     //@@author
 
+    // @@author Kenneth-Chia
     /** Returns an unmodifiable observable view of filtered dogs. */
     ObservableList<Dog> getFilteredDogList();
 
     /** Returns an unmodifiable observable view of all dogs. */
     ObservableList<Dog> getDogList();
+    // @@author
 
     /** Returns an unmodifiable observable view of all activities. */
     ObservableList<Activity> getActivityList();

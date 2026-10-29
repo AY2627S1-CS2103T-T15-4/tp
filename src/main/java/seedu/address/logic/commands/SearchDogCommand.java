@@ -15,7 +15,7 @@ public class SearchDogCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + " [n/NAME] [b/BREED] [s/SIZE] [i/ID]";
     public static final String MESSAGE_INVALID_ID = "Error in searching dogs:\n"
-            + "Please enter a valid dog index";
+            + "Please enter a valid dog ID";
     private static final String MESSAGE_SUCCESS_PREFIX = "Successfully searched dogs by ";
 
     private final String name;

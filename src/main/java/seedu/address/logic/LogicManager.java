@@ -192,6 +192,7 @@ public class LogicManager implements Logic {
         return model.getFilteredCustomerList();
     }
 
+    // @@author Kenneth-Chia
     @Override
     public ObservableList<Dog> getFilteredDogList() {
         return model.getFilteredDogList();
@@ -201,6 +202,7 @@ public class LogicManager implements Logic {
     public ObservableList<Dog> getDogList() {
         return model.getDogList();
     }
+    // @@author
 
     @Override
     public ObservableList<Activity> getActivityList() {

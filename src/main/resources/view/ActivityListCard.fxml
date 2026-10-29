@@ -17,13 +17,21 @@
       <padding>
         <Insets top="10" right="14" bottom="10" left="14" />
       </padding>
-      <HBox spacing="0.5" alignment="CENTER_LEFT">
+      <HBox fx:id="header" spacing="0.5" alignment="CENTER_LEFT">
         <Label fx:id="id" styleClass="cell_big_label">
           <minWidth>
             <Region fx:constant="USE_PREF_SIZE" />
           </minWidth>
         </Label>
         <Label fx:id="name" styleClass="cell_big_label" />
+        <Label fx:id="headerTime" styleClass="cell_small_label" style="-fx-font-weight: bold;">
+          <HBox.margin>
+            <Insets left="16" />
+          </HBox.margin>
+          <minWidth>
+            <Region fx:constant="USE_PREF_SIZE" />
+          </minWidth>
+        </Label>
       </HBox>
       <Label fx:id="date" styleClass="cell_small_label" />
       <Label fx:id="time" styleClass="cell_small_label" />

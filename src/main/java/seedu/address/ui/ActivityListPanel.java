@@ -5,9 +5,11 @@ import static java.util.Objects.requireNonNull;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
@@ -108,18 +110,22 @@ public class ActivityListPanel extends UiPart<Region> {
     public void refresh(LocalDate today) {
         requireNonNull(today);
         List<CardListEntry> cards = new ArrayList<>();
-        activities.stream()
-                .filter(activity -> !todayPanel || activity.occursOn(today))
-                .forEach(activity -> {
-                    String bookingSummary = todayPanel
-                            ? ActivityBookingSummary.bookingsOn(enrolments, activity.getId(), today)
-                            : ActivityBookingSummary.upcomingBookings(enrolments, activity.getId(), today);
-                    String searchSummary = todayPanel ? "" : enrolmentSummary.apply(activity);
-                    Supplier<Region> cardFactory = () -> new ActivityCard(activity, bookingSummary,
-                            searchSummary).getRoot();
-                    Object contentSnapshot = List.of(activity, bookingSummary, searchSummary);
-                    cards.add(new CardListEntry("activity:" + activity.getId(), contentSnapshot, cardFactory));
-                });
+        Stream<Activity> displayedActivities = activities.stream()
+                .filter(activity -> !todayPanel || activity.occursOn(today));
+        if (todayPanel) {
+            displayedActivities = displayedActivities.sorted(Comparator.comparing(Activity::getStartTime)
+                    .thenComparingInt(Activity::getId));
+        }
+        displayedActivities.forEach(activity -> {
+            String bookingSummary = todayPanel
+                    ? ActivityBookingSummary.bookingsOn(enrolments, activity.getId(), today)
+                    : ActivityBookingSummary.upcomingBookings(enrolments, activity.getId(), today);
+            String searchSummary = todayPanel ? "" : enrolmentSummary.apply(activity);
+            Supplier<Region> cardFactory = () -> new ActivityCard(activity, bookingSummary,
+                    searchSummary, todayPanel).getRoot();
+            Object contentSnapshot = List.of(activity, bookingSummary, searchSummary);
+            cards.add(new CardListEntry("activity:" + activity.getId(), contentSnapshot, cardFactory));
+        });
         CardListUpdater.reconcile(recordListView, cards);
     }
 
