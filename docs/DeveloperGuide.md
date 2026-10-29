@@ -562,8 +562,10 @@ The command replaces the active activity, dog, and customer displays and returns
 
 `WatchDogParser` routes `filterun` to `FilterUnlinkedCommandParser`, which accepts only the lowercase
 categories `dog` and `customer`, with arbitrary surrounding whitespace. `FilterUnlinkedCommand` filters dogs
-whose `ownerId` is absent or customers with no owned dogs, and clears the related panel. Its predicates are
-stored by `ModelManager`, so the results refresh after later record or relationship changes.
+whose `ownerId` is absent or customers with no owned dogs. The dog form hides customers and shows
+activities with bookings for unowned dogs; its enrolment details include only those dogs. The customer
+form hides both dogs and activities. Its predicates are stored by `ModelManager`, so the results refresh
+after later record or relationship changes.
 
 <puml src="diagrams/FilterUnlinkedSequenceDiagram.puml" alt="Filtering unlinked dogs or customers" />
 
