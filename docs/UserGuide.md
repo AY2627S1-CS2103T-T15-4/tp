@@ -165,7 +165,7 @@ Example: `searcha n/Dog run t/16:00`
 * Dates must use `YYYY-MM-DD`, and times must use 24-hour `HH:mm` format.
 * Only lowercase `n/`, `d/`, `t/`, and `r/` field prefixes are accepted.
 * A successful command displays `Successfully searched activities by` followed by the supplied values, in the form
-  `name: NAME`, `time: HH:mm`, `date: YYYY-MM-DD`, and `recurrence: Once|Weekly|Daily`. Unused fields are omitted.
+  `name: NAME`, `date: YYYY-MM-DD`, `time: HH:mm`, and `recurrence: Once|Weekly|Daily`. Unused fields are omitted.
   If there are no matches, the activity panel is empty.
 * The dog panel shows dogs enrolled in the matching activities; when a date is supplied, only enrolments on that
   occurrence date are included. The customer panel shows owners of those dogs.
@@ -367,9 +367,12 @@ Example: `searchd b/Golden Retriever s/Medium`
 Format: `filterun dog` or `filterun customer`
 
 * `filterun dog` displays dogs that are not linked to any customer and clears the customer panel.
-* `filterun customer` displays customers that do not own any dogs and clears the dog panel.
+  The activity panel shows activities those dogs are enrolled in, including past enrolments. Each activity's
+  `Enrolments` section shows only unowned dogs and their stored enrolment dates.
+* `filterun customer` displays customers that do not own any dogs and clears the dog and activity panels.
 * The category must be lowercase. Multiple spaces between `filterun` and the category are accepted.
 * The filter remains active while records are added, edited, deleted, linked, or unlinked.
+  Matching activities also refresh when enrolments change.
 
 ### Searching customers: `searchc`
 

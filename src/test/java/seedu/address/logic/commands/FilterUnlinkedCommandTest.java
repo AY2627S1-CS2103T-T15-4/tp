@@ -3,11 +3,16 @@ package seedu.address.logic.commands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.model.ModelManager;
+import seedu.address.model.activity.Activity;
+import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
@@ -15,6 +20,81 @@ import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
 
 public class FilterUnlinkedCommandTest {
+    private static final LocalDate ENROL_DATE = LocalDate.now().plusDays(7);
+
+    @Test
+    public void execute_filterDogs_replacesPreviousSearchAndLimitsEnrolmentSummary() throws Exception {
+        ModelManager model = modelWithLinkedAndUnlinkedRecords();
+        Activity shared = addActivity(model, "Shared walk", 9);
+        Activity ownedOnly = addActivity(model, "Owned walk", 11);
+        Activity empty = addActivity(model, "Empty walk", 13);
+        model.enrolDogs(shared.getId(), ENROL_DATE, List.of(1, 2));
+        model.enrolDogs(ownedOnly.getId(), ENROL_DATE, List.of(1));
+        new SearchDogCommand(null, null, null, 1).execute(model);
+
+        new FilterUnlinkedCommand(true).execute(model);
+
+        assertEquals(List.of(shared), model.getFilteredActivityList());
+        assertEquals(List.of(model.getDogList().get(1)), model.getFilteredDogList());
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+        assertEquals("Enrolments:\n2. Max: " + ENROL_DATE, model.getActivityEnrolmentSummary(shared));
+        assertEquals("", model.getActivityEnrolmentSummary(ownedOnly));
+        assertEquals("", model.getActivityEnrolmentSummary(empty));
+    }
+
+    @Test
+    public void execute_filterCustomers_clearsPreviousActivitiesAndEnrolmentContext() throws Exception {
+        ModelManager model = modelWithLinkedAndUnlinkedRecords();
+        Activity activity = addActivity(model, "Walk", 9);
+        model.enrolDogs(activity.getId(), ENROL_DATE, List.of(1, 2));
+        new SearchDogCommand(null, null, null, 1).execute(model);
+
+        new FilterUnlinkedCommand(false).execute(model);
+
+        assertEquals(List.of(model.getCustomerList().get(1)), model.getFilteredCustomerList());
+        assertTrue(model.getFilteredDogList().isEmpty());
+        assertTrue(model.getFilteredActivityList().isEmpty());
+        assertEquals("", model.getActivityEnrolmentSummary(activity));
+        model.unlinkDogs(List.of(1));
+        assertEquals(2, model.getFilteredCustomerList().size());
+        assertTrue(model.getFilteredActivityList().isEmpty());
+    }
+
+    @Test
+    public void execute_filterDogs_refreshesActivitiesAfterRelationshipAndEnrolmentChanges() throws Exception {
+        ModelManager model = modelWithLinkedAndUnlinkedRecords();
+        Activity activity = addActivity(model, "Walk", 9);
+        new SearchActivityCommand("walk", null, null).execute(model);
+        new FilterUnlinkedCommand(true).execute(model);
+        assertTrue(model.getFilteredActivityList().isEmpty());
+
+        model.enrolDogs(activity.getId(), ENROL_DATE, List.of(2));
+        assertEquals(List.of(activity), model.getFilteredActivityList());
+        assertEquals("Enrolments:\n2. Max: " + ENROL_DATE, model.getActivityEnrolmentSummary(activity));
+
+        model.linkDogs(2, List.of(2));
+        assertTrue(model.getFilteredDogList().isEmpty());
+        assertTrue(model.getFilteredActivityList().isEmpty());
+        assertEquals("", model.getActivityEnrolmentSummary(activity));
+
+        model.unlinkDogs(List.of(2));
+        assertEquals(List.of(activity), model.getFilteredActivityList());
+        model.unenrolDogs(activity.getId(), ENROL_DATE, List.of(2));
+        assertTrue(model.getFilteredActivityList().isEmpty());
+        assertEquals(1, model.getFilteredDogList().size());
+
+        model.enrolDogs(activity.getId(), ENROL_DATE, List.of(2));
+        assertEquals(List.of(activity), model.getFilteredActivityList());
+        model.deleteActivity(activity);
+        assertTrue(model.getFilteredActivityList().isEmpty());
+        assertEquals(1, model.getFilteredDogList().size());
+    }
+
+    private Activity addActivity(ModelManager model, String name, int hour) {
+        return model.addActivity(new ActivityName(name), ENROL_DATE, LocalTime.of(hour, 0),
+                LocalTime.of(hour + 1, 0), Recurrence.ONCE);
+    }
+
     @Test
     public void execute_filterUnlinkedDogs_showsOnlyUnownedDogs() throws Exception {
         ModelManager model = modelWithLinkedAndUnlinkedRecords();

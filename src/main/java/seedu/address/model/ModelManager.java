@@ -134,11 +134,13 @@ public class ModelManager implements Model {
     @Override
     public void setActivity(Activity target, Activity editedActivity) {
         addressBook.setActivity(target, editedActivity);
+        refreshDisplayedRecords();
     }
 
     @Override
     public void deleteActivity(Activity target) {
         addressBook.removeActivity(target);
+        refreshDisplayedRecords();
     }
 
     @Override
