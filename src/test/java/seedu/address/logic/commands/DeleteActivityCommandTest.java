@@ -7,11 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.model.ModelManager;
@@ -92,6 +95,29 @@ public class DeleteActivityCommandTest {
 
         assertEquals(originalActivities, model.getActivityList());
         assertEquals(originalEnrolments, model.getWatchDog().getEnrolmentList());
+    }
+
+    @Test
+    public void execute_invalidActivityList_reportsCommandException() {
+        ModelManager nullListModel = new ModelManager() {
+            @Override
+            public ObservableList<Activity> getActivityList() {
+                return null;
+            }
+        };
+        ModelManager nullEntryModel = new ModelManager() {
+            @Override
+            public ObservableList<Activity> getActivityList() {
+                ArrayList<Activity> entries = new ArrayList<>();
+                entries.add(null);
+                return FXCollections.observableArrayList(entries);
+            }
+        };
+
+        assertThrows(CommandException.class, DeleteActivityCommand.MESSAGE_INVALID_ACTIVITY_LIST,
+                () -> new DeleteActivityCommand(1).execute(nullListModel));
+        assertThrows(CommandException.class, DeleteActivityCommand.MESSAGE_INVALID_ACTIVITY_LIST,
+                () -> new DeleteActivityCommand(1).execute(nullEntryModel));
     }
 
     @Test

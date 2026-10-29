@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import javafx.collections.ObservableList;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -34,6 +35,7 @@ public class EditActivityCommand extends Command {
             "Activity ID %d has enrolments and cannot be edited. Create a new activity instead.";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
     public static final String MESSAGE_INVALID_ACTIVITY_ID = "The activity ID provided is invalid.";
+    public static final String MESSAGE_INVALID_ACTIVITY_LIST = "Cannot edit activity: the activity list is invalid.";
 
     private static final Logger logger = LogsCenter.getLogger(EditActivityCommand.class);
 
@@ -58,7 +60,13 @@ public class EditActivityCommand extends Command {
             throw new CommandException(MESSAGE_NOT_EDITED);
         }
 
-        Activity activityToEdit = model.getActivityList().stream()
+        ObservableList<Activity> activities = model.getActivityList();
+        if (activities == null || activities.stream().anyMatch(Objects::isNull)) {
+            logger.warning("Cannot edit activity ID " + activityId + ": activity list is null or contains null.");
+            throw new CommandException(MESSAGE_INVALID_ACTIVITY_LIST);
+        }
+
+        Activity activityToEdit = activities.stream()
                 .filter(activity -> activity.getId() == activityId)
                 .findFirst()
                 .orElseThrow(() -> {
