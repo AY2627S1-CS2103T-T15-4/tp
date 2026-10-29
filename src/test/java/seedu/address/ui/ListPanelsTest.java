@@ -162,6 +162,7 @@ public class ListPanelsTest {
         });
     }
 
+    // @@author XanderGoh
     @Test
     public void activityCard_displaysEnrolmentSummaryWhenProvided() throws Exception {
         runOnFxThread(() -> {
@@ -204,6 +205,7 @@ public class ListPanelsTest {
             assertEquals("", label(list.getItems().get(0).get(), "enrolments"));
         });
     }
+    // @@author
 
     @Test
     public void customerListPanel_displaysCustomersAndOwnedDogs() throws Exception {

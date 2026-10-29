@@ -7,11 +7,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+// @@author XanderGoh
 import java.util.function.Function;
+// @@author
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+// @@author XanderGoh
 import javafx.beans.Observable;
+// @@author
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -33,7 +37,9 @@ public class ActivityListPanel extends UiPart<Region> {
     private final ObservableList<Enrolment> enrolments;
     private final Clock clock;
     private final boolean todayPanel;
+    // @@author XanderGoh
     private final Function<Activity, String> enrolmentSummary;
+    // @@author
 
     /**
      * Creates a general panel showing upcoming dog bookings for the supplied activities.
@@ -45,6 +51,7 @@ public class ActivityListPanel extends UiPart<Region> {
         this(activities, enrolments, Clock.systemDefaultZone(), false, null, activity -> "");
     }
 
+    // @@author XanderGoh
     /** Creates a panel with a dynamic search-specific enrolment summary. */
     public ActivityListPanel(ObservableList<Activity> activities, ObservableList<Enrolment> enrolments,
             Function<Activity, String> enrolmentSummary) {
@@ -57,6 +64,7 @@ public class ActivityListPanel extends UiPart<Region> {
         this(activities, enrolments == null ? javafx.collections.FXCollections.observableArrayList() : enrolments,
                 Clock.systemDefaultZone(), false, contextChanges, enrolmentSummary);
     }
+    // @@author
 
     /**
      * Creates a date-sensitive panel with an injectable clock.
@@ -91,9 +99,11 @@ public class ActivityListPanel extends UiPart<Region> {
         recordListView.setCellFactory(listView -> new RecordListViewCell());
         activities.addListener((ListChangeListener<Activity>) change -> refresh());
         enrolments.addListener((ListChangeListener<Enrolment>) change -> refresh());
+        // @@author XanderGoh
         if (contextChanges != null) {
             contextChanges.addListener(observable -> refresh());
         }
+        // @@author
         refresh();
     }
 

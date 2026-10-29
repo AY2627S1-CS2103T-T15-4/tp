@@ -30,10 +30,12 @@ public class ActivityCard extends UiPart<Region> {
     private Label recurrence;
     @FXML
     private Label dogSummary;
+    // @@author XanderGoh
     @FXML
     private Label enrolmentsHeading;
     @FXML
     private Label enrolments;
+    // @@author
 
     /**
      * Creates a card with the given activity and complete dog-summary label.
@@ -86,10 +88,12 @@ public class ActivityCard extends UiPart<Region> {
         dogSummary.setText(dogSummaryText);
         dogSummary.setVisible(!dogSummaryText.isBlank());
         dogSummary.setManaged(!dogSummaryText.isBlank());
+        // @@author XanderGoh
         enrolmentsHeading.setVisible(!enrolmentEntry.isBlank());
         enrolmentsHeading.setManaged(!enrolmentEntry.isBlank());
         enrolments.setText(enrolmentEntry.substring(enrolmentEntry.indexOf('\n') + 1));
         enrolments.setVisible(!enrolmentEntry.isBlank());
         enrolments.setManaged(!enrolmentEntry.isBlank());
+        // @@author
     }
 }

@@ -1,3 +1,4 @@
+// @@author XanderGoh
 package seedu.address.model.dog;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -34,11 +34,13 @@ public class UniqueDogList implements Iterable<Dog> {
         internalList.add(toAdd);
     }
 
+    // @@author XanderGoh
     /** Removes a dog that exists in this list. */
     public void remove(Dog toRemove) {
         requireNonNull(toRemove);
         internalList.remove(toRemove);
     }
+    // @@author
 
     /** Replaces a dog while preserving uniqueness by persistent ID. */
     public void setDog(Dog target, Dog editedDog) {

@@ -64,7 +64,9 @@ public class LogicManagerHistoryTest {
 
         assertThrows(ParseException.class, () -> harness.logic.execute("notacommand"));
         assertThrows(ParseException.class, () -> harness.logic.execute("redo extra"));
+        // @@author XanderGoh
         assertThrows(CommandException.class, () -> harness.logic.execute("deletedog 99"));
+        // @@author
         harness.logic.execute("redo");
         assertEquals(List.of("Buddy"), harness.dogNames());
     }
@@ -152,7 +154,9 @@ public class LogicManagerHistoryTest {
 
     @Test
     public void execute_restoredDependentFilters_showOnlyRelatedRecords() throws Exception {
+        // @@author XanderGoh
         for (String filter : List.of("searchd n/Buddy", "searchc n/Alice")) {
+            // @@author
             Harness afterReset = linkedHarness();
             afterReset.logic.execute(filter);
             afterReset.assertFilteredPair();

@@ -1,3 +1,4 @@
+// @@author XanderGoh
 package seedu.address.model.customer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
