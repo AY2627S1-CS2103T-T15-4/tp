@@ -34,8 +34,8 @@ import seedu.address.model.dog.exceptions.UnlinkException;
  * Wraps all data at the address-book level.
  * Stores customers and dogs with unique persistent identities.
  */
-public class AddressBook implements ReadOnlyAddressBook {
-    private static final Logger logger = LogsCenter.getLogger(AddressBook.class);
+public class WatchDog implements ReadOnlyWatchDog {
+    private static final Logger logger = LogsCenter.getLogger(WatchDog.class);
 
     private final UniqueDogList dogs = new UniqueDogList();
     private final UniqueCustomerList customers = new UniqueCustomerList();
@@ -43,18 +43,18 @@ public class AddressBook implements ReadOnlyAddressBook {
     private final ObservableList<Activity> activityView = FXCollections.unmodifiableObservableList(activities);
     private final ObservableList<Enrolment> enrolments = FXCollections.observableArrayList();
     private long nextActivityId = 1;
-    private int nextDogId = 1;
-    private int nextCustomerId = 1;
+    private long nextDogId = 1;
+    private long nextCustomerId = 1;
 
 
-    /** Creates an empty address book. */
-    public AddressBook() {
+    /** Creates an empty WatchDog data file. */
+    public WatchDog() {
     }
 
     /**
-     * Creates an AddressBook using the records in the {@code toBeCopied}
+     * Creates a WatchDog using the records in the {@code toBeCopied}
      */
-    public AddressBook(ReadOnlyAddressBook toBeCopied) {
+    public WatchDog(ReadOnlyWatchDog toBeCopied) {
         this();
         resetData(toBeCopied);
     }
@@ -62,10 +62,10 @@ public class AddressBook implements ReadOnlyAddressBook {
     //// list overwrite operations
 
     /**
-     * Resets the existing data of this {@code AddressBook} with {@code newData}.
+     * Resets the existing data of this {@code WatchDog} with {@code newData}.
      * Rejects dog owners missing from the incoming customers before changing any records.
      */
-    public void resetData(ReadOnlyAddressBook newData) {
+    public void resetData(ReadOnlyWatchDog newData) {
         requireNonNull(newData);
 
         List<Activity> restored = List.copyOf(newData.getActivityList());
@@ -79,21 +79,20 @@ public class AddressBook implements ReadOnlyAddressBook {
                 || nextId < minimumId || nextId > (long) Integer.MAX_VALUE + 1) {
             throw new IllegalArgumentException("Invalid activity IDs or next activity ID.");
         }
+        long minimumDogId = restoredDogs.stream().mapToLong(Dog::getId).max().orElse(0) + 1;
+        long restoredNextDogId = newData.getNextDogId();
+        long nextRestoredDogId = restoredNextDogId == -1 ? minimumDogId : restoredNextDogId;
+        validateNextDogId(nextRestoredDogId, minimumDogId);
         dogs.setDogs(restoredDogs);
         customers.setCustomers(restoredCustomers);
         nextActivityId = nextId;
+        nextDogId = nextRestoredDogId;
 
-        int restoredNextDogId = newData.getNextDogId();
-        this.nextDogId = restoredNextDogId >= 0
-                ? restoredNextDogId
-                : dogs.asUnmodifiableObservableList().stream()
-                        .mapToInt(Dog::getId).max().orElse(-1) + 1;
-
-        int restoredNextCustomerId = newData.getNextCustomerId();
+        long restoredNextCustomerId = newData.getNextCustomerId();
         this.nextCustomerId = restoredNextCustomerId >= 1
                 ? restoredNextCustomerId
                 : customers.asUnmodifiableObservableList().stream()
-                        .mapToInt(Customer::getId).max().orElse(0) + 1;
+                        .mapToLong(Customer::getId).max().orElse(0) + 1;
         activities.restore(restored, restoredEnrolments);
     }
 
@@ -101,6 +100,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     private final class ActivityList extends ModifiableObservableListBase<Activity> {
         private final List<Activity> values = new ArrayList<>();
 
+        /** Replaces schedules and publishes one coherent change after enrolments have been restored. */
         private void restore(List<Activity> restored, List<Enrolment> restoredEnrolments) {
             beginChange();
             try {
@@ -209,6 +209,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
     }
 
+    /** Returns true if two activities overlap, treating adjacent boundaries as non-overlapping. */
     private static boolean timesOverlap(Activity first, Activity second) {
         return first.getStartTime().isBefore(second.getEndTime())
                 && second.getStartTime().isBefore(first.getEndTime());
@@ -265,12 +266,15 @@ public class AddressBook implements ReadOnlyAddressBook {
      */
     public Customer addCustomer(Customer customer) {
         requireNonNull(customer);
+        if (customer.getId() < 0 && nextCustomerId > Integer.MAX_VALUE) {
+            throw new IllegalStateException("No more customer IDs are available");
+        }
         Customer identifiedCustomer = customer.getId() < 0
-                ? new Customer(nextCustomerId, customer.getName(), customer.getPhone(), customer.getEmail(),
+                ? new Customer((int) nextCustomerId, customer.getName(), customer.getPhone(), customer.getEmail(),
                         customer.getBackupContact())
                 : customer;
         customers.add(identifiedCustomer);
-        nextCustomerId = Math.max(nextCustomerId, identifiedCustomer.getId() + 1);
+        nextCustomerId = Math.max(nextCustomerId, (long) identifiedCustomer.getId() + 1);
         return identifiedCustomer;
     }
 
@@ -286,7 +290,7 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     /**
      * Removes {@code key} and clears ownership of that customer's dogs without deleting them.
-     * {@code key} must exist in the address book. Other customers and dogs are unaffected.
+     * {@code key} must exist in WatchDog. Other customers and dogs are unaffected.
      */
     public void removeCustomer(Customer key) {
         customers.remove(key);
@@ -297,9 +301,10 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Enrols a batch of existing dogs into one occurrence of an existing activity atomically.
+     * Enrols a batch of existing dogs identified by distinct positive IDs into one occurrence of an existing
+     * activity atomically.
      *
-     * @throws EnrolException if the date, IDs, recurrence, duplicate, or time-conflict checks fail
+     * @throws EnrolException If the date, IDs, recurrence, duplicate, or time-conflict checks fail.
      */
     public void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
         requireNonNull(date);
@@ -325,9 +330,10 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Removes a batch of existing dogs from one occurrence of an existing activity atomically.
+     * Removes a batch of existing dogs identified by distinct positive IDs from one occurrence of an existing
+     * activity atomically.
      *
-     * @throws EnrolException if the date, IDs, recurrence, or enrolment checks fail
+     * @throws EnrolException If the date, IDs, recurrence, or enrolment checks fail.
      */
     public void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
         requireNonNull(date);
@@ -353,7 +359,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Links all requested dogs to an existing customer, regardless of display filters.
+     * Links dogs identified by distinct positive IDs to an existing customer, regardless of display filters.
      * Validates the entire batch before replacing the dog list. Rejected batches change nothing.
      *
      * @throws LinkException if IDs repeat, endpoints are missing, or any dog already has an owner.
@@ -363,6 +369,9 @@ public class AddressBook implements ReadOnlyAddressBook {
         if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
                 || new HashSet<>(dogIds).size() != dogIds.size()) {
             throw new LinkException("Specify at least one dog ID, with no repeated IDs.");
+        }
+        if (dogIds.stream().anyMatch(dogId -> dogId < 1)) {
+            throw new LinkException("Dog IDs must be positive.");
         }
         if (getCustomerList().stream().noneMatch(customer -> customer.getId() == customerId)) {
             throw new LinkException("Customer ID " + customerId + " does not exist.");
@@ -383,7 +392,8 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Unlinks a batch from their current owners without deleting records or changing filters.
+     * Unlinks dogs identified by distinct positive IDs from their current owners without deleting records or
+     * changing filters.
      * Validates every endpoint and ownership before publishing the updated dog list.
      *
      * @throws UnlinkException if the batch is empty, IDs repeat, dogs are missing,
@@ -394,6 +404,9 @@ public class AddressBook implements ReadOnlyAddressBook {
         if (dogIds.isEmpty() || dogIds.stream().anyMatch(Objects::isNull)
                 || new HashSet<>(dogIds).size() != dogIds.size()) {
             throw new UnlinkException("Specify at least one dog ID, with no repeated IDs.");
+        }
+        if (dogIds.stream().anyMatch(dogId -> dogId < 1)) {
+            throw new UnlinkException("Dog IDs must be positive.");
         }
         Map<Integer, Dog> replacements = new HashMap<>();
         for (int dogId : dogIds) {
@@ -445,13 +458,18 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     /**
      * Adds a new dog and assigns it the next available persistent ID.
+     * The counter is consumed only after the dog is stored successfully.
      *
-     * @param dog dog details without an assigned ID
-     * @return the identified dog that was stored
+     * @param dog Dog details without an assigned ID.
+     * @return The identified dog that was stored.
+     * @throws IllegalStateException If all positive {@code int} dog IDs have been allocated.
      */
     public Dog addDog(Dog dog) {
         requireNonNull(dog);
-        Dog newDog = new Dog(nextDogId, dog.getName(), dog.getBreed(), dog.getSize());
+        if (nextDogId > Integer.MAX_VALUE) {
+            throw new IllegalStateException("No more dog IDs are available.");
+        }
+        Dog newDog = new Dog((int) nextDogId, dog.getName(), dog.getBreed(), dog.getSize());
         dogs.add(newDog);
         nextDogId++;
         return newDog;
@@ -460,39 +478,53 @@ public class AddressBook implements ReadOnlyAddressBook {
     /**
      * Adds a dog loaded from storage without assigning it a new ID.
      *
-     * @param identified dog with its persisted ID
-     * @return the stored dog
+     * @param identified Dog with its positive persisted ID.
+     * @return The stored dog.
+     * @throws IllegalArgumentException If the dog does not have a positive persistent ID.
      */
     public Dog addDogFromStorage(Dog identified) {
         requireNonNull(identified);
         validateDogOwners(List.of(identified), getCustomerList());
         dogs.add(identified);
-        nextDogId = Math.max(nextDogId, identified.getId() + 1);
+        nextDogId = Math.max(nextDogId, (long) identified.getId() + 1);
         return identified;
     }
 
     @Override
-    public int getNextDogId() {
+    public long getNextDogId() {
         return nextDogId;
     }
 
     @Override
-    public int getNextCustomerId() {
+    public long getNextCustomerId() {
         return nextCustomerId;
     }
 
-    /** Restores the next unused dog ID from persistent storage. */
-    public void setNextDogId(int nextDogId) {
-        if (nextDogId < 0) {
-            throw new IllegalArgumentException("Next dog ID must be nonnegative.");
-        }
+    /**
+     * Restores a counter above all stored dog IDs. {@code Integer.MAX_VALUE + 1} represents exhaustion.
+     *
+     * @throws IllegalArgumentException If {@code nextDogId} does not exceed all stored IDs or is out of range.
+     */
+    public void setNextDogId(long nextDogId) {
+        long minimumDogId = getDogList().stream().mapToLong(Dog::getId).max().orElse(0) + 1;
+        validateNextDogId(nextDogId, minimumDogId);
         this.nextDogId = nextDogId;
     }
 
-    /** Restores the next unused customer ID from persistent storage. */
-    public void setNextCustomerId(int nextCustomerId) {
-        if (nextCustomerId < 1) {
-            throw new IllegalArgumentException("Next customer ID must be positive.");
+    /** Rejects a restored dog counter that is reused, nonpositive, or outside the supported range. */
+    private static void validateNextDogId(long nextDogId, long minimumDogId) {
+        if (nextDogId < minimumDogId || nextDogId > (long) Integer.MAX_VALUE + 1) {
+            throw new IllegalArgumentException(
+                    "Next dog ID must be positive, exceed all stored dog IDs, and be within range.");
+        }
+    }
+
+    /** Restores the next unused customer ID; MAX_VALUE + 1 represents exhausted IDs. */
+    public void setNextCustomerId(long nextCustomerId) {
+        long minimumId = customers.asUnmodifiableObservableList().stream()
+                .mapToLong(Customer::getId).max().orElse(0) + 1;
+        if (nextCustomerId < minimumId || nextCustomerId > (long) Integer.MAX_VALUE + 1) {
+            throw new IllegalArgumentException("Invalid next customer ID.");
         }
         this.nextCustomerId = nextCustomerId;
     }
@@ -501,8 +533,8 @@ public class AddressBook implements ReadOnlyAddressBook {
      * Returns true if a stored dog has the same persistent ID as {@code dog}.
      * Unassigned dogs do not have an identity and therefore never match.
      *
-     * @param dog dog to check
-     * @return whether a dog with the same ID exists
+     * @param dog Dog to check.
+     * @return Whether a dog with the same ID exists.
      */
     public boolean hasDog(Dog dog) {
         requireNonNull(dog);
@@ -512,7 +544,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     /**
      * Removes the given dog and all of its enrolments, including enrolments for past activity occurrences.
      *
-     * @throws IllegalArgumentException if no stored dog has the same persistent ID
+     * @throws IllegalArgumentException If no stored dog has the same persistent ID.
      */
     public void removeDog(Dog dog) {
         requireNonNull(dog);
@@ -575,20 +607,23 @@ public class AddressBook implements ReadOnlyAddressBook {
         enrolments.add(enrolment);
     }
 
+    /** Returns the activity with {@code activityId}, rejecting invalid or unknown IDs. */
     private Activity getActivity(int activityId) throws EnrolException {
-        if (activityId <= 0) {
-            throw new EnrolException("Activity IDs must be whole numbers from 1 to 2147483647.");
+        if (activityId < 1) {
+            throw new EnrolException("Activity IDs must be positive whole numbers.");
         }
         return getActivityList().stream().filter(activity -> activity.getId() == activityId).findFirst()
                 .orElseThrow(() -> new EnrolException("Activity ID " + activityId + " does not exist."));
     }
 
+    /** Rejects a dog ID unless it is positive and identifies a stored dog. */
     private void validateDogExists(int dogId) throws EnrolException {
-        if (getDogList().stream().noneMatch(dog -> dog.getId() == dogId)) {
+        if (dogId < 1 || getDogList().stream().noneMatch(dog -> dog.getId() == dogId)) {
             throw new EnrolException("Dog ID " + dogId + " does not exist.");
         }
     }
 
+    /** Rejects an empty dog ID batch, nonpositive IDs, null entries, and repeated IDs. */
     private void validateDogIdBatch(List<Integer> dogIds) throws EnrolException {
         if (dogIds.isEmpty()) {
             throw new EnrolException("Provide at least one dog ID.");
@@ -598,8 +633,8 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
         HashSet<Integer> seen = new HashSet<>();
         for (int dogId : dogIds) {
-            if (dogId < 0) {
-                throw new EnrolException("Dog IDs must be whole numbers from 0 to 2147483647.");
+            if (dogId < 1) {
+                throw new EnrolException("Dog IDs must be positive whole numbers.");
             }
             if (!seen.add(dogId)) {
                 throw new EnrolException("Dog ID " + dogId
@@ -608,6 +643,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
     }
 
+    /** Returns an explanation of why {@code activity} does not occur on {@code date}. */
     private EnrolException occurrenceError(Activity activity, LocalDate date) {
         if (date.isBefore(activity.getStartDate())) {
             return new EnrolException("Activity ID " + activity.getId() + " starts on " + activity.getStartDate()
@@ -623,6 +659,7 @@ public class AddressBook implements ReadOnlyAddressBook {
                 + "occurs only on " + activity.getStartDate() + ", not " + date + ".");
     }
 
+    /** Rejects duplicate enrolments and enrolments that conflict with another activity. */
     private void validateEnrolment(Enrolment enrolment, Activity activity) throws EnrolException {
         LocalDate date = enrolment.getDate();
         if (!activity.occursOn(date)) {
@@ -655,19 +692,22 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
 
         // instanceof handles nulls
-        if (!(other instanceof AddressBook otherAddressBook)) {
+        if (!(other instanceof WatchDog otherWatchDog)) {
             return false;
         }
 
-        return dogs.equals(otherAddressBook.dogs)
-                && customers.equals(otherAddressBook.customers)
-                && activities.equals(otherAddressBook.activities)
-                && enrolments.equals(otherAddressBook.enrolments)
-                && nextActivityId == otherAddressBook.nextActivityId;
+        return dogs.equals(otherWatchDog.dogs)
+                && customers.equals(otherWatchDog.customers)
+                && activities.equals(otherWatchDog.activities)
+                && enrolments.equals(otherWatchDog.enrolments)
+                && nextDogId == otherWatchDog.nextDogId
+                && nextCustomerId == otherWatchDog.nextCustomerId
+                && nextActivityId == otherWatchDog.nextActivityId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dogs, customers, activities, enrolments, nextActivityId);
+        return Objects.hash(dogs, customers, activities, enrolments,
+                nextDogId, nextCustomerId, nextActivityId);
     }
 }

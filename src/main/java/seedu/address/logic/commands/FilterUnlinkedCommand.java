@@ -24,11 +24,17 @@ public class FilterUnlinkedCommand extends Command {
         if (filterDogs) {
             model.updateFilteredDogList(dog -> dog.getOwnerId().isEmpty());
             model.updateFilteredCustomerList(customer -> false);
+            model.updateFilteredActivityList(activity -> model.getWatchDog().getEnrolmentList().stream()
+                    .filter(enrolment -> enrolment.getActivityId() == activity.getId())
+                    .anyMatch(enrolment -> model.getDogList().stream()
+                            .anyMatch(dog -> dog.getId() == enrolment.getDogId() && dog.getOwnerId().isEmpty())));
+            model.setActivityEnrolmentDogPredicate(dog -> dog.getOwnerId().isEmpty());
             return new CommandResult(MESSAGE_SUCCESS_DOG);
         }
         model.updateFilteredCustomerList(customer -> model.getDogList().stream()
                 .noneMatch(dog -> dog.getOwnerId().orElse(-1) == customer.getId()));
         model.updateFilteredDogList(dog -> false);
+        model.updateFilteredActivityList(activity -> false);
         return new CommandResult(MESSAGE_SUCCESS_CUSTOMER);
     }
 

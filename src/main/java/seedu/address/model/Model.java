@@ -1,5 +1,7 @@
 package seedu.address.model;
 
+import static java.util.Objects.requireNonNull;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -10,6 +12,7 @@ import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
+import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
@@ -27,9 +30,13 @@ public interface Model {
     Predicate<Activity> PREDICATE_SHOW_ALL_ACTIVITIES = unused -> true;
 
     /** Captures the complete model state needed to restore a previous command. */
-    record ModelState(ReadOnlyAddressBook addressBook, Predicate<Customer> customerPredicate,
+    record ModelState(ReadOnlyWatchDog watchDog, Predicate<Customer> customerPredicate,
             Predicate<Dog> dogPredicate, Predicate<Activity> activityPredicate,
-            Integer selectedDogId, Integer selectedCustomerId, Predicate<Dog> enrolmentDogPredicate) {
+            Predicate<Dog> enrolmentDogPredicate) {
+        /** Predicates may be null when that panel has no active filter. The data snapshot may not. */
+        public ModelState {
+            requireNonNull(watchDog);
+        }
     }
 
     /** Returns a snapshot of the current data and display state. */
@@ -79,36 +86,36 @@ public interface Model {
     void setGuiSettings(GuiSettings guiSettings);
 
     /**
-     * Replaces address book data with the data in {@code addressBook}.
+     * Replaces WatchDog data with the data in {@code watchDog}.
      */
-    void setAddressBook(ReadOnlyAddressBook addressBook);
+    void setWatchDog(ReadOnlyWatchDog watchDog);
 
-    /** Returns the AddressBook */
-    ReadOnlyAddressBook getAddressBook();
+    /** Returns the WatchDog */
+    ReadOnlyWatchDog getWatchDog();
 
     boolean hasCustomer(Customer customer);
 
     /**
      * Deletes the given customer and unlinks their dogs, preserving the dog records.
-     * The customer must exist in the address book.
+     * The customer must exist in WatchDog.
      */
     void deleteCustomer(Customer customer);
 
     /**
      * Adds the given customer.
-     * {@code customer} must not already exist in the address book.
+     * {@code customer} must not already exist in WatchDog.
      */
     void addCustomer(Customer customer);
 
     /**
      * Replaces the given customer {@code target} with {@code editedCustomer}.
-     * {@code target} must exist in the address book.
+     * {@code target} must exist in WatchDog.
      * {@code editedCustomer} must preserve the target's persistent ID so that dog ownership stays valid.
      */
     void setCustomer(Customer target, Customer editedCustomer);
 
     default ObservableList<Dog> getDogList() {
-        return getAddressBook().getDogList();
+        return getWatchDog().getDogList();
     }
 
     /** Returns an unmodifiable observable view of filtered dogs. */
@@ -121,7 +128,7 @@ public interface Model {
 
     /** Returns an unmodifiable view of every stored customer. */
     default ObservableList<Customer> getCustomerList() {
-        return getAddressBook().getCustomerList();
+        return getWatchDog().getCustomerList();
     }
 
     void updateFilteredCustomerList(Predicate<Customer> predicate);
@@ -129,7 +136,7 @@ public interface Model {
     /** Adds an empty schedule and returns it with its persistent ID. */
     Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end, Recurrence recurrence);
 
-    /** Deletes the given activity. The activity must exist in the address book. */
+    /** Deletes the given activity. The activity must exist in WatchDog. */
     void deleteActivity(Activity activity);
 
     /** Replaces an activity with no enrolments. */
@@ -137,7 +144,16 @@ public interface Model {
 
     /** Returns all schedules, independently of dog/customer filters. */
     default ObservableList<Activity> getActivityList() {
-        return getAddressBook().getActivityList();
+        return getWatchDog().getActivityList();
+    }
+
+    /**
+     * Returns all dated enrolments as a live unmodifiable observable view.
+     *
+     * @return all dated enrolments
+     */
+    default ObservableList<Enrolment> getEnrolmentList() {
+        return getWatchDog().getEnrolmentList();
     }
 
     /** Returns an unmodifiable observable view of filtered activities. */
@@ -159,24 +175,16 @@ public interface Model {
     void showActivitiesOnOrAfter(LocalDate date);
 
     /**
-     * Shows this dog, its current owner, and its activities with enrolments today or later.
-     * Later changes to those records update the same three lists.
+     * Adds a dog and returns the dog with its assigned persistent ID.
+     *
+     * @throws IllegalStateException if all supported dog IDs have been allocated
      */
-    void selectDog(int dogId);
-
-    /**
-     * Shows this customer, that customer's dogs, and their activities with enrolments today or later.
-     * Later changes to those records update the same three lists.
-     */
-    void selectCustomer(int customerId);
-
-    /** Adds a dog and returns the dog with its assigned persistent ID. */
     Dog addDog(Dog dog);
 
     /** Returns whether a dog with the same persistent ID exists. */
     boolean hasDog(Dog dog);
 
-    /** Deletes the given dog. The dog must exist in the address book. */
+    /** Deletes the given dog. The dog must exist in WatchDog. */
     void deleteDog(Dog dog);
 
     /** Replaces an existing dog with its edited version. */

@@ -4,7 +4,7 @@
     @Test
     public void panel_globalSearch_showsBothCategoriesAndSwitchesToSpecificSearch() throws Exception {
         runOnFxThread(() -> {
-            AddressBook book = new AddressBook();
+            WatchDog book = new WatchDog();
             book.addCustomer(new Customer(42, "Buddy Tan", "91234567", "buddy@example.com", "98765432"));
             book.addDogFromStorage(BUDDY);
             ModelManager model = new ModelManager(book, new UserPrefs());
@@ -24,6 +24,6 @@
             assertEquals("Buddy", label(list.getItems().get(0).get(), "name"));
             new SearchCommand("missing").execute(model);
             assertTrue(list.getItems().isEmpty());
-            assertEquals(book, model.getAddressBook());
+            assertEquals(book, model.getWatchDog());
         });
     }

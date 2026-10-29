@@ -2,7 +2,7 @@ package seedu.address.testutil;
 
 import java.util.List;
 
-import seedu.address.model.AddressBook;
+import seedu.address.model.WatchDog;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
@@ -17,8 +17,8 @@ public class TypicalWatchDog {
     public static final Dog MAX = new Dog(51, new DogName("Max"), new Breed("Labrador"), new Size("large"));
 
     /** Returns a fresh book with one linked dog and one unlinked dog. */
-    public static AddressBook getTypicalAddressBook() {
-        AddressBook book = new AddressBook();
+    public static WatchDog getTypicalWatchDog() {
+        WatchDog book = new WatchDog();
         book.addCustomer(ALICE);
         book.addCustomer(BOB);
         book.addDogFromStorage(BUDDY);

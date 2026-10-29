@@ -9,11 +9,15 @@ public class Enrolment {
     private final int dogId;
     private final LocalDate date;
 
-    /** Creates an enrolment record. */
+    /**
+     * Creates an enrolment record with positive persistent activity and dog IDs.
+     *
+     * @throws IllegalArgumentException If either ID is not positive.
+     */
     public Enrolment(int activityId, int dogId, LocalDate date) {
         Objects.requireNonNull(date);
-        if (activityId <= 0 || dogId < 0) {
-            throw new IllegalArgumentException("Activity IDs must be positive and dog IDs nonnegative.");
+        if (activityId < 1 || dogId < 1) {
+            throw new IllegalArgumentException("Activity and dog IDs must be positive.");
         }
         this.activityId = activityId;
         this.dogId = dogId;

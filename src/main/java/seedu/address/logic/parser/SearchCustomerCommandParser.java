@@ -85,12 +85,12 @@ public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand
         for (String token : value.split("\\s+")) {
             try {
                 int id = Integer.parseInt(token);
-                if (id < 0) {
+                if (id < 1) {
                     throw new NumberFormatException();
                 }
                 dogIds.add(id);
             } catch (NumberFormatException exception) {
-                throw new ParseException(MESSAGE_INVALID_INFO, exception);
+                throw new ParseException(SearchCustomerCommand.MESSAGE_INVALID_DOG_ID, exception);
             }
         }
         return dogIds;
@@ -102,12 +102,12 @@ public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand
         }
         try {
             int customerId = Integer.parseInt(value);
-            if (customerId < 0) {
+            if (customerId <= 0) {
                 throw new NumberFormatException();
             }
             return customerId;
         } catch (NumberFormatException exception) {
-            throw new ParseException(MESSAGE_INVALID_INFO, exception);
+            throw new ParseException(SearchCustomerCommand.MESSAGE_INVALID_CUSTOMER_ID, exception);
         }
     }
 

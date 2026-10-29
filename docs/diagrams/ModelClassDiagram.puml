@@ -7,9 +7,9 @@ show members
 
 class "<<interface>>\nModel" as Model
 class ModelManager
-class "<<interface>>\nReadOnlyAddressBook" as ReadOnlyAddressBook
+class "<<interface>>\nReadOnlyWatchDog" as ReadOnlyWatchDog
 class "<<interface>>\nReadOnlyUserPrefs" as ReadOnlyUserPrefs
-class AddressBook
+class WatchDog
 class UserPrefs
 class UniqueCustomerList
 class UniqueDogList
@@ -30,16 +30,16 @@ class Enrolment {
 }
 
 ModelManager .up.|> Model
-ModelManager --> "1" AddressBook : addressBook
+ModelManager --> "1" WatchDog : watchDog
 ModelManager --> "1" UserPrefs : userPrefs
-Model ..> ReadOnlyAddressBook : exposes
+Model ..> ReadOnlyWatchDog : exposes
 Model ..> ReadOnlyUserPrefs : exposes
-AddressBook .up.|> ReadOnlyAddressBook
+WatchDog .up.|> ReadOnlyWatchDog
 UserPrefs .up.|> ReadOnlyUserPrefs
-AddressBook --> "1" UniqueCustomerList : customers
-AddressBook --> "1" UniqueDogList : dogs
-AddressBook --> "*" Activity : activities
-AddressBook --> "*" Enrolment : enrolments
+WatchDog --> "1" UniqueCustomerList : customers
+WatchDog --> "1" UniqueDogList : dogs
+WatchDog --> "*" Activity : activities
+WatchDog --> "*" Enrolment : enrolments
 UniqueCustomerList --> "*" Customer
 UniqueDogList --> "*" Dog
 

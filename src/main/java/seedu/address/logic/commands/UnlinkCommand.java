@@ -16,7 +16,8 @@ public class UnlinkCommand extends Command {
     public static final String COMMAND_WORD = "unlink";
     public static final String MESSAGE_USAGE = "unlink: Unlinks selected dogs or all dogs owned by a customer.\n"
             + "Parameters: d/DOG_ID [DOG_ID]... OR c/CUSTOMER_ID\n"
-            + "IDs must be integers from 0 to 2147483647; dog IDs must not repeat.\n"
+            + "Customer and dog IDs must be positive; dog IDs must not repeat.\n"
+
             + "The entire batch is rejected if any selected dog is missing or has no owner.\n"
             + "The customer form requires an existing customer with linked dogs; do not mix prefixes.\n"
             + "Examples: unlink d/2 3 | unlink c/1";
@@ -27,18 +28,18 @@ public class UnlinkCommand extends Command {
     private final Integer customerId;
     private final List<Integer> dogIds;
 
-    /** Creates an unlink request containing distinct nonnegative dog IDs. */
+    /** Creates an unlink request containing distinct positive dog IDs. */
     public UnlinkCommand(List<Integer> dogIds) {
         this.dogIds = List.copyOf(dogIds);
         checkArgument(!dogIds.isEmpty()
-                && dogIds.stream().allMatch(id -> id >= 0)
+                && dogIds.stream().allMatch(id -> id >= 1)
                 && new HashSet<>(dogIds).size() == dogIds.size(), "Invalid unlink IDs.");
         this.customerId = null;
     }
 
-    /** Creates a request to unlink all dogs belonging to a nonnegative customer ID. */
+    /** Creates a request to unlink all dogs belonging to a positive customer ID. */
     public UnlinkCommand(int customerId) {
-        checkArgument(customerId >= 0, "Invalid customer ID.");
+        checkArgument(customerId > 0, "Invalid customer ID.");
         this.customerId = customerId;
         this.dogIds = List.of();
     }

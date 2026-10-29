@@ -15,7 +15,7 @@ public class DeleteActivityCommandParserTest {
     @Test
     public void parse_validId_returnsCommand() throws Exception {
         assertEquals(new DeleteActivityCommand(21), parser.parse(" 21 "));
-        assertEquals(new DeleteActivityCommand(1), new AddressBookParser().parseCommand("deleteactivity 1"));
+        assertEquals(new DeleteActivityCommand(1), new WatchDogParser().parseCommand("deleteactivity 1"));
     }
 
     @Test

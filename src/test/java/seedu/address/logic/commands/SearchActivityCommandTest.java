@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.ModelManager;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Recurrence;
@@ -25,12 +26,131 @@ public class SearchActivityCommandTest {
     private static final LocalDate ENROL_DATE = LocalDate.now().plusDays(7);
 
     @Test
+    public void execute_allFields_messageFollowsUsageOrder() throws Exception {
+        ModelManager model = modelWithActivities();
+
+        CommandResult result = new SearchActivityCommand("walk", DATE, LocalTime.of(8, 30),
+                Recurrence.DAILY).execute(model);
+
+        assertEquals("Successfully searched activities by name: walk, date: 2026-10-20, "
+                + "time: 08:30, recurrence: Daily", result.getFeedbackToUser());
+    }
+
+    @Test
+    public void execute_deleteMatchingActivities_refreshesDogsAndOwnersAndRestoresState() throws Exception {
+        ModelManager model = new ModelManager();
+        model.addCustomer(new Customer(1, "Anna", "91234567", "anna@example.com", "98765432"));
+        Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
+        model.linkDogs(1, List.of(dog.getId()));
+        var first = model.addActivity(new ActivityName("Morning walk"), ENROL_DATE, LocalTime.of(9, 0),
+                LocalTime.of(10, 0), Recurrence.ONCE);
+        var second = model.addActivity(new ActivityName("Evening walk"), ENROL_DATE, LocalTime.of(17, 0),
+                LocalTime.of(18, 0), Recurrence.ONCE);
+        model.enrolDogs(first.getId(), ENROL_DATE, List.of(dog.getId()));
+        model.enrolDogs(second.getId(), ENROL_DATE, List.of(dog.getId()));
+        new SearchActivityCommand("walk", null, null).execute(model);
+
+        new DeleteActivityCommand(first.getId()).execute(model);
+
+        assertEquals(List.of(second), model.getFilteredActivityList());
+        assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
+        assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
+        var beforeDelete = model.createState();
+        new DeleteActivityCommand(second.getId()).execute(model);
+        var afterDelete = model.createState();
+
+        assertTrue(model.getFilteredActivityList().isEmpty());
+        assertTrue(model.getFilteredDogList().isEmpty());
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+
+        model.restoreState(beforeDelete);
+        assertEquals(List.of(second), model.getFilteredActivityList());
+        assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
+        assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
+
+        model.restoreState(afterDelete);
+        assertTrue(model.getFilteredActivityList().isEmpty());
+        assertTrue(model.getFilteredDogList().isEmpty());
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+    }
+
+    @Test
+    public void execute_editActivity_reappliesActiveFilter() throws Exception {
+        ModelManager model = modelWithActivities();
+        new SearchActivityCommand("run", null, null).execute(model);
+        var descriptor = new EditActivityCommand.EditActivityDescriptor();
+        descriptor.setName(new ActivityName("Evening training"));
+
+        new EditActivityCommand(model.getActivityList().get(0).getId(), descriptor).execute(model);
+
+        assertTrue(model.getFilteredActivityList().isEmpty());
+        assertTrue(model.getFilteredDogList().isEmpty());
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+    }
+
+    @Test
+    public void execute_activityId_combinesFieldsAndFiltersDogsAndOwners() throws Exception {
+        ModelManager model = new ModelManager();
+        model.addCustomer(new Customer(1, "Anna", "91234567", "anna@example.com", "98765432"));
+        Dog dog = model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
+        model.linkDogs(1, List.of(dog.getId()));
+        var first = model.addActivity(new ActivityName("Walk"), ENROL_DATE, LocalTime.NOON,
+                LocalTime.of(13, 0), Recurrence.ONCE);
+        var second = model.addActivity(new ActivityName("Walk"), ENROL_DATE, LocalTime.of(14, 0),
+                LocalTime.of(15, 0), Recurrence.ONCE);
+        model.enrolDogs(first.getId(), ENROL_DATE, List.of(dog.getId()));
+
+        CommandResult result = new SearchActivityCommand("walk", ENROL_DATE, LocalTime.NOON,
+                Recurrence.ONCE, first.getId()).execute(model);
+        assertEquals("Successfully searched activities by name: walk, date: " + ENROL_DATE
+                + ", time: 12:00, recurrence: Once, activity id: " + first.getId(), result.getFeedbackToUser());
+        assertEquals(List.of(first), model.getFilteredActivityList());
+        assertEquals(List.of(model.getDogList().get(0)), model.getFilteredDogList());
+        assertEquals(List.of(model.getCustomerList().get(0)), model.getFilteredCustomerList());
+
+        new SearchActivityCommand("missing", null, null, null, first.getId()).execute(model);
+        assertTrue(model.getFilteredActivityList().isEmpty());
+        assertTrue(model.getFilteredDogList().isEmpty());
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+
+        result = new SearchActivityCommand(null, null, null, null, second.getId()).execute(model);
+        assertEquals("Successfully searched activities by activity id: " + second.getId(), result.getFeedbackToUser());
+        assertEquals(List.of(second), model.getFilteredActivityList());
+        assertTrue(model.getFilteredDogList().isEmpty());
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+    }
+
+    @Test
+    public void execute_invalidActivityId_preservesPreviousDisplay() throws Exception {
+        ModelManager model = modelWithActivities();
+        new SearchActivityCommand("run", null, null).execute(model);
+        var activities = List.copyOf(model.getFilteredActivityList());
+        for (int id : new int[]{-1, 0, 999, Integer.MAX_VALUE}) {
+            assertThrows(CommandException.class,
+                    "Error in searching activities:\nPlease enter a valid activity index", () ->
+                    new SearchActivityCommand(null, null, null, null, id).execute(model));
+            assertEquals(activities, model.getFilteredActivityList());
+            assertTrue(model.getFilteredDogList().isEmpty());
+            assertTrue(model.getFilteredCustomerList().isEmpty());
+        }
+    }
+
+    @Test
+    public void equals_activityId_isCompared() {
+        SearchActivityCommand command = new SearchActivityCommand(null, null, null, null, 1);
+        assertEquals(command, new SearchActivityCommand(null, null, null, null, 1));
+        assertFalse(command.equals(new SearchActivityCommand(null, null, null, null, 2)));
+        assertFalse(command.equals(new SearchActivityCommand(null, null, null)));
+        assertTrue(command.toString().contains("activityId=1"));
+    }
+
+    @Test
     public void execute_combinedFields_filtersWithAndLogic() throws Exception {
         ModelManager model = modelWithActivities();
 
         CommandResult result = new SearchActivityCommand("dog run", DATE, LocalTime.of(16, 0)).execute(model);
 
-        assertEquals("Successfully searched activities by name: dog run, time: 16:00, date: 2026-10-20",
+        assertEquals("Successfully searched activities by name: dog run, date: 2026-10-20, time: 16:00",
                 result.getFeedbackToUser());
         assertEquals(List.of(model.getActivityList().get(0)), model.getFilteredActivityList());
     }

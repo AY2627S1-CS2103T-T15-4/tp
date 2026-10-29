@@ -4,7 +4,7 @@ skinparam ArrowFontStyle plain
 skinparam ParticipantFontColor #FFFFFF
 skinparam maxMessageSize 180
 
-participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":WatchDogParser" as Router LOGIC_COLOR
 participant ":DeleteDogCommandParser" as Parser LOGIC_COLOR
 participant ":DeleteDogCommand" as Command LOGIC_COLOR
 
@@ -16,7 +16,7 @@ Parser -> Command : new DeleteDogCommand(1)
 Parser --> Router : command
 
 legend bottom
-  Inside parseCommand("delete dog 1").
+  Inside parseCommand("deletedog 1").
   LogicManager then executes the returned command and saves.
   Validation failures, activation bars and disposal are omitted.
 endlegend

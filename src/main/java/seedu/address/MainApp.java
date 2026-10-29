@@ -1,5 +1,7 @@
 package seedu.address;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,15 +15,15 @@ import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
-import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
+import seedu.address.model.ReadOnlyWatchDog;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.util.SampleDataUtil;
-import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
+import seedu.address.storage.JsonWatchDogStorage;
 import seedu.address.storage.Storage;
 import seedu.address.storage.StorageManager;
 import seedu.address.ui.Ui;
@@ -32,55 +34,73 @@ import seedu.address.ui.UiManager;
  */
 public class MainApp extends Application {
 
-    public static final String VERSION = "V0.5.1";
+    public static final String VERSION = "V1.5";
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
     private static final Path USER_PREFS_FILE_PATH = Paths.get("preferences.json");
-    private static final Path ADDRESS_BOOK_FILE_PATH = Paths.get("data", "addressbook.json");
+    private static final Path WATCHDOG_DATA_FILE_PATH = Paths.get("data", "watchdog.json");
 
     protected Ui ui;
     protected Logic logic;
     protected Storage storage;
     protected Model model;
 
+    private final Path userPrefsFilePath;
+    private final Path dataFilePath;
+
+    /**
+     * Creates an application using the default preferences and data files.
+     */
+    public MainApp() {
+        this(USER_PREFS_FILE_PATH, WATCHDOG_DATA_FILE_PATH);
+    }
+
+    /**
+     * Creates an application using the given preferences and data files.
+     */
+    MainApp(Path userPrefsFilePath, Path dataFilePath) {
+        this.userPrefsFilePath = requireNonNull(userPrefsFilePath);
+        this.dataFilePath = requireNonNull(dataFilePath);
+    }
+
     @Override
     public void init() throws Exception {
-        logger.info("=============================[ Initializing AddressBook ]===========================");
+        logger.info("=============================[ Initializing WatchDog ]===========================");
         super.init();
 
-        JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(USER_PREFS_FILE_PATH);
+        JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(userPrefsFilePath);
         UserPrefs userPrefs = initPrefs(userPrefsStorage);
-        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(ADDRESS_BOOK_FILE_PATH);
-        storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        JsonWatchDogStorage watchDogStorage = new JsonWatchDogStorage(dataFilePath);
+        storage = new StorageManager(watchDogStorage, userPrefsStorage);
 
         model = initModelManager(storage, userPrefs);
 
         logic = new LogicManager(model, storage);
 
-        ui = new UiManager(logic, storage.getAddressBookFilePath());
+        ui = new UiManager(logic, storage.getWatchDogFilePath());
     }
 
     /**
-     * Returns a {@code ModelManager} with the data from {@code storage}'s address book and {@code userPrefs}. <br>
-     * The data from the sample address book will be used instead if {@code storage}'s address book is not found,
-     * or an empty address book will be used instead if errors occur when reading {@code storage}'s address book.
+     * Returns a {@code ModelManager} with the data from {@code storage}'s WatchDog and {@code userPrefs}. <br>
+     * The data from the sample WatchDog will be used instead if {@code storage}'s WatchDog is not found,
+     * or an empty WatchDog data file will be used instead if errors occur when reading {@code storage}'s WatchDog.
      */
     private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
-        logger.info("Using data file : " + storage.getAddressBookFilePath());
+        logger.info("Using data file : " + storage.getWatchDogFilePath());
 
-        Optional<ReadOnlyAddressBook> addressBookOptional;
-        ReadOnlyAddressBook initialData;
+        Optional<ReadOnlyWatchDog> watchDogOptional;
+        ReadOnlyWatchDog initialData;
         try {
-            addressBookOptional = storage.readAddressBook();
-            if (addressBookOptional.isEmpty()) {
-                logger.info("Creating a new data file " + storage.getAddressBookFilePath()
-                        + " populated with a sample AddressBook.");
+            watchDogOptional = storage.readWatchDog();
+            if (watchDogOptional.isEmpty()) {
+                logger.info("Creating a new data file " + storage.getWatchDogFilePath()
+                        + " populated with sample WatchDog data.");
             }
-            initialData = addressBookOptional.orElseGet(SampleDataUtil::getSampleAddressBook);
+            initialData = watchDogOptional.orElseGet(SampleDataUtil::getSampleWatchDog);
         } catch (DataLoadingException e) {
-            logger.warning("Data file at " + storage.getAddressBookFilePath() + " could not be loaded."
-                    + " Will be starting with an empty AddressBook.");
-            initialData = new AddressBook();
+            logger.warning("Data file at " + storage.getWatchDogFilePath() + " could not be loaded."
+                    + " Will be starting with no WatchDog records.");
+            initialData = new WatchDog();
         }
 
         return new ModelManager(initialData, userPrefs);
@@ -120,13 +140,13 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        logger.info("Starting AddressBook " + MainApp.VERSION);
+        logger.info("Starting WatchDog " + MainApp.VERSION);
         ui.start(primaryStage);
     }
 
     @Override
     public void stop() {
-        logger.info("============================ [ Stopping AddressBook ] =============================");
+        logger.info("============================ [ Stopping WatchDog ] =============================");
         try {
             storage.saveUserPrefs(model.getUserPrefs());
         } catch (IOException e) {

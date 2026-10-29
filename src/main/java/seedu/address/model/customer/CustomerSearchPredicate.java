@@ -37,6 +37,9 @@ public class CustomerSearchPredicate implements Predicate<Customer> {
     private CustomerSearchPredicate(String nameQuery, String phone, String email,
                                     String backupContact, Set<Integer> dogIds, List<Dog> dogs,
                                     Integer customerId) {
+        if (dogIds != null && dogIds.stream().anyMatch(id -> id == null || id < 1)) {
+            throw new IllegalArgumentException("Dog search IDs must be positive.");
+        }
         this.nameQuery = nameQuery == null ? null : normalize(nameQuery);
         this.phone = phone;
         this.email = email == null ? null : email.toLowerCase(Locale.ROOT);
@@ -94,8 +97,8 @@ public class CustomerSearchPredicate implements Predicate<Customer> {
     }
 
     private static int validateId(int value) {
-        if (value < 0) {
-            throw new IllegalArgumentException("Customer search ID cannot be negative");
+        if (value <= 0) {
+            throw new IllegalArgumentException("Customer search ID must be positive");
         }
         return value;
     }

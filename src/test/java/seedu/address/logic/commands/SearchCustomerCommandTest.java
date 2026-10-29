@@ -59,6 +59,33 @@ public class SearchCustomerCommandTest {
     }
 
     @Test
+    public void execute_invalidIds_preservesPreviousDisplay() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        Activity activity = model.addActivity(new ActivityName("Walk"), LocalDate.now().plusDays(7),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        model.enrolDogs(activity.getId(), activity.getStartDate(), List.of(1));
+        new SearchCustomerCommand(null, null, null, null, null, 1).execute(model);
+        var customers = List.copyOf(model.getFilteredCustomerList());
+        var dogs = List.copyOf(model.getFilteredDogList());
+        String summary = model.getActivityEnrolmentSummary(activity);
+
+        for (int id : new int[]{-1, 0}) {
+            assertThrows(IllegalArgumentException.class, () ->
+                    new SearchCustomerCommand(null, null, null, null, Set.of(1, id)));
+        }
+        for (int id : new int[]{999, Integer.MAX_VALUE}) {
+            assertThrows(CommandException.class, "Error in searching customers:\nPlease enter a valid dog index", () ->
+                    new SearchCustomerCommand(null, null, null, null, Set.of(1, id)).execute(model));
+            assertThrows(CommandException.class, SearchCustomerCommand.MESSAGE_INVALID_CUSTOMER_ID, () ->
+                    new SearchCustomerCommand(null, null, null, null, null, id).execute(model));
+            assertEquals(customers, model.getFilteredCustomerList());
+            assertEquals(dogs, model.getFilteredDogList());
+            assertEquals(List.of(activity), model.getFilteredActivityList());
+            assertEquals(summary, model.getActivityEnrolmentSummary(activity));
+        }
+    }
+
+    @Test
     public void execute_unknownDogId_throwsCommandException() throws Exception {
         ModelManager model = modelWithCustomersAndDogs();
 

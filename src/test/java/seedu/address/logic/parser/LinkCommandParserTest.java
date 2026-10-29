@@ -17,10 +17,10 @@ public class LinkCommandParserTest {
     public void parse_validIds_acceptsSingleAndMultipleDogs() throws Exception {
         assertEquals(new LinkCommand(1, List.of(1, 2, 3, 4, 5)), parser.parse("c/1 d/1 2 3 4 5"));
         assertEquals(new LinkCommand(1, List.of(2)), parser.parse(" c/1 d/2 "));
-        assertEquals(new LinkCommand(0, List.of(2, Integer.MAX_VALUE)),
-                parser.parse("\t c/0  d/02\t 2147483647  "));
+        assertEquals(new LinkCommand(1, List.of(2, Integer.MAX_VALUE)),
+                parser.parse("\t c/01  d/02\t 2147483647  "));
         assertEquals(new LinkCommand(1, List.of(2, 3)),
-                new AddressBookParser().parseCommand("link c/1 d/2 3"));
+                new WatchDogParser().parseCommand("link c/1 d/2 3"));
     }
 
     @Test
@@ -31,8 +31,14 @@ public class LinkCommandParserTest {
                 "prefix c/1 d/2", "c/1 d/2 extra",
                 "d/2 c/1", "C/1 d/2", "c/1 D/2", "c/1d/2", "c/ 1 d/2", "c/1 d/ 2",
                 "c/-1 d/2", "c/1 d/-2", "c/+1 d/2", "c/1 d/2.0", "c/a d/2", "c/1 d/a",
-                "c/2147483648 d/2", "c/1 d/2147483648", "c/1 d/999999999999999999999")) {
+                "c/2147483648 d/2", "c/1 d/0", "c/1 d/2147483648", "c/1 d/999999999999999999999")) {
+
             assertThrows(ParseException.class, () -> parser.parse(input), input);
         }
+    }
+
+    @Test
+    public void command_zeroDogId_rejectsInvalidDogId() {
+        assertThrows(IllegalArgumentException.class, () -> new LinkCommand(1, List.of(0)));
     }
 }

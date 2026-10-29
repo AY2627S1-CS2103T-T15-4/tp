@@ -5,7 +5,7 @@ skinparam classBackgroundColor MODEL_COLOR
 skinparam ArrowFontStyle plain
 show members
 
-class AddressBook {
+class WatchDog {
   -nextActivityId: long
   +addActivity(...): Activity
   +removeActivity(activity: Activity): void
@@ -39,8 +39,8 @@ class "<<enumeration>>\nRecurrence" as Recurrence {
   WEEKLY
 }
 
-AddressBook --> "*" Activity : activities
-AddressBook --> "*" Enrolment : enrolments
+WatchDog --> "*" Activity : activities
+WatchDog --> "*" Enrolment : enrolments
 Activity --> "1" ActivityName : name
 Activity --> "1" Recurrence : recurrence
 

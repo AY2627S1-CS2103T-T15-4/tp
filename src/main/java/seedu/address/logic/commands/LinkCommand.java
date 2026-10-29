@@ -16,7 +16,8 @@ public class LinkCommand extends Command {
     public static final String COMMAND_WORD = "link";
     public static final String MESSAGE_USAGE = "link: Links one or more unowned dogs to a customer.\n"
             + "Parameters: c/CUSTOMER_ID d/DOG_ID [DOG_ID]...\n"
-            + "IDs must be integers from 0 to 2147483647; dog IDs must not repeat.\n"
+            + "Customer and dog IDs must be positive and must not repeat.\n"
+
             + "The entire batch is rejected if any record is missing or any dog already has an owner.\n"
             + "Example: link c/1 d/2 3";
     public static final String MESSAGE_SUCCESS = "Linked dog IDs %s to customer ID %d.";
@@ -24,11 +25,12 @@ public class LinkCommand extends Command {
     private final int customerId;
     private final List<Integer> dogIds;
 
-    /** Creates a link request containing distinct nonnegative dog IDs and a nonnegative customer ID. */
+    /** Creates a link request containing distinct positive dog IDs and a positive customer ID. */
     public LinkCommand(int customerId, List<Integer> dogIds) {
         this.dogIds = List.copyOf(dogIds);
-        checkArgument(customerId >= 0 && !dogIds.isEmpty()
-                && dogIds.stream().allMatch(id -> id >= 0)
+        checkArgument(customerId >= 1 && !dogIds.isEmpty()
+                && dogIds.stream().allMatch(id -> id >= 1)
+
                 && new HashSet<>(dogIds).size() == dogIds.size(), "Invalid link IDs.");
         this.customerId = customerId;
     }

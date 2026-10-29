@@ -13,28 +13,93 @@
 .list-cell:filled:selected { -fx-background-color: #90D1CA; }
 
 .list-cell:hover #cardPane {
-    -fx-border-color: transparent;
-    -fx-border-width: 0;
+    -fx-border-color: rgba(9, 107, 104, 0.65);
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
     -fx-background-insets: 0;
     -fx-background-radius: 10;
-    -fx-effect: innershadow(gaussian, rgba(18, 153, 144, 0.45), 8, 0.25, 0, 1);
-    -fx-scale-x: 1.01;
-    -fx-scale-y: 1.01;
+    -fx-effect: dropshadow(gaussian, rgba(9, 107, 104, 0.35), 9, 0.1, 0, 2);
 }
 
 .today-panel .list-cell:hover #cardPane {
+    -fx-border-color: rgba(144, 209, 202, 0.85);
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
     -fx-background-insets: 0;
     -fx-background-radius: 10;
-    -fx-effect: null;
-    -fx-scale-x: 1;
-    -fx-scale-y: 1;
+    -fx-effect: dropshadow(gaussian, rgba(9, 107, 104, 0.28), 8, 0.05, 0, 2);
 }
 
 .list-cell .label { -fx-text-fill: #096B68; }
 
 .cell_big_label { -fx-font-family: "Segoe UI Semibold"; -fx-font-size: 16px; -fx-text-fill: #096B68; }
 .cell_small_label { -fx-font-family: "Segoe UI"; -fx-font-size: 13px; -fx-text-fill: #096B68; }
-#cardPane { -fx-background-color: #FEF9EF; -fx-background-insets: 0; -fx-background-radius: 10; -fx-border-radius: 10; -fx-effect: dropshadow(gaussian, rgba(18, 153, 144, 0.22), 7, 0.0, 0, 2); }
+.backup-contact-label { -fx-font-family: "Segoe UI"; -fx-font-size: 13px; -fx-font-style: italic; -fx-text-fill: #096B68; }
+.contact-icon {
+    -fx-background-color: #096B68;
+    -fx-min-width: 14;
+    -fx-pref-width: 14;
+    -fx-max-width: 14;
+    -fx-min-height: 14;
+    -fx-pref-height: 14;
+    -fx-max-height: 14;
+    -fx-scale-shape: true;
+    -fx-position-shape: true;
+}
+.dog-icon {
+    -fx-background-color: #096B68;
+    -fx-min-width: 15;
+    -fx-pref-width: 15;
+    -fx-max-width: 15;
+    -fx-min-height: 15;
+    -fx-pref-height: 15;
+    -fx-max-height: 15;
+    -fx-scale-shape: true;
+    -fx-position-shape: true;
+    -fx-shape: "M12 10 C8 10 5 14 5 17 C5 20 8 21 12 19 C16 21 19 20 19 17 C19 14 16 10 12 10 Z M4 8 C2 8 1 6 2 4 C3 2 6 3 6 5 C6 7 5 8 4 8 Z M9 6 C7 6 6 4 7 2 C8 0 11 1 11 3 C11 5 10 6 9 6 Z M15 6 C13 6 12 4 13 2 C14 0 17 1 17 3 C17 5 16 6 15 6 Z M20 8 C18 8 17 6 18 4 C19 2 22 3 22 5 C22 7 21 8 20 8 Z";
+}
+#phoneIcon {
+    -fx-shape: "M6.62 10.79 C8.06 13.62 10.38 15.94 13.21 17.38 L15.41 15.18 C15.69 14.9 16.08 14.82 16.43 14.93 C17.55 15.3 18.75 15.5 20 15.5 C20.55 15.5 21 15.95 21 16.5 L21 20 C21 20.55 20.55 21 20 21 C10.61 21 3 13.39 3 4 C3 3.45 3.45 3 4 3 L7.5 3 C8.05 3 8.5 3.45 8.5 4 C8.5 5.25 8.7 6.45 9.07 7.57 C9.18 7.92 9.1 8.31 8.82 8.59 Z";
+}
+#emailIcon {
+    -fx-shape: "M20 4 L4 4 C2.9 4 2.01 4.9 2.01 6 L2 18 C2 19.1 2.9 20 4 20 L20 20 C21.1 20 22 19.1 22 18 L22 6 C22 4.9 21.1 4 20 4 Z M20 8 L12 13 L4 8 L4 6 L12 11 L20 6 Z";
+}
+.empty-state {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 12px;
+    -fx-font-style: italic;
+    -fx-text-fill: #096B68;
+    -fx-opacity: 0.70;
+}
+.tooltip.card-tooltip {
+    -fx-background-color: #FEF9EF;
+    -fx-border-color: #90D1CA;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 7 9 7 9;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 11px;
+    -fx-text-fill: #096B68;
+}
+.tooltip.copy-confirmation {
+    -fx-background-color: #096B68;
+    -fx-border-color: #90D1CA;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 6 9 6 9;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-font-size: 11px;
+    -fx-text-fill: #FEF9EF;
+}
+#cardPane {
+    -fx-background-color: #FEF9EF;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-border-color: transparent;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(18, 153, 144, 0.22), 7, 0.0, 0, 2);
+}
 
 .stack-pane { -fx-background-color: #90D1CA; }
 .record-lists { -fx-background-color: transparent; -fx-padding: 10 24 10 24; }
@@ -46,6 +111,7 @@
     -fx-opacity: 1;
     -fx-font-family: "Segoe UI";
     -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(9, 107, 104, 0.65), 2, 0.2, 0, 1);
 }
 
 .command-area, .result-area {
@@ -69,7 +135,8 @@
 .today-panel #cardPane .cell_big_label, .today-panel #cardPane .cell_small_label,
 .today-panel #cardPane .label { -fx-text-fill: #FEF9EF; -fx-opacity: 1; }
 
-.result-display { -fx-background-color: #FEF9EF; -fx-font-family: "Segoe UI Semibold"; -fx-font-weight: bold; -fx-font-size: 12pt; -fx-text-fill: #096B68; }
+.result-display { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-padding: 0; -fx-font-family: "Segoe UI Semibold"; -fx-font-weight: bold; -fx-font-size: 12pt; -fx-text-fill: #096B68; -fx-prompt-text-fill: rgba(18, 153, 144, 0.58); }
+.result-display .viewport, .result-display .content { -fx-background-color: transparent; -fx-background-insets: 0; }
 .result-display .label { -fx-text-fill: #096B68 !important; }
 .status-bar, .status-bar-with-border { -fx-background-color: #096B68; -fx-border-color: #90D1CA; }
 .status-bar .label, .status-bar-with-border .label { -fx-font-family: "Segoe UI Light"; -fx-text-fill: #FEF9EF; -fx-padding: 4px; }
@@ -77,12 +144,22 @@
 .menu-bar { -fx-background-color: #096B68; }
 .menu-bar .label { -fx-font-size: 14pt; -fx-font-family: "Segoe UI Light"; -fx-text-fill: #FEF9EF; }
 .menu .left-container { -fx-background-color: #096B68; }
+
+.context-menu { -fx-background-color: #FEF9EF; }
+.menu-item .label {
+    -fx-font-size: 11pt;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-text-fill: #096B68;
+}
+.menu-item:hover, .menu-item:focused { -fx-background-color: #90D1CA; }
+.menu-item:hover .label, .menu-item:focused .label { -fx-text-fill: #096B68; }
+
 .scroll-bar { -fx-background-color: #90D1CA; }
 .scroll-bar .thumb { -fx-background-color: #129990; -fx-background-insets: 3; }
 .scroll-bar .increment-button, .scroll-bar .decrement-button { -fx-background-color: transparent; -fx-padding: 0; }
 .scroll-bar .increment-arrow, .scroll-bar .decrement-arrow { -fx-shape: " "; }
 
 #commandTypeLabel { -fx-font-size: 11px; -fx-text-fill: #129990; }
-#commandTextField { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-width: 0; -fx-background-radius: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-padding: 2 6 2 6; -fx-font-family: "Segoe UI Semibold"; -fx-font-weight: bold; -fx-font-size: 12pt; -fx-text-fill: #096B68; -fx-prompt-text-fill: #129990; }
-#resultDisplay .content { -fx-background-color: #FEF9EF; -fx-background-radius: 10; }
+#commandTextField { -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent; -fx-border-width: 0; -fx-background-radius: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-padding: 2 6 2 6; -fx-font-family: "Segoe UI Semibold"; -fx-font-weight: bold; -fx-font-size: 11pt; -fx-text-fill: #096B68; -fx-prompt-text-fill: rgba(18, 153, 144, 0.58); }
+#resultDisplay .content { -fx-background-color: transparent; }
 .error { -fx-text-fill: #129990 !important; }

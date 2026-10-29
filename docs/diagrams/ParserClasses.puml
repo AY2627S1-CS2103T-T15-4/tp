@@ -4,7 +4,7 @@ skinparam arrowThickness 1.1
 skinparam arrowColor LOGIC_COLOR_T4
 skinparam classBackgroundColor LOGIC_COLOR
 
-class AddressBookParser
+class WatchDogParser
 class "<<interface>>\nParser" as Parser
 class AddDogCommandParser
 class AddDogCommand
@@ -14,7 +14,7 @@ class ArgumentMultimap
 class ArgumentTokenizer
 class Prefix
 
-AddressBookParser ..> AddDogCommandParser : creates
+WatchDogParser ..> AddDogCommandParser : creates
 AddDogCommandParser .up.|> Parser
 AddDogCommandParser ..> AddDogCommand : creates
 AddDogCommandParser ..> ArgumentTokenizer : tokenizes

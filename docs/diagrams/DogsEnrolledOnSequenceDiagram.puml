@@ -6,7 +6,7 @@ skinparam maxMessageSize 180
 
 participant "command:SummaryCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
-participant ":AddressBook" as Book MODEL_COLOR
+participant ":WatchDog" as Book MODEL_COLOR
 
 Command -> Model : getDogsEnrolledOn(today)
 Model -> Book : getEnrolmentList()

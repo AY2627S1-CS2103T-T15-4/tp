@@ -23,9 +23,17 @@ public class LinkCommandParser implements Parser<LinkCommand> {
         String[] fields = input.split("\\s+");
         try {
             int customerId = Integer.parseInt(fields[0].substring(2));
+            if (customerId <= 0) {
+                throw invalidFormat();
+            }
             List<Integer> dogIds = new ArrayList<>();
             for (int i = 1; i < fields.length; i++) {
-                dogIds.add(Integer.parseInt(i == 1 ? fields[i].substring(2) : fields[i]));
+                int dogId = Integer.parseInt(i == 1 ? fields[i].substring(2) : fields[i]);
+                if (dogId < 1) {
+                    throw invalidFormat();
+                }
+                dogIds.add(dogId);
+
             }
             if (new HashSet<>(dogIds).size() != dogIds.size()) {
                 throw invalidFormat();

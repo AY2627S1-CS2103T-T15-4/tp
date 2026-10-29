@@ -7,7 +7,7 @@
 
 We are a team based in the [School of Computing, National University of Singapore](http://www.comp.nus.edu.sg).
 
-You can reach us at the email `seer[at]comp.nus.edu.sg`
+Report bugs and suggestions through the [WatchDog issue tracker](https://github.com/AY2627S1-CS2103T-T15-4/tp/issues).
 
 ## Project team
 
@@ -34,7 +34,6 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 <img src="images/xandergoh.png" width="200px">
 
 [[github](http://github.com/xandergoh)]
-[[portfolio](team/johndoe.md)]
 
 * Role: Developer
 * Responsibilities: Data, Debugging, Testing

@@ -6,6 +6,9 @@ import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.testutil.Assert.assertThrows;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.AddDogCommand;
@@ -16,6 +19,7 @@ import seedu.address.logic.commands.EditActivityCommand;
 import seedu.address.logic.commands.EditActivityCommand.EditActivityDescriptor;
 import seedu.address.logic.commands.EditDogCommand;
 import seedu.address.logic.commands.EditDogCommand.EditDogDescriptor;
+import seedu.address.logic.commands.EnrolDogCommand;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FilterUnlinkedCommand;
 import seedu.address.logic.commands.HelpCommand;
@@ -27,6 +31,7 @@ import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.commands.SummaryCommand;
 import seedu.address.logic.commands.TodayCommand;
 import seedu.address.logic.commands.UndoCommand;
+import seedu.address.logic.commands.UnenrolDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.dog.Breed;
@@ -34,9 +39,9 @@ import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
 
-public class AddressBookParserTest {
+public class WatchDogParserTest {
 
-    private final AddressBookParser parser = new AddressBookParser();
+    private final WatchDogParser parser = new WatchDogParser();
 
     @Test
     public void parseCommand_retiredSearch_throwsUnknownCommand() {
@@ -92,20 +97,44 @@ public class AddressBookParserTest {
 
     @Test
     public void parseCommand_deleteDog() throws Exception {
-        DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("delete dog 12");
+        DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("deletedog 12");
         assertEquals(new DeleteDogCommand(12), command);
     }
 
     @Test
+    public void parseCommand_oldDeleteForms_rejected() {
+        for (String input : new String[] {"delete dog 12", "delete  dog   12", "delete customer 21",
+            "delete  customer   21", "delete\tdog\t12", "delete\tcustomer\t21"}) {
+            assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
+        }
+    }
+
+    @Test
     public void parseCommand_deleteDogWithMultipleSpaces() throws Exception {
-        DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("delete  dog   12");
+        DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("deletedog   12");
         assertEquals(new DeleteDogCommand(12), command);
     }
 
     @Test
     public void parseCommand_deleteCustomer() throws Exception {
-        DeleteCustomerCommand command = (DeleteCustomerCommand) parser.parseCommand("delete customer 21");
+        DeleteCustomerCommand command = (DeleteCustomerCommand) parser.parseCommand("deletecustomer 21");
         assertEquals(new DeleteCustomerCommand(21), command);
+    }
+
+    @Test
+    public void parseCommand_deleteCustomerWithWhitespace() throws Exception {
+        for (String input : new String[] {"deletecustomer 21", "deletecustomer   21",
+            "  deletecustomer 21  ", "\tdeletecustomer\t21\t"}) {
+            assertEquals(new DeleteCustomerCommand(21), parser.parseCommand(input));
+        }
+    }
+
+    @Test
+    public void parseCommand_deleteCustomerWithInvalidArguments_throwsParseException() {
+        for (String input : new String[] {"deletecustomer", "deletecustomer -1",
+            "deletecustomer abc", "deletecustomer 21 22", "deletecustomer21"}) {
+            assertThrows(ParseException.class, () -> parser.parseCommand(input));
+        }
     }
 
     @Test
@@ -129,6 +158,20 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_editActivityInvalidArgs_failure() {
         assertThrows(ParseException.class, () -> parser.parseCommand("editactivity invalid n/Training"));
+    }
+
+    @Test
+    public void parseCommand_enrol_acceptsAnyPrefixOrderAndWhitespaceSeparatedDogIds() throws Exception {
+        EnrolDogCommand expected = new EnrolDogCommand(1, LocalDate.of(2028, 2, 29), List.of(2, 3, 5));
+
+        assertEquals(expected, parser.parseCommand("enrol d/2  3\t5 a/1 date/2028-02-29"));
+    }
+
+    @Test
+    public void parseCommand_unenrol_acceptsAnyPrefixOrderAndWhitespaceSeparatedDogIds() throws Exception {
+        UnenrolDogCommand expected = new UnenrolDogCommand(1, LocalDate.of(2028, 2, 29), List.of(2, 3, 5));
+
+        assertEquals(expected, parser.parseCommand("unenrol date/2028-02-29 d/2  3\t5 a/1"));
     }
 
     @Test
@@ -172,7 +215,7 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_help() throws Exception {
         assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD) instanceof HelpCommand);
-        assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD + " 3") instanceof HelpCommand);
+        assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD + " summary") instanceof HelpCommand);
     }
 
     @Test

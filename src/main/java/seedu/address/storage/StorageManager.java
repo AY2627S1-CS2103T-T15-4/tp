@@ -7,24 +7,24 @@ import java.util.logging.Logger;
 
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
-import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
+import seedu.address.model.ReadOnlyWatchDog;
 import seedu.address.model.UserPrefs;
 
 /**
- * Manages storage of AddressBook data in local storage.
+ * Manages storage of WatchDog data in local storage.
  */
 public class StorageManager implements Storage {
 
     private static final Logger logger = LogsCenter.getLogger(StorageManager.class);
-    private JsonAddressBookStorage addressBookStorage;
+    private JsonWatchDogStorage watchDogStorage;
     private JsonUserPrefsStorage userPrefsStorage;
 
     /**
-     * Creates a {@code StorageManager} with the given address book and user prefs storage.
+     * Creates a {@code StorageManager} with the given WatchDog and user prefs storage.
      */
-    public StorageManager(JsonAddressBookStorage addressBookStorage, JsonUserPrefsStorage userPrefsStorage) {
-        this.addressBookStorage = addressBookStorage;
+    public StorageManager(JsonWatchDogStorage watchDogStorage, JsonUserPrefsStorage userPrefsStorage) {
+        this.watchDogStorage = watchDogStorage;
         this.userPrefsStorage = userPrefsStorage;
     }
 
@@ -46,23 +46,23 @@ public class StorageManager implements Storage {
     }
 
 
-    // ================ AddressBook methods ==============================
+    // ================ WatchDog methods ==============================
 
     @Override
-    public Path getAddressBookFilePath() {
-        return addressBookStorage.getAddressBookFilePath();
+    public Path getWatchDogFilePath() {
+        return watchDogStorage.getWatchDogFilePath();
     }
 
     @Override
-    public Optional<ReadOnlyAddressBook> readAddressBook() throws DataLoadingException {
-        logger.fine("Attempting to read data from file: " + addressBookStorage.getAddressBookFilePath());
-        return addressBookStorage.readAddressBook();
+    public Optional<ReadOnlyWatchDog> readWatchDog() throws DataLoadingException {
+        logger.fine("Attempting to read data from file: " + watchDogStorage.getWatchDogFilePath());
+        return watchDogStorage.readWatchDog();
     }
 
     @Override
-    public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
-        logger.fine("Attempting to write to data file: " + addressBookStorage.getAddressBookFilePath());
-        addressBookStorage.saveAddressBook(addressBook);
+    public void saveWatchDog(ReadOnlyWatchDog watchDog) throws IOException {
+        logger.fine("Attempting to write to data file: " + watchDogStorage.getWatchDogFilePath());
+        watchDogStorage.saveWatchDog(watchDog);
     }
 
 }

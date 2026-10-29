@@ -19,12 +19,15 @@ public class UniqueDogList implements Iterable<Dog> {
     /** Returns true if a dog with the same persistent ID exists. */
     public boolean contains(Dog toCheck) {
         requireNonNull(toCheck);
-        return toCheck.getId() >= 0 && internalList.stream().anyMatch(toCheck::isSameDog);
+        return toCheck.getId() >= 1 && internalList.stream().anyMatch(toCheck::isSameDog);
     }
 
     /** Adds a dog that does not already exist. */
     public void add(Dog toAdd) {
         requireNonNull(toAdd);
+        if (toAdd.getId() < 1) {
+            throw new IllegalArgumentException("Dog ID must be positive.");
+        }
         if (contains(toAdd)) {
             throw new DuplicateDogException();
         }
@@ -68,6 +71,9 @@ public class UniqueDogList implements Iterable<Dog> {
     /** Replaces the contents of this list with the given dogs. */
     public void setDogs(List<Dog> dogs) {
         requireAllNonNull(dogs);
+        if (dogs.stream().anyMatch(dog -> dog.getId() < 1)) {
+            throw new IllegalArgumentException("Dog IDs must be positive.");
+        }
         for (int i = 0; i < dogs.size(); i++) {
             for (int j = i + 1; j < dogs.size(); j++) {
                 if (dogs.get(i).isSameDog(dogs.get(j))) {

@@ -12,6 +12,8 @@ class ResultDisplay
 class HelpWindow
 class CustomerListPanel
 class DogListPanel
+class ActivityBookingSummary
+class CardListUpdater
 class ActivityListPanel
 class TodayActivityListPanel
 class CustomerCard
@@ -34,6 +36,10 @@ TodayActivityListPanel -up-|> ActivityListPanel
 CustomerListPanel ..> CustomerCard : creates
 DogListPanel ..> DogCard : creates
 ActivityListPanel ..> ActivityCard : creates
+ActivityListPanel ..> ActivityBookingSummary : formats booking lines
+ActivityListPanel ..> CardListUpdater : reconciles cards
+CustomerListPanel ..> CardListUpdater
+DogListPanel ..> CardListUpdater
 
 note right of ActivityListPanel
   Observes activity, enrolment and search-context
@@ -41,7 +47,9 @@ note right of ActivityListPanel
 end note
 
 note bottom of TodayActivityListPanel
-  Uses the complete activity list,
-  filtered to schedules occurring today.
+  Uses all schedules and exact-date bookings.
+  General panel shows bookings today or later.
+  MainWindow refreshes both with one date
+  after successful commands.
 end note
 @enduml

@@ -5,9 +5,11 @@ import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.customer.exceptions.CustomerNotFoundException;
 import seedu.address.model.customer.exceptions.DuplicateCustomerException;
 
@@ -18,6 +20,8 @@ import seedu.address.model.customer.exceptions.DuplicateCustomerException;
  * @see Customer#isSameCustomer(Customer)
  */
 public class UniqueCustomerList implements Iterable<Customer> {
+
+    private static final Logger logger = LogsCenter.getLogger(UniqueCustomerList.class);
 
     private final ObservableList<Customer> internalList = FXCollections.observableArrayList();
     private final ObservableList<Customer> internalUnmodifiableList =
@@ -38,6 +42,7 @@ public class UniqueCustomerList implements Iterable<Customer> {
     public void add(Customer toAdd) {
         requireNonNull(toAdd);
         if (contains(toAdd)) {
+            logger.warning("Rejected a duplicate customer ID " + toAdd.getId());
             throw new DuplicateCustomerException();
         }
         internalList.add(toAdd);
@@ -81,6 +86,7 @@ public class UniqueCustomerList implements Iterable<Customer> {
     public void setCustomers(List<Customer> customers) {
         requireAllNonNull(customers);
         if (!customersAreUnique(customers)) {
+            logger.warning("Rejected a customer list containing duplicate IDs.");
             throw new DuplicateCustomerException();
         }
 

@@ -11,7 +11,7 @@ import seedu.address.logic.commands.DeleteCustomerCommand;
 public class DeleteCustomerCommandParserTest {
 
     private static final String INVALID_FORMAT = "Error in deleting customer:\nInvalid format. "
-            + "Please use the following format: delete <category> <id>\nExample: delete customer 21";
+            + "Please use the following format: deletecustomer <id>\nExample: deletecustomer 21";
 
     private final DeleteCustomerCommandParser parser = new DeleteCustomerCommandParser();
 
@@ -33,5 +33,8 @@ public class DeleteCustomerCommandParserTest {
         assertParseFailure(parser, "", INVALID_FORMAT);
         assertParseFailure(parser, "abc", INVALID_FORMAT);
         assertParseFailure(parser, "21 extra", INVALID_FORMAT);
+        assertParseFailure(parser, "+21", INVALID_FORMAT);
+        assertParseFailure(parser, "21.0", INVALID_FORMAT);
+        assertParseFailure(parser, "2147483648", INVALID_FORMAT);
     }
 }

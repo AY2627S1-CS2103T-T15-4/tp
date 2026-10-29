@@ -7,7 +7,7 @@ skinparam classBackgroundColor LOGIC_COLOR
 package Logic as LogicPackage {
 class "<<interface>>\nLogic" as Logic
 class LogicManager
-class AddressBookParser
+class WatchDogParser
 class "{abstract}\nCommand" as Command
 class AddDogCommand
 class SummaryCommand
@@ -18,11 +18,11 @@ class "<<interface>>\nModel" as Model MODEL_COLOR
 class "<<interface>>\nStorage" as Storage STORAGE_COLOR
 
 LogicManager .up.|> Logic
-LogicManager --> "1" AddressBookParser : addressBookParser
+LogicManager --> "1" WatchDogParser : watchDogParser
 LogicManager --> "1" Model : model
 LogicManager --> "1" Storage : storage
 LogicManager ..> Command : executes
-AddressBookParser ..> Command : returns
+WatchDogParser ..> Command : returns
 AddDogCommand -up-|> Command
 SummaryCommand -up-|> Command
 Command ..> Model : execute(model)

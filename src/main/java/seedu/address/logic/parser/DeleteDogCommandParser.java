@@ -3,18 +3,18 @@ package seedu.address.logic.parser;
 import seedu.address.logic.commands.DeleteDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
-/** Parses arguments for the {@code delete dog} command. */
+/** Parses arguments for the {@code deletedog} command. */
 public class DeleteDogCommandParser implements Parser<DeleteDogCommand> {
 
     private static final String MESSAGE_INVALID_FORMAT = "Error in deleting dog:\nInvalid format. "
-            + "Please use the following format: delete <category> <id>\nExample: delete dog 12";
+            + "Please use the following format: deletedog <id>\nExample: deletedog 12";
 
     @Override
     public DeleteDogCommand parse(String args) throws ParseException {
         String trimmedArgs = args.trim();
         try {
             int dogId = Integer.parseInt(trimmedArgs);
-            if (dogId < 0) {
+            if (dogId < 1) {
                 throw new NumberFormatException();
             }
             return new DeleteDogCommand(dogId);

@@ -1,3 +1,4 @@
+// @@author Umaiza-15
 package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,9 +31,11 @@ public class JsonAdaptedDogTest {
     }
 
     @Test
-    public void toModelType_negativeId_throwsIllegalValueException() {
+    public void toModelType_nonpositiveId_throwsIllegalValueException() {
         JsonAdaptedDog dog = new JsonAdaptedDog(-1, "Cookie", "Poodle", "Large", null);
-        assertThrows(IllegalValueException.class, "Dog id must be nonnegative.", dog::toModelType);
+        assertThrows(IllegalValueException.class, "Dog id must be positive.", dog::toModelType);
+        JsonAdaptedDog zeroDog = new JsonAdaptedDog(0, "Cookie", "Poodle", "Large", null);
+        assertThrows(IllegalValueException.class, "Dog id must be positive.", zeroDog::toModelType);
     }
 
     @Test

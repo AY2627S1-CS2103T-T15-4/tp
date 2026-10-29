@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.testutil.Assert;
 
 public class SearchCustomerCommandParserTest {
     private final SearchCustomerCommandParser parser = new SearchCustomerCommandParser();
@@ -36,15 +37,28 @@ public class SearchCustomerCommandParserTest {
 
     @Test
     public void parse_invalidPhoneBackupOrId_throwsParseException() {
-        for (String input : new String[]{"p/9123456", "bc/912345678", "d/-1", "d/abc", "i/-1", "i/abc"}) {
+        for (String input : new String[]{"p/9123456", "bc/912345678", "d/0", "d/-1", "d/abc", "i/-1", "i/abc"}) {
+
             assertThrows(ParseException.class, () -> parser.parse(input));
         }
     }
 
     @Test
     public void parse_invalidDogOrCustomerId_includesSearchingErrorPrefix() {
-        String expectedMessage = "Error in searching customers:\n"
-                + "Info is in the wrong format. Input in the correct format";
-        assertThrows(ParseException.class, expectedMessage, () -> parser.parse("i/not-a-number"));
+        for (String value : new String[]{"-1", "0", "00", "not-a-number", "2147483648", "-2147483649"}) {
+            assertThrows(ParseException.class, "Error in searching customers:\nPlease enter a valid dog index", () ->
+                    parser.parse("d/" + value));
+            assertThrows(ParseException.class, "Error in searching customers:\nPlease enter a valid dog index", () ->
+                    parser.parse("d/1 " + value));
+            assertThrows(ParseException.class,
+                    "Error in searching customers:\nPlease enter a valid customer index", () ->
+                    parser.parse("i/" + value));
+        }
+    }
+
+    @Test
+    public void command_zeroDogId_rejectsInvalidDogId() {
+        Assert.assertThrows(IllegalArgumentException.class, () ->
+                new SearchCustomerCommand(null, null, null, null, java.util.Set.of(0)));
     }
 }

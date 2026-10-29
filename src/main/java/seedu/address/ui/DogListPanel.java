@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
@@ -25,15 +26,31 @@ public class DogListPanel extends UiPart<Region> {
     public DogListPanel(ObservableList<Dog> dogs) {
         super(FXML);
         this.dogs = dogs;
+        recordListView.setPlaceholder(createEmptyState("No dogs to display."));
         recordListView.setCellFactory(listView -> new RecordListViewCell());
         dogs.addListener((ListChangeListener<Dog>) change -> updateDogs());
         updateDogs();
     }
 
+    /** Reconciles visible dog cards with the current filtered dog list. */
     private void updateDogs() {
-        List<Supplier<Region>> cards = new ArrayList<>();
-        dogs.forEach(dog -> cards.add(() -> new DogCard(dog).getRoot()));
-        recordListView.getItems().setAll(cards);
+        List<CardListEntry> cards = new ArrayList<>();
+        dogs.forEach(dog -> {
+            Supplier<Region> cardFactory = () -> new DogCard(dog).getRoot();
+            cards.add(new CardListEntry("dog:" + dog.getId(), dog, cardFactory));
+        });
+        CardListUpdater.reconcile(recordListView, cards);
+    }
+
+    /** Scrolls to the first dog after an explicit display-changing command. */
+    void scrollToTop() {
+        CardListUpdater.scrollToTop(recordListView);
+    }
+
+    private static Label createEmptyState(String message) {
+        Label placeholder = new Label(message);
+        placeholder.getStyleClass().add("empty-state");
+        return placeholder;
     }
 
     private static class RecordListViewCell extends ListCell<Supplier<Region>> {

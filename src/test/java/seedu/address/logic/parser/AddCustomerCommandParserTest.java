@@ -26,7 +26,7 @@ public class AddCustomerCommandParserTest {
 
         assertParseSuccess(parser, validArguments, new AddCustomerCommand(customer));
         assertEquals(new AddCustomerCommand(customer),
-                new AddressBookParser().parseCommand(AddCustomerCommand.COMMAND_WORD + validArguments));
+                new WatchDogParser().parseCommand(AddCustomerCommand.COMMAND_WORD + validArguments));
     }
 
     @Test

@@ -23,11 +23,20 @@ public class UnlinkCommandParser implements Parser<UnlinkCommand> {
         String[] fields = input.split("\\s+");
         try {
             if (input.startsWith("c/")) {
-                return new UnlinkCommand(Integer.parseInt(fields[0].substring(2)));
+                int customerId = Integer.parseInt(fields[0].substring(2));
+                if (customerId <= 0) {
+                    throw invalidFormat();
+                }
+                return new UnlinkCommand(customerId);
             }
             List<Integer> dogIds = new ArrayList<>();
             for (int i = 0; i < fields.length; i++) {
-                dogIds.add(Integer.parseInt(i == 0 ? fields[i].substring(2) : fields[i]));
+                int dogId = Integer.parseInt(i == 0 ? fields[i].substring(2) : fields[i]);
+                if (dogId < 1) {
+                    throw invalidFormat();
+                }
+                dogIds.add(dogId);
+
             }
             if (new HashSet<>(dogIds).size() != dogIds.size()) {
                 throw invalidFormat();

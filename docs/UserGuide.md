@@ -22,7 +22,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 
 1. Copy the file to the folder you want to use as the _home folder_ for WatchDog.
 
-1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar addressbook.jar`.<br>
+1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar WatchDog.jar`.<br>
    A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
    ![Ui](images/Ui.png)
 
@@ -62,11 +62,11 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 * Items followed by `...` can appear zero or more times.<br>
   For example, `link c/7 d/42 51` links multiple dogs to one customer.
 
-* Parameters can be in any order.<br>
+* Field parameters can be in any order unless stated otherwise. `link` requires `c/` before `d/`.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Extraneous parameters for some commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
-  For example, `help 123` is interpreted as `help`. `reset` and `summary` reject extra parameters.
+* Extraneous parameters for some commands that take no parameters, such as `exit` and `clear`, are ignored.<br>
+  `reset` and `summary` reject extra parameters. `help` accepts an optional command name.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
@@ -81,6 +81,25 @@ Shows a message explaining how to access the help page.
 ![help message](images/helpMessage.png)
 
 Format: `help`
+
+To view a command's format, example and specifications in the result section (where success and error
+messages appear), use `help COMMAND`. This does not open the help window or execute the named command.
+
+Examples:
+
+* `help` opens the help window.
+* `help summary`
+* `help adddog`
+* `help deletedog`
+* `help reset`
+
+Use the lowercase command name without its arguments. Surrounding whitespace and multiple spaces
+between `help` and the command name are accepted. An unknown command name or
+extra arguments (for example, `help summary today`) display an error and the supported command names.
+Plain `help` still opens the original help window.
+
+Both forms preserve records, filters, and undo/redo history. For example, after adding a dog and
+running `help adddog`, `undo` undoes the addition. Running help after `undo` also preserves `redo`.
 
 
 ### Adding an activity: `addactivity`
@@ -111,6 +130,23 @@ Invalid dates, times, recurrence values, missing or repeated fields produce an e
 Creation does not book any dogs, so overlapping empty schedules are allowed. Dog booking commands
 and activity cards are separate features; this contribution reports creation in the command feedback.
 
+### Reading activity cards
+
+An activity card describes a reusable schedule, not a single booking. `Schedule starts: YYYY-MM-DD`
+is the schedule's first occurrence; daily and weekly schedules can continue after that date.
+
+In the general activity panel, `Dogs with upcoming bookings: ...` lists the distinct dog IDs that have
+dated bookings for that activity today or later. Today remains included even after the activity's end time.
+IDs are sorted numerically and a dog booked on several upcoming dates appears once. The label shows `None`
+when there are no upcoming bookings, without hiding the activity.
+
+The separate Today panel uses `Dogs enrolled on YYYY-MM-DD: ...` and includes only bookings on that exact
+local date. It reads all stored enrolments independently of dog and customer search filters. These labels do
+not change the activity's start date, recurrence, or other schedule details.
+
+The date is captured from the computer's local timezone whenever the panels refresh. There is no midnight
+timer; after midnight, the next successful command or activity/enrolment refresh updates the labels.
+
 ### Deleting an activity: `deleteactivity`
 
 Deletes the activity with the specified persistent ID. For a recurring activity, this deletes the
@@ -131,12 +167,15 @@ If dogs are enrolled, the command leaves the activity unchanged and suggests cre
 
 Format: `editactivity ACTIVITY_ID [n/NAME] [date/YYYY-MM-DD] [start/HH:mm] [end/HH:mm] [r/once|daily|weekly]`
 
+Example: `editactivity 21 n/Morning walk start/09:00 end/10:00` changes activity 21's name and times,
+provided it exists and has no enrolments. Its other details remain unchanged.
+
 ### Searching activities: `searcha`
 
-Searches activities by name, date, time, and/or recurrence. At least one field must be provided, and all supplied
+Searches activities by name, date, time, recurrence, and/or activity ID. At least one field must be provided, and all supplied
 fields must match.
 
-Format: `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`
+Format: `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE] [i/ACTIVITY_ID]`
 
 Example: `searcha n/Dog run t/16:00`
 
@@ -144,10 +183,14 @@ Example: `searcha n/Dog run t/16:00`
 * Date matching includes activities that occur on the specified date, including daily and weekly recurrences.
 * Time matching is inclusive: an activity matches when the specified time is between its start and end times.
 * Recurrence matching accepts `Once`, `Weekly`, or `Daily`, and is case-insensitive.
+* Activity ID must be a positive ID in the database and matches exactly. It combines with other fields using AND.
+  Invalid or nonexistent IDs display `Error in searching activities:` followed by
+  `Please enter a valid activity index`. Zero, negative, nonnumeric, and out-of-range IDs are invalid.
+  Invalid IDs reject the entire search and preserve the previous display. Repeated field prefixes are rejected.
 * Dates must use `YYYY-MM-DD`, and times must use 24-hour `HH:mm` format.
-* Only lowercase `n/`, `d/`, `t/`, and `r/` field prefixes are accepted.
+* Only lowercase `n/`, `d/`, `t/`, `r/`, and `i/` field prefixes are accepted.
 * A successful command displays `Successfully searched activities by` followed by the supplied values, in the form
-  `name: NAME`, `time: HH:mm`, `date: YYYY-MM-DD`, and `recurrence: Once|Weekly|Daily`. Unused fields are omitted.
+  `name: NAME`, `date: YYYY-MM-DD`, `time: HH:mm`, `recurrence: Once|Weekly|Daily`, and `activity id: ACTIVITY_ID`. Unused fields are omitted.
   If there are no matches, the activity panel is empty.
 * The dog panel shows dogs enrolled in the matching activities; when a date is supplied, only enrolments on that
   occurrence date are included. The customer panel shows owners of those dogs.
@@ -181,7 +224,8 @@ Example:
 * `adddog n/Cookie b/Chihuahua s/Small`
 
 Valid sizes are `small`, `medium`, `large`, and `giant`. Size input is case-insensitive.
-Dog names and breeds may contain letters, numbers, spaces, and must not be blank. Leading and trailing
+Dog names may contain letters, numbers, spaces, hyphens, and apostrophes, and must not be blank. Breeds may contain
+letters, numbers, spaces, and hyphens, and must not be blank. Leading and trailing
 spaces in field values are ignored.
 
 ### Adding a customer: `addcustomer`
@@ -194,8 +238,10 @@ Example:
 
 * `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 
-Customer names may contain letters, numbers, spaces, hyphens, and apostrophes. A hyphen or apostrophe
-must be followed by a letter or number; repeated punctuation is not allowed. For example, `Jean-Luc`
+Customer names may contain only English letters (`A-Z`, `a-z`), digits (`0-9`), spaces, hyphens (`-`),
+and straight apostrophes (`'`). Accented letters (such as `é`), Chinese characters, and curly apostrophes
+(`’`) are not supported. Names must start with an English letter or digit. A hyphen or apostrophe must
+be followed by an English letter or digit; repeated punctuation is not allowed. For example, `Jean-Luc`
 and `O'Neil` are valid names.
 
 Email addresses must use the `local-part@domain` format. Apostrophes are allowed in the local part
@@ -219,12 +265,16 @@ are not changed.
 
 Format: `reset`
 
+Example: `reset` restores the overview after a search or filter.
+
 ### Viewing daycare statistics: `summary`
 
 Shows six statistics using all stored records, including records hidden by search or filters.
 The command preserves your records and filters.
 
 Format: `summary` (no parameters; surrounding whitespace is accepted)
+
+Example: `summary` displays the statistics below using your stored records and the current local date.
 
 Example output:
 
@@ -281,21 +331,23 @@ Format: `link c/CUSTOMER_ID d/DOG_ID [DOG_ID]...`
 
 Example: `link c/1 d/2 3` links dogs 2 and 3 to customer 1.
 
-* Use persistent record IDs, including records hidden by a search. IDs range from 0 to 2147483647.
-* Put exactly one `c/` field first, followed by exactly one `d/` field containing one or more dog IDs separated by whitespace.
+* Use persistent record IDs, including records hidden by a search. Dog IDs start at 1.
+* Put exactly one `c/` field first, followed by one `d/` field with space-separated dog IDs.
   Prefixes are lowercase, and there must be no space between a prefix and its ID.
 * Each customer can own multiple dogs; each dog can have only one owner. Unlinked records are allowed.
 * Editing a dog's name, breed, or size preserves its owner. Use `unlink` to remove ownership.
-* Dog IDs and the `d/` prefix must not repeat. Unknown fields, missing IDs, negative IDs and non-integer IDs are rejected.
+* Customer and dog IDs must be positive integers; dog IDs must not repeat. Unknown fields, missing IDs, zero or negative IDs,
+  and non-integer IDs are rejected.
+
 * If the customer or any dog does not exist, or any dog already has an owner (even the same customer),
   the entire command fails and no records change. Linking does not reassign dogs.
-* A successful command reports the linked IDs. Dog cards show `Owner ID: CUSTOMER_ID`, or `Owner ID: None`.
-  Customer cards show `Dog IDs: 2, 3` below backup contact, or `Dog IDs: None` if no dogs are linked.
+* A successful command reports the linked IDs. Dog cards show a person icon followed by the customer ID,
+  or `None` when unlinked. Customer cards show a paw icon followed by `2, 3`, or `None` if no dogs are linked.
   This field includes all owned dogs, even when search filters hide their cards.
   Existing search filters stay active; use `reset` to see all dogs and customers, plus upcoming activities.
 * Links are saved automatically and survive restarting the application.
 * **Deleting a customer unlinks their dogs without deleting them**, including dogs hidden by a search.
-  These dogs keep their IDs and details, show `Owner ID: None`, and can be linked to another customer.
+  These dogs keep their IDs and details, show a person icon followed by `None`, and can be linked to another customer.
   Other customers' dogs and unlinked dogs are unaffected. Deleting a dog does not delete its customer.
 
 ### Unlinking dogs from a customer: `unlink`
@@ -307,17 +359,17 @@ Examples:
 * `unlink d/1 2 3` removes ownership from dogs 1, 2 and 3, even if they have different owners.
 * `unlink c/1` removes ownership from every dog belonging to customer 1, including hidden dogs.
 
-* Use persistent IDs from `0` to `2147483647`, lowercase prefixes, and whitespace between fields.
-  Do not put whitespace after the slash. Separate dog IDs with whitespace in a single `d/` field.
-  Repeated dog IDs (including `d/2 02`) and repeated `d/` prefixes are rejected.
+* Customer and dog IDs are positive integers. Use lowercase prefixes and whitespace between dog IDs.
+  Do not put whitespace after the slash. Repeated dog IDs (including `d/2 02`) are rejected.
+
 * Do not mix customer and dog prefixes. The customer form accepts exactly one customer ID.
 * For the dog form, every dog must exist and have an owner. If any dog is missing or unowned,
   the whole batch fails without changing anything.
 * For the customer form, the customer must exist and have at least one linked dog; otherwise an error is shown.
 * Unlinking never deletes customers or dogs, even when unlinking a customer's last dog.
   All other details stay unchanged. You can then use `link` to assign the dogs to another customer.
-* Dog cards show `Owner ID: None`; the customer's Dog IDs field removes the unlinked IDs,
-  showing `Dog IDs: None` when none remain. Existing search filters stay active.
+* Dog cards show a person icon followed by `None`; the customer's paw-icon row removes the unlinked IDs,
+  showing `None` when none remain. Existing search filters stay active.
 * Changes are saved automatically and survive restarting the application.
 
 ### Searching dogs: `searchd`
@@ -330,10 +382,10 @@ Example: `searchd b/Golden Retriever s/Medium`
 
 * Name and breed matching are case-insensitive substring searches.
 * Size must be `small`, `medium`, `large`, or `giant`, ignoring letter case.
-* ID matching is exact, and the ID must belong to a dog in the database.
+* ID matching is exact; dog IDs are positive integers and must belong to a dog in the database.
 * A successful command displays `Successfully searched dogs by` followed by only the supplied fields.
 * Invalid input displays `Error in searching dogs:` followed by the applicable error message. Invalid or nonexistent
-  dog IDs display `Invalid dog id. Please input a valid dog id.`
+  dog IDs display `Please enter a valid dog index`.
 * Invalid sizes display `Invalid dog size. Please input small/medium/large/giant only.`
 * The customer panel is also filtered to customers linked to the matching dogs.
 * The activity panel shows activities in which a matching dog is enrolled.
@@ -344,14 +396,44 @@ Example: `searchd b/Golden Retriever s/Medium`
 * The filter remains active while dogs or customers are added, edited, deleted, linked, or unlinked.
   Matching activities refresh when enrolments change.
 
+### Enrolling dogs in activities: `enrol` and `unenrol`
+
+Formats: `enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]` and
+`unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]`.
+
+Examples:
+
+* `enrol a/1 date/2026-11-04 d/2 3` enrols dogs 2 and 3 in activity 1's occurrence on 4 November 2026.
+* `unenrol a/1 date/2026-11-04 d/2 3` removes those two dated bookings.
+
+These examples assume activity 1 and dogs 2 and 3 exist and the activity occurs on that date.
+For `enrol`, use today or a future occurrence date when trying the example; the dogs must not already
+be enrolled or have overlapping bookings. For `unenrol`, both dogs must have the specified bookings.
+
+The `a/`, `date/`, and `d/` fields may appear in any order and must each appear exactly once. Dog IDs are separated
+by one or more spaces, must be positive integers, and must not repeat; commas and `d/0` are rejected. Activity IDs
+must also be positive integers and are supplied separately using `a/`.
+
+Invalid input reports the specific field or formatting problem, followed by the complete command format and an
+example. `enrol` rejects past dates and states that the date must be today or later. `unenrol` permits past dates so
+that a historical enrolment can be corrected, provided the activity occurred and the dog was enrolled on that date.
+
 ### Filtering unlinked records: `filterun`
 
 Format: `filterun dog` or `filterun customer`
 
+Examples:
+
+* `filterun dog` finds dogs without an owner.
+* `filterun customer` finds customers without dogs.
+
 * `filterun dog` displays dogs that are not linked to any customer and clears the customer panel.
-* `filterun customer` displays customers that do not own any dogs and clears the dog panel.
+  The activity panel shows activities those dogs are enrolled in, including past enrolments. Each activity's
+  `Enrolments` section shows only unowned dogs and their stored enrolment dates.
+* `filterun customer` displays customers that do not own any dogs and clears the dog and activity panels.
 * The category must be lowercase. Multiple spaces between `filterun` and the category are accepted.
 * The filter remains active while records are added, edited, deleted, linked, or unlinked.
+  Matching activities also refresh when enrolments change.
 
 ### Searching customers: `searchc`
 
@@ -364,29 +446,33 @@ Example: `searchc n/Anna d/12 34`
 * Name matching is case-insensitive, uses a substring search, and treats repeated spaces as one space.
 * Phone and backup contact numbers require exactly eight digits and use exact matching.
 * Email matching is case-insensitive and exact.
-* Dog IDs must exist. A customer must own all specified dog IDs to match.
-* Customer ID must be a nonnegative ID belonging to an existing customer; it matches that customer exactly.
+* Dog IDs must be positive and exist. A customer must own all specified dog IDs to match.
+* Customer ID must be a positive ID belonging to an existing customer; it matches that customer exactly.
+
 * The dog panel is also filtered to show only dogs owned by the matching customers.
 * Dog IDs and customer ID appear in the success message only when supplied; dog IDs are displayed in ascending numeric order.
 * Only lowercase `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/` prefixes are accepted.
 * Invalid field values display `Error in searching customers:` followed by the applicable error message. Invalid or nonexistent dog and customer IDs have specific messages.
+  Dog IDs display `Please enter a valid dog index`; customer IDs display `Please enter a valid customer index`.
+  Zero, negative, nonnumeric, and out-of-range IDs are invalid. If any ID is invalid, the entire search is rejected
+  and the previous display is preserved.
 * Unsupported field prefixes are rejected as invalid command formats.
 * If no customers match, the customer panel is empty.
 * The filter remains active while customers or their linked dogs are added, edited, deleted, linked, or unlinked.
   The activity panel shows only activities with enrolments belonging to the matching customers. Each activity
   includes an `Enrolments` section containing only their dogs and those dogs' stored enrolment dates.
 
-### Deleting a dog: `delete dog`
+### Deleting a dog: `deletedog`
 
 Deletes a dog using its persistent dog ID and removes all of that dog's activity enrolments, including past
 occurrences. Other dogs' enrolments and the activity schedules remain unchanged.
 
-Format: `delete dog ID`
+Format: `deletedog ID`
 
 Examples:
 
-* `delete dog 0`
-* `delete  dog   0`
+* `deletedog 1`
+* `deletedog   1`
 
 Multiple spaces between the command components are accepted.
 
@@ -398,26 +484,33 @@ If the ID does not exist, WatchDog displays:
 
 `Error in deleting dog:`<br>`Please enter a valid dog index`
 
-### Deleting a customer: `delete customer`
+### Deleting a customer: `deletecustomer`
 
 Deletes a customer using its persistent customer ID.
 
-Format: `delete customer ID`
+Format: `deletecustomer ID`
 
 Example:
 
-* `delete customer 21`
+* `deletecustomer 21`
+* `deletecustomer   21`
+
+Leading and trailing whitespace and multiple spaces between the command name and ID are accepted.
 
 ### Customer and dog cards
 
-The main list shows the currently selected category in a scrollable area. Customer cards show
-customer details. Dog cards show the persistent dog ID and name, followed by breed and size.
+The customer and dog panels are separate scrollable areas. Customer cards show contact details and the IDs of
+their dogs. Dog cards show the persistent dog ID and name, followed by breed, size, and customer ID when linked.
 Newly added records appear automatically. Customer and dog IDs belong to separate categories and may overlap.
-Dog and customer IDs belong to separate categories and may overlap.
+
+Hover over a contact-detail or dog-detail row to see its full value when the displayed text is shortened.
+Right-click a customer or dog card to copy an individual field or all details in a labelled, multiline format.
+An unlinked dog's customer-ID action is disabled. The app briefly confirms a successful copy and reports when
+the operating system clipboard rejects it.
 
 ### Clearing all entries: `clear`
 
-Clears all customers, dogs, activities, and enrolments from the address book after confirmation.
+Clears all customers, dogs, activities, and enrolments from WatchDog after confirmation.
 
 Format: `clear`
 
@@ -433,6 +526,11 @@ Examples:
 
 Clearing also discards the undo and redo history, so `clear` cannot be undone. This remains true
 if the command changes memory but its save fails.
+
+Clearing preserves the current search filters and display selection. Newly added records appear only
+if they match the active view. For example, after `searchc n/Alice` followed by `clear` and `Y`, adding
+a customer named Bob succeeds but does not display Bob in the customer panel. Use `reset` to show all
+customers and dogs, plus activities occurring today or later.
 
 ### Undoing and redoing a command: `undo`, `redo`
 
@@ -464,18 +562,20 @@ Exits the program.
 
 Format: `exit`
 
+Example: `exit` closes WatchDog.
+
 ### Saving the data
 
 WatchDog automatically saves data after every command. You do not need to save manually.
 
 ### Editing the data file
 
-WatchDog data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+WatchDog data is saved automatically as `data/watchdog.json` inside the folder from which you launch WatchDog (the home folder in Quick Start). Advanced users are welcome to update data directly by editing that data file.
 
 <box type="warning" seamless>
 
 **Caution:**
-If your changes make the data file invalid, WatchDog starts with an empty address book at the next run. The invalid file remains on disk until you run a command (WatchDog saves after every command). Still, we recommend backing up the file before editing it.<br>
+If your changes make the data file invalid, WatchDog starts with no saved records at the next run. The invalid file remains on disk until you run a command (WatchDog saves after every command). Still, we recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause WatchDog to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
 
@@ -495,7 +595,6 @@ _Details coming soon ..._
 ## Known issues
 
 1. **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
-2. **If you minimize the Help Window** and then run the `help` command (or use the `Help` menu, or the keyboard shortcut `F1`) again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -510,18 +609,19 @@ Action     | Format, Examples
 **Search customers** | `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`<br> e.g., `searchc n/alex i/42`
 **Search dogs** | `searchd [n/NAME] [b/BREED] [s/SIZE] [i/DOG_ID]`<br> e.g., `searchd n/bud s/small`
 **Add activity** | `addactivity n/NAME date/YYYY-MM-DD start/HH:mm end/HH:mm r/once`<br>Use `r/daily` or `r/weekly` for recurrence.
-**Enrol dogs** | `enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2`<br>Date must be today or a future occurrence; overlapping activities for the same dog are rejected.
-**Unenrol dogs** | `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2`<br>Removes only the specified dated enrolments.
+**Enrol dogs** | `enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]`<br>Fields may appear in any order. Date must be today or a future occurrence; overlapping activities for the same dog are rejected.
+**Unenrol dogs** | `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]`<br>Fields may appear in any order. Removes only the specified dated enrolments.
 **Delete activity** | `deleteactivity ACTIVITY_ID`<br>e.g., `deleteactivity 21`
-**Search activities** | `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE]`<br>e.g., `searcha n/Dog run t/16:00`
+**Edit activity** | `editactivity ACTIVITY_ID [n/NAME] [date/YYYY-MM-DD] [start/HH:mm] [end/HH:mm] [r/RECURRENCE]`<br>e.g., `editactivity 21 n/Morning walk start/09:00 end/10:00`
+**Search activities** | `searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE] [i/ACTIVITY_ID]`<br>e.g., `searcha n/Dog run t/16:00`
 **Today** | `today`<br>Shows today's activities and the enrolled dogs and owners involved.
 **Search customers by fields** | `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]`<br>e.g., `searchc n/Anna i/21`
 **Add dog** | `adddog n/NAME b/BREED s/SIZE`<br>e.g., `adddog n/Cookie b/Chihuahua s/Small`
 **Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 **Edit dog** | `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`<br>e.g., `editdog 1 s/Large`
 **Edit customer** | `editcustomer CUSTOMER_ID [n/NAME] [p/PHONE] [e/EMAIL] [bc/BACKUP_CONTACT]`<br>e.g., `editcustomer 1 p/91234567`
-**Delete dog** | `delete dog ID`<br>e.g., `delete dog 0`
-**Delete customer** | `delete customer ID`<br>e.g., `delete customer 21`
+**Delete dog** | `deletedog ID`<br>e.g., `deletedog 1`
+**Delete customer** | `deletecustomer ID`<br>e.g., `deletecustomer 21`
 **Undo** | `undo`
 **Redo** | `redo`
-**Help**   | `help`
+**Help**   | `help` opens the help window; `help COMMAND` shows command details in the result section.<br>e.g., `help summary`, `help adddog`, `help deletedog`

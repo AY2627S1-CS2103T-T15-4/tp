@@ -1,22 +1,24 @@
+// @@author Umaiza-15
 package seedu.address.model.dog;
 
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
 /**
- * Represents a dog's name in the address book.
+ * Represents a dog's name in WatchDog.
  * Guarantees: immutable; is valid as declared in {@link #isValidName(String)}
  */
 public class DogName {
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Names should only contain alphanumeric characters and spaces, and should not be blank";
+            "Names should only contain alphanumeric characters, spaces, hyphens, and apostrophes, "
+                    + "and should not be blank";
 
     /*
      * The first character of the name must not be a whitespace,
      * otherwise " " (a blank string) becomes a valid input.
      */
-    public static final String VALIDATION_REGEX = "[\\p{Alnum}][\\p{Alnum} ]*";
+    public static final String VALIDATION_REGEX = "[\\p{Alnum}][\\p{Alnum} '-]*";
 
     public final String fullName;
 

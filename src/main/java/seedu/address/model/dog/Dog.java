@@ -8,8 +8,8 @@ import java.util.Optional;
 import seedu.address.commons.util.ToStringBuilder;
 
 /**
- * Represents a dog in the address book.
- * Guarantees: details are present and not null, field values are validated, immutable.
+ * Represents a dog in WatchDog.
+ * Guarantees: stored dogs have positive IDs; details are present and not null, field values are validated, immutable.
  */
 public class Dog {
 
@@ -22,19 +22,20 @@ public class Dog {
     /**
      * Creates a dog with the given details.
      *
-     * @param name name of the dog
-     * @param breed breed of the dog
-     * @param size size of the dog
+     * @param id Positive persistent dog ID.
+     * @param name Name of the dog.
+     * @param breed Breed of the dog.
+     * @param size Size of the dog.
      */
     public Dog(int id, DogName name, Breed breed, Size size) {
         this(id, name, breed, size, null);
     }
 
-    /** Creates a stored dog with an optional positive owner ID. */
+    /** Creates a stored dog with a positive dog ID and an optional positive owner ID. */
     public Dog(int id, DogName name, Breed breed, Size size, Integer ownerId) {
         requireAllNonNull(name, breed, size);
-        if (id < 0) {
-            throw new IllegalArgumentException("Dog id must be nonnegative.");
+        if (id < 1) {
+            throw new IllegalArgumentException("Dog id must be positive.");
         }
         this.id = id;
         this.name = name;
@@ -50,7 +51,7 @@ public class Dog {
     /**
      * Creates a dog without an assigned persistent ID.
      * This constructor is retained temporarily for existing parser/tests;
-     * new dogs should receive their ID through the model/address book.
+     * new dogs should receive their ID through the model/WatchDog.
      */
     public Dog(DogName name, Breed breed, Size size) {
         requireAllNonNull(name, breed, size);

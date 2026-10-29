@@ -42,8 +42,8 @@ class JsonAdaptedDog {
         if (id == null) {
             throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, "id"));
         }
-        if (id < 0) {
-            throw new IllegalValueException("Dog id must be nonnegative.");
+        if (id < 1) {
+            throw new IllegalValueException("Dog id must be positive.");
         }
         if (name == null) {
             throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, "name"));

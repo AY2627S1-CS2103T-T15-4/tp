@@ -15,10 +15,10 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.EditActivityCommand.EditActivityDescriptor;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.AddressBookParser;
-import seedu.address.model.AddressBook;
+import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Enrolment;
@@ -35,15 +35,15 @@ public class EditActivityCommandTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        AddressBook addressBook = new AddressBook();
-        addressBook.addActivity(new ActivityName("Walk"), INITIAL_DATE,
+        WatchDog watchDog = new WatchDog();
+        watchDog.addActivity(new ActivityName("Walk"), INITIAL_DATE,
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.WEEKLY);
-        addressBook.addActivity(new ActivityName("Grooming"), INITIAL_DATE,
+        watchDog.addActivity(new ActivityName("Grooming"), INITIAL_DATE,
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
-        addressBook.addDogFromStorage(new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
-        addressBook.enrolDogs(1, INITIAL_DATE, List.of(7));
-        addressBook.enrolDogs(2, INITIAL_DATE, List.of(7));
-        model = new ModelManager(addressBook, new UserPrefs());
+        watchDog.addDogFromStorage(new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
+        watchDog.enrolDogs(1, INITIAL_DATE, List.of(7));
+        watchDog.enrolDogs(2, INITIAL_DATE, List.of(7));
+        model = new ModelManager(watchDog, new UserPrefs());
     }
 
     @Test
@@ -57,14 +57,14 @@ public class EditActivityCommandTest {
         EditActivityDescriptor descriptor = new EditActivityDescriptor();
         descriptor.setDate(LocalDate.of(2028, 3, 1));
         Activity original = model.getActivityList().get(0);
-        List<Enrolment> originalEnrolments = List.copyOf(model.getAddressBook().getEnrolmentList());
+        List<Enrolment> originalEnrolments = List.copyOf(model.getWatchDog().getEnrolmentList());
 
         String expectedMessage = EditActivityCommand.MESSAGE_ACTIVITY_HAS_ENROLMENTS.formatted(1);
         assertThrows(CommandException.class, expectedMessage, () ->
                 new EditActivityCommand(1, descriptor).execute(model));
 
         assertEquals(original, model.getActivityList().get(0));
-        assertEquals(originalEnrolments, model.getAddressBook().getEnrolmentList());
+        assertEquals(originalEnrolments, model.getWatchDog().getEnrolmentList());
     }
 
     @Test
@@ -83,7 +83,7 @@ public class EditActivityCommandTest {
 
     @Test
     public void parseAndExecute_enrolledActivity_suggestsCreatingNewActivity() throws Exception {
-        Command command = new AddressBookParser().parseCommand("editactivity 1 start/08:00");
+        Command command = new WatchDogParser().parseCommand("editactivity 1 start/08:00");
 
         String expectedMessage = EditActivityCommand.MESSAGE_ACTIVITY_HAS_ENROLMENTS.formatted(1);
         assertThrows(CommandException.class, expectedMessage, () -> command.execute(model));
@@ -108,7 +108,7 @@ public class EditActivityCommandTest {
         assertEquals(LocalTime.of(8, 0), edited.getStartTime());
         assertEquals(LocalTime.of(9, 0), edited.getEndTime());
         assertEquals(Recurrence.DAILY, edited.getRecurrence());
-        assertTrue(emptyModel.getAddressBook().getEnrolmentList().isEmpty());
+        assertTrue(emptyModel.getWatchDog().getEnrolmentList().isEmpty());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class EditActivityCommandTest {
         assertEquals("Edited activity ID 1.", result.getFeedbackToUser());
         assertEquals(INITIAL_DATE.plusDays(1), model.getActivityList().get(0).getStartDate());
         assertEquals(Recurrence.DAILY, model.getActivityList().get(0).getRecurrence());
-        assertEquals(List.of(new Enrolment(2, 7, INITIAL_DATE)), model.getAddressBook().getEnrolmentList());
+        assertEquals(List.of(new Enrolment(2, 7, INITIAL_DATE)), model.getWatchDog().getEnrolmentList());
     }
 
     @Test
@@ -215,9 +215,9 @@ public class EditActivityCommandTest {
     }
 
     private static ModelManager createModelWithoutEnrolments() throws Exception {
-        AddressBook addressBook = new AddressBook();
-        addressBook.addActivity(new ActivityName("Walk"), INITIAL_DATE,
+        WatchDog watchDog = new WatchDog();
+        watchDog.addActivity(new ActivityName("Walk"), INITIAL_DATE,
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.WEEKLY);
-        return new ModelManager(addressBook, new UserPrefs());
+        return new ModelManager(watchDog, new UserPrefs());
     }
 }

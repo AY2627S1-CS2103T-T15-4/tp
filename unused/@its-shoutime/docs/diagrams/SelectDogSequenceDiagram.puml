@@ -5,11 +5,11 @@ skinparam arrowColor LOGIC_COLOR_T4
 
 actor User
 participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":WatchDogParser" as Router LOGIC_COLOR
 participant ":SelectDogCommandParser" as Parser LOGIC_COLOR
 participant "command:SelectDogCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
-participant ":AddressBook" as Book MODEL_COLOR
+participant ":WatchDog" as Book MODEL_COLOR
 
 User -> Logic : execute("select dog 21")
 Logic -> Router : parseCommand(...)

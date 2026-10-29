@@ -8,8 +8,8 @@ show members
 class "<<interface>>\nStorage" as Storage
 class StorageManager
 class JsonUserPrefsStorage
-class JsonAddressBookStorage
-class JsonSerializableAddressBook
+class JsonWatchDogStorage
+class JsonSerializableWatchDog
 class JsonAdaptedCustomer
 class JsonAdaptedDog {
   -ownerId: Integer
@@ -23,11 +23,11 @@ class JsonAdaptedEnrolment {
 
 StorageManager .up.|> Storage
 StorageManager --> "1" JsonUserPrefsStorage : userPrefsStorage
-StorageManager --> "1" JsonAddressBookStorage : addressBookStorage
-JsonAddressBookStorage ..> JsonSerializableAddressBook : reads / writes
-JsonSerializableAddressBook --> "*" JsonAdaptedCustomer : customers
-JsonSerializableAddressBook --> "*" JsonAdaptedDog : dogs
-JsonSerializableAddressBook --> "*" JsonAdaptedActivity : activities
-JsonSerializableAddressBook --> "*" JsonAdaptedEnrolment : enrolments
+StorageManager --> "1" JsonWatchDogStorage : watchDogStorage
+JsonWatchDogStorage ..> JsonSerializableWatchDog : reads / writes
+JsonSerializableWatchDog --> "*" JsonAdaptedCustomer : customers
+JsonSerializableWatchDog --> "*" JsonAdaptedDog : dogs
+JsonSerializableWatchDog --> "*" JsonAdaptedActivity : activities
+JsonSerializableWatchDog --> "*" JsonAdaptedEnrolment : enrolments
 
 @enduml

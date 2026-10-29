@@ -10,10 +10,10 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.CustomerSearchPredicate;
 import seedu.address.model.dog.Breed;
@@ -34,10 +34,10 @@ public class ListCommandTest {
 
     @BeforeEach
     public void setUp() {
-        AddressBook addressBook = new AddressBook();
-        addressBook.addCustomer(LILY);
-        model = new ModelManager(addressBook, new UserPrefs());
-        expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        WatchDog watchDog = new WatchDog();
+        watchDog.addCustomer(LILY);
+        model = new ModelManager(watchDog, new UserPrefs());
+        expectedModel = new ModelManager(model.getWatchDog(), new UserPrefs());
     }
 
     //@@author its-shoutime-unused
