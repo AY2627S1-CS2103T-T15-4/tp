@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.AppUtil.checkArgument;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -22,6 +23,7 @@ public class DeleteCustomerCommand extends Command {
 
     /** Creates a command to delete the customer with the specified ID. */
     public DeleteCustomerCommand(int customerId) {
+        checkArgument(customerId >= 1, "Customer ID must be positive.");
         this.customerId = customerId;
     }
 

@@ -28,7 +28,8 @@ public class DogOwnershipTest {
     }
 
     @Test
-    public void withOwner_negativeId_rejected() {
+    public void withOwner_nonPositiveId_rejected() {
+        assertThrows(IllegalArgumentException.class, () -> unlinked.withOwner(0));
         assertThrows(IllegalArgumentException.class, () -> unlinked.withOwner(-1));
     }
 }

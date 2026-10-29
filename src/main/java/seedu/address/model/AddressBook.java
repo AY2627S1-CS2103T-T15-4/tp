@@ -90,7 +90,7 @@ public class AddressBook implements ReadOnlyAddressBook {
                         .mapToInt(Dog::getId).max().orElse(-1) + 1;
 
         int restoredNextCustomerId = newData.getNextCustomerId();
-        this.nextCustomerId = restoredNextCustomerId >= 0
+        this.nextCustomerId = restoredNextCustomerId >= 1
                 ? restoredNextCustomerId
                 : customers.asUnmodifiableObservableList().stream()
                         .mapToInt(Customer::getId).max().orElse(0) + 1;
