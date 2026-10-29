@@ -159,6 +159,7 @@ public interface Model {
         return getWatchDog().getActivityList();
     }
 
+    // @@author Umaiza-15
     /**
      * Returns all dated enrolments as a live unmodifiable observable view.
      *
@@ -167,6 +168,7 @@ public interface Model {
     default ObservableList<Enrolment> getEnrolmentList() {
         return getWatchDog().getEnrolmentList();
     }
+    // @@author
 
     /** Returns an unmodifiable observable view of filtered activities. */
     ObservableList<Activity> getFilteredActivityList();
