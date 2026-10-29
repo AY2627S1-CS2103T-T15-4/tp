@@ -140,7 +140,7 @@ public class MainWindowTest {
 
             window.executeCommand("list dog");
             assertTrue(customers.getItems().isEmpty());
-            window.executeCommand("resetdisplay");
+            window.executeCommand("reset");
 
             assertEquals(1, customers.getItems().size());
             assertEquals(1, dogs.getItems().size());

@@ -13,8 +13,8 @@ import seedu.address.model.Model;
 
 /** Restores all customers and dogs and shows activities occurring today or later. */
 public class ResetDisplayCommand extends Command {
-    public static final String COMMAND_WORD = "resetdisplay";
-    public static final String MESSAGE_USAGE = "resetdisplay: Shows all customers, dogs, and upcoming activities.";
+    public static final String COMMAND_WORD = "reset";
+    public static final String MESSAGE_USAGE = "reset: Shows all customers, dogs, and upcoming activities.";
     public static final String MESSAGE_SUCCESS = "Showing all customers, dogs, and activities from %s onward.";
 
     private static final Logger logger = LogsCenter.getLogger(ResetDisplayCommand.class);

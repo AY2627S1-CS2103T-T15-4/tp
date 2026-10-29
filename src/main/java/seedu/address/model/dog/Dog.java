@@ -30,7 +30,7 @@ public class Dog {
         this(id, name, breed, size, null);
     }
 
-    /** Creates a stored dog with an optional nonnegative owner ID. */
+    /** Creates a stored dog with an optional positive owner ID. */
     public Dog(int id, DogName name, Breed breed, Size size, Integer ownerId) {
         requireAllNonNull(name, breed, size);
         if (id < 0) {
@@ -40,8 +40,8 @@ public class Dog {
         this.name = name;
         this.breed = breed;
         this.size = size;
-        if (ownerId != null && ownerId < 0) {
-            throw new IllegalArgumentException("Owner ID must be nonnegative.");
+        if (ownerId != null && ownerId < 1) {
+            throw new IllegalArgumentException("Owner ID must be positive.");
         }
         this.ownerId = ownerId;
     }

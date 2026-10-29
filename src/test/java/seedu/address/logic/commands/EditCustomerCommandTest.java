@@ -31,8 +31,8 @@ public class EditCustomerCommandTest {
 
         Customer expected = customer(1, "Alice Tan", "98765432");
         assertEquals(expected, model.getFilteredCustomerList().get(0));
-        assertEquals(String.format(EditCustomerCommand.MESSAGE_EDIT_CUSTOMER_SUCCESS, expected),
-                result.getFeedbackToUser());
+        assertEquals("Edited customer: 1; Name: Alice Tan; Phone: 98765432; Email: test@example.com; "
+                + "Backup Contact: 98765432", result.getFeedbackToUser());
     }
 
     @Test
@@ -67,7 +67,7 @@ public class EditCustomerCommandTest {
     public void execute_secondCustomerId_editsOnlyMatchingCustomer() throws Exception {
         Model model = new ModelManager();
         Customer first = customer(1, "Alice Tan", "91234567");
-        Customer second = customer(2, "Bob Lim", "92345678");
+        Customer second = new Customer(2, "Bob Lim", "92345678", "bob@example.com", "98765432");
         model.addCustomer(first);
         model.addCustomer(second);
         EditCustomerDescriptor descriptor = new EditCustomerDescriptor();
@@ -76,7 +76,8 @@ public class EditCustomerCommandTest {
         new EditCustomerCommand(2, descriptor).execute(model);
 
         assertEquals(first, model.getFilteredCustomerList().get(0));
-        assertEquals(customer(2, "Bob Lee", "92345678"), model.getFilteredCustomerList().get(1));
+        assertEquals(new Customer(2, "Bob Lee", "92345678", "bob@example.com", "98765432"),
+                model.getFilteredCustomerList().get(1));
     }
 
     @Test

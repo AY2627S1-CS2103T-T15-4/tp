@@ -33,7 +33,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 
    * `list dog` : Lists all dogs.
 
-   * `resetdisplay` : Shows all customers and dogs, plus activities occurring today or later.
+   * `reset` : Shows all customers and dogs, plus activities occurring today or later.
 
    * `summary` : Shows overall counts and today's activities and distinct enrolled dogs.
 
@@ -66,7 +66,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
 * Extraneous parameters for some commands that take no parameters, such as `help`, `exit`, and `clear`, are ignored.<br>
-  For example, `help 123` is interpreted as `help`. `resetdisplay` and `summary` reject extra parameters.
+  For example, `help 123` is interpreted as `help`. `reset` and `summary` reject extra parameters.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
@@ -194,7 +194,20 @@ Example:
 
 * `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 
-The contact number and backup contact number must be eight-digit numbers.
+Customer names may contain letters, numbers, spaces, hyphens, and apostrophes. A hyphen or apostrophe
+must be followed by a letter or number; repeated punctuation is not allowed. For example, `Jean-Luc`
+and `O'Neil` are valid names.
+
+Email addresses must use the `local-part@domain` format. Apostrophes are allowed in the local part
+before `@`.
+
+The contact number and backup contact number must each contain exactly eight digits. You may enter
+spaces between digits; the spaces are removed when the number is stored. All four fields are required.
+Each customer's primary phone number and email address must be unique across all customers, including
+those hidden by filters. Email uniqueness ignores letter case. Backup contact numbers may be shared,
+including with another customer's primary phone number.
+If fields are missing, WatchDog lists them and shows the command format. If a value is invalid, it
+reports the first invalid field and its constraints.
 
 ### Listing all customers: `list customer`
 
@@ -212,7 +225,7 @@ Format: `list dog`
 
 If there are no dogs, WatchDog displays `There are no dogs to display.`
 
-### Resetting the display: `resetdisplay`
+### Resetting the display: `reset`
 
 Shows all stored customers and dogs, plus activities with an occurrence today or later according to
 the computer's local date. One-time activities before today are hidden. A daily or weekly activity
@@ -220,7 +233,7 @@ remains visible while it has a future occurrence, even if its first date is in t
 cards continue to show the schedule's first date. This command changes the view only; stored records
 are not changed.
 
-Format: `resetdisplay`
+Format: `reset`
 
 ### Viewing daycare statistics: `summary`
 
@@ -273,6 +286,10 @@ Example: `editcustomer 1 p/91234567 e/johndoe@example.com`
 
 * `CUSTOMER_ID` must identify an existing customer.
 * Any supplied field replaces its existing value.
+* The resulting primary phone number and email address must not belong to another customer. You may
+  keep your existing phone number and email address. Backup contact numbers need not be unique.
+* Supplied names, phone numbers, backup contacts, and email addresses follow the same validation rules
+  as `addcustomer`.
 
 ### Linking dogs to a customer: `link`
 
@@ -445,7 +462,7 @@ then `redo` to bring Cookie back. You can undo the redone command again.
 
 Only one command can be undone at a time. A later successful undoable command replaces that history
 and makes `redo` unavailable. View-changing commands such as search, filter, selection, and
-`resetdisplay` are undoable too. `help`, `summary`, and `exit` preserve both undo and redo history;
+`reset` are undoable too. `help`, `summary`, and `exit` preserve both undo and redo history;
 parse errors and commands rejected before execution also leave history unchanged. The history is
 cleared after confirming `clear` with `Y` and is not retained when WatchDog restarts. Surrounding whitespace is accepted,
 but neither command accepts arguments.
