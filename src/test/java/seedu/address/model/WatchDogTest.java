@@ -360,6 +360,7 @@ public class WatchDogTest {
         assertTrue(watchDog.getDogList().isEmpty());
     }
 
+    // @@author XanderGoh
     @Test
     public void removeDog_listenerRestoresEnrolment_assertsNoDanglingEnrolments() {
         Dog dog = watchDog.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("Small")));
@@ -406,6 +407,7 @@ public class WatchDogTest {
         assertEquals(List.of(dog), watchDog.getDogList());
         assertTrue(watchDog.getEnrolmentList().isEmpty());
     }
+    // @@author
 
     @Test
     public void getRecordLists_modifyList_throwsUnsupportedOperationException() {

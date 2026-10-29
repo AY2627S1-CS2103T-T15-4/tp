@@ -215,15 +215,19 @@ public class LogicManager implements Logic {
         return model.getFilteredActivityList();
     }
 
+    // @@author XanderGoh
     @Override
     public String getActivityEnrolmentSummary(Activity activity) {
         return model.getActivityEnrolmentSummary(activity);
     }
+    // @@author
 
+    // @@author XanderGoh
     @Override
     public javafx.beans.Observable getActivityEnrolmentContextChanges() {
         return model.getActivityEnrolmentContextChanges();
     }
+    // @@author
 
     @Override
     public GuiSettings getGuiSettings() {

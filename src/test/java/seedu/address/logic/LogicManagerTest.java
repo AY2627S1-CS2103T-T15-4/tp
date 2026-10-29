@@ -77,7 +77,9 @@ public class LogicManagerTest {
 
     @Test
     public void execute_commandExecutionError_throwsCommandException() {
+        // @@author XanderGoh
         String deleteCommand = "deletedog 9";
+        // @@author
         assertCommandException(deleteCommand, DeleteDogCommand.MESSAGE_INVALID_ID);
     }
 
@@ -369,7 +371,9 @@ public class LogicManagerTest {
     @Test
     public void execute_failedCommand_preservesUndoHistory() throws Exception {
         logic.execute("adddog n/Buddy b/Poodle s/small");
+        // @@author XanderGoh
         assertCommandException("deletedog 9", DeleteDogCommand.MESSAGE_INVALID_ID);
+        // @@author
 
         logic.execute("undo");
         assertEquals(List.of(), logic.getDogList());

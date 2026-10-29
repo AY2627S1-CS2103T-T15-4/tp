@@ -14,20 +14,26 @@ import org.junit.jupiter.api.Test;
 import seedu.address.logic.commands.AddDogCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.DeleteCustomerCommand;
+// @@author XanderGoh
 import seedu.address.logic.commands.DeleteDogCommand;
+// @@author
 import seedu.address.logic.commands.EditActivityCommand;
 import seedu.address.logic.commands.EditActivityCommand.EditActivityDescriptor;
 import seedu.address.logic.commands.EditDogCommand;
 import seedu.address.logic.commands.EditDogCommand.EditDogDescriptor;
 import seedu.address.logic.commands.EnrolDogCommand;
 import seedu.address.logic.commands.ExitCommand;
+// @@author XanderGoh
 import seedu.address.logic.commands.FilterUnlinkedCommand;
+// @@author
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
+// @@author XanderGoh
 import seedu.address.logic.commands.SearchActivityCommand;
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.commands.SearchDogCommand;
+// @@author
 import seedu.address.logic.commands.SummaryCommand;
 import seedu.address.logic.commands.TodayCommand;
 import seedu.address.logic.commands.UndoCommand;
@@ -95,12 +101,15 @@ public class WatchDogParserTest {
         }
     }
 
+    // @@author XanderGoh
     @Test
     public void parseCommand_deleteDog() throws Exception {
         DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("deletedog 12");
         assertEquals(new DeleteDogCommand(12), command);
     }
+    // @@author
 
+    // @@author XanderGoh
     @Test
     public void parseCommand_oldDeleteForms_rejected() {
         for (String input : new String[] {"delete dog 12", "delete  dog   12", "delete customer 21",
@@ -108,12 +117,15 @@ public class WatchDogParserTest {
             assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
         }
     }
+    // @@author
 
+    // @@author XanderGoh
     @Test
     public void parseCommand_deleteDogWithMultipleSpaces() throws Exception {
         DeleteDogCommand command = (DeleteDogCommand) parser.parseCommand("deletedog   12");
         assertEquals(new DeleteDogCommand(12), command);
     }
+    // @@author
 
     @Test
     public void parseCommand_deleteCustomer() throws Exception {
@@ -174,30 +186,39 @@ public class WatchDogParserTest {
         assertEquals(expected, parser.parseCommand("unenrol date/2028-02-29 d/2  3\t5 a/1"));
     }
 
+    // @@author XanderGoh
     @Test
     public void parseCommand_searchCustomer() throws Exception {
         assertEquals(new SearchCustomerCommand("anna", null, null, null, null, 1),
                 parser.parseCommand("searchc n/anna i/1"));
     }
+    // @@author
 
+    // @@author XanderGoh
     @Test
     public void parseCommand_searchDog() throws Exception {
         assertEquals(new SearchDogCommand("lala", null, null, null),
                 parser.parseCommand("searchd n/lala"));
     }
+    // @@author
 
+    // @@author XanderGoh
     @Test
     public void parseCommand_searchUnlinked() throws Exception {
         assertEquals(new FilterUnlinkedCommand(true), parser.parseCommand("filterun   dog"));
         assertEquals(new FilterUnlinkedCommand(false), parser.parseCommand("filterun customer"));
     }
+    // @@author
 
+    // @@author XanderGoh
     @Test
     public void parseCommand_searchActivity() throws Exception {
         assertEquals(new SearchActivityCommand("walk", null, null),
                 parser.parseCommand("searcha n/walk"));
     }
+    // @@author
 
+    // @@author XanderGoh
     @Test
     public void parseCommand_oldSearchNames_throwUnknownCommand() {
         for (String input : new String[] {"filtera n/walk", "filterc n/anna", "filterd n/lala",
@@ -205,6 +226,7 @@ public class WatchDogParserTest {
             assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(input));
         }
     }
+    // @@author
 
     @Test
     public void parseCommand_exit() throws Exception {

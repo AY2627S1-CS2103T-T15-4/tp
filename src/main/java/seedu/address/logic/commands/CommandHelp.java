@@ -38,7 +38,9 @@ public final class CommandHelp {
                     "editcustomer 1 p/91234567 e/johndoe@example.com",
                     "Requires an existing customer and at least one field. Omitted fields are preserved. "
                             + IDS + " " + CUSTOMER_FIELDS),
+            // @@author XanderGoh
             entry(DeleteDogCommand.COMMAND_WORD, "deletedog DOG_ID", "deletedog 1",
+                    // @@author
                     "Deletes the dog and all its activity enrolments, including past dates. "
                             + "Other dogs, customers and activity schedules remain. " + IDS),
             entry(DeleteCustomerCommand.COMMAND_WORD, "deletecustomer CUSTOMER_ID", "deletecustomer 21",
@@ -86,8 +88,10 @@ public final class CommandHelp {
                     "Deletes an existing activity's entire series and all its enrolments. "
                             + "Dogs and other activities remain; deleted activity IDs are not reused. " + IDS),
             entry(SearchActivityCommand.COMMAND_WORD,
+                    // @@author XanderGoh
                     "searcha [n/NAME] [d/YYYY-MM-DD] [t/HH:mm] [r/RECURRENCE] [i/ACTIVITY_ID]",
                     "searcha n/Dog run t/16:00",
+                    // @@author
                     "Supply at least one field; all supplied fields must match. Name matching ignores case "
                             + "and repeated spaces. Date includes recurring occurrences; time matches inclusively "
                             + "between start and end. Recurrence is Once, Weekly or Daily, ignoring case. "

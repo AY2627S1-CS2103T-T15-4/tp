@@ -546,8 +546,10 @@ public class WatchDog implements ReadOnlyWatchDog {
      *
      * @throws IllegalArgumentException If no stored dog has the same persistent ID.
      */
+    // @@author XanderGoh
     public void removeDog(Dog dog) {
         requireNonNull(dog);
+        // @@author
         Dog storedDog = getDogList().stream()
                 .filter(candidate -> candidate.isSameDog(dog))
                 .findFirst()
@@ -556,10 +558,12 @@ public class WatchDog implements ReadOnlyWatchDog {
         long removedEnrolmentCount = enrolments.stream().filter(enrolment -> enrolment.getDogId() == dogId).count();
         enrolments.removeIf(enrolment -> enrolment.getDogId() == dogId);
         dogs.remove(storedDog);
+        // @@author XanderGoh
         assert enrolments.stream().noneMatch(enrolment -> enrolment.getDogId() == dogId)
                 : "Deleted dog must have no remaining enrolments.";
         assert getDogList().stream().noneMatch(remainingDog -> remainingDog.isSameDog(storedDog))
                 : "Deleted dog must no longer be stored.";
+        // @@author
         logger.fine("Deleted dog ID " + dogId + " and removed " + removedEnrolmentCount + " enrolments.");
     }
 
@@ -579,10 +583,12 @@ public class WatchDog implements ReadOnlyWatchDog {
                 .toString();
     }
 
+    // @@author XanderGoh
     @Override
     public ObservableList<Dog> getDogList() {
         return dogs.asUnmodifiableObservableList();
     }
+    // @@author
 
     @Override
     public ObservableList<Customer> getCustomerList() {

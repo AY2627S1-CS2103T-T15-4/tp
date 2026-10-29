@@ -141,6 +141,7 @@ public class ModelManagerTest {
         assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredCustomerList().remove(0));
     }
 
+    // @@author XanderGoh
     @Test
     public void activityEnrolmentSummary_multipleDogsAndDates_isSortedAndGrouped() throws Exception {
         Activity activity = modelManager.addActivity(new ActivityName("Walk"), LocalDate.of(2028, 2, 29),
@@ -190,6 +191,7 @@ public class ModelManagerTest {
 
         assertEquals("", modelManager.getActivityEnrolmentSummary(activity));
     }
+    // @@author
 
     @Test
     public void equals() {

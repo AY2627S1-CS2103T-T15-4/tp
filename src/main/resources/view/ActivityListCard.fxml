@@ -38,9 +38,11 @@
       <Label fx:id="recurrence" styleClass="cell_small_label" />
       <Label fx:id="dogSummary" lineSpacing="1" styleClass="cell_small_label" wrapText="true"
           maxWidth="Infinity" />
+      <!-- @@author XanderGoh -->
       <Label fx:id="enrolmentsHeading" text="&#10;Enrolments:" styleClass="cell_small_label"
              style="-fx-font-weight: bold;" />
       <Label fx:id="enrolments" styleClass="cell_small_label" wrapText="true" />
+      <!-- @@author -->
     </VBox>
   </GridPane>
 </HBox>

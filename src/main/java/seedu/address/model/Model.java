@@ -7,7 +7,9 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.function.Predicate;
 
+// @@author XanderGoh
 import javafx.beans.Observable;
+// @@author
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.activity.Activity;
@@ -15,7 +17,9 @@ import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
 import seedu.address.model.customer.Customer;
+// @@author XanderGoh
 import seedu.address.model.dog.Dog;
+// @@author
 import seedu.address.model.dog.exceptions.EnrolException;
 import seedu.address.model.dog.exceptions.LinkException;
 import seedu.address.model.dog.exceptions.UnlinkException;
@@ -114,9 +118,11 @@ public interface Model {
      */
     void setCustomer(Customer target, Customer editedCustomer);
 
+    // @@author XanderGoh
     default ObservableList<Dog> getDogList() {
         return getWatchDog().getDogList();
     }
+    // @@author
 
     /** Returns an unmodifiable observable view of filtered dogs. */
     ObservableList<Dog> getFilteredDogList();
@@ -131,7 +137,9 @@ public interface Model {
         return getWatchDog().getCustomerList();
     }
 
+    // @@author XanderGoh
     void updateFilteredCustomerList(Predicate<Customer> predicate);
+    // @@author
 
     /** Adds an empty schedule and returns it with its persistent ID. */
     Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end, Recurrence recurrence);
@@ -162,6 +170,7 @@ public interface Model {
     /** Updates the activity filter; the predicate must not be null. */
     void updateFilteredActivityList(Predicate<Activity> predicate);
 
+    // @@author XanderGoh
     /** Sets the dog context whose enrolment dates should be shown on activity cards. */
     void setActivityEnrolmentDogPredicate(Predicate<Dog> predicate);
 
@@ -170,6 +179,7 @@ public interface Model {
 
     /** Returns an observable signal for changes to the activity-card enrolment context. */
     Observable getActivityEnrolmentContextChanges();
+    // @@author
 
     /** Shows activities with an occurrence on or after the given date. */
     void showActivitiesOnOrAfter(LocalDate date);
@@ -185,7 +195,9 @@ public interface Model {
     boolean hasDog(Dog dog);
 
     /** Deletes the given dog. The dog must exist in WatchDog. */
+    // @@author XanderGoh
     void deleteDog(Dog dog);
+    // @@author
 
     /** Replaces an existing dog with its edited version. */
     void setDog(Dog target, Dog editedDog);
