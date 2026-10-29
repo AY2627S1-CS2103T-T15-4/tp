@@ -49,13 +49,33 @@ public class CustomerIdAssignmentTest {
     public void resetData_zeroNextCustomerId_recomputesPositiveId() {
         AddressBook addressBook = new AddressBook(new AddressBook() {
             @Override
-            public int getNextCustomerId() {
+            public long getNextCustomerId() {
                 return 0;
             }
         });
 
         assertEquals(1, addressBook.getNextCustomerId());
         assertEquals(1, addressBook.addCustomer(customer("Alice")).getId());
+    }
+
+    @Test
+    public void addCustomer_maximumId_exhaustsIdsWithoutReusingDeletedId() {
+        AddressBook addressBook = new AddressBook();
+        addressBook.setNextCustomerId(Integer.MAX_VALUE);
+
+        Customer lastCustomer = addressBook.addCustomer(customer("Alice"));
+
+        assertEquals(Integer.MAX_VALUE, lastCustomer.getId());
+        assertEquals((long) Integer.MAX_VALUE + 1, addressBook.getNextCustomerId());
+        assertThrows(IllegalStateException.class,
+                "No more customer IDs are available", () -> addressBook.addCustomer(customer("Bob")));
+        assertEquals(1, addressBook.getCustomerList().size());
+
+        addressBook.removeCustomer(lastCustomer);
+        AddressBook copy = new AddressBook(addressBook);
+        assertThrows(IllegalStateException.class,
+                "No more customer IDs are available", () -> copy.addCustomer(customer("Carol")));
+        assertEquals(0, copy.getCustomerList().size());
     }
 
     @Test

@@ -103,7 +103,7 @@ public class AddressBookOwnershipTest {
             }
 
             @Override
-            public int getNextCustomerId() {
+            public long getNextCustomerId() {
                 return 200;
             }
         };
@@ -148,7 +148,7 @@ public class AddressBookOwnershipTest {
         book.addDogFromStorage(dog(127));
         book.addDogFromStorage(dog(128));
         int nextDogId = book.getNextDogId();
-        int nextCustomerId = book.getNextCustomerId();
+        long nextCustomerId = book.getNextCustomerId();
 
         book.linkDogs(1, List.of(0));
         book.linkDogs(128, List.of(127, 128));

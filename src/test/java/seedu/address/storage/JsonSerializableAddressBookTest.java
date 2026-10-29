@@ -115,7 +115,7 @@ public class JsonSerializableAddressBookTest {
         Dog dog = new Dog(7, new DogName("Buddy"), new Breed("Poodle"), new Size("Small"));
         JsonSerializableAddressBook data = new JsonSerializableAddressBook(
                 List.of(new JsonAdaptedCustomer(customer(9, "Alice Tan"))),
-                List.of(new JsonAdaptedDog(dog)), -1, 0, null, null, null);
+                List.of(new JsonAdaptedDog(dog)), -1, 0L, null, null, null);
 
         AddressBook restored = data.toModelType();
 
@@ -133,6 +133,19 @@ public class JsonSerializableAddressBookTest {
         AddressBook restored = new JsonSerializableAddressBook(addressBook).toModelType();
 
         assertEquals(2, restored.addCustomer(customer(-1, "Bob Lim")).getId());
+    }
+
+    @Test
+    public void toModelType_legacyMaximumCustomerId_preservesExhaustion() throws Exception {
+        JsonSerializableAddressBook data = new JsonSerializableAddressBook(
+                List.of(new JsonAdaptedCustomer(customer(Integer.MAX_VALUE, "Alice Tan"))),
+                null, null, (long) Integer.MAX_VALUE, null, null);
+
+        AddressBook restored = data.toModelType();
+
+        assertEquals((long) Integer.MAX_VALUE + 1, restored.getNextCustomerId());
+        assertThrows(IllegalStateException.class,
+                "No more customer IDs are available", () -> restored.addCustomer(customer(-1, "Bob Lim")));
     }
 
     @Test
