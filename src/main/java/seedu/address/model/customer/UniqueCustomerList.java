@@ -96,11 +96,13 @@ public class UniqueCustomerList implements Iterable<Customer> {
         internalList.setAll(customers);
     }
 
+    // @@author lilosy
     /** Replaces the contents of this list with those from {@code replacement}. */
     public void setCustomers(UniqueCustomerList replacement) {
         requireNonNull(replacement);
         internalList.setAll(replacement.internalList);
     }
+    // @@author its-shoutime
 
     /**
      * Returns the backing list as an unmodifiable {@code ObservableList}.

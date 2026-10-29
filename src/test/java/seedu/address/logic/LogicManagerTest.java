@@ -278,6 +278,7 @@ public class LogicManagerTest {
         assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
     }
 
+    // @@author lilosy
     @Test
     public void execute_clear_requestsConfirmationWithoutChangingOrSavingData() throws Exception {
         model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
@@ -369,6 +370,7 @@ public class LogicManagerTest {
         }
     }
 
+    // @@author its-shoutime
     @Test
     public void execute_failedCommand_preservesUndoHistory() throws Exception {
         logic.execute("adddog n/Buddy b/Poodle s/small");
