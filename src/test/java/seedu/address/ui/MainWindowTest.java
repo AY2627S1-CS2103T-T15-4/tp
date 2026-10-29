@@ -71,11 +71,11 @@ public class MainWindowTest {
         model.addActivity(new ActivityName("Today walk"), LocalDate.now(),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
         Logic logic = new LogicManager(model, new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonAddressBookStorage(folder.resolve("watchdog.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
-            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("watchdog.json"));
             window.fillInnerParts();
             ListView<Supplier<Region>> customers = listView(window.getCustomerListPanel());
             ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
@@ -128,11 +128,11 @@ public class MainWindowTest {
         model.addActivity(new ActivityName("Future walk"), today.plusDays(1),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
         Logic logic = new LogicManager(model, new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonAddressBookStorage(folder.resolve("watchdog.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
-            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("watchdog.json"));
             window.fillInnerParts();
             ListView<Supplier<Region>> customers = listView(window.getCustomerListPanel());
             ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
@@ -155,11 +155,11 @@ public class MainWindowTest {
     public void fillInnerParts_resizesPawPatternAndRendersPawMarks() throws Exception {
         Path folder = Files.createTempDirectory("mainwindow-paw-pattern");
         Logic logic = new LogicManager(new ModelManager(), new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonAddressBookStorage(folder.resolve("watchdog.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
-            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("watchdog.json"));
             window.fillInnerParts();
             Pane pawPattern = (Pane) window.getPrimaryStage().getScene().lookup("#pawPattern");
 

@@ -22,7 +22,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 
 1. Copy the file to the folder you want to use as the _home folder_ for WatchDog.
 
-1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar addressbook.jar`.<br>
+1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar WatchDog.jar`.<br>
    A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
    ![Ui](images/Ui.png)
 
@@ -443,7 +443,7 @@ Dog and customer IDs belong to separate categories and may overlap.
 
 ### Clearing all entries: `clear`
 
-Clears all customers, dogs, activities, and enrolments from the address book after confirmation.
+Clears all customers, dogs, activities, and enrolments from WatchDog after confirmation.
 
 Format: `clear`
 
@@ -501,12 +501,12 @@ WatchDog automatically saves data after every command. You do not need to save m
 
 ### Editing the data file
 
-WatchDog data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+WatchDog data is saved automatically as `data/watchdog.json` inside the folder from which you launch WatchDog (the home folder in Quick Start). Advanced users are welcome to update data directly by editing that data file.
 
 <box type="warning" seamless>
 
 **Caution:**
-If your changes make the data file invalid, WatchDog starts with an empty address book at the next run. The invalid file remains on disk until you run a command (WatchDog saves after every command). Still, we recommend backing up the file before editing it.<br>
+If your changes make the data file invalid, WatchDog starts with no saved records at the next run. The invalid file remains on disk until you run a command (WatchDog saves after every command). Still, we recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause WatchDog to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
 

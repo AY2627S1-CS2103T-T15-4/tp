@@ -52,7 +52,7 @@ public class LogicManagerTest {
     @BeforeEach
     public void setUp() {
         JsonAddressBookStorage addressBookStorage =
-                new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
+                new JsonAddressBookStorage(temporaryFolder.resolve("watchdog.json"));
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
         StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
         logic = new LogicManager(model, storage);
@@ -88,7 +88,7 @@ public class LogicManagerTest {
                 logic.execute("summary").getFeedbackToUser());
         assertEquals(before, model.getAddressBook());
         assertEquals(List.of(), model.getFilteredDogList());
-        assertEquals(before, new AddressBook(new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"))
+        assertEquals(before, new AddressBook(new JsonAddressBookStorage(temporaryFolder.resolve("watchdog.json"))
                 .readAddressBook().orElseThrow()));
     }
 
@@ -219,7 +219,7 @@ public class LogicManagerTest {
 
         assertEquals(before, model.getAddressBook());
         assertEquals(List.of(), model.getFilteredDogList());
-        assertFalse(Files.exists(temporaryFolder.resolve("addressBook.json")));
+        assertFalse(Files.exists(temporaryFolder.resolve("watchdog.json")));
     }
 
     @Test
@@ -231,7 +231,7 @@ public class LogicManagerTest {
             assertEquals(ClearCommand.MESSAGE_SUCCESS, logic.execute(response).getFeedbackToUser());
             assertEquals(new AddressBook(), model.getAddressBook());
             assertEquals(new AddressBook(), new AddressBook(
-                    new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"))
+                    new JsonAddressBookStorage(temporaryFolder.resolve("watchdog.json"))
                             .readAddressBook().orElseThrow()));
             assertParseException("y", MESSAGE_UNKNOWN_COMMAND);
         }
