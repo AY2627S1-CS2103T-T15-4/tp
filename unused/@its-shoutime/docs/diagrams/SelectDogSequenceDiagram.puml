@@ -1,3 +1,4 @@
+'@@author its-shoutime-unused
 @startuml
 '' Archived because select dog is not part of the final product.
 !include style.puml

@@ -43,6 +43,7 @@ public class LogicManager implements Logic {
     private final Model model;
     private final Storage storage;
     private final WatchDogParser watchDogParser;
+    //@@author its-shoutime
     private HistorySnapshot undoSnapshot;
     private HistorySnapshot redoSnapshot;
     private boolean awaitingClearConfirmation;
@@ -184,6 +185,7 @@ public class LogicManager implements Logic {
             }
         }
     }
+    //@@author
 
     @Override
     public ObservableList<Customer> getFilteredCustomerList() {

@@ -318,6 +318,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         customers.setCustomer(target, editedCustomer);
     }
 
+    //@@author its-shoutime
     /**
      * Removes {@code key} and clears ownership of that customer's dogs without deleting them.
      * {@code key} must exist in WatchDog. Other customers and dogs are unaffected.
@@ -330,7 +331,7 @@ public class WatchDog implements ReadOnlyWatchDog {
                         ? dog.withoutOwner() : dog)
                 .toList());
     }
-    // @@author
+    //@@author
 
     /**
      * Enrols a batch of existing dogs identified by distinct positive IDs into one occurrence of an existing
@@ -626,10 +627,12 @@ public class WatchDog implements ReadOnlyWatchDog {
         return dogs.asUnmodifiableObservableList();
     }
 
+    //@@author its-shoutime
     @Override
     public ObservableList<Customer> getCustomerList() {
         return customers.asUnmodifiableObservableList();
     }
+    //@@author
 
     @Override
     public ObservableList<Enrolment> getEnrolmentList() {

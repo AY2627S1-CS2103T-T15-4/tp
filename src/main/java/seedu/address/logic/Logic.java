@@ -30,8 +30,10 @@ public interface Logic {
      */
     CommandResult execute(String commandText) throws CommandException, ParseException;
 
+    //@@author its-shoutime
     /** Returns an unmodifiable view of the filtered list of customers */
     ObservableList<Customer> getFilteredCustomerList();
+    //@@author
 
     // @@author Kenneth-Chia
     /** Returns an unmodifiable observable view of filtered dogs. */
