@@ -12,9 +12,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.model.AddressBook;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Recurrence;
@@ -60,12 +60,12 @@ public class AddActivityCommandTest {
 
     @Test
     public void execute_exhaustedIds_throwsWithoutMutation() {
-        AddressBook book = new AddressBook();
+        WatchDog book = new WatchDog();
         book.setNextActivityId((long) Integer.MAX_VALUE + 1);
         ModelManager model = new ModelManager(book, new UserPrefs());
         assertThrows(CommandException.class, "No activity IDs remain available.", () ->
                 command(Recurrence.ONCE).execute(model));
-        assertEquals(book, model.getAddressBook());
+        assertEquals(book, model.getWatchDog());
         assertThrows(NullPointerException.class, () -> command(Recurrence.ONCE).execute(null));
     }
 

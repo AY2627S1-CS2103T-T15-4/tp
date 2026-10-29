@@ -10,11 +10,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.logic.parser.AddressBookParser;
+import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.AddressBook;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
@@ -25,11 +25,11 @@ import seedu.address.model.dog.Size;
 public class SearchCommandTest {
     private final Customer alex = new Customer(42, "Alex Tan", "91234567", "alex@example.com", "98765432");
     private final Dog dog = new Dog(42, new DogName("Alex Buddy"), new Breed("Poodle"), new Size("small"));
-    private final AddressBookParser parser = new AddressBookParser();
+    private final WatchDogParser parser = new WatchDogParser();
 
     @Test
     public void execute_searchesBothCategoriesAndReplacesFilters() throws Exception {
-        AddressBook book = new AddressBook();
+        WatchDog book = new WatchDog();
         book.addCustomer(alex);
         book.addDogFromStorage(dog);
         ModelManager model = new ModelManager(book, new UserPrefs());
@@ -54,7 +54,7 @@ public class SearchCommandTest {
         assertEquals(List.of(alex), model.getFilteredCustomerList());
         assertEquals(List.of(dog), model.getFilteredDogList());
         assertEquals("0 customers and 0 dogs found.", execute(model, "search id/0"));
-        assertEquals(book, model.getAddressBook());
+        assertEquals(book, model.getWatchDog());
     }
 
     @Test

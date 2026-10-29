@@ -4,7 +4,7 @@ skinparam ArrowFontStyle plain
 
 box Logic LOGIC_COLOR_T1
 participant ":LogicManager" as LogicManager LOGIC_COLOR
-participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant ":WatchDogParser" as WatchDogParser LOGIC_COLOR
 participant ":DeleteDogCommandParser" as DeleteDogCommandParser LOGIC_COLOR
 participant "d:DeleteDogCommand" as DeleteDogCommand LOGIC_COLOR
 participant "r:CommandResult" as CommandResult LOGIC_COLOR
@@ -12,23 +12,23 @@ end box
 
 box Model MODEL_COLOR_T1
 participant "m:ModelManager" as ModelManager MODEL_COLOR
-participant "b:AddressBook" as AddressBook MODEL_COLOR
+participant "b:WatchDog" as WatchDog MODEL_COLOR
 end box
 
 [-> LogicManager : execute("deletedog 1")
 activate LogicManager
 
-LogicManager -> AddressBookParser : parseCommand("deletedog 1")
-activate AddressBookParser
+LogicManager -> WatchDogParser : parseCommand("deletedog 1")
+activate WatchDogParser
 
 create DeleteDogCommandParser
-AddressBookParser -> DeleteDogCommandParser
+WatchDogParser -> DeleteDogCommandParser
 activate DeleteDogCommandParser
 
-DeleteDogCommandParser --> AddressBookParser
+DeleteDogCommandParser --> WatchDogParser
 deactivate DeleteDogCommandParser
 
-AddressBookParser -> DeleteDogCommandParser : parse("1")
+WatchDogParser -> DeleteDogCommandParser : parse("1")
 activate DeleteDogCommandParser
 
 create DeleteDogCommand
@@ -38,14 +38,14 @@ activate DeleteDogCommand
 DeleteDogCommand --> DeleteDogCommandParser :
 deactivate DeleteDogCommand
 
-DeleteDogCommandParser --> AddressBookParser : d
+DeleteDogCommandParser --> WatchDogParser : d
 deactivate DeleteDogCommandParser
 'Hidden arrow to position the destroy marker below the end of the activation bar.
-DeleteDogCommandParser -[hidden]-> AddressBookParser
+DeleteDogCommandParser -[hidden]-> WatchDogParser
 destroy DeleteDogCommandParser
 
-AddressBookParser --> LogicManager : d
-deactivate AddressBookParser
+WatchDogParser --> LogicManager : d
+deactivate WatchDogParser
 
 LogicManager -> DeleteDogCommand : execute(m)
 activate DeleteDogCommand
@@ -53,12 +53,12 @@ activate DeleteDogCommand
 DeleteDogCommand -> ModelManager : deleteDog(dog)
 activate ModelManager
 
-ModelManager -> AddressBook : removeDog(dog)
-activate AddressBook
-AddressBook -> AddressBook : remove all enrolments for dog ID
-AddressBook -> AddressBook : remove dog record
-AddressBook --> ModelManager
-deactivate AddressBook
+ModelManager -> WatchDog : removeDog(dog)
+activate WatchDog
+WatchDog -> WatchDog : remove all enrolments for dog ID
+WatchDog -> WatchDog : remove dog record
+WatchDog --> ModelManager
+deactivate WatchDog
 
 ModelManager --> DeleteDogCommand
 deactivate ModelManager

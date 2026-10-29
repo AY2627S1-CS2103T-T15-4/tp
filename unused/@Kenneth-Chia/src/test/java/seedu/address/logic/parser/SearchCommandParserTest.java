@@ -13,7 +13,7 @@ import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
 public class SearchCommandParserTest {
-    private final AddressBookParser parser = new AddressBookParser();
+    private final WatchDogParser parser = new WatchDogParser();
 
     @Test
     public void parse_validInput_createsExpectedCommand() throws Exception {

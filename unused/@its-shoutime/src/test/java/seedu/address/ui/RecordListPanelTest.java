@@ -34,9 +34,9 @@ import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.commands.SearchDogCommand;
 import seedu.address.logic.commands.UnlinkCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.model.AddressBook;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.customer.CustomerSearchPredicate;
 import seedu.address.model.dog.Breed;
@@ -140,7 +140,7 @@ public class RecordListPanelTest {
     @Test
     public void panel_customerDogIds_includeHiddenDogsAndRefreshAfterLinkAndDelete() throws Exception {
         runOnFxThread(() -> {
-            AddressBook book = new AddressBook();
+            WatchDog book = new WatchDog();
             book.addCustomer(ALEX);
             book.addDogFromStorage(BUDDY);
             book.addDogFromStorage(new Dog(3, new DogName("Max"), new Breed("Poodle"), new Size("small")));
@@ -172,7 +172,7 @@ public class RecordListPanelTest {
     public void panel_unlink_updatesBothCardsAndKeepsRecords() throws Exception {
         for (UnlinkCommand command : List.of(new UnlinkCommand(List.of(42)), new UnlinkCommand(7))) {
             runOnFxThread(() -> {
-                AddressBook book = new AddressBook();
+                WatchDog book = new WatchDog();
                 book.addCustomer(ALEX);
                 book.addDogFromStorage(BUDDY.withOwner(7));
                 ModelManager model = new ModelManager(book, new UserPrefs());
@@ -194,7 +194,7 @@ public class RecordListPanelTest {
     @Test
     public void panel_linkAndCustomerDeletion_refreshesOwnerAndKeepsDogs() throws Exception {
         runOnFxThread(() -> {
-            AddressBook book = new AddressBook();
+            WatchDog book = new WatchDog();
             book.addCustomer(ALEX);
             book.addDogFromStorage(BUDDY);
             ModelManager model = new ModelManager(book, new UserPrefs());
@@ -267,7 +267,7 @@ public class RecordListPanelTest {
     @Test
     public void panel_searchAndResetCommands_displayMatchingCategoryAndRestoreCards() throws Exception {
         runOnFxThread(() -> {
-            AddressBook book = new AddressBook();
+            WatchDog book = new WatchDog();
             book.addCustomer(ALEX);
             book.addDogFromStorage(BUDDY);
             book.addDogFromStorage(new Dog(43, new DogName("Max"), new Breed("Poodle"), new Size("small")));
@@ -290,14 +290,14 @@ public class RecordListPanelTest {
             executeCommand(new SearchDogCommand(new DogSearchPredicate(43)), model);
             assertEquals(1, list.getItems().size());
             assertEquals("Max", label(list.getItems().get(0).get(), "name"));
-            assertEquals(book, model.getAddressBook());
+            assertEquals(book, model.getWatchDog());
         });
     }
 
     @Test
     public void panel_customerSearch_switchesBetweenCategoriesAndRestoresCustomers() throws Exception {
         runOnFxThread(() -> {
-            AddressBook book = new AddressBook();
+            WatchDog book = new WatchDog();
             book.addCustomer(ALEX);
             book.addCustomer(new Customer(42, "Beth", "92345678", "beth@example.com", "97654321"));
             book.addDogFromStorage(BUDDY);
@@ -318,7 +318,7 @@ public class RecordListPanelTest {
             executeCommand(new SearchDogCommand(new DogSearchPredicate("bud")), model);
             assertEquals(1, list.getItems().size());
             assertEquals("Buddy", label(list.getItems().get(0).get(), "name"));
-            assertEquals(book, model.getAddressBook());
+            assertEquals(book, model.getWatchDog());
         });
     }
 

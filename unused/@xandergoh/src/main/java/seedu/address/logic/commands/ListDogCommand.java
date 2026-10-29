@@ -6,7 +6,7 @@ import static java.util.Objects.requireNonNull;
 
 import seedu.address.model.Model;
 
-/** Lists all dogs in the address book. */
+/** Lists all dogs in WatchDog. */
 public class ListDogCommand extends Command {
     public static final String COMMAND_WORD = "list dog";
     public static final String MESSAGE_SUCCESS = "Listed all dogs.";

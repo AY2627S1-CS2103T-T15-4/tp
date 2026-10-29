@@ -9,12 +9,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.AddressBookParser;
+import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.model.ModelManager;
 import seedu.address.model.customer.Customer;
 
 public class CustomerContactUniquenessTest {
-    private final AddressBookParser parser = new AddressBookParser();
+    private final WatchDogParser parser = new WatchDogParser();
     private ModelManager model;
 
     @BeforeEach
@@ -117,7 +117,7 @@ public class CustomerContactUniquenessTest {
     private void assertRejected(String input, String message) throws Exception {
         List<Customer> customersBefore = List.copyOf(model.getCustomerList());
         List<Customer> visibleBefore = List.copyOf(model.getFilteredCustomerList());
-        long nextCustomerId = model.getAddressBook().getNextCustomerId();
+        long nextCustomerId = model.getWatchDog().getNextCustomerId();
         Command command = parser.parseCommand(input);
 
         CommandException exception = assertThrows(CommandException.class, () -> command.execute(model));
@@ -125,6 +125,6 @@ public class CustomerContactUniquenessTest {
         assertEquals(message, exception.getMessage());
         assertEquals(customersBefore, model.getCustomerList());
         assertEquals(visibleBefore, model.getFilteredCustomerList());
-        assertEquals(nextCustomerId, model.getAddressBook().getNextCustomerId());
+        assertEquals(nextCustomerId, model.getWatchDog().getNextCustomerId());
     }
 }

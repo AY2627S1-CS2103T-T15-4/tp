@@ -15,15 +15,15 @@ import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
-import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
+import seedu.address.model.ReadOnlyWatchDog;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.util.SampleDataUtil;
-import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
+import seedu.address.storage.JsonWatchDogStorage;
 import seedu.address.storage.Storage;
 import seedu.address.storage.StorageManager;
 import seedu.address.ui.Ui;
@@ -70,37 +70,37 @@ public class MainApp extends Application {
 
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(userPrefsFilePath);
         UserPrefs userPrefs = initPrefs(userPrefsStorage);
-        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(dataFilePath);
-        storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        JsonWatchDogStorage watchDogStorage = new JsonWatchDogStorage(dataFilePath);
+        storage = new StorageManager(watchDogStorage, userPrefsStorage);
 
         model = initModelManager(storage, userPrefs);
 
         logic = new LogicManager(model, storage);
 
-        ui = new UiManager(logic, storage.getAddressBookFilePath());
+        ui = new UiManager(logic, storage.getWatchDogFilePath());
     }
 
     /**
-     * Returns a {@code ModelManager} with the data from {@code storage}'s address book and {@code userPrefs}. <br>
-     * The data from the sample address book will be used instead if {@code storage}'s address book is not found,
-     * or an empty address book will be used instead if errors occur when reading {@code storage}'s address book.
+     * Returns a {@code ModelManager} with the data from {@code storage}'s WatchDog and {@code userPrefs}. <br>
+     * The data from the sample WatchDog will be used instead if {@code storage}'s WatchDog is not found,
+     * or an empty WatchDog data file will be used instead if errors occur when reading {@code storage}'s WatchDog.
      */
     private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
-        logger.info("Using data file : " + storage.getAddressBookFilePath());
+        logger.info("Using data file : " + storage.getWatchDogFilePath());
 
-        Optional<ReadOnlyAddressBook> addressBookOptional;
-        ReadOnlyAddressBook initialData;
+        Optional<ReadOnlyWatchDog> watchDogOptional;
+        ReadOnlyWatchDog initialData;
         try {
-            addressBookOptional = storage.readAddressBook();
-            if (addressBookOptional.isEmpty()) {
-                logger.info("Creating a new data file " + storage.getAddressBookFilePath()
+            watchDogOptional = storage.readWatchDog();
+            if (watchDogOptional.isEmpty()) {
+                logger.info("Creating a new data file " + storage.getWatchDogFilePath()
                         + " populated with sample WatchDog data.");
             }
-            initialData = addressBookOptional.orElseGet(SampleDataUtil::getSampleAddressBook);
+            initialData = watchDogOptional.orElseGet(SampleDataUtil::getSampleWatchDog);
         } catch (DataLoadingException e) {
-            logger.warning("Data file at " + storage.getAddressBookFilePath() + " could not be loaded."
+            logger.warning("Data file at " + storage.getWatchDogFilePath() + " could not be loaded."
                     + " Will be starting with no WatchDog records.");
-            initialData = new AddressBook();
+            initialData = new WatchDog();
         }
 
         return new ModelManager(initialData, userPrefs);

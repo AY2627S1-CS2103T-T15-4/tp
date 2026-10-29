@@ -73,7 +73,7 @@ public class SearchActivityCommand extends Command {
         if (dogId < 1) {
             throw new IllegalArgumentException("Stored dog IDs must be positive.");
         }
-        return model.getAddressBook().getEnrolmentList().stream().anyMatch(enrolment ->
+        return model.getWatchDog().getEnrolmentList().stream().anyMatch(enrolment ->
                 enrolment.getDogId() == dogId && (date == null || enrolment.getDate().equals(date))
                         && model.getActivityList().stream()
                         .filter(activity -> activity.getId() == enrolment.getActivityId())

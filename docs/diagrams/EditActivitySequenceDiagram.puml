@@ -6,11 +6,11 @@ skinparam maxMessageSize 230
 
 actor User
 participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":AddressBookParser" as Router LOGIC_COLOR
+participant ":WatchDogParser" as Router LOGIC_COLOR
 participant ":EditActivityCommandParser" as Parser LOGIC_COLOR
 participant "command:EditActivityCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
-participant ":AddressBook" as Book MODEL_COLOR
+participant ":WatchDog" as Book MODEL_COLOR
 participant ":StorageManager" as Storage STORAGE_COLOR
 
 User -> Logic : execute("editactivity 1 start/10:00")
@@ -56,11 +56,11 @@ else activity has no enrolments
   Model --> Command : success
   Command --> Logic : CommandResult with activity ID
   deactivate Command
-  Logic -> Model : getAddressBook()
+  Logic -> Model : getWatchDog()
   activate Model
-  Model --> Logic : addressBook
+  Model --> Logic : watchDog
   deactivate Model
-  Logic -> Storage : saveAddressBook(addressBook)
+  Logic -> Storage : saveWatchDog(watchDog)
   activate Storage
   Storage --> Logic
   deactivate Storage

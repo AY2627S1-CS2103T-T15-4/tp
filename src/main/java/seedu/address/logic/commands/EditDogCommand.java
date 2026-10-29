@@ -19,7 +19,7 @@ import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
 
-/** Edits the details of an existing dog in the address book. */
+/** Edits the details of an existing dog in WatchDog. */
 public class EditDogCommand extends Command {
     public static final String COMMAND_WORD = "editdog";
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the dog identified by its ID. "

@@ -39,9 +39,9 @@ import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
 
-public class AddressBookParserTest {
+public class WatchDogParserTest {
 
-    private final AddressBookParser parser = new AddressBookParser();
+    private final WatchDogParser parser = new WatchDogParser();
 
     @Test
     public void parseCommand_retiredSearch_throwsUnknownCommand() {

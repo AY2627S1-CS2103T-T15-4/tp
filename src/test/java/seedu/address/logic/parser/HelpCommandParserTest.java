@@ -13,7 +13,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.ModelManager;
 
 public class HelpCommandParserTest {
-    private final AddressBookParser parser = new AddressBookParser();
+    private final WatchDogParser parser = new WatchDogParser();
 
     @Test
     public void parse_emptyTopic_opensOriginalHelpWindow() throws Exception {
@@ -43,6 +43,11 @@ public class HelpCommandParserTest {
     public void parse_commandTopic_acceptsSurroundingWhitespace() throws Exception {
         assertEquals(parser.parseCommand("help deletedog").execute(new ModelManager()),
                 parser.parseCommand("  help \t deletedog  ").execute(new ModelManager()));
+    }
+
+    @Test
+    public void parse_nullArgs_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new HelpCommandParser().parse(null));
     }
 
     @Test

@@ -6,15 +6,17 @@ import java.util.TreeSet;
 
 /** Command formats, examples and specifications for help in the result display. */
 public final class CommandHelp {
-    private static final String DOG_FIELDS = "Names and breeds must be nonblank letters, numbers or spaces. "
-            + "Size is small, medium, large or giant (case-insensitive).";
+    private static final String DOG_FIELDS = "Names may contain letters, numbers, spaces, hyphens and apostrophes. "
+            + "Breeds may contain letters, numbers, spaces and hyphens. Both must be nonblank and start with "
+            + "a letter or number. Size is small, medium, large or giant (case-insensitive).";
     private static final String CUSTOMER_FIELDS = "Phone and backup contact must contain exactly eight digits; "
             + "spaces between digits are removed. Names allow letters, numbers, spaces, hyphens and apostrophes; "
             + "punctuation must be followed by a letter or number. Email must be valid. "
             + "Primary phone and email must be unique across customers (email ignores case); "
             + "backup contacts may be shared.";
-    private static final String IDS = "Use persistent record IDs, including hidden records; "
-            + "Dog and customer IDs range from 0 to 2147483647; activity IDs from 1 to 2147483647.";
+    private static final String IDS = "Use persistent record IDs, including hidden records. "
+            + "Dog IDs range from 1 to 2147483647. "
+            + "Customer and activity IDs range from 1 to 2147483647.";
     private static final String ACTIVITY_FIELDS = "Dates use YYYY-MM-DD and times use 24-hour HH:mm. "
             + "End must be later than start on the same day. Recurrence is lowercase once, daily or weekly.";
 
@@ -91,15 +93,18 @@ public final class CommandHelp {
                             + "between start and end. Recurrence is Once, Weekly or Daily, ignoring case. "
                             + "Also shows enrolled dogs and their owners; a supplied date limits enrolments "
                             + "to that occurrence. Filters remain active as records change."),
-            entry(EnrolDogCommand.COMMAND_WORD, "enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2",
-                    "enrol a/1 date/2026-11-20 d/2,3",
-                    "Activity and distinct dog IDs must exist. Date must be today or a future occurrence "
-                            + "of the activity. Duplicate enrolments and overlapping activities for the same "
-                            + "dog are rejected. " + IDS),
-            entry(UnenrolDogCommand.COMMAND_WORD, "unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID1,DOG_ID2",
-                    "unenrol a/1 date/2026-11-20 d/2,3",
-                    "Removes only the specified dated enrolments. Activity and distinct dog IDs must exist "
-                            + "and the dogs must be enrolled on that date. " + IDS),
+            entry(EnrolDogCommand.COMMAND_WORD, "enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID]...",
+                    "enrol a/1 date/2026-11-20 d/2 3",
+                    "Fields may appear in any order, each exactly once. Dog IDs are separated by spaces; "
+                            + "commas are rejected. Activity and distinct dog IDs must exist and be positive. "
+                            + "Date must be today or a future occurrence of the activity. Duplicate enrolments "
+                            + "and overlapping activities for the same dog are rejected. " + IDS),
+            entry(UnenrolDogCommand.COMMAND_WORD, "unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID]...",
+                    "unenrol a/1 date/2026-11-20 d/2 3",
+                    "Fields may appear in any order, each exactly once. Dog IDs are separated by spaces; "
+                            + "commas are rejected. Removes only the specified dated enrolments. Activity and "
+                            + "distinct dog IDs must exist, and the dogs must be enrolled on that date. "
+                            + "Past dates are allowed when that enrolment exists. " + IDS),
             entry(TodayCommand.COMMAND_WORD, "today", "today",
                     "Accepts no parameters. Shows activities occurring today, dogs enrolled in today's "
                             + "occurrences and their owners. Replaces all three displays; empty panels mean "

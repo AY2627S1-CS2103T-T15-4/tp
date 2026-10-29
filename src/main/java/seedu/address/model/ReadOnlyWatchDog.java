@@ -8,9 +8,9 @@ import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Dog;
 
 /**
- * Unmodifiable view of an address book
+ * Unmodifiable view of a WatchDog data file
  */
-public interface ReadOnlyAddressBook {
+public interface ReadOnlyWatchDog {
 
     default ObservableList<Dog> getDogList() {
         return FXCollections.emptyObservableList();
@@ -43,7 +43,7 @@ public interface ReadOnlyAddressBook {
         return FXCollections.emptyObservableList();
     }
 
-    /** Returns the next unused activity ID; older address books start at one. */
+    /** Returns the next unused activity ID; older WatchDog files start at one. */
     default long getNextActivityId() {
         return 1;
     }

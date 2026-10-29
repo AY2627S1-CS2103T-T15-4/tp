@@ -16,7 +16,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 /** Contains tests for {@link SelectDogCommandParser}. */
 public class SelectDogCommandParserTest {
 
-    private final AddressBookParser addressBookParser = new AddressBookParser();
+    private final WatchDogParser watchDogParser = new WatchDogParser();
     private final SelectDogCommandParser parser = new SelectDogCommandParser();
 
     @Test
@@ -40,8 +40,8 @@ public class SelectDogCommandParserTest {
 
     @Test
     public void parse_wrongCommandCase_throwsUnknownCommand() {
-        assertThrows(ParseException.class, () -> addressBookParser.parseCommand("Select dog 21"));
+        assertThrows(ParseException.class, () -> watchDogParser.parseCommand("Select dog 21"));
         assertEquals(MESSAGE_UNKNOWN_COMMAND,
-                assertThrows(ParseException.class, () -> addressBookParser.parseCommand("Select dog 21")).getMessage());
+                assertThrows(ParseException.class, () -> watchDogParser.parseCommand("Select dog 21")).getMessage());
     }
 }
