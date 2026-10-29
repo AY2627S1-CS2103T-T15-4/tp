@@ -77,6 +77,10 @@ public class ModelManager implements Model {
         activeDogPredicate = state.dogPredicate();
         activeActivityPredicate = state.activityPredicate();
         enrolmentDogPredicate = state.enrolmentDogPredicate();
+        assert addressBook.getCustomerList() != null;
+        logger.fine("Restored " + addressBook.getCustomerList().size() + " customers, "
+                + addressBook.getDogList().size() + " dogs and "
+                + addressBook.getActivityList().size() + " activities.");
         signalEnrolmentContextChanged();
         filteredCustomers.setPredicate(null);
         filteredDogs.setPredicate(null);

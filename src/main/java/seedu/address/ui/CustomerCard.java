@@ -1,5 +1,8 @@
 package seedu.address.ui;
 
+import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +46,8 @@ public class CustomerCard extends UiPart<Region> {
     /** Creates a customer card with the persistent IDs of all dogs owned by that customer. */
     public CustomerCard(Customer customer, List<Integer> ownedDogIds) {
         super(FXML);
+        requireNonNull(customer);
+        requireAllNonNull(ownedDogIds);
         this.customer = customer;
         id.setText(customer.getId() + ". ");
         name.setText(customer.getName().fullName);
