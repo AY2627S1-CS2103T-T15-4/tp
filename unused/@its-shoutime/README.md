@@ -27,4 +27,6 @@ shared files:
   declarations from `src/main/java/seedu/address/model/Model.java`.
 
 These excerpts are historical attribution records and are excluded from the Gradle
-source and test sets.
+source and test sets. The leftover selection fields, snapshot members, and methods
+that remained in `Model` and `ModelManager` after the commands were retired were
+removed from the active sources. The excerpts above are the retained copy.
