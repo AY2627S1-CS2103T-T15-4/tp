@@ -17,7 +17,9 @@ import seedu.address.model.customer.Email;
 import seedu.address.model.customer.Name;
 import seedu.address.model.customer.Phone;
 
-/** Parses input arguments and creates an {@link AddCustomerCommand}. */
+/**
+ * Parses input arguments and creates an {@link AddCustomerCommand}.
+ */
 public class AddCustomerCommandParser implements Parser<AddCustomerCommand> {
 
     /**

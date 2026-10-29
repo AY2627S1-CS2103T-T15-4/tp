@@ -46,8 +46,10 @@ public class EditCustomerCommand extends Command {
     private final EditCustomerDescriptor editCustomerDescriptor;
 
     /**
-     * @param customerId persistent ID of the customer to edit
-     * @param editCustomerDescriptor details to edit the customer with
+     * Creates a command to edit the customer with the specified ID and replacement details.
+     *
+     * @param customerId persistent ID of the customer to edit.
+     * @param editCustomerDescriptor details to edit the customer with.
      */
     public EditCustomerCommand(int customerId, EditCustomerDescriptor editCustomerDescriptor) {
         if (customerId < 1) {

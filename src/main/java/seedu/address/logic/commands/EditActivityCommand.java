@@ -120,6 +120,9 @@ public class EditActivityCommand extends Command {
             recurrence = toCopy.recurrence;
         }
 
+        /**
+         * Returns true if at least one field is edited.
+         */
         public boolean isAnyFieldEdited() {
             return name != null || date != null || startTime != null || endTime != null || recurrence != null;
         }
