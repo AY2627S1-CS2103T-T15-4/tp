@@ -63,7 +63,7 @@ public class WatchDog implements ReadOnlyWatchDog {
 
     /**
      * Resets the existing data of this {@code WatchDog} with {@code newData}.
-     * Rejects dog owners missing from the incoming customers before changing any records.
+     * Validates incoming identities, ownership and dated bookings before changing any records.
      */
     public void resetData(ReadOnlyWatchDog newData) {
         requireNonNull(newData);
@@ -83,6 +83,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         long restoredNextDogId = newData.getNextDogId();
         long nextRestoredDogId = restoredNextDogId == -1 ? minimumDogId : restoredNextDogId;
         validateNextDogId(nextRestoredDogId, minimumDogId);
+        validateRestoredRecords(restoredCustomers, restoredDogs, restored, restoredEnrolments);
         dogs.setDogs(restoredDogs);
         customers.setCustomers(restoredCustomers);
         nextActivityId = nextId;
@@ -94,6 +95,19 @@ public class WatchDog implements ReadOnlyWatchDog {
                 : customers.asUnmodifiableObservableList().stream()
                         .mapToLong(Customer::getId).max().orElse(0) + 1;
         activities.restore(restored, restoredEnrolments);
+        assert activities.equals(restored) && enrolments.equals(restoredEnrolments)
+                : "Restoration must preserve the validated schedules and bookings.";
+        logger.fine("Restored " + restored.size() + " activities and " + restoredEnrolments.size() + " enrolments.");
+    }
+
+    /** Reuses storage validation in an isolated book so a rejected snapshot cannot partially replace live data. */
+    private static void validateRestoredRecords(List<Customer> customers, List<Dog> dogs,
+            List<Activity> activities, List<Enrolment> enrolments) {
+        WatchDog candidate = new WatchDog();
+        candidate.customers.setCustomers(customers);
+        candidate.dogs.setDogs(dogs);
+        candidate.activities.addAll(activities);
+        enrolments.forEach(candidate::addEnrolmentFromStorage);
     }
 
     /** Delays activity notifications until the corresponding enrolments have also been restored. */
@@ -157,6 +171,8 @@ public class WatchDog implements ReadOnlyWatchDog {
         Activity activity = new Activity((int) nextActivityId, name, date, start, end, recurrence);
         nextActivityId++;
         activities.add(activity);
+        assert nextActivityId > activity.getId() : "The next activity ID must exceed the allocated ID.";
+        logger.fine("Created activity ID " + activity.getId() + ".");
         return activity;
     }
 
@@ -389,6 +405,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
         // All endpoints were validated; a mismatch here means the internal update is defective.
         assert hasExpectedOwners(dogIds, customerId) : "Linked dogs must exist and belong to the requested customer.";
+        logger.fine("Linked " + dogIds.size() + " dogs to customer ID " + customerId + ".");
     }
 
     /**
@@ -419,6 +436,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         }
         dogs.setDogs(getDogList().stream().map(dog -> replacements.getOrDefault(dog.getId(), dog)).toList());
         assert hasExpectedOwners(dogIds, null) : "Unlinked dogs must exist and have no owner.";
+        logger.fine("Unlinked " + dogIds.size() + " dogs from their owners.");
     }
 
     /** Checks stored endpoints as well as ownership, so missing dogs cannot satisfy the postcondition. */

@@ -2,6 +2,7 @@ package seedu.address.storage;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.dog.Breed;
@@ -22,7 +23,7 @@ class JsonAdaptedDog {
     @JsonCreator
     public JsonAdaptedDog(@JsonProperty("id") Integer id, @JsonProperty("name") String name,
             @JsonProperty("breed") String breed, @JsonProperty("size") String size,
-            @JsonProperty("ownerId") Integer ownerId) {
+            @JsonProperty("ownerId") @JsonDeserialize(using = OwnerIdDeserializer.class) Integer ownerId) {
         this.id = id;
         this.name = name;
         this.breed = breed;

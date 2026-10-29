@@ -73,7 +73,8 @@ as well as visible customers, so these IDs remain accurate when dog cards are fi
 
 `JsonAdaptedDog` persists `ownerId`. A missing or null field means unlinked, preserving compatibility
 with older files. Negative owner IDs and references to missing customers are rejected on load;
-customers are restored before dogs. Copies of WatchDog retain ownership through immutable dogs.
+owner IDs must be integer JSON numbers, so fractions and numeric strings cannot silently change ownership.
+Customers are restored before dogs. Copies of WatchDog retain ownership through immutable dogs.
 The shared model boundaries also reject dangling owner IDs: `setDog` validates the replacement,
 `setCustomers` checks that existing owners remain present, and `resetData` validates ownership against
 snapshots of the incoming dogs and customers before changing records. Customer deletion uses its explicit
@@ -436,6 +437,10 @@ Activity IDs and the counter must be integer JSON numbers; fractions, numeric st
 out-of-range numbers are rejected before conversion. Reset restores identity counters before replacing
 activities and enrolments. An internal activity list batches activity notifications until enrolments
 are restored, so listeners of either list see the restored schedules, enrolments and counters.
+Before publishing a reset, an isolated candidate validates incoming customer and dog identities and
+reuses storage enrolment validation for references, occurrence dates, duplicate bookings and overlaps.
+Rejected snapshots leave the existing records, counters and observable lists unchanged. Historical
+bookings remain valid during restoration; the restriction to today or later applies to new enrolments.
 `LogicManager` uses its existing save path after successful command execution.
 
 The following sequence diagram shows successful execution of
@@ -651,6 +656,12 @@ updates assert that all requested dog endpoints exist with the expected owner af
 unenrolment, and dog deletion assert that the expected dated records are present or absent after a successful
 mutation. The Gradle `run` and `test` tasks enable assertions so these checks are active during development
 and automated testing.
+
+Customer search commands and predicates copy their query dog IDs, preventing a caller from changing an
+existing query through its original set. The predicate retains the live stored-dog view so later ownership
+changes still refresh the results. Restoration asserts that validated schedules and bookings are preserved.
+Recurrence and summary tests check date boundaries and schedule counts. Their `FINE`
+diagnostics contain counts and dates rather than customer contacts.
 
 `LogicManager` records each command. `WatchDog` logs successful enrolment changes and dog deletion at
 `FINE`, including the number of enrolment records removed. An invalid enrolment restored from storage is

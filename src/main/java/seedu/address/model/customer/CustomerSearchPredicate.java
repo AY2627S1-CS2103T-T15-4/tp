@@ -30,7 +30,7 @@ public class CustomerSearchPredicate implements Predicate<Customer> {
         this(null, null, null, null, null, List.of(), validateId(customerId));
     }
 
-    /** Creates a predicate using the supplied customer fields and stored dogs. */
+    /** Creates a predicate with a snapshot of query IDs and a live view of stored dogs. */
     public CustomerSearchPredicate(String nameQuery, String phone, String email,
                                    String backupContact, Set<Integer> dogIds, List<Dog> dogs) {
         this(nameQuery, phone, email, backupContact, dogIds, dogs, null);

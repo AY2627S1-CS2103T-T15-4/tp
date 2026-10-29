@@ -12,6 +12,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.WatchDog;
@@ -83,6 +84,27 @@ public class DogOwnershipStorageTest {
         assertThrows(IllegalValueException.class, negative::toModelType);
         JsonSerializableWatchDog missing = readDog(", \"ownerId\": 7");
         assertThrows(IllegalValueException.class, missing::toModelType);
+    }
+
+    @Test
+    public void read_nonIntegerOwnerId_rejectsWithoutChangingFile() throws Exception {
+        Path file = temporaryFolder.resolve("malformed-owner.json");
+        JsonWatchDogStorage storage = new JsonWatchDogStorage(file);
+        for (String token : List.of("7.5", "\"7\"", "true", "{}", "[]", "2147483648", "7e0")) {
+            String json = "{\"customers\":[{\"id\":7,\"name\":\"Alex\",\"phone\":\"91234567\","
+                    + "\"email\":\"alex@example.com\",\"backupContact\":\"98765432\"}],"
+                    + "\"dogs\":[{\"id\":42,\"name\":\"Buddy\",\"breed\":\"Poodle\",\"size\":\"small\","
+                    + "\"ownerId\":" + token + "}]}";
+            Files.writeString(file, json);
+
+            assertThrows(DataLoadingException.class, storage::readWatchDog, token);
+            assertEquals(json, Files.readString(file));
+        }
+    }
+
+    @Test
+    public void read_nullOwnerId_loadsUnlinked() throws Exception {
+        assertEquals(dog(42), readDog(", \"ownerId\": null").toModelType().getDogList().get(0));
     }
 
     private JsonSerializableWatchDog readDog(String ownerField) throws Exception {

@@ -43,7 +43,7 @@ public class SearchCustomerCommand extends Command {
     }
 
     /**
-     * Creates a customer search using the supplied fields and, when present, positive dog IDs.
+     * Creates a customer search, copying the supplied positive dog IDs to preserve the query.
      *
      * @throws IllegalArgumentException if any supplied dog or customer ID is not positive
      */
