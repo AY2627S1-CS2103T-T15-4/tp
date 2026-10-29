@@ -423,6 +423,9 @@ Format: `delete customer ID`
 Example:
 
 * `delete customer 21`
+* `delete  customer   21`
+
+Leading and trailing whitespace and multiple spaces between the command words and ID are accepted.
 
 ### Customer and dog cards
 
