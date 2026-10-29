@@ -556,8 +556,10 @@ public class AddressBook implements ReadOnlyAddressBook {
         long removedEnrolmentCount = enrolments.stream().filter(enrolment -> enrolment.getDogId() == dogId).count();
         enrolments.removeIf(enrolment -> enrolment.getDogId() == dogId);
         dogs.remove(storedDog);
-        assert enrolments.stream().noneMatch(enrolment -> enrolment.getDogId() == dogId);
-        assert getDogList().stream().noneMatch(remainingDog -> remainingDog.isSameDog(storedDog));
+        assert enrolments.stream().noneMatch(enrolment -> enrolment.getDogId() == dogId)
+                : "Deleted dog must have no remaining enrolments.";
+        assert getDogList().stream().noneMatch(remainingDog -> remainingDog.isSameDog(storedDog))
+                : "Deleted dog must no longer be stored.";
         logger.fine("Deleted dog ID " + dogId + " and removed " + removedEnrolmentCount + " enrolments.");
     }
 
