@@ -82,6 +82,7 @@ public class UnenrolDogCommandParser implements Parser<UnenrolDogCommand> {
         return new ParseException(message + UnenrolDogCommand.MESSAGE_FORMAT_GUIDANCE, cause);
     }
 
+    /** Parses the three prefixed fields while rejecting stray text and repeated prefixes. */
     private ParsedFields parseFields(String input) throws ParseException {
         String activityId = null;
         String date = null;

@@ -21,9 +21,9 @@ public class Breed {
     public final String breed;
 
     /**
-     * Constructs a {@code breedInput}.
+     * Constructs a {@code Breed}.
      *
-     * @param breedInput A valid name.
+     * @param breedInput A valid breed.
      */
     public Breed(String breedInput) {
         requireNonNull(breedInput);
@@ -32,7 +32,7 @@ public class Breed {
     }
 
     /**
-     * Returns true if a given string is a valid name.
+     * Returns true if a given string is a valid breed.
      */
     public static boolean isValidBreed(String test) {
         return test.matches(VALIDATION_REGEX);

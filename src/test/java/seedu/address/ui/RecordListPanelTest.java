@@ -96,7 +96,7 @@ public class RecordListPanelTest {
         runOnFxThread(() -> {
             AtomicReference<String> copiedText = new AtomicReference<>();
             Dog linkedDog = BUDDY.withOwner(7);
-            DogCard dogCard = new DogCard(linkedDog, copiedText::set);
+            DogCard dogCard = new DogCard(linkedDog, recordingWriter(copiedText));
             Region card = dogCard.getRoot();
             ContextMenu copyMenu = CardInteractionUtil.getCopyMenu(card);
 
@@ -124,7 +124,7 @@ public class RecordListPanelTest {
             Dog longValueDog = new Dog(43, new DogName("O'Neil-Dog"), new Breed(longBreed), new Size("Large"));
             AtomicReference<String> copiedText = new AtomicReference<>("unchanged");
             ContextMenu copyMenu = CardInteractionUtil.getCopyMenu(
-                    new DogCard(longValueDog, copiedText::set).getRoot());
+                    new DogCard(longValueDog, recordingWriter(copiedText)).getRoot());
 
             copyMenu.getItems().get(0).fire();
             assertEquals(longBreed, copiedText.get());
@@ -324,6 +324,13 @@ public class RecordListPanelTest {
 
     private static String label(Region card, String id) {
         return ((Label) card.lookup("#" + id)).getText();
+    }
+
+    private static ClipboardWriter recordingWriter(AtomicReference<String> copiedText) {
+        return value -> {
+            copiedText.set(value);
+            return true;
+        };
     }
 
     private static void executeCommand(Command command, ModelManager model) {

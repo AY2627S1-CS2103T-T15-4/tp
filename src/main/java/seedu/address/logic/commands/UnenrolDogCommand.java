@@ -27,7 +27,12 @@ public class UnenrolDogCommand extends Command {
     private final LocalDate date;
     private final List<Integer> dogIds;
 
-    /** Creates a command containing a positive activity ID and distinct positive dog IDs. */
+    /**
+     * Creates a command containing a positive activity ID and distinct positive dog IDs.
+     *
+     * @throws IllegalArgumentException If the IDs, date, or dog ID collection are invalid.
+     * @throws NullPointerException If {@code dogIds} is null.
+     */
     public UnenrolDogCommand(int activityId, LocalDate date, List<Integer> dogIds) {
         checkArgument(activityId >= 1 && date != null && !dogIds.isEmpty()
                 && dogIds.stream().allMatch(id -> id >= 1)

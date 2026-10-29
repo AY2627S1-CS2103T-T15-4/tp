@@ -15,10 +15,10 @@ public final class ActivityBookingSummary {
     /**
      * Returns the summary of distinct dogs booked for this activity today or later.
      *
-     * @param enrolments all stored dated enrolments
-     * @param activityId activity whose bookings are summarized
-     * @param today inclusive lower date boundary
-     * @return the complete general-card dog summary
+     * @param enrolments All stored dated enrolments.
+     * @param activityId Activity whose bookings are summarized.
+     * @param today Inclusive lower date boundary.
+     * @return The complete general-card dog summary.
      */
     public static String upcomingBookings(List<Enrolment> enrolments, int activityId, LocalDate today) {
         requireNonNull(enrolments);
@@ -36,10 +36,10 @@ public final class ActivityBookingSummary {
     /**
      * Returns the summary of distinct dogs booked for this activity on the supplied date.
      *
-     * @param enrolments all stored dated enrolments
-     * @param activityId activity whose bookings are summarized
-     * @param date exact booking date
-     * @return the complete exact-date dog summary
+     * @param enrolments All stored dated enrolments.
+     * @param activityId Activity whose bookings are summarized.
+     * @param date Exact booking date.
+     * @return The complete exact-date dog summary.
      */
     public static String bookingsOn(List<Enrolment> enrolments, int activityId, LocalDate date) {
         requireNonNull(enrolments);

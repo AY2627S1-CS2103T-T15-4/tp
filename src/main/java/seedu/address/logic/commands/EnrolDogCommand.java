@@ -29,6 +29,9 @@ public class EnrolDogCommand extends Command {
 
     /**
      * Creates an enrol request containing a positive activity ID and distinct positive dog IDs.
+     *
+     * @throws IllegalArgumentException If the IDs, date, or dog ID collection are invalid.
+     * @throws NullPointerException If {@code dogIds} is null.
      */
     public EnrolDogCommand(int activityId, LocalDate date, List<Integer> dogIds) {
         this.dogIds = List.copyOf(dogIds);

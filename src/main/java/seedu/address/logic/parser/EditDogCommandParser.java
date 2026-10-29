@@ -15,7 +15,7 @@ public class EditDogCommandParser implements Parser<EditDogCommand> {
     /**
      * Parses the arguments for an {@code EditDogCommand}.
      *
-     * @throws ParseException if the input does not follow the expected format
+     * @throws ParseException If the input does not follow the expected format.
      */
     @Override
     public EditDogCommand parse(String args) throws ParseException {
@@ -59,6 +59,7 @@ public class EditDogCommandParser implements Parser<EditDogCommand> {
         return new EditDogCommand(dogId, descriptor);
     }
 
+    /** Returns a positive dog ID parsed from {@code value}. */
     private static int parseDogId(String value) throws ParseException {
         try {
             int dogId = Integer.parseInt(value.trim());

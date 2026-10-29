@@ -42,7 +42,7 @@ public class EditDogCommand extends Command {
     /**
      * Creates a command to edit the dog with the specified positive ID.
      *
-     * @throws IllegalArgumentException if {@code dogId} is not positive
+     * @throws IllegalArgumentException If {@code dogId} is not positive.
      */
     public EditDogCommand(int dogId, EditDogDescriptor editDogDescriptor) {
         if (dogId < 1) {
@@ -72,6 +72,7 @@ public class EditDogCommand extends Command {
         return new CommandResult(String.format(MESSAGE_EDIT_DOG_SUCCESS, Messages.format(editedDog)));
     }
 
+    /** Returns a dog that preserves unspecified fields and ownership from the original dog. */
     private static Dog createEditedDog(Dog dogToEdit, EditDogDescriptor descriptor) {
         DogName updatedName = descriptor.getName().orElse(dogToEdit.getName());
         Breed updatedBreed = descriptor.getBreed().orElse(dogToEdit.getBreed());
@@ -106,6 +107,7 @@ public class EditDogCommand extends Command {
         private Breed breed;
         private Size size;
 
+        /** Creates an empty descriptor. */
         public EditDogDescriptor() {}
 
         /** Creates a defensive copy of the given descriptor. */

@@ -58,11 +58,11 @@ Unlinking preserves records and filters, including a customer's last dog, and us
 `ownerId` storage field without a schema change.
 
 `AddressBook.removeCustomer` clears ownership of that customer's dogs, regardless of filters,
-preserving their persistent IDs and details. Unowned dog cards show `Owner ID: None`.
+preserving their persistent IDs and details. Unowned dog cards show a person icon followed by `None`.
 Removing a dog leaves its customer intact. Customer edits must preserve persistent IDs to keep links valid.
-Observable list updates refresh dog cards, which display owner IDs without changing search filters.
-Customer cards display owned dog IDs below backup contact. `RecordListPanel` observes the complete dog list
-as well as visible records, so these IDs remain accurate when dog cards are filtered out.
+Observable list updates refresh dog cards, which display customer IDs without changing search filters.
+Customer cards display owned dog IDs below backup contact. `CustomerListPanel` observes the complete dog list
+as well as visible customers, so these IDs remain accurate when dog cards are filtered out.
 
 `JsonAdaptedDog` persists `ownerId`. A missing or null field means unlinked, preserving compatibility
 with older files. Negative owner IDs and references to missing customers are rejected on load;
@@ -94,7 +94,7 @@ The following provides a quick overview of the main components and their interac
 
 **Main components of the architecture**
 
-**`Main`** (consisting of classes [`Main`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
+**`Main`** (consisting of classes [`Main`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
 * At app launch, it initializes the other components in the correct sequence, and connects them up with each other.
 * At shut down, it shuts down the other components and invokes cleanup methods where necessary.
 
@@ -126,21 +126,27 @@ The sections below give more details of each component.
 
 ### UI component
 
-The **API** of this component is specified in [`Ui.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/Ui.java)
+The **API** of this component is specified in [`Ui.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/ui/Ui.java)
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
-The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `RecordListPanel`,
-`ActivityListPanel`, `TodayActivityListPanel`, and `StatusBarFooter`. `TodayActivityListPanel` reuses the
-activity list and filters it to schedules occurring today. All of these, including `MainWindow`, inherit
-from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
+The UI consists of a `MainWindow` and its parts, including `CommandBox`, `ResultDisplay`, separate customer,
+dog and activity list panels, and `TodayActivityListPanel`. `TodayActivityListPanel` reuses the activity-list
+implementation and filters it to schedules occurring today. Visible GUI parts inherit from the abstract
+`UiPart` class, which provides their shared FXML-loading behavior.
 
-`RecordListPanel` observes the filtered customer and dog lists, plus the complete dog list exposed by `Logic`.
-It displays customers followed by dogs in a single list, using `CustomerCard` and `DogCard`.
-List changes rebuild the card factories; JavaFX creates card nodes as cells need them.
-Cards use persistent IDs, not row numbers. The complete dog list supplies ownership details independently of filters.
+Each list panel observes its model data and uses `CardListUpdater` to reconcile stable, ID-keyed card factories.
+Unchanged entries are retained instead of rebuilding the entire list, which preserves the visible record during
+ordinary edits, ownership changes, and enrolment changes. Commands that intentionally replace the displayed
+result set, such as search, list, filter, and reset, scroll the panels to the first result. JavaFX still creates
+card nodes only as cells need them. Customer ownership summaries use the complete dog list independently of
+the current dog filter.
 
-The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
+Customer and dog cards install their tooltips and copy menus through `CardInteractionUtil`. Clipboard writes
+return a success result through `ClipboardWriter`, so the UI shows `Copied!` only after a successful write and
+shows failure feedback otherwise.
+
+The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
 
 The `UI` component,
 
@@ -151,7 +157,7 @@ The `UI` component,
 
 ### Logic component
 
-**API** : [`Logic.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/logic/Logic.java)
+**API** : [`Logic.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/logic/Logic.java)
 
 Here's a (partial) class diagram of the `Logic` component:
 
@@ -184,7 +190,7 @@ How the parsing works:
 * All `XYZCommandParser` classes, such as `AddDogCommandParser` and `DeleteDogCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
 ### Model component
-**API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
+**API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/model/Model.java)
 
 <puml src="diagrams/ModelClassDiagram.puml" width="450" />
 
@@ -200,7 +206,7 @@ The `Model` component,
 
 ### Storage component
 
-**API** : [`Storage.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/storage/Storage.java)
+**API** : [`Storage.java`](https://github.com/AY2627S1-CS2103T-T15-4/tp/tree/master/src/main/java/seedu/address/storage/Storage.java)
 
 <puml src="diagrams/StorageClassDiagram.puml" width="550" />
 
@@ -511,7 +517,7 @@ panel uses only enrolments whose date equals the captured local date. Existing a
 that these enrolments refer to stored activities and dogs.
 
 `ActivityBookingSummary` performs the date query and formatting without JavaFX. `ActivityListPanel` captures
-`LocalDate.now(clock)` once per refresh, rebuilds cards when either the displayed activities or enrolments
+`LocalDate.now(clock)` once per refresh, reconciles cards when either the displayed activities or enrolments
 change, and accepts an injectable clock for deterministic tests. The Today variant additionally displays only
 schedules that occur on that captured date. Because reset, clear, undo and redo update the existing observable
 lists, listeners remain attached. `MainWindow` also requests a refresh after each successful command, so date
@@ -942,8 +948,6 @@ testers are expected to do more *exploratory* testing.
    1. Relaunch the app by double-clicking the JAR file.<br>
        Expected: The most recent window size and location are retained.
 
-1. _{ more test cases … }_
-
 ### Daycare summary
 
 Use a disposable data folder for this test. Substitute the computer's current local date for
@@ -979,6 +983,53 @@ appear as an undoable mutation.
    the dog returns and saves. Repeat for a failed `redo`, a new add after `undo`, and `clear`.
    A failed `clear` leaves memory empty and neither history operation available.
 
+### Adding and editing dogs
+
+1. Run `adddog n/O'Neil-Jr b/German-Shepherd s/medium`.
+   Expect one dog to be added with a positive persistent ID, with the apostrophe and hyphens preserved.
+1. Omit each required field in turn, and repeat with an empty value such as
+   `adddog n/ b/Poodle s/small`. Expect the message to identify the missing or empty field and then show
+   the full `adddog` format, example, and valid size options. No dog is added.
+1. Repeat with an unsupported size, a repeated prefix, text before the first prefix, or punctuation that is
+   invalid for the relevant field. Expect a specific validation or format error followed by the same shared
+   guidance. No dog is added.
+1. Run `editdog ID n/Sir-Barks-a-Lot b/Mixed-Breed` using the ID from step 1. Expect the supplied fields to
+   change while the dog's size, customer link, persistent ID, and enrolments remain unchanged.
+1. Run `editdog 0 s/large`, use a missing positive ID, omit all edit fields, and provide an empty field.
+   Expect the relevant ID or field error followed by the full `editdog` format, example, and size options.
+   The original dog remains unchanged.
+
+### Enrolling and unenrolling dogs
+
+Use an existing activity occurrence on `TODAY` or a future date and two existing positive dog IDs.
+
+1. Run `enrol d/DOG_ID_1  DOG_ID_2 date/YYYY-MM-DD a/ACTIVITY_ID`, using multiple spaces and a field order
+   different from the documented format. Expect both dogs to be enrolled in that occurrence.
+1. Repeat the same enrolment. Expect the command to report that the dogs are already enrolled; no duplicate
+   enrolment records are created.
+1. Try a missing or empty field, a repeated prefix, `a/0`, `d/0`, a comma-separated dog list, duplicate dog
+   IDs, an invalid date, and a past date. Expect the message to identify the problem and then show the full
+   `enrol` format and example. No enrolments change.
+1. Enrol one selected dog in another activity that overlaps the same date and time, then try to enrol both
+   selected dogs in the first activity. Expect the whole command to fail atomically because of the conflict.
+1. Run `unenrol date/YYYY-MM-DD d/DOG_ID_1  DOG_ID_2 a/ACTIVITY_ID` with the fields reordered.
+   Expect only those dated enrolments to be removed. Repeat the command and expect an error without other changes.
+1. Repeat the invalid-field checks for `unenrol`. Also verify that a valid past occurrence can be unenrolled,
+   unlike enrolment, so historical mistakes can be corrected.
+
+### Card details, copying, and scrolling
+
+1. Add or edit a customer to have a long email, and a dog to have a long breed. Hover over each shortened detail.
+   Expect a wrapped tooltip containing the complete value.
+1. Right-click a customer card. Copy each contact field and then all details, pasting each result into a text
+   editor. Expect exact plain-text values and labelled multiline output for all details.
+1. Right-click a linked dog card and copy its customer ID. Unlink the dog and reopen the menu.
+   Expect the customer-ID item to be disabled and the all-details output to show `Customer ID: None`.
+   Relink the dog and expect the action and updated ID to return without restarting the app.
+1. Scroll each populated panel to a middle record and edit, link, unlink, enrol, or unenrol a visible record.
+   Expect the visible record to remain anchored without a jump. Run a search, list, filter, or reset command;
+   expect each replaced result set to start at its first record.
+
 ### Deleting a dog
 
 1. Add a dog with `adddog n/Buddy b/Poodle s/small` and note its displayed ID.
@@ -989,8 +1040,22 @@ appear as an undoable mutation.
 
 ### Saving data
 
-1. Dealing with missing/corrupted data files
+Use a disposable copy of the app folder for these tests.
 
-   1. _{Explain how to simulate missing or corrupted data files and state the expected behavior.}_
+1. Missing data file
 
-1. _{ more test cases … }_
+   1. Ensure the app is closed, then remove `data/addressbook.json` and launch the app.<br>
+      Expected: The app starts with sample data. A subsequent successful command recreates the data file.
+
+1. Invalid JSON
+
+   1. Ensure the app is closed, then replace the contents of `data/addressbook.json` with text that is not
+      valid JSON and launch the app.<br>
+      Expected: The app starts with an empty address book and records a data-loading warning in the log.
+
+1. Invalid persisted dog counter
+
+   1. Save at least one dog, close the app, and change `nextDogId` in `data/addressbook.json` to zero,
+      a non-integer value, or a value not greater than every stored dog ID. Relaunch the app.<br>
+      Expected: The app rejects the inconsistent file, starts with an empty address book, and records a
+      data-loading warning. Restore the disposable file before continuing other tests.

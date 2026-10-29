@@ -33,8 +33,8 @@ public class ActivityListPanel extends UiPart<Region> {
     /**
      * Creates a general panel showing upcoming dog bookings for the supplied activities.
      *
-     * @param activities schedules permitted by the current activity filter
-     * @param enrolments all stored dated enrolments
+     * @param activities Schedules permitted by the current activity filter.
+     * @param enrolments All stored dated enrolments.
      */
     public ActivityListPanel(ObservableList<Activity> activities, ObservableList<Enrolment> enrolments) {
         this(activities, enrolments, Clock.systemDefaultZone(), false);
@@ -43,10 +43,10 @@ public class ActivityListPanel extends UiPart<Region> {
     /**
      * Creates a date-sensitive panel with an injectable clock.
      *
-     * @param activities schedules available to the panel
-     * @param enrolments all stored dated enrolments
-     * @param clock local-date source
-     * @param todayPanel whether to show only today's schedules and bookings
+     * @param activities Schedules available to the panel.
+     * @param enrolments All stored dated enrolments.
+     * @param clock Local-date source.
+     * @param todayPanel Whether to show only today's schedules and bookings.
      */
     protected ActivityListPanel(ObservableList<Activity> activities, ObservableList<Enrolment> enrolments,
             Clock clock, boolean todayPanel) {
@@ -64,28 +64,35 @@ public class ActivityListPanel extends UiPart<Region> {
         refresh();
     }
 
-    /** Rebuilds cards using one captured current date for this update. */
+    /** Reconciles cards using one captured current date for this update. */
     public void refresh() {
         refresh(LocalDate.now(clock));
     }
 
     /**
-     * Rebuilds cards using the supplied current date.
+     * Reconciles cards using the supplied current date.
      *
-     * @param today current local date shared across the coordinated panel refresh
+     * @param today Current local date shared across the coordinated panel refresh.
      */
     public void refresh(LocalDate today) {
         requireNonNull(today);
-        List<Supplier<Region>> cards = new ArrayList<>();
+        List<CardListEntry> cards = new ArrayList<>();
         activities.stream()
                 .filter(activity -> !todayPanel || activity.occursOn(today))
                 .forEach(activity -> {
                     String summary = todayPanel
                             ? ActivityBookingSummary.bookingsOn(enrolments, activity.getId(), today)
                             : ActivityBookingSummary.upcomingBookings(enrolments, activity.getId(), today);
-                    cards.add(() -> new ActivityCard(activity, summary).getRoot());
+                    Supplier<Region> cardFactory = () -> new ActivityCard(activity, summary).getRoot();
+                    Object contentSnapshot = List.of(activity, summary);
+                    cards.add(new CardListEntry("activity:" + activity.getId(), contentSnapshot, cardFactory));
                 });
-        recordListView.getItems().setAll(cards);
+        CardListUpdater.reconcile(recordListView, cards);
+    }
+
+    /** Scrolls to the first activity after an explicit display-changing command. */
+    void scrollToTop() {
+        CardListUpdater.scrollToTop(recordListView);
     }
 
     private static Label createEmptyState(String message) {

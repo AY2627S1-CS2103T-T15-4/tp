@@ -12,7 +12,7 @@ public class Enrolment {
     /**
      * Creates an enrolment record with positive persistent activity and dog IDs.
      *
-     * @throws IllegalArgumentException if either ID is not positive
+     * @throws IllegalArgumentException If either ID is not positive.
      */
     public Enrolment(int activityId, int dogId, LocalDate date) {
         Objects.requireNonNull(date);

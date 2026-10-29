@@ -37,10 +37,12 @@ public class DogSearchPredicate implements Predicate<Dog> {
                 && (id == null || dog.getId() == id);
     }
 
+    /** Returns a case-insensitive, whitespace-normalized query, preserving null as an absent field. */
     private static String normalize(String value) {
         return value == null ? null : value.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
     }
 
+    /** Returns a nonblank dog-name query. */
     private static String validateName(String value) {
         Objects.requireNonNull(value);
         if (value.isBlank()) {
@@ -49,6 +51,7 @@ public class DogSearchPredicate implements Predicate<Dog> {
         return value;
     }
 
+    /** Returns a positive dog ID query. */
     private static int validateId(int value) {
         if (value < 1) {
             throw new IllegalArgumentException("Dog search ID must be positive");

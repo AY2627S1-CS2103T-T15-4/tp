@@ -100,6 +100,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     private final class ActivityList extends ModifiableObservableListBase<Activity> {
         private final List<Activity> values = new ArrayList<>();
 
+        /** Replaces schedules and publishes one coherent change after enrolments have been restored. */
         private void restore(List<Activity> restored, List<Enrolment> restoredEnrolments) {
             beginChange();
             try {
@@ -215,6 +216,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
     }
 
+    /** Returns true if two activities overlap, treating adjacent boundaries as non-overlapping. */
     private static boolean timesOverlap(Activity first, Activity second) {
         return first.getStartTime().isBefore(second.getEndTime())
                 && second.getStartTime().isBefore(first.getEndTime());
@@ -306,7 +308,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      * Enrols a batch of existing dogs identified by distinct positive IDs into one occurrence of an existing
      * activity atomically.
      *
-     * @throws EnrolException if the date, IDs, recurrence, duplicate, or time-conflict checks fail
+     * @throws EnrolException If the date, IDs, recurrence, duplicate, or time-conflict checks fail.
      */
     public void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
         requireNonNull(date);
@@ -335,7 +337,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      * Removes a batch of existing dogs identified by distinct positive IDs from one occurrence of an existing
      * activity atomically.
      *
-     * @throws EnrolException if the date, IDs, recurrence, or enrolment checks fail
+     * @throws EnrolException If the date, IDs, recurrence, or enrolment checks fail.
      */
     public void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
         requireNonNull(date);
@@ -462,9 +464,9 @@ public class AddressBook implements ReadOnlyAddressBook {
      * Adds a new dog and assigns it the next available persistent ID.
      * The counter is consumed only after the dog is stored successfully.
      *
-     * @param dog dog details without an assigned ID
-     * @return the identified dog that was stored
-     * @throws IllegalStateException if all positive {@code int} dog IDs have been allocated
+     * @param dog Dog details without an assigned ID.
+     * @return The identified dog that was stored.
+     * @throws IllegalStateException If all positive {@code int} dog IDs have been allocated.
      */
     public Dog addDog(Dog dog) {
         requireNonNull(dog);
@@ -480,9 +482,9 @@ public class AddressBook implements ReadOnlyAddressBook {
     /**
      * Adds a dog loaded from storage without assigning it a new ID.
      *
-     * @param identified dog with its positive persisted ID
-     * @return the stored dog
-     * @throws IllegalArgumentException if the dog does not have a positive persistent ID
+     * @param identified Dog with its positive persisted ID.
+     * @return The stored dog.
+     * @throws IllegalArgumentException If the dog does not have a positive persistent ID.
      */
     public Dog addDogFromStorage(Dog identified) {
         requireNonNull(identified);
@@ -505,7 +507,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     /**
      * Restores a counter above all stored dog IDs. {@code Integer.MAX_VALUE + 1} represents exhaustion.
      *
-     * @throws IllegalArgumentException if {@code nextDogId} does not exceed all stored IDs or is out of range
+     * @throws IllegalArgumentException If {@code nextDogId} does not exceed all stored IDs or is out of range.
      */
     public void setNextDogId(long nextDogId) {
         long minimumDogId = getDogList().stream().mapToLong(Dog::getId).max().orElse(0) + 1;
@@ -513,6 +515,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         this.nextDogId = nextDogId;
     }
 
+    /** Rejects a restored dog counter that is reused, nonpositive, or outside the supported range. */
     private static void validateNextDogId(long nextDogId, long minimumDogId) {
         if (nextDogId < minimumDogId || nextDogId > (long) Integer.MAX_VALUE + 1) {
             throw new IllegalArgumentException(
@@ -532,8 +535,8 @@ public class AddressBook implements ReadOnlyAddressBook {
      * Returns true if a stored dog has the same persistent ID as {@code dog}.
      * Unassigned dogs do not have an identity and therefore never match.
      *
-     * @param dog dog to check
-     * @return whether a dog with the same ID exists
+     * @param dog Dog to check.
+     * @return Whether a dog with the same ID exists.
      */
     public boolean hasDog(Dog dog) {
         requireNonNull(dog);
@@ -543,7 +546,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     /**
      * Removes the given dog and all of its enrolments, including enrolments for past activity occurrences.
      *
-     * @throws IllegalArgumentException if no stored dog has the same persistent ID
+     * @throws IllegalArgumentException If no stored dog has the same persistent ID.
      */
     public void removeDog(Dog dog) {
         requireNonNull(dog);
@@ -606,6 +609,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         enrolments.add(enrolment);
     }
 
+    /** Returns the activity with {@code activityId}, rejecting invalid or unknown IDs. */
     private Activity getActivity(int activityId) throws EnrolException {
         if (activityId < 1) {
             throw new EnrolException("Activity IDs must be positive whole numbers.");
@@ -614,12 +618,14 @@ public class AddressBook implements ReadOnlyAddressBook {
                 .orElseThrow(() -> new EnrolException("Activity ID " + activityId + " does not exist."));
     }
 
+    /** Rejects a dog ID unless it is positive and identifies a stored dog. */
     private void validateDogExists(int dogId) throws EnrolException {
         if (dogId < 1 || getDogList().stream().noneMatch(dog -> dog.getId() == dogId)) {
             throw new EnrolException("Dog ID " + dogId + " does not exist.");
         }
     }
 
+    /** Rejects an empty dog ID batch, nonpositive IDs, null entries, and repeated IDs. */
     private void validateDogIdBatch(List<Integer> dogIds) throws EnrolException {
         if (dogIds.isEmpty()) {
             throw new EnrolException("Provide at least one dog ID.");
@@ -639,6 +645,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
     }
 
+    /** Returns an explanation of why {@code activity} does not occur on {@code date}. */
     private EnrolException occurrenceError(Activity activity, LocalDate date) {
         if (date.isBefore(activity.getStartDate())) {
             return new EnrolException("Activity ID " + activity.getId() + " starts on " + activity.getStartDate()
@@ -654,6 +661,7 @@ public class AddressBook implements ReadOnlyAddressBook {
                 + "occurs only on " + activity.getStartDate() + ", not " + date + ".");
     }
 
+    /** Rejects duplicate enrolments and enrolments that conflict with another activity. */
     private void validateEnrolment(Enrolment enrolment, Activity activity) throws EnrolException {
         LocalDate date = enrolment.getDate();
         if (!activity.occursOn(date)) {

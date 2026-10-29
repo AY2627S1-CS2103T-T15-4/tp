@@ -25,8 +25,8 @@ public class ActivityCard extends UiPart<Region> {
     /**
      * Creates a card with the given activity and complete dog-summary label.
      *
-     * @param activity schedule to display
-     * @param dogSummaryText complete dated-booking summary
+     * @param activity Schedule to display.
+     * @param dogSummaryText Complete dated-booking summary.
      */
     public ActivityCard(Activity activity, String dogSummaryText) {
         super(FXML);

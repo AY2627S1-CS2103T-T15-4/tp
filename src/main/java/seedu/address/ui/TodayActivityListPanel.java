@@ -12,8 +12,8 @@ public class TodayActivityListPanel extends ActivityListPanel {
     /**
      * Creates a panel backed by all activities and dated enrolments.
      *
-     * @param activities all stored activity schedules
-     * @param enrolments all stored dated enrolments
+     * @param activities All stored activity schedules.
+     * @param enrolments All stored dated enrolments.
      */
     public TodayActivityListPanel(ObservableList<Activity> activities, ObservableList<Enrolment> enrolments) {
         this(activities, enrolments, Clock.systemDefaultZone());

@@ -19,7 +19,7 @@ public class AddDogCommandParser implements Parser<AddDogCommand> {
     /**
      * Parses the given {@code String} of arguments in the context of the {@code AddDogCommand}
      * and returns an {@code AddDogCommand} for execution.
-     * @throws ParseException if the user input does not conform to the expected format
+     * @throws ParseException If the user input does not conform to the expected format.
      */
     public AddDogCommand parse(String args) throws ParseException {
         ArgumentMultimap argMultimap =

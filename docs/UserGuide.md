@@ -18,7 +18,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 1. Ensure that Java `25` or later is installed on your computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-1. Download the latest `.jar` file from [here](https://github.com/se-edu/addressbook-level3/releases).
+1. Download the latest `.jar` file from [here](https://github.com/AY2627S1-CS2103T-T15-4/tp/releases).
 
 1. Copy the file to the folder you want to use as the _home folder_ for WatchDog.
 
@@ -300,13 +300,13 @@ Example: `link c/1 d/2 d/3` links dogs 2 and 3 to customer 1.
   and non-integer IDs are rejected.
 * If the customer or any dog does not exist, or any dog already has an owner (even the same customer),
   the entire command fails and no records change. Linking does not reassign dogs.
-* A successful command reports the linked IDs. Dog cards show `Owner ID: CUSTOMER_ID`, or `Owner ID: None`.
-  Customer cards show `Dog IDs: 2, 3` below backup contact, or `Dog IDs: None` if no dogs are linked.
+* A successful command reports the linked IDs. Dog cards show a person icon followed by the customer ID,
+  or `None` when unlinked. Customer cards show a paw icon followed by `2, 3`, or `None` if no dogs are linked.
   This field includes all owned dogs, even when search filters hide their cards.
   Existing search filters stay active; use `list dog` to see all dogs.
 * Links are saved automatically and survive restarting the application.
 * **Deleting a customer unlinks their dogs without deleting them**, including dogs hidden by a search.
-  These dogs keep their IDs and details, show `Owner ID: None`, and can be linked to another customer.
+  These dogs keep their IDs and details, show a person icon followed by `None`, and can be linked to another customer.
   Other customers' dogs and unlinked dogs are unaffected. Deleting a dog does not delete its customer.
 
 ### Unlinking dogs from a customer: `unlink`
@@ -326,8 +326,8 @@ Examples:
 * For the customer form, the customer must exist and have at least one linked dog; otherwise an error is shown.
 * Unlinking never deletes customers or dogs, even when unlinking a customer's last dog.
   All other details stay unchanged. You can then use `link` to assign the dogs to another customer.
-* Dog cards show `Owner ID: None`; the customer's Dog IDs field removes the unlinked IDs,
-  showing `Dog IDs: None` when none remain. Existing search filters stay active.
+* Dog cards show a person icon followed by `None`; the customer's paw-icon row removes the unlinked IDs,
+  showing `None` when none remain. Existing search filters stay active.
 * Changes are saved automatically and survive restarting the application.
 
 ### Searching dogs: `searchd`
@@ -428,10 +428,14 @@ Example:
 
 ### Customer and dog cards
 
-The main list shows the currently selected category in a scrollable area. Customer cards show
-customer details. Dog cards show the persistent dog ID and name, followed by breed and size.
+The customer and dog panels are separate scrollable areas. Customer cards show contact details and the IDs of
+their dogs. Dog cards show the persistent dog ID and name, followed by breed, size, and customer ID when linked.
 Newly added records appear automatically. Customer and dog IDs belong to separate categories and may overlap.
-Dog and customer IDs belong to separate categories and may overlap.
+
+Hover over a contact-detail or dog-detail row to see its full value when the displayed text is shortened.
+Right-click a customer or dog card to copy an individual field or all details in a labelled, multiline format.
+An unlinked dog's customer-ID action is disabled. The app briefly confirms a successful copy and reports when
+the operating system clipboard rejects it.
 
 ### Clearing all entries: `clear`
 

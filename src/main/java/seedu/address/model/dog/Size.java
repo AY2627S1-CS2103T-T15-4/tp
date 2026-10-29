@@ -33,7 +33,7 @@ public class Size {
     }
 
     /**
-     * Returns true if a given string is a valid name.
+     * Returns true if a given string is a valid size.
      */
     public static boolean isValidSize(String test) {
         return test.matches(SIZE_REGEX);

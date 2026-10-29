@@ -1,7 +1,9 @@
 package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -25,12 +27,15 @@ import javafx.css.PseudoClass;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -38,8 +43,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Ellipse;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
+import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -348,8 +355,93 @@ public class MainWindowTest {
         });
     }
 
+    @Test
+    public void executeCommand_failureHelpAndExit_updateVisibleWindowState() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-command-results");
+        Logic logic = new LogicManager(new ModelManager(), new StorageManager(
+                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            window.fillInnerParts();
+            window.show();
+            TextArea result = (TextArea) window.getPrimaryStage().getScene().lookup("#resultDisplay");
+
+            assertThrows(ParseException.class, () -> window.executeCommand("not-a-command"));
+            assertTrue(result.getText().contains("Unknown command"));
+
+            window.executeCommand("help");
+            assertTrue(Window.getWindows().stream().filter(Window::isShowing).count() >= 2);
+
+            window.executeCommand("exit");
+            assertFalse(window.getPrimaryStage().isShowing());
+            assertFalse(Window.getWindows().stream().anyMatch(Window::isShowing));
+        });
+    }
+
+    @Test
+    public void executeCommand_displayChangingCommandResetsListsToTop() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-scroll-reset");
+        Model model = new ModelManager();
+        for (int index = 1; index <= 20; index++) {
+            model.addDog(new Dog(new DogName("Dog " + index), new Breed("Poodle"), new Size("Small")));
+        }
+        Logic logic = new LogicManager(model, new StorageManager(
+                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            window.fillInnerParts();
+            window.show();
+            ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
+            dogs.scrollTo(dogs.getItems().size() - 1);
+            dogs.layout();
+            assertTrue(firstVisibleIndex(dogs) > 0);
+
+            window.executeCommand("list dog");
+            dogs.layout();
+
+            assertEquals(0, firstVisibleIndex(dogs));
+            window.getPrimaryStage().close();
+        });
+    }
+
+    @Test
+    public void helpAccelerator_textInputHasFocus_opensHelpWindow() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-help-accelerator");
+        Logic logic = new LogicManager(new ModelManager(), new StorageManager(
+                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            window.fillInnerParts();
+            window.show();
+            TextField command = (TextField) window.getPrimaryStage().getScene().lookup("#commandTextField");
+            command.requestFocus();
+
+            command.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.F1,
+                    false, false, false, false));
+
+            assertTrue(Window.getWindows().stream().filter(Window::isShowing).count() >= 2);
+            window.executeCommand("exit");
+        });
+    }
+
     private static String label(Region card, String id) {
         return ((Label) card.lookup("#" + id)).getText();
+    }
+
+    private static int firstVisibleIndex(ListView<?> listView) {
+        return listView.lookupAll(".list-cell").stream()
+                .filter(ListCell.class::isInstance)
+                .map(ListCell.class::cast)
+                .filter(cell -> cell.isVisible() && !cell.isEmpty() && cell.getIndex() >= 0)
+                .mapToInt(ListCell::getIndex)
+                .min()
+                .orElse(-1);
     }
 
     @SuppressWarnings("unchecked")

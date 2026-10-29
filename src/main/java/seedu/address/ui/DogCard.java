@@ -1,7 +1,5 @@
 package seedu.address.ui;
 
-import java.util.function.Consumer;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -45,7 +43,7 @@ public class DogCard extends UiPart<Region> {
     }
 
     /** Creates a dog card that sends copied values to the supplied clipboard writer. */
-    DogCard(Dog dog, Consumer<String> clipboardWriter) {
+    DogCard(Dog dog, ClipboardWriter clipboardWriter) {
         super(FXML);
         id.setText(dog.getId() + ". ");
         name.setText(dog.getName().fullName);
@@ -62,7 +60,8 @@ public class DogCard extends UiPart<Region> {
         installCopyMenu(dog, clipboardWriter);
     }
 
-    private void installCopyMenu(Dog dog, Consumer<String> clipboardWriter) {
+    /** Installs actions for copying dog details that are available on this card. */
+    private void installCopyMenu(Dog dog, ClipboardWriter clipboardWriter) {
         MenuItem copyCustomerId = dog.getOwnerId()
                 .map(ownerId -> CardInteractionUtil.createCopyMenuItem("Copy customer ID",
                         String.valueOf(ownerId), cardPane, clipboardWriter))

@@ -18,11 +18,12 @@ Parser -> Command : new EditDogCommand(1, descriptor)
 Parser --> Router : command
 Router --> Logic : command
 Logic -> Command : execute(Model)
-Command -> Model : find dog by persistent ID 1
-Model --> Command : target dog
+Command -> Model : getDogList()
+Model --> Command : complete dog list
+Command -> Command : find ID 1 and create edited dog\nwith the same owner ID
 Command -> Model : setDog(target, editedDog)
 Model -> Book : setDog(target, editedDog)
-Book -> Book : preserve ID and owner, replace dog
+Book -> Book : replace dog with the same persistent ID
 Book --> Model : success or validation failure
 Model --> Command : result
 Command --> Logic : CommandResult

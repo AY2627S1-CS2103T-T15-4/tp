@@ -2,6 +2,7 @@ package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -23,11 +25,14 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.PickResult;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import seedu.address.model.customer.Customer;
 
@@ -96,7 +101,7 @@ public class CustomerCardTest {
     public void copyMenu_copiesIndividualAndLabelledCustomerDetails() throws Exception {
         runOnFxThread(() -> {
             AtomicReference<String> copiedText = new AtomicReference<>();
-            CustomerCard customerCard = new CustomerCard(ALEX, List.of(4, 2), copiedText::set);
+            CustomerCard customerCard = new CustomerCard(ALEX, List.of(4, 2), recordingWriter(copiedText));
             Region card = customerCard.getRoot();
             ContextMenu copyMenu = CardInteractionUtil.getCopyMenu(card);
 
@@ -127,9 +132,9 @@ public class CustomerCardTest {
             Customer otherCustomer = new Customer(9, "Beth Tan", "99887766", "Beth.Tan@example.com", "88776655");
             AtomicReference<String> copiedText = new AtomicReference<>();
             ContextMenu longValueMenu = CardInteractionUtil.getCopyMenu(
-                    new CustomerCard(longValueCustomer, List.of(), copiedText::set).getRoot());
+                    new CustomerCard(longValueCustomer, List.of(), recordingWriter(copiedText)).getRoot());
             ContextMenu otherMenu = CardInteractionUtil.getCopyMenu(
-                    new CustomerCard(otherCustomer, List.of(), copiedText::set).getRoot());
+                    new CustomerCard(otherCustomer, List.of(), recordingWriter(copiedText)).getRoot());
 
             longValueMenu.getItems().get(0).fire();
             assertEquals("00123456789", copiedText.get());
@@ -141,6 +146,94 @@ public class CustomerCardTest {
             assertEquals("Beth.Tan@example.com", copiedText.get());
             longValueMenu.getItems().get(4).fire();
             assertEquals(CardCopyFormatter.formatCustomer(longValueCustomer, List.of()), copiedText.get());
+        });
+    }
+
+    @Test
+    public void copyMenuItem_reportsClipboardSuccessAndFailureExactlyOnce() throws Exception {
+        runOnFxThread(() -> {
+            AtomicInteger writeCount = new AtomicInteger();
+            AtomicReference<String> copiedText = new AtomicReference<>();
+            AtomicReference<Boolean> feedback = new AtomicReference<>();
+            StackPane anchor = new StackPane();
+
+            var successfulItem = CardInteractionUtil.createCopyMenuItem("Copy", "complete value", anchor,
+                    value -> {
+                        writeCount.incrementAndGet();
+                        copiedText.set(value);
+                        return true;
+                    }, feedback::set);
+            successfulItem.fire();
+
+            assertEquals(1, writeCount.get());
+            assertEquals("complete value", copiedText.get());
+            assertEquals(Boolean.TRUE, feedback.get());
+            assertEquals("Copied!", CardInteractionUtil.MESSAGE_COPY_SUCCESS);
+
+            var failedItem = CardInteractionUtil.createCopyMenuItem("Copy", "failed value", anchor,
+                    value -> {
+                        writeCount.incrementAndGet();
+                        copiedText.set(value);
+                        return false;
+                    }, feedback::set);
+            failedItem.fire();
+
+            assertEquals(2, writeCount.get());
+            assertEquals("failed value", copiedText.get());
+            assertEquals(Boolean.FALSE, feedback.get());
+            assertEquals("Could not copy. Please try again.", CardInteractionUtil.MESSAGE_COPY_FAILURE);
+        });
+    }
+
+    @Test
+    public void contextMenuRequest_opensInstalledMenuAndConsumesEvent() throws Exception {
+        runOnFxThread(() -> {
+            Region card = new CustomerCard(ALEX).getRoot();
+            StackPane root = new StackPane(card);
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root, 300, 250));
+            stage.show();
+            try {
+                ContextMenu copyMenu = CardInteractionUtil.getCopyMenu(card);
+                ContextMenuEvent request = new ContextMenuEvent(ContextMenuEvent.CONTEXT_MENU_REQUESTED,
+                        10, 10, 100, 100, false, new PickResult(card, 10, 10));
+
+                card.getOnContextMenuRequested().handle(request);
+
+                assertTrue(request.isConsumed());
+                assertTrue(copyMenu.isShowing());
+                copyMenu.hide();
+            } finally {
+                stage.close();
+            }
+        });
+    }
+
+    @Test
+    public void copyFeedback_handlesDetachedAnchorAndShowsSuccessOrFailureBesideVisibleCard() throws Exception {
+        runOnFxThread(() -> {
+            assertNull(CardInteractionUtil.showCopyFeedback(new StackPane(), true));
+
+            StackPane card = new StackPane();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(new StackPane(card), 300, 250));
+            assertNull(CardInteractionUtil.showCopyFeedback(card, true));
+            stage.show();
+            try {
+                Tooltip success = CardInteractionUtil.showCopyFeedback(card, true);
+                assertNotNull(success);
+                assertEquals(CardInteractionUtil.MESSAGE_COPY_SUCCESS, success.getText());
+                assertTrue(success.isShowing());
+                success.hide();
+
+                Tooltip failure = CardInteractionUtil.showCopyFeedback(card, false);
+                assertNotNull(failure);
+                assertEquals(CardInteractionUtil.MESSAGE_COPY_FAILURE, failure.getText());
+                assertTrue(failure.isShowing());
+                failure.hide();
+            } finally {
+                stage.close();
+            }
         });
     }
 
@@ -185,6 +278,13 @@ public class CustomerCardTest {
 
     private static String label(Region card, String id) {
         return ((Label) card.lookup("#" + id)).getText();
+    }
+
+    private static ClipboardWriter recordingWriter(AtomicReference<String> copiedText) {
+        return value -> {
+            copiedText.set(value);
+            return true;
+        };
     }
 
     private static void runOnFxThread(Runnable assertions) throws Exception {

@@ -1,7 +1,6 @@
 package seedu.address.ui;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javafx.fxml.FXML;
@@ -55,7 +54,7 @@ public class CustomerCard extends UiPart<Region> {
     }
 
     /** Creates a customer card that sends copied values to the supplied clipboard writer. */
-    CustomerCard(Customer customer, List<Integer> ownedDogIds, Consumer<String> clipboardWriter) {
+    CustomerCard(Customer customer, List<Integer> ownedDogIds, ClipboardWriter clipboardWriter) {
         super(FXML);
         this.customer = customer;
         id.setText(customer.getId() + ". ");
@@ -72,7 +71,8 @@ public class CustomerCard extends UiPart<Region> {
         installCopyMenu(clipboardWriter, ownedDogIds);
     }
 
-    private void installCopyMenu(Consumer<String> clipboardWriter, List<Integer> ownedDogIds) {
+    /** Installs actions for copying individual customer fields or the complete card. */
+    private void installCopyMenu(ClipboardWriter clipboardWriter, List<Integer> ownedDogIds) {
         ContextMenu copyMenu = new ContextMenu(
                 CardInteractionUtil.createCopyMenuItem("Copy phone number", customer.getPhone().value,
                         cardPane, clipboardWriter),

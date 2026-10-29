@@ -2,6 +2,8 @@ package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -139,6 +141,45 @@ public class ListPanelsTest {
             assertEquals("Milo", label(list.getItems().get(1).get(), "name"));
             dogs.clear();
             assertTrue(list.getItems().isEmpty());
+        });
+    }
+
+    @Test
+    public void dogListPanel_incrementalChangesKeepUnaffectedCardEntriesStable() throws Exception {
+        runOnFxThread(() -> {
+            Dog secondDog = new Dog(4, new DogName("Milo"), new Breed("Poodle"), new Size("Large"));
+            ObservableList<Dog> dogs = FXCollections.observableArrayList(DOG, secondDog);
+            ListView<Supplier<Region>> list = listView(new DogListPanel(dogs));
+            Supplier<Region> firstEntry = list.getItems().get(0);
+            Supplier<Region> secondEntry = list.getItems().get(1);
+
+            dogs.set(1, new Dog(4, new DogName("Milo-Edited"), new Breed("Poodle"), new Size("Large")));
+
+            assertSame(firstEntry, list.getItems().get(0));
+            assertNotSame(secondEntry, list.getItems().get(1));
+
+            dogs.add(0, new Dog(8, new DogName("New Dog"), new Breed("Poodle"), new Size("Small")));
+
+            assertSame(firstEntry, list.getItems().get(1));
+        });
+    }
+
+    @Test
+    public void customerListPanel_ownershipChangeReplacesOnlyAffectedCustomerEntry() throws Exception {
+        runOnFxThread(() -> {
+            Customer otherCustomer = new Customer(4, "Beth Tan", "92345678",
+                    "beth@example.com", "97654321");
+            ObservableList<Customer> customers = FXCollections.observableArrayList(CUSTOMER, otherCustomer);
+            ObservableList<Dog> dogs = FXCollections.observableArrayList(DOG);
+            ListView<Supplier<Region>> list = listView(new CustomerListPanel(customers, dogs));
+            Supplier<Region> affectedEntry = list.getItems().get(0);
+            Supplier<Region> unaffectedEntry = list.getItems().get(1);
+
+            dogs.set(0, DOG.withOwner(CUSTOMER.getId()));
+
+            assertNotSame(affectedEntry, list.getItems().get(0));
+            assertSame(unaffectedEntry, list.getItems().get(1));
+            assertEquals("2", label(list.getItems().get(0).get(), "dogIds"));
         });
     }
 
@@ -304,6 +345,26 @@ public class ListPanelsTest {
             activities.set(0, new Activity(1, new ActivityName("Renamed"), TODAY,
                     LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE));
             assertEquals("Renamed", label(list.getItems().get(0).get(), "name"));
+        });
+    }
+
+    @Test
+    public void activityListPanel_enrolmentChangeReplacesOnlyAffectedActivityEntry() throws Exception {
+        runOnFxThread(() -> {
+            Activity otherActivity = new Activity(4, new ActivityName("Training"), TODAY,
+                    LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
+            ObservableList<Activity> activities = FXCollections.observableArrayList(ACTIVITY, otherActivity);
+            ObservableList<Enrolment> enrolments = FXCollections.observableArrayList();
+            ListView<Supplier<Region>> list = listView(new ActivityListPanel(activities, enrolments, CLOCK, false));
+            Supplier<Region> affectedEntry = list.getItems().get(0);
+            Supplier<Region> unaffectedEntry = list.getItems().get(1);
+
+            enrolments.add(new Enrolment(ACTIVITY.getId(), DOG.getId(), TODAY));
+
+            assertNotSame(affectedEntry, list.getItems().get(0));
+            assertSame(unaffectedEntry, list.getItems().get(1));
+            assertEquals("Dogs with upcoming bookings: 2",
+                    label(list.getItems().get(0).get(), "dogSummary"));
         });
     }
 

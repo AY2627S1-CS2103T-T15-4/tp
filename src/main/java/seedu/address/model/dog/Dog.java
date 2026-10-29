@@ -22,9 +22,10 @@ public class Dog {
     /**
      * Creates a dog with the given details.
      *
-     * @param name name of the dog
-     * @param breed breed of the dog
-     * @param size size of the dog
+     * @param id Positive persistent dog ID.
+     * @param name Name of the dog.
+     * @param breed Breed of the dog.
+     * @param size Size of the dog.
      */
     public Dog(int id, DogName name, Breed breed, Size size) {
         this(id, name, breed, size, null);

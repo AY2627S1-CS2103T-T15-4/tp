@@ -32,10 +32,19 @@ public class DogListPanel extends UiPart<Region> {
         updateDogs();
     }
 
+    /** Reconciles visible dog cards with the current filtered dog list. */
     private void updateDogs() {
-        List<Supplier<Region>> cards = new ArrayList<>();
-        dogs.forEach(dog -> cards.add(() -> new DogCard(dog).getRoot()));
-        recordListView.getItems().setAll(cards);
+        List<CardListEntry> cards = new ArrayList<>();
+        dogs.forEach(dog -> {
+            Supplier<Region> cardFactory = () -> new DogCard(dog).getRoot();
+            cards.add(new CardListEntry("dog:" + dog.getId(), dog, cardFactory));
+        });
+        CardListUpdater.reconcile(recordListView, cards);
+    }
+
+    /** Scrolls to the first dog after an explicit display-changing command. */
+    void scrollToTop() {
+        CardListUpdater.scrollToTop(recordListView);
     }
 
     private static Label createEmptyState(String message) {
