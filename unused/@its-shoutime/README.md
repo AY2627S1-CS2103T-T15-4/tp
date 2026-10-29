@@ -30,3 +30,10 @@ These excerpts are historical attribution records and are excluded from the Grad
 source and test sets. The leftover selection fields, snapshot members, and methods
 that remained in `Model` and `ModelManager` after the commands were retired were
 removed from the active sources. The excerpts above are the retained copy.
+
+`RecordListPanel` showed customers and dogs in one list. The application uses
+`CustomerListPanel` and `DogListPanel` instead, so the combined panel and its
+tests were moved here:
+
+- `src/main/java/seedu/address/ui/RecordListPanel.java`
+- `src/test/java/seedu/address/ui/RecordListPanelTest.java`
