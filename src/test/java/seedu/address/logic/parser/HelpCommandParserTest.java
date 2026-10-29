@@ -13,7 +13,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.ModelManager;
 
 public class HelpCommandParserTest {
-    private final AddressBookParser parser = new AddressBookParser();
+    private final WatchDogParser parser = new WatchDogParser();
 
     @Test
     public void parse_emptyTopic_opensOriginalHelpWindow() throws Exception {
@@ -26,7 +26,7 @@ public class HelpCommandParserTest {
     @Test
     public void parse_supportedTopics_returnsFormattedHelpInResultSection() throws Exception {
         String[] topics = {"adddog", "addcustomer", "editdog", "editcustomer",
-            "delete", "delete dog", "delete customer", "link", "unlink", "searchd",
+            "deletedog", "deletecustomer", "link", "unlink", "searchd",
             "searchc", "filterun", "addactivity", "editactivity", "deleteactivity", "searcha", "enrol",
             "unenrol", "today", "reset", "summary", "clear", "undo", "redo", "help", "exit"};
         for (String topic : topics) {
@@ -40,15 +40,21 @@ public class HelpCommandParserTest {
     }
 
     @Test
-    public void parse_multiwordTopic_normalizesWhitespace() throws Exception {
-        assertEquals(parser.parseCommand("help delete dog").execute(new ModelManager()),
-                parser.parseCommand("  help \t delete \t dog  ").execute(new ModelManager()));
+    public void parse_commandTopic_acceptsSurroundingWhitespace() throws Exception {
+        assertEquals(parser.parseCommand("help deletedog").execute(new ModelManager()),
+                parser.parseCommand("  help \t deletedog  ").execute(new ModelManager()));
+    }
+
+    @Test
+    public void parse_nullArgs_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new HelpCommandParser().parse(null));
     }
 
     @Test
     public void parse_unknownTopicOrCommandArguments_throwsHelpfulError() {
         for (String topic : new String[] {"3", "unknown", "Summary", "summary today", "adddog n/Cookie",
-            "delete dog 1", "list cat", "list", "list dog", "list customer", "resetdisplay", "search", "select"}) {
+            "deletedog 1", "delete", "delete dog", "delete customer", "list cat", "list", "list dog",
+            "list customer", "resetdisplay", "search", "select"}) {
             assertThrows(ParseException.class, String.format(HelpCommandParser.MESSAGE_UNKNOWN_TOPIC, topic), () ->
                     parser.parseCommand("help " + topic));
         }

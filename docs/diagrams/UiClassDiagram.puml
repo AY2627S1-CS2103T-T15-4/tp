@@ -4,77 +4,52 @@ skinparam arrowThickness 1.1
 skinparam arrowColor UI_COLOR_T4
 skinparam classBackgroundColor UI_COLOR
 
-package UI <<Rectangle>>{
-Class "<<interface>>\nUi" as Ui
-Class "{abstract}\nUiPart" as UiPart
-Class UiManager
-Class MainWindow
-Class HelpWindow
-Class ResultDisplay
-Class CustomerListPanel
-Class DogListPanel
-Class ActivityListPanel
-Class TodayActivityListPanel
-Class CustomerCard
-Class DogCard
-Class ActivityCard
-Class CommandBox
-}
+class "<<interface>>\nUi" as Ui
+class UiManager
+class MainWindow
+class CommandBox
+class ResultDisplay
+class HelpWindow
+class CustomerListPanel
+class DogListPanel
+class ActivityBookingSummary
+class CardListUpdater
+class ActivityListPanel
+class TodayActivityListPanel
+class CustomerCard
+class DogCard
+class ActivityCard
+class "<<interface>>\nLogic" as Logic LOGIC_COLOR
 
-package Model <<Rectangle>> {
-Class HiddenModel #FFFFFF
-}
+UiManager .up.|> Ui
+UiManager --> "1" MainWindow : mainWindow
+UiManager --> "1" Logic : logic
+MainWindow --> "1" Logic : logic
+MainWindow -left-> "1" ResultDisplay
+MainWindow -right-> "1" HelpWindow
+MainWindow --> "1" CustomerListPanel
+MainWindow --> "1" DogListPanel
+MainWindow --> "1" ActivityListPanel
+MainWindow --> "1" TodayActivityListPanel
+MainWindow .left.> CommandBox : creates
+TodayActivityListPanel -up-|> ActivityListPanel
+CustomerListPanel ..> CustomerCard : creates
+DogListPanel ..> DogCard : creates
+ActivityListPanel ..> ActivityCard : creates
+ActivityListPanel ..> ActivityBookingSummary : formats booking lines
+ActivityListPanel ..> CardListUpdater : reconciles cards
+CustomerListPanel ..> CardListUpdater
+DogListPanel ..> CardListUpdater
 
-package Logic <<Rectangle>> {
-Class HiddenLogic #FFFFFF
-}
+note right of ActivityListPanel
+  Observes activity, enrolment and search-context
+  changes to refresh per-dog enrolment dates.
+end note
 
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Ui
-
-UiManager .left.|> Ui
-UiManager -down-> "1" MainWindow
-MainWindow *-down->  "1" CommandBox
-MainWindow *-down-> "1" ResultDisplay
-MainWindow *-down-> "1" CustomerListPanel
-MainWindow *-down-> "1" DogListPanel
-MainWindow *-down-> "1" ActivityListPanel
-MainWindow *-down-> "1" TodayActivityListPanel
-MainWindow --> "0..1" HelpWindow
-
-CustomerListPanel -down-> "*" CustomerCard
-DogListPanel -down-> "*" DogCard
-ActivityListPanel --> "*" ActivityCard
-TodayActivityListPanel --|> ActivityListPanel
-
-MainWindow -left-|> UiPart
-
-ResultDisplay --|> UiPart
-CommandBox --|> UiPart
-CustomerListPanel --|> UiPart
-DogListPanel --|> UiPart
-ActivityListPanel --|> UiPart
-CustomerCard --|> UiPart
-DogCard --|> UiPart
-ActivityCard --|> UiPart
-HelpWindow --|> UiPart
-
-CustomerCard ..> Model
-DogCard ..> Model
-ActivityCard ..> Model
-UiManager -right-> Logic
-MainWindow -left-> Logic
-
-CustomerListPanel -[hidden]left- HelpWindow
-TodayActivityListPanel -[hidden]right- ActivityListPanel
-HelpWindow -[hidden]left- CommandBox
-CommandBox -[hidden]left- ResultDisplay
-CustomerListPanel -[hidden]left- DogListPanel
-
-MainWindow -[hidden]-|> UiPart
-
-note right of TodayActivityListPanel
-  Filters the shared activity list
-  to schedules occurring today.
+note bottom of TodayActivityListPanel
+  Uses all schedules and exact-date bookings.
+  General panel shows bookings today or later.
+  MainWindow refreshes both with one date
+  after successful commands.
 end note
 @enduml

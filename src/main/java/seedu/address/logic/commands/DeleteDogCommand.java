@@ -11,10 +11,10 @@ import seedu.address.model.dog.Dog;
 /** Deletes a dog identified by its persistent ID. */
 public class DeleteDogCommand extends Command {
 
-    public static final String COMMAND_WORD = "delete dog";
+    public static final String COMMAND_WORD = "deletedog";
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + " <id>: Deletes the dog with the specified ID.\n"
-            + "Example: delete dog 12";
+            + "Example: deletedog 12";
     public static final String MESSAGE_SUCCESS = "Successfully deleted dog %1$d: %2$s; Breed: %3$s; Size: %4$s";
     public static final String MESSAGE_INVALID_ID = "Error in deleting dog:\nPlease enter a valid dog ID";
 

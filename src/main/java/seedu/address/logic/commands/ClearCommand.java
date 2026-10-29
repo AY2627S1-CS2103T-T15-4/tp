@@ -2,11 +2,11 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
+import seedu.address.model.WatchDog;
 
 /**
- * Clears all customers, dogs, activities and enrolments from the address book.
+ * Clears all customers, dogs, activities and enrolments from WatchDog.
  * The logic manager obtains confirmation before executing this command and discards undo/redo history afterwards.
  */
 public class ClearCommand extends Command {
@@ -20,15 +20,15 @@ public class ClearCommand extends Command {
 
 
     /**
-     * Replaces the address book with an empty one. The caller is responsible for obtaining confirmation.
+     * Replaces WatchDog with an empty one. The caller is responsible for obtaining confirmation.
      *
-     * @param model The model whose address book is cleared.
-     * @return The success message after clearing the address book.
+     * @param model The model whose WatchDog is cleared.
+     * @return The success message after clearing WatchDog.
      */
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
-        model.setAddressBook(new AddressBook());
+        model.setWatchDog(new WatchDog());
         return new CommandResult(MESSAGE_SUCCESS);
     }
 }

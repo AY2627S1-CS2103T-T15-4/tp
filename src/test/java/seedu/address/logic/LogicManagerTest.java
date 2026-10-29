@@ -23,16 +23,17 @@ import javafx.collections.ObservableList;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteDogCommand;
+import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
-import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.ReadOnlyWatchDog;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
@@ -40,8 +41,8 @@ import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
-import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
+import seedu.address.storage.JsonWatchDogStorage;
 import seedu.address.storage.StorageManager;
 
 public class LogicManagerTest {
@@ -56,11 +57,16 @@ public class LogicManagerTest {
 
     @BeforeEach
     public void setUp() {
-        JsonAddressBookStorage addressBookStorage =
-                new JsonAddressBookStorage(temporaryFolder.resolve("watchdog.json"));
+        JsonWatchDogStorage watchDogStorage =
+                new JsonWatchDogStorage(temporaryFolder.resolve("watchdog.json"));
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        StorageManager storage = new StorageManager(watchDogStorage, userPrefsStorage);
         logic = new LogicManager(model, storage);
+    }
+
+    @Test
+    public void execute_nullCommandText_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> logic.execute(null));
     }
 
     @Test
@@ -71,7 +77,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_commandExecutionError_throwsCommandException() {
-        String deleteCommand = "delete dog 9";
+        String deleteCommand = "deletedog 9";
         assertCommandException(deleteCommand, DeleteDogCommand.MESSAGE_INVALID_ID);
     }
 
@@ -85,33 +91,51 @@ public class LogicManagerTest {
     public void execute_summary_preservesFilteredDataAndSavesExistingRecords() throws Exception {
         model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
         model.updateFilteredDogList(unused -> false);
-        AddressBook before = new AddressBook(model.getAddressBook());
+        WatchDog before = new WatchDog(model.getWatchDog());
 
         assertEquals("Overall: 1 dogs | 0 customers\n"
                 + "Activity schedules: 0 total | 0 from today onwards\n"
                 + "Today (" + LocalDate.now() + "): 0 activities | 0 distinct dogs enrolled",
                 logic.execute("summary").getFeedbackToUser());
-        assertEquals(before, model.getAddressBook());
+        assertEquals(before, model.getWatchDog());
         assertEquals(List.of(), model.getFilteredDogList());
-        assertEquals(before, new AddressBook(new JsonAddressBookStorage(temporaryFolder.resolve("watchdog.json"))
-                .readAddressBook().orElseThrow()));
+        assertEquals(before, new WatchDog(new JsonWatchDogStorage(temporaryFolder.resolve("watchdog.json"))
+                .readWatchDog().orElseThrow()));
     }
 
     @Test
-    public void execute_summaryStorageFailure_reportsSaveErrorWithoutChangingRecords() {
+    public void execute_historyNeutralStorageFailure_returnsResultAndPreservesHistory() throws Exception {
         for (IOException exception : List.of(DUMMY_IO_EXCEPTION, DUMMY_AD_EXCEPTION)) {
-            JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("summary.json")) {
+            setUp();
+            boolean[] failSave = {false};
+            JsonWatchDogStorage storage = new JsonWatchDogStorage(temporaryFolder.resolve("summary.json")) {
                 @Override
-                public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
-                    throw exception;
+                public void saveWatchDog(ReadOnlyWatchDog watchDog) throws IOException {
+                    if (failSave[0]) {
+                        throw exception;
+                    }
+                    super.saveWatchDog(watchDog);
                 }
             };
+            model = new ModelManager();
             logic = new LogicManager(model, new StorageManager(storage,
                     new JsonUserPrefsStorage(temporaryFolder.resolve("summaryPrefs.json"))));
-            String expected = exception instanceof AccessDeniedException
-                    ? String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, exception.getMessage())
-                    : String.format(LogicManager.FILE_OPS_ERROR_FORMAT, exception.getMessage());
-            assertCommandFailure("summary", CommandException.class, expected);
+            assertEquals(List.of(), logic.getDogList());
+            logic.execute("adddog n/Buddy b/Poodle s/small");
+            assertEquals(1, logic.getDogList().size());
+            logic.execute("undo");
+            failSave[0] = true;
+            assertEquals(List.of(), logic.getDogList());
+
+            assertEquals("Overall: 0 dogs | 0 customers\n"
+                    + "Activity schedules: 0 total | 0 from today onwards\n"
+                    + "Today (" + LocalDate.now() + "): 0 activities | 0 distinct dogs enrolled",
+                    logic.execute("summary").getFeedbackToUser());
+            assertEquals(HelpCommand.SHOWING_HELP_MESSAGE, logic.execute("help").getFeedbackToUser());
+            assertTrue(logic.execute("exit").isExit());
+            failSave[0] = false;
+            logic.execute("redo");
+            assertEquals("Buddy", logic.getDogList().get(0).getName().toString());
         }
     }
 
@@ -165,7 +189,7 @@ public class LogicManagerTest {
     @Test
     public void getEnrolmentList_unenrolUndoRedoAndClear_updateExistingUnmodifiableView() throws Exception {
         LocalDate date = LocalDate.of(2026, 10, 28);
-        AddressBook book = new AddressBook();
+        WatchDog book = new WatchDog();
         book.addActivity(new ActivityName("Walk"), date,
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         book.addDogFromStorage(new Dog(1, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
@@ -173,7 +197,7 @@ public class LogicManagerTest {
         book.addEnrolmentFromStorage(booking);
         model = new ModelManager(book, new UserPrefs());
         logic = new LogicManager(model, new StorageManager(
-                new JsonAddressBookStorage(temporaryFolder.resolve("enrolmentHistory.json")),
+                new JsonWatchDogStorage(temporaryFolder.resolve("enrolmentHistory.json")),
                 new JsonUserPrefsStorage(temporaryFolder.resolve("enrolmentHistoryPrefs.json"))));
         ObservableList<Enrolment> enrolments = logic.getEnrolmentList();
         int[] notifications = {0};
@@ -202,22 +226,22 @@ public class LogicManagerTest {
 
         logic.execute(addCommand);
         Dog buddy = dogs.get(0);
-        assertEquals(2, model.getAddressBook().getNextDogId());
+        assertEquals(2, model.getWatchDog().getNextDogId());
         assertEquals(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, addCommand.trim()),
                 logic.execute("undo").getFeedbackToUser());
         assertEquals(List.of(), dogs);
-        assertEquals(1, model.getAddressBook().getNextDogId());
+        assertEquals(1, model.getWatchDog().getNextDogId());
         assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
 
         assertEquals(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, addCommand.trim()),
                 logic.execute("redo").getFeedbackToUser());
         assertEquals(List.of(buddy), dogs);
-        assertEquals(2, model.getAddressBook().getNextDogId());
+        assertEquals(2, model.getWatchDog().getNextDogId());
         assertCommandException("redo", RedoCommand.MESSAGE_NO_COMMAND);
 
         logic.execute("undo");
         assertEquals(List.of(), dogs);
-        assertEquals(1, model.getAddressBook().getNextDogId());
+        assertEquals(1, model.getWatchDog().getNextDogId());
     }
 
     @Test
@@ -255,11 +279,11 @@ public class LogicManagerTest {
     public void execute_clear_requestsConfirmationWithoutChangingOrSavingData() throws Exception {
         model.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
         model.updateFilteredDogList(unused -> false);
-        AddressBook before = new AddressBook(model.getAddressBook());
+        WatchDog before = new WatchDog(model.getWatchDog());
 
         assertEquals(ClearCommand.MESSAGE_CONFIRMATION, logic.execute("clear").getFeedbackToUser());
 
-        assertEquals(before, model.getAddressBook());
+        assertEquals(before, model.getWatchDog());
         assertEquals(List.of(), model.getFilteredDogList());
         assertFalse(Files.exists(temporaryFolder.resolve("watchdog.json")));
     }
@@ -271,10 +295,10 @@ public class LogicManagerTest {
             logic.execute("clear");
 
             assertEquals(ClearCommand.MESSAGE_SUCCESS, logic.execute(response).getFeedbackToUser());
-            assertEquals(new AddressBook(), model.getAddressBook());
-            assertEquals(new AddressBook(), new AddressBook(
-                    new JsonAddressBookStorage(temporaryFolder.resolve("watchdog.json"))
-                            .readAddressBook().orElseThrow()));
+            assertEquals(new WatchDog(), model.getWatchDog());
+            assertEquals(new WatchDog(), new WatchDog(
+                    new JsonWatchDogStorage(temporaryFolder.resolve("watchdog.json"))
+                            .readWatchDog().orElseThrow()));
             assertParseException("y", MESSAGE_UNKNOWN_COMMAND);
         }
     }
@@ -283,11 +307,11 @@ public class LogicManagerTest {
     public void execute_clearCancellation_preservesDataAndUndoHistory() throws Exception {
         for (String response : List.of("N", "n", "  n  ")) {
             logic.execute("adddog n/Buddy b/Poodle s/small");
-            AddressBook before = new AddressBook(model.getAddressBook());
+            WatchDog before = new WatchDog(model.getWatchDog());
             logic.execute("clear");
 
             assertEquals(ClearCommand.MESSAGE_CANCELLED, logic.execute(response).getFeedbackToUser());
-            assertEquals(before, model.getAddressBook());
+            assertEquals(before, model.getWatchDog());
             logic.execute("undo");
             assertEquals(List.of(), logic.getDogList());
         }
@@ -313,7 +337,7 @@ public class LogicManagerTest {
         }
 
         assertEquals(ClearCommand.MESSAGE_SUCCESS, logic.execute("y").getFeedbackToUser());
-        assertEquals(new AddressBook(), model.getAddressBook());
+        assertEquals(new WatchDog(), model.getWatchDog());
     }
 
     @Test
@@ -321,9 +345,9 @@ public class LogicManagerTest {
         for (IOException failure : List.of(DUMMY_IO_EXCEPTION, DUMMY_AD_EXCEPTION)) {
             setUp();
             logic.execute("adddog n/Buddy b/Poodle s/small");
-            JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("clear.json")) {
+            JsonWatchDogStorage storage = new JsonWatchDogStorage(temporaryFolder.resolve("clear.json")) {
                 @Override
-                public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
+                public void saveWatchDog(ReadOnlyWatchDog watchDog) throws IOException {
                     throw failure;
                 }
             };
@@ -335,7 +359,7 @@ public class LogicManagerTest {
 
             assertEquals(ClearCommand.MESSAGE_CONFIRMATION, logic.execute("clear").getFeedbackToUser());
             assertThrows(CommandException.class, expected, () -> logic.execute("y"));
-            assertEquals(new AddressBook(), model.getAddressBook());
+            assertEquals(new WatchDog(), model.getWatchDog());
             assertCommandException("undo", UndoCommand.MESSAGE_NO_COMMAND);
             assertCommandException("redo", RedoCommand.MESSAGE_NO_COMMAND);
             assertParseException("y", MESSAGE_UNKNOWN_COMMAND);
@@ -345,7 +369,7 @@ public class LogicManagerTest {
     @Test
     public void execute_failedCommand_preservesUndoHistory() throws Exception {
         logic.execute("adddog n/Buddy b/Poodle s/small");
-        assertCommandException("delete dog 9", DeleteDogCommand.MESSAGE_INVALID_ID);
+        assertCommandException("deletedog 9", DeleteDogCommand.MESSAGE_INVALID_ID);
 
         logic.execute("undo");
         assertEquals(List.of(), logic.getDogList());
@@ -363,11 +387,11 @@ public class LogicManagerTest {
     public void execute_retiredSearch_preservesRecordsFiltersAndRedoHistory() throws Exception {
         logic.execute("adddog n/Buddy b/Poodle s/small");
         logic.execute("undo");
-        AddressBook before = new AddressBook(model.getAddressBook());
+        WatchDog before = new WatchDog(model.getWatchDog());
         for (String input : List.of("search n/Buddy", "search id/1", "search dog n/Buddy",
                 "search customer n/Alex")) {
             assertParseException(input, MESSAGE_UNKNOWN_COMMAND);
-            assertEquals(before, model.getAddressBook());
+            assertEquals(before, model.getWatchDog());
             assertEquals(List.of(), logic.getFilteredDogList());
         }
         logic.execute("redo");
@@ -387,14 +411,14 @@ public class LogicManagerTest {
         String add = "adddog n/Cookie b/Chihuahua s/Small";
         logic.execute(add);
         Dog cookie = logic.getDogList().get(0);
-        for (String help : List.of("help", "help summary", "help adddog", "help delete dog")) {
+        for (String help : List.of("help", "help summary", "help adddog", "help deletedog")) {
             logic.execute(help);
         }
         assertEquals(List.of(cookie), logic.getDogList());
         assertEquals(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, add),
                 logic.execute("undo").getFeedbackToUser());
         assertEquals(List.of(), logic.getDogList());
-        for (String help : List.of("help", "help summary", "help adddog", "help delete dog")) {
+        for (String help : List.of("help", "help summary", "help adddog", "help deletedog")) {
             logic.execute(help);
         }
         assertEquals(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, add),
@@ -430,17 +454,17 @@ public class LogicManagerTest {
         model = new ModelManager();
         boolean[] failSave = {false};
         Path historyPath = temporaryFolder.resolve("history.json");
-        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(historyPath) {
+        JsonWatchDogStorage watchDogStorage = new JsonWatchDogStorage(historyPath) {
             @Override
-            public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
+            public void saveWatchDog(ReadOnlyWatchDog watchDog) throws IOException {
                 if (failSave[0]) {
                     throw failure;
                 }
-                super.saveAddressBook(addressBook);
+                super.saveWatchDog(watchDog);
             }
         };
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("historyPrefs.json"));
-        logic = new LogicManager(model, new StorageManager(addressBookStorage, userPrefsStorage));
+        logic = new LogicManager(model, new StorageManager(watchDogStorage, userPrefsStorage));
         logic.execute("adddog n/Buddy b/Poodle s/small");
         if (!undo) {
             logic.execute("undo");
@@ -489,7 +513,7 @@ public class LogicManagerTest {
      */
     private void assertCommandFailure(String inputCommand, Class<? extends Throwable> expectedException,
             String expectedMessage) {
-        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        Model expectedModel = new ModelManager(model.getWatchDog(), new UserPrefs());
         assertCommandFailure(inputCommand, expectedException, expectedMessage, expectedModel);
     }
 
@@ -515,21 +539,21 @@ public class LogicManagerTest {
     private void assertCommandFailureForExceptionFromStorage(IOException e, String expectedMessage) {
         Path prefPath = temporaryFolder.resolve("ExceptionUserPrefs.json");
 
-        // Inject LogicManager with a JsonAddressBookStorage that throws the IOException e when saving
-        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(prefPath) {
+        // Inject LogicManager with a JsonWatchDogStorage that throws the IOException e when saving
+        JsonWatchDogStorage watchDogStorage = new JsonWatchDogStorage(prefPath) {
             @Override
-            public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
+            public void saveWatchDog(ReadOnlyWatchDog watchDog) throws IOException {
                 throw e;
             }
         };
 
         JsonUserPrefsStorage userPrefsStorage =
                 new JsonUserPrefsStorage(temporaryFolder.resolve("ExceptionUserPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        StorageManager storage = new StorageManager(watchDogStorage, userPrefsStorage);
 
         logic = new LogicManager(model, storage);
 
-        // Triggers the saveAddressBook method by executing an add command
+        // Triggers the saveWatchDog method by executing an add command
         String addCommand = "adddog n/Buddy b/Poodle s/small";
         ModelManager expectedModel = new ModelManager();
         expectedModel.addDog(new Dog(new DogName("Buddy"), new Breed("Poodle"), new Size("small")));

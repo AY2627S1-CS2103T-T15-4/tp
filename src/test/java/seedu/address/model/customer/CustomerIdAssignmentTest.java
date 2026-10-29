@@ -5,18 +5,18 @@ import static seedu.address.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.model.AddressBook;
+import seedu.address.model.WatchDog;
 
 public class CustomerIdAssignmentTest {
 
     @Test
     public void addCustomer_assignsIncreasingIdsWithoutReusingDeletedId() {
-        AddressBook addressBook = new AddressBook();
-        Customer firstCustomer = addressBook.addCustomer(customer("Alice"));
-        Customer secondCustomer = addressBook.addCustomer(customer("Bob"));
+        WatchDog watchDog = new WatchDog();
+        Customer firstCustomer = watchDog.addCustomer(customer("Alice"));
+        Customer secondCustomer = watchDog.addCustomer(customer("Bob"));
 
-        addressBook.removeCustomer(firstCustomer);
-        Customer thirdCustomer = addressBook.addCustomer(customer("Carol"));
+        watchDog.removeCustomer(firstCustomer);
+        Customer thirdCustomer = watchDog.addCustomer(customer("Carol"));
 
         assertEquals(1, firstCustomer.getId());
         assertEquals(2, secondCustomer.getId());
@@ -24,12 +24,12 @@ public class CustomerIdAssignmentTest {
     }
 
     @Test
-    public void addressBookCopy_preservesNextCustomerId() {
-        AddressBook original = new AddressBook();
+    public void watchDogCopy_preservesNextCustomerId() {
+        WatchDog original = new WatchDog();
         Customer firstCustomer = original.addCustomer(customer("Alice"));
         original.removeCustomer(firstCustomer);
 
-        AddressBook copy = new AddressBook(original);
+        WatchDog copy = new WatchDog(original);
         Customer secondCustomer = copy.addCustomer(customer("Bob"));
 
         assertEquals(2, secondCustomer.getId());
@@ -37,42 +37,42 @@ public class CustomerIdAssignmentTest {
 
     @Test
     public void addCustomer_existingId_advancesCounterForLaterUnassignedCustomer() {
-        AddressBook addressBook = new AddressBook();
-        addressBook.addCustomer(new Customer(7, "Stored", "91234567", "stored@example.com", "98765432"));
+        WatchDog watchDog = new WatchDog();
+        watchDog.addCustomer(new Customer(7, "Stored", "91234567", "stored@example.com", "98765432"));
 
-        Customer assignedCustomer = addressBook.addCustomer(customer("New Customer"));
+        Customer assignedCustomer = watchDog.addCustomer(customer("New Customer"));
 
         assertEquals(8, assignedCustomer.getId());
     }
 
     @Test
     public void resetData_zeroNextCustomerId_recomputesPositiveId() {
-        AddressBook addressBook = new AddressBook(new AddressBook() {
+        WatchDog watchDog = new WatchDog(new WatchDog() {
             @Override
             public long getNextCustomerId() {
                 return 0;
             }
         });
 
-        assertEquals(1, addressBook.getNextCustomerId());
-        assertEquals(1, addressBook.addCustomer(customer("Alice")).getId());
+        assertEquals(1, watchDog.getNextCustomerId());
+        assertEquals(1, watchDog.addCustomer(customer("Alice")).getId());
     }
 
     @Test
     public void addCustomer_maximumId_exhaustsIdsWithoutReusingDeletedId() {
-        AddressBook addressBook = new AddressBook();
-        addressBook.setNextCustomerId(Integer.MAX_VALUE);
+        WatchDog watchDog = new WatchDog();
+        watchDog.setNextCustomerId(Integer.MAX_VALUE);
 
-        Customer lastCustomer = addressBook.addCustomer(customer("Alice"));
+        Customer lastCustomer = watchDog.addCustomer(customer("Alice"));
 
         assertEquals(Integer.MAX_VALUE, lastCustomer.getId());
-        assertEquals((long) Integer.MAX_VALUE + 1, addressBook.getNextCustomerId());
+        assertEquals((long) Integer.MAX_VALUE + 1, watchDog.getNextCustomerId());
         assertThrows(IllegalStateException.class,
-                "No more customer IDs are available", () -> addressBook.addCustomer(customer("Bob")));
-        assertEquals(1, addressBook.getCustomerList().size());
+                "No more customer IDs are available", () -> watchDog.addCustomer(customer("Bob")));
+        assertEquals(1, watchDog.getCustomerList().size());
 
-        addressBook.removeCustomer(lastCustomer);
-        AddressBook copy = new AddressBook(addressBook);
+        watchDog.removeCustomer(lastCustomer);
+        WatchDog copy = new WatchDog(watchDog);
         assertThrows(IllegalStateException.class,
                 "No more customer IDs are available", () -> copy.addCustomer(customer("Carol")));
         assertEquals(0, copy.getCustomerList().size());
@@ -80,36 +80,36 @@ public class CustomerIdAssignmentTest {
 
     @Test
     public void setNextCustomerId_aboveExhaustedCounter_rejectsWithoutChangingCounter() {
-        AddressBook addressBook = new AddressBook();
+        WatchDog watchDog = new WatchDog();
         long exhaustedCounter = (long) Integer.MAX_VALUE + 1;
-        addressBook.setNextCustomerId(exhaustedCounter);
+        watchDog.setNextCustomerId(exhaustedCounter);
 
         assertThrows(IllegalArgumentException.class, "Invalid next customer ID.", () ->
-                addressBook.setNextCustomerId(exhaustedCounter + 1));
+                watchDog.setNextCustomerId(exhaustedCounter + 1));
 
-        assertEquals(exhaustedCounter, addressBook.getNextCustomerId());
+        assertEquals(exhaustedCounter, watchDog.getNextCustomerId());
         assertThrows(IllegalStateException.class, "No more customer IDs are available", () ->
-                addressBook.addCustomer(customer("Alice")));
+                watchDog.addCustomer(customer("Alice")));
     }
 
     @Test
     public void setNextCustomerId_existingCustomerId_rejectsWithoutChangingCounter() {
-        AddressBook addressBook = new AddressBook();
-        Customer firstCustomer = addressBook.addCustomer(customer("Alice"));
+        WatchDog watchDog = new WatchDog();
+        Customer firstCustomer = watchDog.addCustomer(customer("Alice"));
 
         assertThrows(IllegalArgumentException.class, "Invalid next customer ID.", () ->
-                addressBook.setNextCustomerId(firstCustomer.getId()));
+                watchDog.setNextCustomerId(firstCustomer.getId()));
 
-        assertEquals(2, addressBook.addCustomer(customer("Bob")).getId());
+        assertEquals(2, watchDog.addCustomer(customer("Bob")).getId());
     }
 
     @Test
     public void setNextCustomerId_rejectsNonPositiveId() {
-        AddressBook addressBook = new AddressBook();
+        WatchDog watchDog = new WatchDog();
 
-        assertThrows(IllegalArgumentException.class, () -> addressBook.setNextCustomerId(0));
-        addressBook.setNextCustomerId(10);
-        assertEquals(10, addressBook.addCustomer(customer("Alice")).getId());
+        assertThrows(IllegalArgumentException.class, () -> watchDog.setNextCustomerId(0));
+        watchDog.setNextCustomerId(10);
+        assertEquals(10, watchDog.addCustomer(customer("Alice")).getId());
     }
 
     private static Customer customer(String name) {

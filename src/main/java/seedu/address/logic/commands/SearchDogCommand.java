@@ -60,7 +60,7 @@ public class SearchDogCommand extends Command {
                 .anyMatch(dog -> dog.getOwnerId()
                         .map(ownerId -> ownerId == customer.getId())
                         .orElse(false)));
-        model.updateFilteredActivityList(activity -> model.getAddressBook().getEnrolmentList().stream()
+        model.updateFilteredActivityList(activity -> model.getWatchDog().getEnrolmentList().stream()
                 .filter(enrolment -> enrolment.getActivityId() == activity.getId())
                 .anyMatch(enrolment -> model.getDogList().stream()
                         .filter(dog -> dog.getId() == enrolment.getDogId())

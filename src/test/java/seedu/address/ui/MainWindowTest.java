@@ -47,10 +47,10 @@ import javafx.stage.Window;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.activity.ActivityName;
 import seedu.address.model.activity.Enrolment;
 import seedu.address.model.activity.Recurrence;
@@ -59,8 +59,8 @@ import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
-import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
+import seedu.address.storage.JsonWatchDogStorage;
 import seedu.address.storage.StorageManager;
 
 public class MainWindowTest {
@@ -96,7 +96,7 @@ public class MainWindowTest {
         model.addActivity(new ActivityName("Today walk"), LocalDate.now(),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
         Logic logic = new LogicManager(model, new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("watchdog.json")),
+                new JsonWatchDogStorage(folder.resolve("watchdog.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
@@ -153,7 +153,7 @@ public class MainWindowTest {
         model.addActivity(new ActivityName("Future walk"), today.plusDays(1),
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
         Logic logic = new LogicManager(model, new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("watchdog.json")),
+                new JsonWatchDogStorage(folder.resolve("watchdog.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
@@ -179,7 +179,7 @@ public class MainWindowTest {
     @Test
     public void activityBookingSummaries_ignoreDogFilterAndRefreshAcrossCommands() throws Exception {
         Path folder = Files.createTempDirectory("mainwindow-bookings");
-        AddressBook book = new AddressBook();
+        WatchDog book = new WatchDog();
         book.addDogFromStorage(new Dog(1, new DogName("Cookie"), new Breed("Chihuahua"), new Size("Small")));
         book.addDogFromStorage(new Dog(2, new DogName("Milo"), new Breed("Poodle"), new Size("Medium")));
         book.addActivity(new ActivityName("Today walk"), FIXED_TODAY,
@@ -190,7 +190,7 @@ public class MainWindowTest {
         Model model = new ModelManager(book, new UserPrefs());
         model.updateFilteredDogList(unused -> false);
         Logic logic = new LogicManager(model, new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonWatchDogStorage(folder.resolve("addressbook.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
@@ -235,7 +235,7 @@ public class MainWindowTest {
                     label(activities.getItems().get(0).get(), "dogSummary"));
 
             window.executeCommand("undo");
-            window.executeCommand("delete dog 1");
+            window.executeCommand("deletedog 1");
             assertEquals("Dogs with upcoming bookings: None",
                     label(activities.getItems().get(0).get(), "dogSummary"));
 
@@ -250,7 +250,7 @@ public class MainWindowTest {
     public void fillInnerParts_resizesPawPatternAndRendersPawMarks() throws Exception {
         Path folder = Files.createTempDirectory("mainwindow-paw-pattern");
         Logic logic = new LogicManager(new ModelManager(), new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("watchdog.json")),
+                new JsonWatchDogStorage(folder.resolve("watchdog.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
@@ -279,7 +279,7 @@ public class MainWindowTest {
     public void fillInnerParts_usesFriendlyInputAndResultPlaceholders() throws Exception {
         Path folder = Files.createTempDirectory("mainwindow-placeholders");
         Logic logic = new LogicManager(new ModelManager(), new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonWatchDogStorage(folder.resolve("addressbook.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
@@ -312,7 +312,7 @@ public class MainWindowTest {
     public void menuDropdowns_useReadableThemeColorsForNormalHoverAndFocusStates() throws Exception {
         Path folder = Files.createTempDirectory("mainwindow-menu-theme");
         Logic logic = new LogicManager(new ModelManager(), new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonWatchDogStorage(folder.resolve("addressbook.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
@@ -360,7 +360,7 @@ public class MainWindowTest {
     public void executeCommand_failureHelpAndExit_updateVisibleWindowState() throws Exception {
         Path folder = Files.createTempDirectory("mainwindow-command-results");
         Logic logic = new LogicManager(new ModelManager(), new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonWatchDogStorage(folder.resolve("addressbook.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
@@ -389,7 +389,7 @@ public class MainWindowTest {
             model.addDog(new Dog(new DogName("Dog " + index), new Breed("Poodle"), new Size("Small")));
         }
         Logic logic = new LogicManager(model, new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonWatchDogStorage(folder.resolve("addressbook.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {
@@ -413,7 +413,7 @@ public class MainWindowTest {
     public void helpAccelerator_textInputHasFocus_opensHelpWindow() throws Exception {
         Path folder = Files.createTempDirectory("mainwindow-help-accelerator");
         Logic logic = new LogicManager(new ModelManager(), new StorageManager(
-                new JsonAddressBookStorage(folder.resolve("addressbook.json")),
+                new JsonWatchDogStorage(folder.resolve("addressbook.json")),
                 new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
 
         runOnFxThread(() -> {

@@ -1,11 +1,11 @@
 package seedu.address.model.util;
 
-import seedu.address.model.AddressBook;
-import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.ReadOnlyWatchDog;
+import seedu.address.model.WatchDog;
 import seedu.address.model.customer.Customer;
 
 /**
- * Contains utility methods for populating {@code AddressBook} with sample data.
+ * Contains utility methods for populating {@code WatchDog} with sample data.
  */
 public class SampleDataUtil {
     public static Customer[] getSampleCustomers() {
@@ -15,8 +15,8 @@ public class SampleDataUtil {
         };
     }
 
-    public static ReadOnlyAddressBook getSampleAddressBook() {
-        AddressBook sampleAb = new AddressBook();
+    public static ReadOnlyWatchDog getSampleWatchDog() {
+        WatchDog sampleAb = new WatchDog();
         for (Customer sampleCustomer : getSampleCustomers()) {
             sampleAb.addCustomer(sampleCustomer);
         }

@@ -5,47 +5,38 @@ skinparam arrowColor LOGIC_COLOR_T4
 skinparam classBackgroundColor LOGIC_COLOR
 
 package Logic as LogicPackage {
-
-package "Parser Classes" as ParserClasses{
-}
-Class XYZCommand
-Class EnrolDogCommand
-Class UnenrolDogCommand
-Class CommandResult
-Class "{abstract}\nCommand" as Command
-
-
-Class "<<interface>>\nLogic" as Logic
-Class LogicManager
+class "<<interface>>\nLogic" as Logic
+class LogicManager
+class WatchDogParser
+class "{abstract}\nCommand" as Command
+class AddDogCommand
+class SummaryCommand
+class CommandResult
 }
 
-package Model {
-Class HiddenModel #FFFFFF
-}
+class "<<interface>>\nModel" as Model MODEL_COLOR
+class "<<interface>>\nStorage" as Storage STORAGE_COLOR
 
-package Storage {
-}
+LogicManager .up.|> Logic
+LogicManager --> "1" WatchDogParser : watchDogParser
+LogicManager --> "1" Model : model
+LogicManager --> "1" Storage : storage
+LogicManager ..> Command : executes
+WatchDogParser ..> Command : returns
+AddDogCommand -up-|> Command
+SummaryCommand -up-|> Command
+Command ..> Model : execute(model)
+Command ..> CommandResult : returns
+Logic ..> CommandResult : returns
 
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Logic
+note bottom of AddDogCommand
+  Representative command subclasses.
+  Other commands and parser internals
+  are omitted.
+end note
 
-LogicManager .right.|> Logic
-LogicManager -right->"1" ParserClasses
-ParserClasses ..> XYZCommand : <<create>>
-
-XYZCommand -up-|> Command
-EnrolDogCommand -up-|> Command
-UnenrolDogCommand -up-|> Command
-LogicManager .left.> Command : <<call>>
-
-LogicManager --> Model
-LogicManager --> Storage
-Storage --[hidden] Model
-Command .[hidden]up.> Storage
-Command .right.> Model
-note right of XYZCommand: XYZCommand = AddDogCommand, \nSearchDogCommand, etc
-
-Logic ..> CommandResult
-LogicManager .down.> CommandResult
-Command .up.> CommandResult : <<create>>
+note bottom of LogicManager
+  Handles undo/redo snapshots and clear confirmation.
+  History fields and commands are omitted.
+end note
 @enduml

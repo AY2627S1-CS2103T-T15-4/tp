@@ -21,7 +21,7 @@ import seedu.address.model.customer.Name;
 import seedu.address.model.customer.Phone;
 
 /**
- * Edits the details of an existing customer in the address book.
+ * Edits the details of an existing customer in WatchDog.
  */
 public class EditCustomerCommand extends Command {
 
@@ -64,7 +64,7 @@ public class EditCustomerCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        Customer customerToEdit = model.getAddressBook().getCustomerList().stream()
+        Customer customerToEdit = model.getWatchDog().getCustomerList().stream()
                 .filter(customer -> customer.getId() == customerId)
                 .findFirst()
                 .orElseThrow(() -> new CommandException(MESSAGE_CUSTOMER_NOT_FOUND));

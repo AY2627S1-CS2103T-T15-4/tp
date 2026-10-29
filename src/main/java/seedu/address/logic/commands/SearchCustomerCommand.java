@@ -102,7 +102,7 @@ public class SearchCustomerCommand extends Command {
 
     private static boolean hasMatchingEnrolment(Model model, Activity activity,
                                                 Predicate<Customer> matchingCustomer) {
-        return model.getAddressBook().getEnrolmentList().stream()
+        return model.getWatchDog().getEnrolmentList().stream()
                 .filter(enrolment -> enrolment.getActivityId() == activity.getId())
                 .anyMatch(enrolment -> model.getDogList().stream()
                         .filter(dog -> dog.getId() == enrolment.getDogId())

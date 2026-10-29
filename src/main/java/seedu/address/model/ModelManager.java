@@ -6,8 +6,6 @@ import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Predicate;
@@ -30,12 +28,12 @@ import seedu.address.model.dog.exceptions.LinkException;
 import seedu.address.model.dog.exceptions.UnlinkException;
 
 /**
- * Represents the in-memory model of the address book data.
+ * Represents the in-memory model of WatchDog data.
  */
 public class ModelManager implements Model {
     private static final Logger logger = LogsCenter.getLogger(ModelManager.class);
 
-    private final AddressBook addressBook;
+    private final WatchDog watchDog;
     private final UserPrefs userPrefs;
     private final FilteredList<Customer> filteredCustomers;
     private final FilteredList<Dog> filteredDogs;
@@ -43,46 +41,45 @@ public class ModelManager implements Model {
     private Predicate<Customer> activeCustomerPredicate;
     private Predicate<Dog> activeDogPredicate;
     private Predicate<Activity> activeActivityPredicate;
-    private Integer selectedDogId;
-    private Integer selectedCustomerId;
     private Predicate<Dog> enrolmentDogPredicate;
     private final SimpleIntegerProperty enrolmentContextVersion = new SimpleIntegerProperty();
 
     /**
-     * Initializes a ModelManager with the given addressBook and userPrefs.
+     * Initializes a ModelManager with the given watchDog and userPrefs.
      */
-    public ModelManager(ReadOnlyAddressBook addressBook, ReadOnlyUserPrefs userPrefs) {
-        requireAllNonNull(addressBook, userPrefs);
+    public ModelManager(ReadOnlyWatchDog watchDog, ReadOnlyUserPrefs userPrefs) {
+        requireAllNonNull(watchDog, userPrefs);
 
-        logger.fine("Initializing with WatchDog data: " + addressBook + " and user prefs " + userPrefs);
+        logger.fine("Initializing with WatchDog data: " + watchDog + " and user prefs " + userPrefs);
 
-        this.addressBook = new AddressBook(addressBook);
+        this.watchDog = new WatchDog(watchDog);
         this.userPrefs = new UserPrefs(userPrefs);
-        filteredCustomers = new FilteredList<>(this.addressBook.getCustomerList());
-        filteredDogs = new FilteredList<>(this.addressBook.getDogList());
-        filteredActivities = new FilteredList<>(this.addressBook.getActivityList());
+        filteredCustomers = new FilteredList<>(this.watchDog.getCustomerList());
+        filteredDogs = new FilteredList<>(this.watchDog.getDogList());
+        filteredActivities = new FilteredList<>(this.watchDog.getActivityList());
     }
 
     public ModelManager() {
-        this(new AddressBook(), new UserPrefs());
+        this(new WatchDog(), new UserPrefs());
     }
 
     @Override
     public ModelState createState() {
-        return new ModelState(new AddressBook(addressBook), activeCustomerPredicate, activeDogPredicate,
-                activeActivityPredicate, selectedDogId, selectedCustomerId, enrolmentDogPredicate);
+        return new ModelState(new WatchDog(watchDog), activeCustomerPredicate, activeDogPredicate,
+                activeActivityPredicate, enrolmentDogPredicate);
     }
 
     @Override
     public void restoreState(ModelState state) {
         requireNonNull(state);
-        addressBook.resetData(state.addressBook());
+        watchDog.resetData(state.watchDog());
         activeCustomerPredicate = state.customerPredicate();
         activeDogPredicate = state.dogPredicate();
         activeActivityPredicate = state.activityPredicate();
-        selectedDogId = state.selectedDogId();
-        selectedCustomerId = state.selectedCustomerId();
         enrolmentDogPredicate = state.enrolmentDogPredicate();
+        logger.fine("Restored " + watchDog.getCustomerList().size() + " customers, "
+                + watchDog.getDogList().size() + " dogs and "
+                + watchDog.getActivityList().size() + " activities.");
         signalEnrolmentContextChanged();
         filteredCustomers.setPredicate(null);
         filteredDogs.setPredicate(null);
@@ -110,36 +107,36 @@ public class ModelManager implements Model {
         userPrefs.setGuiSettings(guiSettings);
     }
 
-    //=========== AddressBook ================================================================================
+    //=========== WatchDog ================================================================================
 
     @Override
-    public void setAddressBook(ReadOnlyAddressBook addressBook) {
-        this.addressBook.resetData(addressBook);
+    public void setWatchDog(ReadOnlyWatchDog watchDog) {
+        this.watchDog.resetData(watchDog);
         refreshDisplayedRecords();
     }
 
     @Override
-    public ReadOnlyAddressBook getAddressBook() {
-        return addressBook;
+    public ReadOnlyWatchDog getWatchDog() {
+        return watchDog;
     }
 
     @Override
     public Activity addActivity(ActivityName name, LocalDate date, LocalTime start, LocalTime end,
             Recurrence recurrence) {
-        Activity activity = addressBook.addActivity(name, date, start, end, recurrence);
+        Activity activity = watchDog.addActivity(name, date, start, end, recurrence);
         refreshDisplayedRecords();
         return activity;
     }
 
     @Override
     public void setActivity(Activity target, Activity editedActivity) {
-        addressBook.setActivity(target, editedActivity);
+        watchDog.setActivity(target, editedActivity);
         refreshDisplayedRecords();
     }
 
     @Override
     public void deleteActivity(Activity target) {
-        addressBook.removeActivity(target);
+        watchDog.removeActivity(target);
         refreshDisplayedRecords();
     }
 
@@ -152,66 +149,66 @@ public class ModelManager implements Model {
     //=========== Dog Operations ============================================================================
     @Override
     public void enrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
-        addressBook.enrolDogs(activityId, date, dogIds);
+        watchDog.enrolDogs(activityId, date, dogIds);
         refreshDisplayedRecords();
     }
 
     @Override
     public void unenrolDogs(int activityId, LocalDate date, List<Integer> dogIds) throws EnrolException {
-        addressBook.unenrolDogs(activityId, date, dogIds);
+        watchDog.unenrolDogs(activityId, date, dogIds);
         refreshDisplayedRecords();
     }
 
     @Override
     public List<Dog> getDogsEnrolledOn(LocalDate date) {
         requireNonNull(date);
-        Set<Integer> enrolledDogIds = addressBook.getEnrolmentList().stream()
+        Set<Integer> enrolledDogIds = watchDog.getEnrolmentList().stream()
                 .filter(enrolment -> enrolment.getDate().equals(date))
                 .map(enrolment -> enrolment.getDogId())
                 .collect(Collectors.toSet());
-        return addressBook.getDogList().stream()
+        return watchDog.getDogList().stream()
                 .filter(dog -> enrolledDogIds.contains(dog.getId()))
                 .toList();
     }
 
     @Override
     public void linkDogs(int customerId, List<Integer> dogIds) throws LinkException {
-        addressBook.linkDogs(customerId, dogIds);
+        watchDog.linkDogs(customerId, dogIds);
         refreshDisplayedRecords();
     }
 
     @Override
     public void unlinkDogs(List<Integer> dogIds) throws UnlinkException {
-        addressBook.unlinkDogs(dogIds);
+        watchDog.unlinkDogs(dogIds);
         refreshDisplayedRecords();
     }
 
     @Override
     public void unlinkCustomerDogs(int customerId) throws UnlinkException {
-        addressBook.unlinkCustomerDogs(customerId);
+        watchDog.unlinkCustomerDogs(customerId);
         refreshDisplayedRecords();
     }
 
     @Override
     public boolean hasDog(Dog dog) {
-        return addressBook.hasDog(dog);
+        return watchDog.hasDog(dog);
     }
 
     @Override
     public void deleteDog(Dog dog) {
-        addressBook.removeDog(dog);
+        watchDog.removeDog(dog);
         refreshDisplayedRecords();
     }
 
     @Override
     public void setDog(Dog target, Dog editedDog) {
-        addressBook.setDog(target, editedDog);
+        watchDog.setDog(target, editedDog);
         refreshDisplayedRecords();
     }
 
     @Override
     public Dog addDog(Dog dog) {
-        Dog addedDog = addressBook.addDog(dog);
+        Dog addedDog = watchDog.addDog(dog);
         refreshDisplayedRecords();
         return addedDog;
     }
@@ -220,18 +217,18 @@ public class ModelManager implements Model {
     @Override
     public boolean hasCustomer(Customer customer) {
         requireNonNull(customer);
-        return addressBook.hasCustomer(customer);
+        return watchDog.hasCustomer(customer);
     }
 
     @Override
     public void deleteCustomer(Customer target) {
-        addressBook.removeCustomer(target);
+        watchDog.removeCustomer(target);
         refreshDisplayedRecords();
     }
 
     @Override
     public void addCustomer(Customer customer) {
-        addressBook.addCustomer(customer);
+        watchDog.addCustomer(customer);
         refreshDisplayedRecords();
     }
 
@@ -239,7 +236,7 @@ public class ModelManager implements Model {
     public void setCustomer(Customer target, Customer editedCustomer) {
         requireAllNonNull(target, editedCustomer);
 
-        addressBook.setCustomer(target, editedCustomer);
+        watchDog.setCustomer(target, editedCustomer);
         refreshDisplayedRecords();
     }
 
@@ -247,7 +244,7 @@ public class ModelManager implements Model {
 
     @Override
     public ObservableList<Dog> getDogList() {
-        return addressBook.getDogList();
+        return watchDog.getDogList();
     }
 
     @Override
@@ -258,7 +255,6 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredDogList(Predicate<Dog> predicate) {
         requireNonNull(predicate);
-        clearSelection();
         activeDogPredicate = predicate;
         filteredDogs.setPredicate(predicate);
     }
@@ -271,7 +267,6 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredCustomerList(Predicate<Customer> predicate) {
         requireNonNull(predicate);
-        clearSelection();
         activeCustomerPredicate = predicate;
         filteredCustomers.setPredicate(predicate);
     }
@@ -284,7 +279,6 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredActivityList(Predicate<Activity> predicate) {
         requireNonNull(predicate);
-        clearSelection();
         activeActivityPredicate = predicate;
         filteredActivities.setPredicate(predicate);
         enrolmentDogPredicate = null;
@@ -312,13 +306,13 @@ public class ModelManager implements Model {
         if (enrolmentDogPredicate == null) {
             return "";
         }
-        List<Dog> matchingDogs = addressBook.getDogList().stream()
+        List<Dog> matchingDogs = watchDog.getDogList().stream()
                 .filter(enrolmentDogPredicate)
                 .sorted(java.util.Comparator.comparingInt(Dog::getId))
                 .toList();
         StringJoiner summary = new StringJoiner("\n", "Enrolments:\n", "");
         matchingDogs.forEach(dog -> {
-            List<LocalDate> dates = addressBook.getEnrolmentList().stream()
+            List<LocalDate> dates = watchDog.getEnrolmentList().stream()
                     .filter(enrolment -> enrolment.getActivityId() == activity.getId()
                             && enrolment.getDogId() == dog.getId())
                     .map(Enrolment::getDate)
@@ -333,44 +327,8 @@ public class ModelManager implements Model {
         return summary.toString().equals("Enrolments:\n") ? "" : summary.toString();
     }
 
-    @Override
-    public void selectDog(int dogId) {
-        if (dogId < 1) {
-            throw new IllegalArgumentException("Dog ID must be positive.");
-        }
-        selectedCustomerId = null;
-        selectedDogId = dogId;
-        applySelectedDog();
-    }
-
-    @Override
-    public void selectCustomer(int customerId) {
-        assert customerId >= 1 : "Customer ID must be positive";
-        selectedDogId = null;
-        selectedCustomerId = customerId;
-        applySelectedCustomer();
-    }
-
-    private void clearSelection() {
-        selectedDogId = null;
-        selectedCustomerId = null;
-    }
-
-    /** Reapplies the current dog selection after stored records change. */
-    private void refreshSelectedDog() {
-        applySelectedDog();
-    }
-
     /** Reapplies active filters after stored records or relationships change. */
     private void refreshDisplayedRecords() {
-        if (selectedDogId != null) {
-            refreshSelectedDog();
-            return;
-        }
-        if (selectedCustomerId != null) {
-            applySelectedCustomer();
-            return;
-        }
         if (activeCustomerPredicate != null) {
             filteredCustomers.setPredicate(null);
             filteredCustomers.setPredicate(activeCustomerPredicate);
@@ -385,45 +343,6 @@ public class ModelManager implements Model {
         }
     }
 
-    private void applySelectedDog() {
-        int dogId = selectedDogId;
-        filteredDogs.setPredicate(dog -> dog.getId() == dogId);
-        filteredCustomers.setPredicate(customer -> ownerIdOf(dogId)
-                .filter(ownerId -> ownerId == customer.getId()).isPresent());
-        filteredActivities.setPredicate(activity -> isVisibleForSelectedDog(dogId, activity));
-    }
-
-    private Optional<Integer> ownerIdOf(int dogId) {
-        for (Dog dog : addressBook.getDogList()) {
-            if (dog.getId() == dogId) {
-                return dog.getOwnerId();
-            }
-        }
-        return Optional.empty();
-    }
-
-    /** Shows an activity for a selected dog when it has a dated enrolment today or later. */
-    private boolean isVisibleForSelectedDog(int dogId, Activity activity) {
-        requireNonNull(activity);
-        LocalDate today = LocalDate.now();
-        return addressBook.getEnrolmentList().stream().anyMatch(enrolment ->
-                enrolment.getDogId() == dogId && enrolment.getActivityId() == activity.getId()
-                        && !enrolment.getDate().isBefore(today) && activity.occursOn(enrolment.getDate()));
-    }
-
-    private void applySelectedCustomer() {
-        int customerId = selectedCustomerId;
-        filteredCustomers.setPredicate(customer -> customer.getId() == customerId);
-        filteredDogs.setPredicate(dog -> dog.getOwnerId().filter(ownerId -> ownerId == customerId).isPresent());
-        filteredActivities.setPredicate(activity -> isVisibleForSelectedCustomer(customerId, activity));
-    }
-
-    private boolean isVisibleForSelectedCustomer(int customerId, Activity activity) {
-        return addressBook.getDogList().stream()
-                .filter(dog -> dog.getOwnerId().filter(ownerId -> ownerId == customerId).isPresent())
-                .anyMatch(dog -> isVisibleForSelectedDog(dog.getId(), activity));
-    }
-
     @Override
     public boolean equals(Object other) {
         if (other == this) {
@@ -435,13 +354,11 @@ public class ModelManager implements Model {
             return false;
         }
 
-        return addressBook.equals(otherModelManager.addressBook)
+        return watchDog.equals(otherModelManager.watchDog)
                 && userPrefs.equals(otherModelManager.userPrefs)
                 && filteredCustomers.equals(otherModelManager.filteredCustomers)
                 && filteredDogs.equals(otherModelManager.filteredDogs)
-                && filteredActivities.equals(otherModelManager.filteredActivities)
-                && Objects.equals(selectedDogId, otherModelManager.selectedDogId)
-                && Objects.equals(selectedCustomerId, otherModelManager.selectedCustomerId);
+                && filteredActivities.equals(otherModelManager.filteredActivities);
     }
 
 }

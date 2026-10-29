@@ -2,106 +2,56 @@
 !include style.puml
 skinparam arrowColor MODEL_COLOR_T4
 skinparam classBackgroundColor MODEL_COLOR
-skinparam classAttributeIconSize 0
-skinparam classAttributeFontColor #FFFFFF
 skinparam ArrowFontStyle plain
 show members
 
-interface Model {
-  +addActivity(name, date, start, end, recurrence): Activity
-  +deleteActivity(activity: Activity): void
-  +setActivity(target, editedActivity): void
-  +getActivityList(): ObservableList<Activity>
-  +enrolDogs(activityId, date, dogIds)
-  +unenrolDogs(activityId, date, dogIds)
-  +deleteDog(dog)
-  +getFilteredActivityList(): ObservableList<Activity>
-  +updateFilteredActivityList(predicate)
-}
-
-class ModelManager {
-  +addActivity(name, date, start, end, recurrence): Activity
-  +enrolDogs(activityId, date, dogIds)
-  +unenrolDogs(activityId, date, dogIds)
-  +deleteDog(dog)
-  +deleteActivity(activity: Activity): void
-  +setActivity(target, editedActivity): void
-  +getFilteredActivityList(): ObservableList<Activity>
-  +updateFilteredActivityList(predicate)
-}
-
-interface ReadOnlyAddressBook {
-  +getActivityList(): ObservableList<Activity>
-  +getNextActivityId(): long
-}
-
-class AddressBook {
+class WatchDog {
   -nextActivityId: long
-  +addActivity(name, date, start, end, recurrence): Activity
+  +addActivity(...): Activity
   +removeActivity(activity: Activity): void
   +setActivity(target, editedActivity): void
-  +getActivityList(): ObservableList<Activity>
-  +enrolDogs(activityId, date, dogIds)
-  +unenrolDogs(activityId, date, dogIds)
-  +removeDog(dog)
+  +enrolDogs(activityId, date, dogIds): void
+  +unenrolDogs(activityId, date, dogIds): void
 }
 
-class Activity <<immutable>> {
+class Activity {
   -id: int
   -startDate: LocalDate
   -startTime: LocalTime
   -endTime: LocalTime
   +occursOn(date: LocalDate): boolean
-  +nextOccurrenceOnOrAfter(date: LocalDate): Optional<LocalDate>
-  +withName(name: ActivityName): Activity
-  +withSchedule(date, start, end, recurrence): Activity
-  +isSameActivity(other: Activity): boolean
+  +nextOccurrenceOnOrAfter(...)
 }
 
-class Enrolment <<immutable>> {
+class Enrolment {
   -activityId: int
   -dogId: int
   -date: LocalDate
-  +getActivityId(): int
-  +getDogId(): int
-  +getDate(): LocalDate
 }
 
-class ActivityName <<immutable>> {
+class ActivityName {
   +fullName: String
-  +{static} isValidName(name: String): boolean
 }
 
-enum Recurrence {
+class "<<enumeration>>\nRecurrence" as Recurrence {
   ONCE
   DAILY
   WEEKLY
 }
 
-ModelManager .up.|> Model
-ModelManager --> "1" AddressBook : addressBook
-Model ..> ReadOnlyAddressBook : exposes
-AddressBook .up.|> ReadOnlyAddressBook
-AddressBook --> "0..*" Activity : activities
-AddressBook --> "0..*" Enrolment : enrolments
-Enrolment --> "1" Activity
-Enrolment --> "1" Dog
+WatchDog --> "*" Activity : activities
+WatchDog --> "*" Enrolment : enrolments
 Activity --> "1" ActivityName : name
 Activity --> "1" Recurrence : recurrence
 
-note bottom of AddressBook
-  Assigns IDs and exposes an unmodifiable observable list.
-  Dog deletion removes that dog's enrolments before its record.
-  Deletion removes the activity and its enrolments without reusing the ID.
-  Editing replaces a schedule with the same ID only if it has no enrolments.
-  Activities with enrolments cannot be edited; create a new activity instead.
-  Other customer/dog data and unrelated APIs are omitted.
+note bottom of Enrolment
+  IDs identify the stored activity and dog;
+  these are not object references.
 end note
 
 note bottom of Activity
-  End time must be later than start time on the same day.
-  Replacement methods return new objects with the same ID.
-  Recurrence is calculated; dogs are not stored on schedules.
-  Getters, constructors and equality methods are omitted.
+  Immutable schedule.
+  Recurrence is calculated;
+  enrolments are stored separately.
 end note
 @enduml

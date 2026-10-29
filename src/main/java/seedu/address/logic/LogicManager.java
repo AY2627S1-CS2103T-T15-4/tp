@@ -1,5 +1,8 @@
 package seedu.address.logic;
 
+import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
+
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.logging.Logger;
@@ -16,7 +19,7 @@ import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.SummaryCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.AddressBookParser;
+import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
 import seedu.address.model.Model.ModelState;
@@ -39,123 +42,147 @@ public class LogicManager implements Logic {
 
     private final Model model;
     private final Storage storage;
-    private final AddressBookParser addressBookParser;
-    private ModelState undoState;
-    private String undoCommandText;
-    private ModelState redoState;
-    private String redoCommandText;
+    private final WatchDogParser watchDogParser;
+    private HistorySnapshot undoSnapshot;
+    private HistorySnapshot redoSnapshot;
     private boolean awaitingClearConfirmation;
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
      */
     public LogicManager(Model model, Storage storage) {
+        requireAllNonNull(model, storage);
         this.model = model;
         this.storage = storage;
-        addressBookParser = new AddressBookParser();
+        watchDogParser = new WatchDogParser();
     }
 
     @Override
     public CommandResult execute(String commandText) throws CommandException, ParseException {
+        requireNonNull(commandText);
         logger.info("----------------[USER COMMAND][" + commandText + "]");
-
-        CommandResult commandResult;
-        Command command;
         if (awaitingClearConfirmation) {
-            String response = commandText.trim();
-            if (response.equalsIgnoreCase("n")) {
-                awaitingClearConfirmation = false;
-                return new CommandResult(ClearCommand.MESSAGE_CANCELLED);
-            }
-            if (!response.equalsIgnoreCase("y")) {
-                throw new CommandException(ClearCommand.MESSAGE_INVALID_CONFIRMATION);
-            }
-            awaitingClearConfirmation = false;
-            command = new ClearCommand();
-        } else {
-            command = addressBookParser.parseCommand(commandText);
-            if (command instanceof ClearCommand) {
-                awaitingClearConfirmation = true;
-                return new CommandResult(ClearCommand.MESSAGE_CONFIRMATION);
-            }
+            return executeClearConfirmation(commandText);
         }
 
+        Command command = watchDogParser.parseCommand(commandText);
+        if (command instanceof ClearCommand) {
+            awaitingClearConfirmation = true;
+            return new CommandResult(ClearCommand.MESSAGE_CONFIRMATION);
+        }
         if (command instanceof UndoCommand) {
-            if (undoState == null) {
-                throw new CommandException(UndoCommand.MESSAGE_NO_COMMAND);
-            }
-            ModelState state = undoState;
-            String undoneCommand = undoCommandText;
-            ModelState stateAfterUndo = model.createState();
-            model.restoreState(state);
-            undoState = null;
-            undoCommandText = null;
-            redoState = stateAfterUndo;
-            redoCommandText = undoneCommand;
-            try {
-                storage.saveAddressBook(model.getAddressBook());
-            } catch (AccessDeniedException e) {
-                throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
-            } catch (IOException ioe) {
-                throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
-            }
-            return new CommandResult(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, undoneCommand));
+            return executeUndo();
         }
-
         if (command instanceof RedoCommand) {
-            if (redoState == null) {
-                throw new CommandException(RedoCommand.MESSAGE_NO_COMMAND);
-            }
-            ModelState stateBeforeRedo = model.createState();
-            ModelState state = redoState;
-            String redoneCommand = redoCommandText;
-            model.restoreState(state);
-            undoState = stateBeforeRedo;
-            undoCommandText = redoneCommand;
-            redoState = null;
-            redoCommandText = null;
-            try {
-                storage.saveAddressBook(model.getAddressBook());
-            } catch (AccessDeniedException e) {
-                throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
-            } catch (IOException ioe) {
-                throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
-            }
-            return new CommandResult(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, redoneCommand));
+            return executeRedo();
         }
+        return executeParsedCommand(command, commandText);
+    }
 
+    private CommandResult executeClearConfirmation(String commandText) throws CommandException {
+        String response = commandText.trim();
+        if (response.equalsIgnoreCase("n")) {
+            awaitingClearConfirmation = false;
+            return new CommandResult(ClearCommand.MESSAGE_CANCELLED);
+        }
+        if (!response.equalsIgnoreCase("y")) {
+            throw new CommandException(ClearCommand.MESSAGE_INVALID_CONFIRMATION);
+        }
+        awaitingClearConfirmation = false;
+        return executeParsedCommand(new ClearCommand(), commandText);
+    }
+
+    private CommandResult executeUndo() throws CommandException {
+        if (undoSnapshot == null) {
+            logger.info("Undo requested when there is no undo snapshot.");
+            throw new CommandException(UndoCommand.MESSAGE_NO_COMMAND);
+        }
+        HistorySnapshot undone = undoSnapshot;
+        HistorySnapshot redo = new HistorySnapshot(model.createState(), undone.commandText());
+        model.restoreState(undone.state());
+        undoSnapshot = null;
+        redoSnapshot = redo;
+        logger.info("Undid the previous command and stored a redo snapshot.");
+        saveWatchDog(true);
+        return new CommandResult(String.format(UndoCommand.MESSAGE_SUCCESS_FORMAT, undone.commandText()));
+    }
+
+    private CommandResult executeRedo() throws CommandException {
+        if (redoSnapshot == null) {
+            logger.info("Redo requested when there is no redo snapshot.");
+            throw new CommandException(RedoCommand.MESSAGE_NO_COMMAND);
+        }
+        HistorySnapshot redone = redoSnapshot;
+        HistorySnapshot undo = new HistorySnapshot(model.createState(), redone.commandText());
+        model.restoreState(redone.state());
+        undoSnapshot = undo;
+        redoSnapshot = null;
+        logger.info("Redid the previous command and stored an undo snapshot.");
+        saveWatchDog(true);
+        return new CommandResult(String.format(RedoCommand.MESSAGE_SUCCESS_FORMAT, redone.commandText()));
+    }
+
+    /**
+     * Runs a parsed command. History is updated from the in-memory result before saving.
+     * Help, summary and exit still return their result when saving fails.
+     */
+    private CommandResult executeParsedCommand(Command command, String commandText) throws CommandException {
         boolean isClear = command instanceof ClearCommand;
         boolean isHistoryNeutral = command instanceof HelpCommand || command instanceof SummaryCommand
                 || command instanceof ExitCommand;
         ModelState stateBeforeCommand = isClear || isHistoryNeutral ? null : model.createState();
-        commandResult = command.execute(model);
-
-        // Execution can change memory even when saving fails; history must describe that live state.
-        if (isClear) {
-            undoState = null;
-            undoCommandText = null;
-            redoState = null;
-            redoCommandText = null;
-        } else if (!isHistoryNeutral) {
-            undoState = stateBeforeCommand;
-            undoCommandText = commandText.trim();
-            redoState = null;
-            redoCommandText = null;
-        }
-
-        try {
-            storage.saveAddressBook(model.getAddressBook());
-        } catch (AccessDeniedException e) {
-            logger.warning("Command executed, but saving was denied by file or folder permissions. "
-                    + "The in-memory changes have not been saved.");
-            throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
-        } catch (IOException ioe) {
-            logger.warning("Command executed, but saving failed with " + ioe.getClass().getSimpleName()
-                    + ". The in-memory changes have not been saved.");
-            throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
-        }
-
+        CommandResult commandResult = command.execute(model);
+        recordHistory(isClear, isHistoryNeutral, stateBeforeCommand, commandText);
+        saveWatchDog(!isHistoryNeutral);
         return commandResult;
+    }
+
+    private void recordHistory(boolean isClear, boolean isHistoryNeutral, ModelState stateBeforeCommand,
+            String commandText) {
+        if (isClear) {
+            undoSnapshot = null;
+            redoSnapshot = null;
+            logger.info("Cleared undo and redo history.");
+        } else if (!isHistoryNeutral) {
+            undoSnapshot = new HistorySnapshot(stateBeforeCommand, commandText.trim());
+            redoSnapshot = null;
+        }
+    }
+
+    /**
+     * One restorable model snapshot paired with the command text shown in feedback.
+     * The two values cannot be stored independently.
+     */
+    private record HistorySnapshot(ModelState state, String commandText) {
+        private HistorySnapshot {
+            requireNonNull(state);
+            requireNonNull(commandText);
+            if (commandText.isBlank()) {
+                throw new IllegalArgumentException("History feedback must name a command.");
+            }
+        }
+    }
+
+    /**
+     * Saves the current WatchDog. A required save reports the failure to the caller.
+     * History has already been updated from the in-memory state when this is called.
+     */
+    private void saveWatchDog(boolean required) throws CommandException {
+        try {
+            storage.saveWatchDog(model.getWatchDog());
+        } catch (AccessDeniedException e) {
+            logger.warning("Saving was denied by file or folder permissions. "
+                    + "The in-memory records have not been saved.");
+            if (required) {
+                throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
+            }
+        } catch (IOException ioe) {
+            logger.warning("Saving failed with " + ioe.getClass().getSimpleName()
+                    + ". The in-memory records have not been saved.");
+            if (required) {
+                throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
+            }
+        }
     }
 
     @Override

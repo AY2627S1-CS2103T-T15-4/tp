@@ -62,7 +62,7 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 * Items followed by `...` can appear zero or more times.<br>
   For example, `link c/7 d/42 51` links multiple dogs to one customer.
 
-* Parameters can be in any order.<br>
+* Field parameters can be in any order unless stated otherwise. `link` requires `c/` before `d/`.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
 * Extraneous parameters for some commands that take no parameters, such as `exit` and `clear`, are ignored.<br>
@@ -76,7 +76,8 @@ Use the customer and dog commands described below.
 
 ### Viewing help: `help`
 
-Shows a message explaining how to access the help page.
+Opens a help window containing the link to this User Guide. Use `help COMMAND` to display a specific
+command's format, example, and specifications directly in the result section.
 
 ![help message](images/helpMessage.png)
 
@@ -87,13 +88,14 @@ messages appear), use `help COMMAND`. This does not open the help window or exec
 
 Examples:
 
+* `help` opens the help window.
 * `help summary`
 * `help adddog`
-* `help delete dog`
+* `help deletedog`
 * `help reset`
 
-Use the lowercase command name without its arguments. Multiword command names are supported;
-surrounding whitespace and multiple spaces between words are accepted. An unknown command name or
+Use the lowercase command name without its arguments. Surrounding whitespace and multiple spaces
+between `help` and the command name are accepted. An unknown command name or
 extra arguments (for example, `help summary today`) display an error and the supported command names.
 Plain `help` still opens the original help window.
 
@@ -163,8 +165,13 @@ leave the activity and enrolments unchanged.
 
 Edits an activity with the specified persistent ID. An activity can be edited only when it has no enrolments.
 If dogs are enrolled, the command leaves the activity unchanged and suggests creating a new activity instead.
+Supply at least one field to change; omitted fields retain their current values. For a recurring activity,
+the changes apply to the entire schedule.
 
 Format: `editactivity ACTIVITY_ID [n/NAME] [date/YYYY-MM-DD] [start/HH:mm] [end/HH:mm] [r/once|daily|weekly]`
+
+Example: `editactivity 21 n/Morning walk start/09:00 end/10:00` changes activity 21's name and times,
+provided it exists and has no enrolments. Its other details remain unchanged.
 
 ### Searching activities: `searcha`
 
@@ -261,12 +268,16 @@ are not changed.
 
 Format: `reset`
 
+Example: `reset` restores the overview after a search or filter.
+
 ### Viewing daycare statistics: `summary`
 
 Shows six statistics using all stored records, including records hidden by search or filters.
 The command preserves your records and filters.
 
 Format: `summary` (no parameters; surrounding whitespace is accepted)
+
+Example: `summary` displays the statistics below using your stored records and the current local date.
 
 Example output:
 
@@ -287,8 +298,8 @@ Today (2026-10-24): 5 activities | 12 distinct dogs enrolled
   Yesterday's and tomorrow's enrolments are excluded. Enrolment does not indicate attendance.
 
 The date shown is read once when the command runs, using the computer's local date.
-Like other successful commands, `summary` is followed by the application's normal save attempt;
-a storage permission or save error can therefore appear instead of the statistics.
+WatchDog attempts to save after running `summary`. If saving fails, the statistics are still displayed
+and the failure is recorded in the application log.
 
 ### Editing a dog: `editdog`
 
@@ -319,6 +330,9 @@ Example: `editcustomer 1 p/91234567 e/johndoe@example.com`
 
 ### Linking dogs to a customer: `link`
 
+Assigns one or more existing, unowned dogs to an existing customer. Use this to record who owns each dog;
+one command can link several dogs to the same customer.
+
 Format: `link c/CUSTOMER_ID d/DOG_ID [DOG_ID]...`
 
 Example: `link c/1 d/2 3` links dogs 2 and 3 to customer 1.
@@ -343,6 +357,9 @@ Example: `link c/1 d/2 3` links dogs 2 and 3 to customer 1.
   Other customers' dogs and unlinked dogs are unaffected. Deleting a dog does not delete its customer.
 
 ### Unlinking dogs from a customer: `unlink`
+
+Removes ownership links from selected dogs or from all dogs belonging to one customer. The dogs and
+customers remain in WatchDog, so you can subsequently link the dogs to another customer.
 
 Formats: `unlink d/DOG_ID [DOG_ID]...` or `unlink c/CUSTOMER_ID`
 
@@ -390,12 +407,40 @@ Example: `searchd b/Golden Retriever s/Medium`
 
 ### Enrolling dogs in activities: `enrol` and `unenrol`
 
+`enrol` books one or more existing dogs into a specific dated occurrence of an existing activity.
+Create the dogs and activity first, then supply their persistent IDs and the date to book.
+For a daily or weekly activity, each command books only the supplied date; it does not automatically
+book the dogs into every future occurrence. Dogs can be enrolled whether or not they have an owner.
+
+`unenrol` cancels the selected dogs' bookings for that activity on the supplied date. Bookings for
+other dates and activities remain. The activity schedule and the dog and customer records also remain,
+so you can use `enrol` again to book another occurrence. Enrolments represent planned participation,
+not attendance or check-in.
+
 Formats: `enrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]` and
 `unenrol a/ACTIVITY_ID date/YYYY-MM-DD d/DOG_ID [DOG_ID...]`.
+
+Examples:
+
+* `enrol a/1 date/2026-11-04 d/2 3` enrols dogs 2 and 3 in activity 1's occurrence on 4 November 2026.
+* `unenrol a/1 date/2026-11-04 d/2 3` removes those two dated bookings.
+
+These examples assume activity 1 and dogs 2 and 3 exist and the activity occurs on that date.
+For `enrol`, use today or a future occurrence date when trying the example; the dogs must not already
+be enrolled or have overlapping bookings. For `unenrol`, both dogs must have the specified bookings.
 
 The `a/`, `date/`, and `d/` fields may appear in any order and must each appear exactly once. Dog IDs are separated
 by one or more spaces, must be positive integers, and must not repeat; commas and `d/0` are rejected. Activity IDs
 must also be positive integers and are supplied separately using `a/`.
+
+* The date must be an occurrence of the selected activity: its start date for a one-time activity,
+  or a date on or after its start date that follows its daily or weekly recurrence.
+* `enrol` rejects a dog already booked into that occurrence or booked into another activity with an
+  overlapping time on the same date. Adjacent activities, where one ends exactly when another starts,
+  are allowed.
+* `unenrol` requires every selected dog to have a booking for that exact activity and date.
+* Both commands apply to the whole batch: if any dog or booking is invalid, none of the requested
+  bookings are added or removed. Existing search filters remain active, and affected cards refresh.
 
 Invalid input reports the specific field or formatting problem, followed by the complete command format and an
 example. `enrol` rejects past dates and states that the date must be today or later. `unenrol` permits past dates so
@@ -403,7 +448,15 @@ that a historical enrolment can be corrected, provided the activity occurred and
 
 ### Filtering unlinked records: `filterun`
 
+Finds incomplete ownership records by showing either dogs without owners or customers without dogs.
+This changes the displayed records and keeps the filter active as ownership changes.
+
 Format: `filterun dog` or `filterun customer`
+
+Examples:
+
+* `filterun dog` finds dogs without an owner.
+* `filterun customer` finds customers without dogs.
 
 * `filterun dog` displays dogs that are not linked to any customer and clears the customer panel.
   The activity panel shows activities those dogs are enrolled in, including past enrolments. Each activity's
@@ -440,17 +493,17 @@ Example: `searchc n/Anna d/12 34`
   The activity panel shows only activities with enrolments belonging to the matching customers. Each activity
   includes an `Enrolments` section containing only their dogs and those dogs' stored enrolment dates.
 
-### Deleting a dog: `delete dog`
+### Deleting a dog: `deletedog`
 
 Deletes a dog using its persistent dog ID and removes all of that dog's activity enrolments, including past
 occurrences. Other dogs' enrolments and the activity schedules remain unchanged.
 
-Format: `delete dog ID`
+Format: `deletedog ID`
 
 Examples:
 
-* `delete dog 1`
-* `delete  dog   1`
+* `deletedog 1`
+* `deletedog   1`
 
 Multiple spaces between the command components are accepted.
 
@@ -462,18 +515,20 @@ If the ID does not exist, WatchDog displays:
 
 `Error in deleting dog:`<br>`Please enter a valid dog index`
 
-### Deleting a customer: `delete customer`
+### Deleting a customer: `deletecustomer`
 
-Deletes a customer using its persistent customer ID.
+Deletes an existing customer using its persistent ID and removes their dogs' ownership links.
+The dogs and their activity bookings remain, and the dogs can be linked to another customer.
+The customer can be deleted even when hidden by a search or filter.
 
-Format: `delete customer ID`
+Format: `deletecustomer ID`
 
 Example:
 
-* `delete customer 21`
-* `delete  customer   21`
+* `deletecustomer 21`
+* `deletecustomer   21`
 
-Leading and trailing whitespace and multiple spaces between the command words and ID are accepted.
+Leading and trailing whitespace and multiple spaces between the command name and ID are accepted.
 
 ### Customer and dog cards
 
@@ -536,9 +591,12 @@ available where applicable, but the data file may not contain that change.
 
 ### Exiting the program: `exit`
 
-Exits the program.
+Closes WatchDog. Record changes are saved automatically after commands; window preferences are saved
+when the application shuts down. Undo and redo history is not retained after exiting.
 
 Format: `exit`
+
+Example: `exit` closes WatchDog.
 
 ### Saving the data
 
@@ -571,7 +629,6 @@ _Details coming soon ..._
 ## Known issues
 
 1. **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
-2. **If you minimize the Help Window** and then run the `help` command (or use the `Help` menu, or the keyboard shortcut `F1`) again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -597,8 +654,8 @@ Action     | Format, Examples
 **Add customer** | `addcustomer n/NAME p/PHONE_NUMBER e/EMAIL bc/BACKUP_CONTACT_NUMBER`<br>e.g., `addcustomer n/Lily Koh p/91234567 e/lily@gmail.com bc/98765432`
 **Edit dog** | `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`<br>e.g., `editdog 1 s/Large`
 **Edit customer** | `editcustomer CUSTOMER_ID [n/NAME] [p/PHONE] [e/EMAIL] [bc/BACKUP_CONTACT]`<br>e.g., `editcustomer 1 p/91234567`
-**Delete dog** | `delete dog ID`<br>e.g., `delete dog 1`
-**Delete customer** | `delete customer ID`<br>e.g., `delete customer 21`
+**Delete dog** | `deletedog ID`<br>e.g., `deletedog 1`
+**Delete customer** | `deletecustomer ID`<br>e.g., `deletecustomer 21`
 **Undo** | `undo`
 **Redo** | `redo`
-**Help**   | `help` opens the help window; `help COMMAND` shows command details in the result section.<br>e.g., `help summary`, `help adddog`, `help delete dog`
+**Help**   | `help` opens the help window; `help COMMAND` shows command details in the result section.<br>e.g., `help summary`, `help adddog`, `help deletedog`

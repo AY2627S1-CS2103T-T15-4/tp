@@ -12,10 +12,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.AddressBookParser;
-import seedu.address.model.AddressBook;
+import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.customer.Customer;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
@@ -25,12 +25,12 @@ import seedu.address.model.dog.exceptions.LinkException;
 
 /** Tests batch ownership changes through the real parser and model. */
 public class LinkCommandTest {
-    private final AddressBookParser parser = new AddressBookParser();
+    private final WatchDogParser parser = new WatchDogParser();
     private ModelManager model;
 
     @BeforeEach
     public void setUp() {
-        AddressBook book = new AddressBook();
+        WatchDog book = new WatchDog();
         book.addCustomer(new Customer(7, "Alex", "91234567", "alex@example.com", "98765432"));
         book.addCustomer(new Customer(8, "Sam", "92345678", "sam@example.com", "98765432"));
         for (int id : List.of(42, 43, 44)) {
@@ -77,7 +77,7 @@ public class LinkCommandTest {
         Dog otherOwnersDog = model.getDogList().get(2);
         Dog unlinked = model.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("small")));
         model.updateFilteredDogList(dog -> false);
-        execute("delete customer 7");
+        execute("deletecustomer 7");
         assertEquals(List.of(firstUnowned, secondUnowned, otherOwnersDog, unlinked), model.getDogList());
         assertTrue(model.getFilteredDogList().isEmpty());
         assertEquals(8, model.getCustomerList().get(0).getId());
@@ -103,18 +103,18 @@ public class LinkCommandTest {
         model.setCustomer(original, edited);
         assertEquals(Optional.of(7), model.getDogList().get(0).getOwnerId());
         assertEquals(edited, model.getCustomerList().get(0));
-        AddressBook before = new AddressBook(model.getAddressBook());
+        WatchDog before = new WatchDog(model.getWatchDog());
         Customer differentId = new Customer(9, "Alex Tan", "91234567", "alex@example.com", "98765432");
         assertThrows(IllegalArgumentException.class, () -> model.setCustomer(edited, differentId));
-        assertEquals(before, model.getAddressBook());
+        assertEquals(before, model.getWatchDog());
     }
 
     @Test
     public void linkDogs_directInvalidBatch_preservesModel() {
-        AddressBook before = new AddressBook(model.getAddressBook());
+        WatchDog before = new WatchDog(model.getWatchDog());
         assertThrows(LinkException.class, () -> model.linkDogs(7, List.of()));
         assertThrows(LinkException.class, () -> model.linkDogs(7, List.of(42, 42)));
-        assertEquals(before, model.getAddressBook());
+        assertEquals(before, model.getWatchDog());
     }
 
     @Test
@@ -135,12 +135,12 @@ public class LinkCommandTest {
     }
 
     private void assertRejected(String input, String message) {
-        AddressBook before = new AddressBook(model.getAddressBook());
+        WatchDog before = new WatchDog(model.getWatchDog());
         var visibleDogs = List.copyOf(model.getFilteredDogList());
         var visibleCustomers = List.copyOf(model.getFilteredCustomerList());
         CommandException exception = assertThrows(CommandException.class, () -> execute(input));
         assertEquals(message, exception.getMessage());
-        assertEquals(before, model.getAddressBook());
+        assertEquals(before, model.getWatchDog());
         assertEquals(visibleDogs, model.getFilteredDogList());
         assertEquals(visibleCustomers, model.getFilteredCustomerList());
     }

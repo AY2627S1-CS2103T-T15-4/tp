@@ -1,31 +1,26 @@
 @startuml
 !include style.puml
-skinparam arrowColor LOGIC_COLOR_T4
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 180
 
-actor User
-participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":AddressBookParser" as Router LOGIC_COLOR
-participant ":EditDogCommandParser" as Parser LOGIC_COLOR
 participant "command:EditDogCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
-participant ":AddressBook" as Book MODEL_COLOR
 
-User -> Logic : execute("editdog 1 s/Small")
-Logic -> Router : parseCommand(...)
-Router -> Parser : parse("1 s/Small")
-Parser -> Parser : validate ID and edited fields
-Parser -> Command : new EditDogCommand(1, descriptor)
-Parser --> Router : command
-Router --> Logic : command
-Logic -> Command : execute(Model)
+[-> Command : execute(model)
 Command -> Model : getDogList()
-Model --> Command : complete dog list
-Command -> Command : find ID 1 and create edited dog\nwith the same owner ID
+Model --> Command : dogs
+note over Command
+  Finds ID 1 in the complete list.
+  Builds editedDog with the same ID
+  and owner, replacing its size.
+end note
 Command -> Model : setDog(target, editedDog)
-Model -> Book : setDog(target, editedDog)
-Book -> Book : replace dog with the same persistent ID
-Book --> Model : success or validation failure
-Model --> Command : result
-Command --> Logic : CommandResult
-Logic --> User : display result
+[<-- Command : commandResult
+
+legend bottom
+  Edits dog 1 using a parsed size descriptor. Model internals are omitted.
+  Parsing and saving follow the shared Logic flow.
+  Successful execution only; validation failures are omitted.
+endlegend
 @enduml

@@ -1,45 +1,33 @@
 @startuml
 !include style.puml
 skinparam arrowThickness 1.1
-skinparam arrowColor STORAGE_COLOR
+skinparam arrowColor STORAGE_COLOR_T4
 skinparam classBackgroundColor STORAGE_COLOR
+show members
 
-package Storage as StoragePackage {
-
-Class "<<interface>>\nStorage" as Storage
-Class StorageManager
-
-package "UserPrefs Storage" #F4F6F6{
-Class JsonUserPrefsStorage
+class "<<interface>>\nStorage" as Storage
+class StorageManager
+class JsonUserPrefsStorage
+class JsonWatchDogStorage
+class JsonSerializableWatchDog
+class JsonAdaptedCustomer
+class JsonAdaptedDog {
+  -ownerId: Integer
 }
-
-package "AddressBook Storage" #F4F6F6{
-Class JsonAddressBookStorage
-Class JsonSerializableAddressBook
-Class JsonAdaptedCustomer
-Class JsonAdaptedDog
-Class JsonAdaptedActivity
-Class JsonAdaptedEnrolment
-Class NextDogIdDeserializer
+class JsonAdaptedActivity
+class JsonAdaptedEnrolment {
+  -activityId: Integer
+  -dogId: Integer
+  -date: LocalDate
 }
-
-}
-
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Storage
 
 StorageManager .up.|> Storage
-StorageManager -down-> "1" JsonUserPrefsStorage
-StorageManager -down-> "1" JsonAddressBookStorage
-
-JsonAddressBookStorage ..> JsonSerializableAddressBook
-JsonSerializableAddressBook --> "*" JsonAdaptedCustomer
-JsonSerializableAddressBook --> "*" JsonAdaptedDog
-JsonSerializableAddressBook --> "*" JsonAdaptedActivity
-JsonSerializableAddressBook --> "*" JsonAdaptedEnrolment
-JsonSerializableAddressBook ..> NextDogIdDeserializer : validates nextDogId
-JsonAdaptedEnrolment : activityId: int
-JsonAdaptedEnrolment : dogId: int
-JsonAdaptedEnrolment : date: LocalDate
+StorageManager --> "1" JsonUserPrefsStorage : userPrefsStorage
+StorageManager --> "1" JsonWatchDogStorage : watchDogStorage
+JsonWatchDogStorage ..> JsonSerializableWatchDog : reads / writes
+JsonSerializableWatchDog --> "*" JsonAdaptedCustomer : customers
+JsonSerializableWatchDog --> "*" JsonAdaptedDog : dogs
+JsonSerializableWatchDog --> "*" JsonAdaptedActivity : activities
+JsonSerializableWatchDog --> "*" JsonAdaptedEnrolment : enrolments
 
 @enduml

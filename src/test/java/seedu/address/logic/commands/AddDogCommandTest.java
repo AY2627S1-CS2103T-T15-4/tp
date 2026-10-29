@@ -8,9 +8,9 @@ import static seedu.address.testutil.Assert.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.model.AddressBook;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.WatchDog;
 import seedu.address.model.dog.Breed;
 import seedu.address.model.dog.Dog;
 import seedu.address.model.dog.DogName;
@@ -42,14 +42,14 @@ public class AddDogCommandTest {
 
     @Test
     public void execute_exhaustedDogIds_throwsCommandExceptionWithoutMutation() {
-        AddressBook addressBook = new AddressBook();
-        addressBook.setNextDogId((long) Integer.MAX_VALUE + 1);
-        ModelManager model = new ModelManager(addressBook, new UserPrefs());
+        WatchDog watchDog = new WatchDog();
+        watchDog.setNextDogId((long) Integer.MAX_VALUE + 1);
+        ModelManager model = new ModelManager(watchDog, new UserPrefs());
 
         assertThrows(CommandException.class, "No more dog IDs are available.", () ->
                 new AddDogCommand(DOG).execute(model));
         assertTrue(model.getDogList().isEmpty());
-        assertEquals((long) Integer.MAX_VALUE + 1, model.getAddressBook().getNextDogId());
+        assertEquals((long) Integer.MAX_VALUE + 1, model.getWatchDog().getNextDogId());
     }
 
     @Test

@@ -1,39 +1,44 @@
 @startuml
 !include style.puml
 skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 180
 
-Actor User as user USER_COLOR
-Participant ":UI" as ui UI_COLOR
-Participant ":Logic" as logic LOGIC_COLOR
-Participant ":Model" as model MODEL_COLOR
-Participant ":Storage" as storage STORAGE_COLOR
+actor User USER_COLOR
+participant ":MainWindow" as UI UI_COLOR
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant "command:DeleteDogCommand" as Command LOGIC_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+participant ":StorageManager" as Storage STORAGE_COLOR
 
-user -[USER_COLOR]> ui : "delete dog 1"
-activate ui UI_COLOR
+User -> UI : deletedog 1
+UI -> Logic : execute("deletedog 1")
+ref over Logic, Command
+  Parse deletedog 1 and return command
+end ref
+Logic -> Model : createState()
+Model --> Logic : stateBeforeCommand
+Logic -> Command : execute(model)
+Command -> Model : getDogList()
+Model --> Command : dogs
+note over Command
+  Finds dog with persistent ID 1.
+end note
+Command -> Model : deleteDog(dog)
+Command --> Logic : commandResult
+note right of Logic
+  Keeps the pre-command state for undo
+  and clears redo before saving.
+end note
+Logic -> Model : getWatchDog()
+Model --> Logic : watchDog
+Logic -> Storage : saveWatchDog(watchDog)
+Logic --> UI : commandResult
+UI --> User : feedback displayed
 
-ui -[UI_COLOR]> logic : execute("delete dog 1")
-activate logic LOGIC_COLOR
-
-logic -[LOGIC_COLOR]> model : deleteDog(p)
-activate model MODEL_COLOR
-
-model -[MODEL_COLOR]-> logic
-deactivate model
-
-logic -[LOGIC_COLOR]> storage : saveAddressBook(addressBook)
-activate storage STORAGE_COLOR
-
-storage -[STORAGE_COLOR]> storage : Save to file
-activate storage STORAGE_COLOR_T1
-storage --[STORAGE_COLOR]> storage
-deactivate storage
-
-storage --[STORAGE_COLOR]> logic
-deactivate storage
-
-logic --[LOGIC_COLOR]> ui
-deactivate logic
-
-ui--[UI_COLOR]> user
-deactivate ui
+legend bottom
+  Successful deletion and saving; model and storage internals are omitted.
+  Parser construction is expanded in the Logic sequence.
+  Observable-list updates refresh the UI; notifications are omitted.
+endlegend
 @enduml

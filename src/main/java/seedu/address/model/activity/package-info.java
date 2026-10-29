@@ -12,7 +12,7 @@
  * includes schedule details. Replacement methods preserve identity and leave the original unchanged.
  * Times describe a same-day interval with end later than start. Dates do not depend on today's clock.
  *
- * <p>Integration contract for subsequent contributions: the address book allocates and persists schedule IDs. Store
+ * <p>Integration contract for subsequent contributions: WatchDog allocates and persists schedule IDs. Store
  * dog participation separately by (activity ID, occurrence date). An absent dated booking means
  * zero dogs; attending one date never enrols a dog in another. The model must validate references,
  * same-dog overlap, and existing bookings before accepting an edited schedule, and remove booking

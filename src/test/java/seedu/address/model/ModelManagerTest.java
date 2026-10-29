@@ -32,19 +32,14 @@ public class ModelManagerTest {
     public void constructor() {
         assertEquals(new UserPrefs(), modelManager.getUserPrefs());
         assertEquals(new GuiSettings(), modelManager.getGuiSettings());
-        assertEquals(new AddressBook(), new AddressBook(modelManager.getAddressBook()));
-    }
-
-    @Test
-    public void selectDog_zeroId_rejectsInvalidDogId() {
-        assertThrows(IllegalArgumentException.class, "Dog ID must be positive.", () -> modelManager.selectDog(0));
+        assertEquals(new WatchDog(), new WatchDog(modelManager.getWatchDog()));
     }
 
     @Test
     public void constructor_validUserPrefs_copiesUserPrefs() {
         UserPrefs userPrefs = new UserPrefs();
         userPrefs.setGuiSettings(new GuiSettings(1, 2, 3, 4));
-        modelManager = new ModelManager(new AddressBook(), userPrefs);
+        modelManager = new ModelManager(new WatchDog(), userPrefs);
         assertEquals(userPrefs, modelManager.getUserPrefs());
 
         // Modifying userPrefs should not modify modelManager's userPrefs
@@ -74,8 +69,8 @@ public class ModelManagerTest {
         assertEquals(List.of(ALICE), modelManager.getFilteredCustomerList());
         assertEquals(List.of(buddy), modelManager.getFilteredDogList());
         assertEquals(List.of(walk), modelManager.getFilteredActivityList());
-        assertEquals(1, modelManager.getAddressBook().getCustomerList().size());
-        assertEquals(1, modelManager.getAddressBook().getDogList().size());
+        assertEquals(1, modelManager.getWatchDog().getCustomerList().size());
+        assertEquals(1, modelManager.getWatchDog().getDogList().size());
     }
 
     @Test
@@ -89,10 +84,10 @@ public class ModelManagerTest {
         modelManager.linkDogs(owner.getId(), List.of(buddy.getId()));
         modelManager.enrolDogs(walk.getId(), walk.getStartDate(), List.of(buddy.getId()));
         Model.ModelState state = modelManager.createState();
-        long nextCustomerId = state.addressBook().getNextCustomerId();
-        long nextDogId = state.addressBook().getNextDogId();
+        long nextCustomerId = state.watchDog().getNextCustomerId();
+        long nextDogId = state.watchDog().getNextDogId();
 
-        long nextActivityId = state.addressBook().getNextActivityId();
+        long nextActivityId = state.watchDog().getNextActivityId();
 
         modelManager.addCustomer(nextCustomer);
         modelManager.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("large")));
@@ -100,7 +95,7 @@ public class ModelManagerTest {
                 LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.ONCE);
         modelManager.restoreState(state);
 
-        ReadOnlyAddressBook restored = modelManager.getAddressBook();
+        ReadOnlyWatchDog restored = modelManager.getWatchDog();
         assertEquals(List.of(owner), restored.getCustomerList());
         assertEquals(List.of(walk), restored.getActivityList());
         assertEquals(List.of(new Enrolment(walk.getId(), buddy.getId(), walk.getStartDate())),
@@ -114,7 +109,7 @@ public class ModelManagerTest {
         Dog nextDog = modelManager.addDog(new Dog(new DogName("Max"), new Breed("Poodle"), new Size("large")));
         Activity nextActivity = modelManager.addActivity(new ActivityName("Run"), LocalDate.now(),
                 LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.ONCE);
-        assertEquals(nextCustomerId, modelManager.getAddressBook().getCustomerList().get(1).getId());
+        assertEquals(nextCustomerId, modelManager.getWatchDog().getCustomerList().get(1).getId());
         assertEquals(nextDogId, (long) nextDog.getId());
         assertEquals(nextActivityId, nextActivity.getId());
     }
@@ -133,9 +128,9 @@ public class ModelManagerTest {
 
     @Test
     public void hasCustomer_checksCustomerIdentity() {
-        AddressBook addressBook = new AddressBook();
-        addressBook.addCustomer(ALICE);
-        modelManager = new ModelManager(addressBook, new UserPrefs());
+        WatchDog watchDog = new WatchDog();
+        watchDog.addCustomer(ALICE);
+        modelManager = new ModelManager(watchDog, new UserPrefs());
 
         assertTrue(modelManager.hasCustomer(ALICE));
         assertFalse(modelManager.hasCustomer(BOB));
@@ -198,15 +193,15 @@ public class ModelManagerTest {
 
     @Test
     public void equals() {
-        AddressBook addressBook = new AddressBook();
-        addressBook.addCustomer(ALICE);
-        addressBook.addCustomer(BOB);
-        AddressBook differentAddressBook = new AddressBook();
+        WatchDog watchDog = new WatchDog();
+        watchDog.addCustomer(ALICE);
+        watchDog.addCustomer(BOB);
+        WatchDog differentWatchDog = new WatchDog();
         UserPrefs userPrefs = new UserPrefs();
 
         // same values -> returns true
-        modelManager = new ModelManager(addressBook, userPrefs);
-        ModelManager modelManagerCopy = new ModelManager(addressBook, userPrefs);
+        modelManager = new ModelManager(watchDog, userPrefs);
+        ModelManager modelManagerCopy = new ModelManager(watchDog, userPrefs);
         assertTrue(modelManager.equals(modelManagerCopy));
 
         // same object -> returns true
@@ -218,12 +213,12 @@ public class ModelManagerTest {
         // different types -> returns false
         assertFalse(modelManager.equals(5));
 
-        // different addressBook -> returns false
-        assertFalse(modelManager.equals(new ModelManager(differentAddressBook, userPrefs)));
+        // different watchDog -> returns false
+        assertFalse(modelManager.equals(new ModelManager(differentWatchDog, userPrefs)));
 
         // different filteredList -> returns false
         modelManager.updateFilteredCustomerList(customer -> customer.getId() == ALICE.getId());
-        assertFalse(modelManager.equals(new ModelManager(addressBook, userPrefs)));
+        assertFalse(modelManager.equals(new ModelManager(watchDog, userPrefs)));
 
         // resets modelManager to initial state for upcoming tests
         modelManager.updateFilteredCustomerList(Model.PREDICATE_SHOW_ALL_CUSTOMERS);
@@ -231,18 +226,18 @@ public class ModelManagerTest {
         // different userPrefs -> returns false
         UserPrefs differentUserPrefs = new UserPrefs();
         differentUserPrefs.setGuiSettings(new GuiSettings(1, 2, 3, 4));
-        assertFalse(modelManager.equals(new ModelManager(addressBook, differentUserPrefs)));
+        assertFalse(modelManager.equals(new ModelManager(watchDog, differentUserPrefs)));
     }
 
     @Test
     public void equals_differentSearchResults_returnsFalse() {
-        AddressBook addressBook = new AddressBook();
-        addressBook.addCustomer(new Customer(42, "Alex", "91234567", "alex@example.com", "98765432"));
-        addressBook.addDogFromStorage(new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
-        addressBook.addActivity(new ActivityName("Walk"), LocalDate.of(2026, 10, 20),
+        WatchDog watchDog = new WatchDog();
+        watchDog.addCustomer(new Customer(42, "Alex", "91234567", "alex@example.com", "98765432"));
+        watchDog.addDogFromStorage(new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        watchDog.addActivity(new ActivityName("Walk"), LocalDate.of(2026, 10, 20),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
-        ModelManager first = new ModelManager(addressBook, new UserPrefs());
-        ModelManager second = new ModelManager(addressBook, new UserPrefs());
+        ModelManager first = new ModelManager(watchDog, new UserPrefs());
+        ModelManager second = new ModelManager(watchDog, new UserPrefs());
 
         assertEquals(first, second);
         first.updateFilteredCustomerList(customer -> false);

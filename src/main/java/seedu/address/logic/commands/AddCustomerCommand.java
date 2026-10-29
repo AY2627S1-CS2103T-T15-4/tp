@@ -7,14 +7,14 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.customer.Customer;
 
-/** Adds a customer to the address book. */
+/** Adds a customer to WatchDog. */
 public class AddCustomerCommand extends Command {
     public static final String COMMAND_WORD = "addcustomer";
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a customer. "
             + "Parameters: n/NAME p/PHONE e/EMAIL bc/BACKUP_CONTACT\n"
             + "Example: " + COMMAND_WORD + " n/Alice Tan p/91234567 e/alice@example.com bc/98765432";
     public static final String MESSAGE_SUCCESS = "New customer added.";
-    public static final String MESSAGE_DUPLICATE_CUSTOMER = "This customer already exists in the address book.";
+    public static final String MESSAGE_DUPLICATE_CUSTOMER = "This customer already exists in WatchDog.";
 
     /**
      * Creates an AddCustomerCommand to add the specified {@code Customer}.

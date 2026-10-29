@@ -1,28 +1,31 @@
 @startuml
 !include style.puml
-skinparam arrowColor LOGIC_COLOR_T4
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #FFFFFF
+skinparam maxMessageSize 180
 
-actor User
-participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":AddressBookParser" as Router LOGIC_COLOR
-participant ":SearchActivityCommandParser" as Parser LOGIC_COLOR
 participant "command:SearchActivityCommand" as Command LOGIC_COLOR
 participant ":ModelManager" as Model MODEL_COLOR
-participant ":AddressBook" as Book MODEL_COLOR
 
-User -> Logic : execute("searcha n/Walk d/2026-10-28")
-Logic -> Router : parseCommand(...)
-Router -> Parser : parse(...)
-Parser -> Command : new SearchActivityCommand(...)
-Parser --> Router : command
-Router --> Logic : command
-Logic -> Command : execute(Model)
+[-> Command : execute(model)
+note over Command
+  Builds activityPredicate for name Walk
+  and occurrence date 2026-10-28.
+  Related predicates use the same date
+  when matching enrolments.
+end note
 Command -> Model : updateFilteredActivityList(activityPredicate)
-Command -> Model : updateFilteredDogList(matching activity + occurrence date)
-Model -> Book : get enrolments for matching occurrence
-Book --> Model : activity, dog and date records
-Command -> Model : updateFilteredCustomerList(owners of visible dogs)
-Model --> Command : refresh filtered views
-Command --> Logic : CommandResult("Successfully searched activities by ...")
-Logic --> User : display success message and views
+Command -> Model : updateFilteredDogList(enrolledDogPredicate)
+Command -> Model : updateFilteredCustomerList(ownerPredicate)
+note right of Model
+  Retains predicates for later refreshes.
+  Stored records are unchanged.
+end note
+[<-- Command : commandResult
+
+legend bottom
+  Searches activities by name and date. Predicate evaluation is omitted.
+  Parsing and saving follow the shared Logic flow.
+  Successful execution only; validation failures are omitted.
+endlegend
 @enduml

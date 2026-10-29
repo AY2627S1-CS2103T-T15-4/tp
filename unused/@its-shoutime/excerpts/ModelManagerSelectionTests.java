@@ -23,11 +23,11 @@
 
     @Test
     public void selectDog_unownedDog_refreshesAfterAddingCustomer() {
-        AddressBook addressBook = new AddressBook();
-        addressBook.addDogFromStorage(new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
-        addressBook.addDogFromStorage(new Dog(43, new DogName("Max"), new Breed("Poodle"), new Size("large")));
-        ModelManager first = new ModelManager(addressBook, new UserPrefs());
-        ModelManager second = new ModelManager(addressBook, new UserPrefs());
+        WatchDog watchDog = new WatchDog();
+        watchDog.addDogFromStorage(new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        watchDog.addDogFromStorage(new Dog(43, new DogName("Max"), new Breed("Poodle"), new Size("large")));
+        ModelManager first = new ModelManager(watchDog, new UserPrefs());
+        ModelManager second = new ModelManager(watchDog, new UserPrefs());
 
         first.selectDog(42);
         first.addCustomer(ALICE);
@@ -39,27 +39,27 @@
 
     @Test
     public void selectDog_showsOnlyItsTodayAndFutureEnrolments() {
-        AddressBook addressBook = new AddressBook();
+        WatchDog watchDog = new WatchDog();
         LocalDate today = LocalDate.now();
         Dog selectedDog = new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small"));
         Dog otherDog = new Dog(43, new DogName("Max"), new Breed("Poodle"), new Size("large"));
-        addressBook.addDogFromStorage(selectedDog);
-        addressBook.addDogFromStorage(otherDog);
-        Activity pastActivity = addressBook.addActivity(new ActivityName("Past"), today.minusDays(1),
+        watchDog.addDogFromStorage(selectedDog);
+        watchDog.addDogFromStorage(otherDog);
+        Activity pastActivity = watchDog.addActivity(new ActivityName("Past"), today.minusDays(1),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
-        Activity todayActivity = addressBook.addActivity(new ActivityName("Today"), today,
+        Activity todayActivity = watchDog.addActivity(new ActivityName("Today"), today,
                 LocalTime.of(10, 0), LocalTime.of(11, 0), Recurrence.ONCE);
-        Activity futureActivity = addressBook.addActivity(new ActivityName("Future"), today.plusDays(1),
+        Activity futureActivity = watchDog.addActivity(new ActivityName("Future"), today.plusDays(1),
                 LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
-        Activity otherDogActivity = addressBook.addActivity(new ActivityName("Other dog"), today,
+        Activity otherDogActivity = watchDog.addActivity(new ActivityName("Other dog"), today,
                 LocalTime.of(11, 0), LocalTime.of(12, 0), Recurrence.ONCE);
-        addressBook.addEnrolmentFromStorage(new Enrolment(pastActivity.getId(), selectedDog.getId(),
+        watchDog.addEnrolmentFromStorage(new Enrolment(pastActivity.getId(), selectedDog.getId(),
                 today.minusDays(1)));
-        addressBook.addEnrolmentFromStorage(new Enrolment(todayActivity.getId(), selectedDog.getId(), today));
-        addressBook.addEnrolmentFromStorage(new Enrolment(futureActivity.getId(), selectedDog.getId(),
+        watchDog.addEnrolmentFromStorage(new Enrolment(todayActivity.getId(), selectedDog.getId(), today));
+        watchDog.addEnrolmentFromStorage(new Enrolment(futureActivity.getId(), selectedDog.getId(),
                 today.plusDays(1)));
-        addressBook.addEnrolmentFromStorage(new Enrolment(otherDogActivity.getId(), otherDog.getId(), today));
-        modelManager = new ModelManager(addressBook, new UserPrefs());
+        watchDog.addEnrolmentFromStorage(new Enrolment(otherDogActivity.getId(), otherDog.getId(), today));
+        modelManager = new ModelManager(watchDog, new UserPrefs());
 
         modelManager.selectDog(selectedDog.getId());
 
@@ -68,12 +68,12 @@
 
     @Test
     public void equals_differentSelectedDog_returnsFalse() {
-        AddressBook addressBook = new AddressBook();
-        addressBook.addCustomer(new Customer(7, "Alex", "91234567", "alex@example.com", "98765432"));
-        addressBook.addDogFromStorage(new Dog(43, new DogName("Max"), new Breed("Poodle"), new Size("large")));
-        addressBook.addDogFromStorage(new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
-        ModelManager first = new ModelManager(addressBook, new UserPrefs());
-        ModelManager second = new ModelManager(addressBook, new UserPrefs());
+        WatchDog watchDog = new WatchDog();
+        watchDog.addCustomer(new Customer(7, "Alex", "91234567", "alex@example.com", "98765432"));
+        watchDog.addDogFromStorage(new Dog(43, new DogName("Max"), new Breed("Poodle"), new Size("large")));
+        watchDog.addDogFromStorage(new Dog(42, new DogName("Buddy"), new Breed("Poodle"), new Size("small")));
+        ModelManager first = new ModelManager(watchDog, new UserPrefs());
+        ModelManager second = new ModelManager(watchDog, new UserPrefs());
 
         first.selectDog(42);
         second.selectDog(99);
@@ -90,11 +90,11 @@
 
     @Test
     public void equals_differentSelectedCustomer_returnsFalse() {
-        AddressBook addressBook = new AddressBook();
-        addressBook.addCustomer(new Customer(42, "Alex", "91234567", "alex@example.com", "98765432"));
-        addressBook.addCustomer(new Customer(43, "Bob", "81234567", "bob@example.com", "87654321"));
-        ModelManager first = new ModelManager(addressBook, new UserPrefs());
-        ModelManager second = new ModelManager(addressBook, new UserPrefs());
+        WatchDog watchDog = new WatchDog();
+        watchDog.addCustomer(new Customer(42, "Alex", "91234567", "alex@example.com", "98765432"));
+        watchDog.addCustomer(new Customer(43, "Bob", "81234567", "bob@example.com", "87654321"));
+        ModelManager first = new ModelManager(watchDog, new UserPrefs());
+        ModelManager second = new ModelManager(watchDog, new UserPrefs());
 
         first.selectCustomer(42);
         second.selectCustomer(43);

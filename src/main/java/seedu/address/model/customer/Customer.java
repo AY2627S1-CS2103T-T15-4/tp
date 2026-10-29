@@ -37,7 +37,7 @@ public class Customer {
 
     /**
      * Creates a customer without an assigned persistent ID.
-     * The address book assigns an ID before storing the customer.
+     * The WatchDog assigns an ID before storing the customer.
      */
     public Customer(Name name, Phone phone, Email email, BackupContact backupContact) {
         requireAllNonNull(name, phone, email, backupContact);

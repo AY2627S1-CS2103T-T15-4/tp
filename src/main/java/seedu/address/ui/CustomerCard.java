@@ -1,5 +1,8 @@
 package seedu.address.ui;
 
+import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,6 +59,9 @@ public class CustomerCard extends UiPart<Region> {
     /** Creates a customer card that sends copied values to the supplied clipboard writer. */
     CustomerCard(Customer customer, List<Integer> ownedDogIds, ClipboardWriter clipboardWriter) {
         super(FXML);
+        requireNonNull(customer);
+        requireNonNull(clipboardWriter);
+        requireAllNonNull(ownedDogIds);
         this.customer = customer;
         id.setText(customer.getId() + ". ");
         name.setText(customer.getName().fullName);
