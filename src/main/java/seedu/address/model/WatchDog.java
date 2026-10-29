@@ -185,6 +185,7 @@ public class WatchDog implements ReadOnlyWatchDog {
     }
     // @@author
 
+    // @@author lilosy
     /** Replaces an activity only when it has no enrolments, after checking for schedule conflicts. */
     public void setActivity(Activity target, Activity editedActivity) {
         requireNonNull(target);
@@ -239,6 +240,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         return first.getStartTime().isBefore(second.getEndTime())
                 && second.getStartTime().isBefore(first.getEndTime());
     }
+    // @@author
 
     // @@author Kenneth-Chia
     /** Restores a schedule with its persisted ID; rejects duplicate identities. */
@@ -271,6 +273,7 @@ public class WatchDog implements ReadOnlyWatchDog {
     }
     // @@author
 
+    // @@author lilosy
     /** Removes an existing activity and its enrolments without reusing its ID. */
     public void removeActivity(Activity activity) {
         requireNonNull(activity);
@@ -280,6 +283,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         enrolments.removeIf(enrolment -> enrolment.getActivityId() == activity.getId());
         activities.remove(activity);
     }
+    // @@author
 
     /** Returns true if a customer with the same identity as {@code customer} exists. */
     public boolean hasCustomer(Customer customer) {
@@ -287,6 +291,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         return customers.contains(customer);
     }
 
+    // @@author lilosy
     /**
      * Adds a customer, assigning a new ID when the customer is unassigned.
      * IDs increase monotonically and are never reused after deletion.
@@ -314,6 +319,7 @@ public class WatchDog implements ReadOnlyWatchDog {
 
         customers.setCustomer(target, editedCustomer);
     }
+    // @@author
 
     //@@author its-shoutime
     /**
@@ -526,10 +532,12 @@ public class WatchDog implements ReadOnlyWatchDog {
         return nextDogId;
     }
 
+    // @@author lilosy
     @Override
     public long getNextCustomerId() {
         return nextCustomerId;
     }
+    // @@author
 
     /**
      * Restores a counter above all stored dog IDs. {@code Integer.MAX_VALUE + 1} represents exhaustion.
@@ -550,6 +558,7 @@ public class WatchDog implements ReadOnlyWatchDog {
         }
     }
 
+    // @@author lilosy
     /** Restores the next unused customer ID; MAX_VALUE + 1 represents exhausted IDs. */
     public void setNextCustomerId(long nextCustomerId) {
         long minimumId = customers.asUnmodifiableObservableList().stream()
@@ -564,6 +573,7 @@ public class WatchDog implements ReadOnlyWatchDog {
             throw new IllegalArgumentException("Invalid next customer ID.");
         }
     }
+    // @@author
 
     /**
      * Returns true if a stored dog has the same persistent ID as {@code dog}.

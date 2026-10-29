@@ -46,7 +46,9 @@ public class LogicManager implements Logic {
     //@@author its-shoutime
     private HistorySnapshot undoSnapshot;
     private HistorySnapshot redoSnapshot;
+    // @@author lilosy
     private boolean awaitingClearConfirmation;
+    // @@author its-shoutime
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
@@ -62,15 +64,19 @@ public class LogicManager implements Logic {
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         requireNonNull(commandText);
         logger.info("----------------[USER COMMAND][" + commandText + "]");
+        // @@author lilosy
         if (awaitingClearConfirmation) {
             return executeClearConfirmation(commandText);
         }
+        // @@author its-shoutime
 
         Command command = watchDogParser.parseCommand(commandText);
+        // @@author lilosy
         if (command instanceof ClearCommand) {
             awaitingClearConfirmation = true;
             return new CommandResult(ClearCommand.MESSAGE_CONFIRMATION);
         }
+        // @@author its-shoutime
         if (command instanceof UndoCommand) {
             return executeUndo();
         }
@@ -80,6 +86,7 @@ public class LogicManager implements Logic {
         return executeParsedCommand(command, commandText);
     }
 
+    // @@author lilosy
     private CommandResult executeClearConfirmation(String commandText) throws CommandException {
         String response = commandText.trim();
         if (response.equalsIgnoreCase("n")) {
@@ -92,6 +99,7 @@ public class LogicManager implements Logic {
         awaitingClearConfirmation = false;
         return executeParsedCommand(new ClearCommand(), commandText);
     }
+    // @@author its-shoutime
 
     private CommandResult executeUndo() throws CommandException {
         if (undoSnapshot == null) {

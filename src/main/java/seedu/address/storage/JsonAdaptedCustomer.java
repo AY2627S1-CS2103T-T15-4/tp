@@ -21,18 +21,22 @@ class JsonAdaptedCustomer {
     public static final String MISSING_FIELD_MESSAGE_FORMAT = "Customer's %s field is missing!";
 
     private final Integer id;
+    // @@author lilosy
     private final String name;
     private final String phone;
     private final String email;
     private final String backupContact;
+    // @@author its-shoutime
 
     /**
      * Constructs a {@code JsonAdaptedCustomer} with the given customer details.
      */
     @JsonCreator
+    // @@author lilosy
     public JsonAdaptedCustomer(@JsonProperty("id") Integer id, @JsonProperty("name") String name,
             @JsonProperty("phone") String phone, @JsonProperty("email") String email,
             @JsonProperty("backupContact") String backupContact) {
+        // @@author its-shoutime
         this.id = id;
         this.name = name;
         this.phone = phone;
@@ -46,10 +50,12 @@ class JsonAdaptedCustomer {
     public JsonAdaptedCustomer(Customer source) {
         requireNonNull(source);
         id = source.getId();
+        // @@author lilosy
         name = source.getName().fullName;
         phone = source.getPhone().value;
         email = source.getEmail().value;
         backupContact = source.getBackupContact().value;
+        // @@author its-shoutime
     }
 
     /**
@@ -63,9 +69,11 @@ class JsonAdaptedCustomer {
         requirePresent(phone, "phone");
         requirePresent(email, "email");
         requirePresent(backupContact, "backupContact");
+        // @@author lilosy
         if (id < 1) {
             throw new IllegalValueException("Customer ID must be positive.");
         }
+        // @@author its-shoutime
         try {
             return new Customer(id, new Name(name), new Phone(phone), new Email(email),
                     new BackupContact(backupContact));

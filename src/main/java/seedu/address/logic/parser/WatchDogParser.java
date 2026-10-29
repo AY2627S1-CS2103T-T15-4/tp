@@ -79,17 +79,23 @@ public class WatchDogParser {
             // @@author XanderGoh
             case SearchActivityCommand.COMMAND_WORD -> new SearchActivityCommandParser().parse(arguments);
             // @@author
+            // @@author lilosy
             case AddCustomerCommand.COMMAND_WORD -> new AddCustomerCommandParser().parse(arguments);
+            // @@author
             case AddDogCommand.COMMAND_WORD -> new AddDogCommandParser().parse(arguments);
+            // @@author lilosy
             case DeleteActivityCommand.COMMAND_WORD -> new DeleteActivityCommandParser().parse(arguments);
+            // @@author
             // @@author XanderGoh
             case DeleteDogCommand.COMMAND_WORD -> new DeleteDogCommandParser().parse(arguments);
             // @@author
             //@@author its-shoutime
             case DeleteCustomerCommand.COMMAND_WORD -> new DeleteCustomerCommandParser().parse(arguments);
             //@@author
+            // @@author lilosy
             case EditActivityCommand.COMMAND_WORD -> new EditActivityCommandParser().parse(arguments);
             case EditCustomerCommand.COMMAND_WORD -> new EditCustomerCommandParser().parse(arguments);
+            // @@author
             case EditDogCommand.COMMAND_WORD -> new EditDogCommandParser().parse(arguments);
             // @@author XanderGoh
             case SearchDogCommand.COMMAND_WORD -> new SearchDogCommandParser().parse(arguments);
@@ -114,6 +120,7 @@ public class WatchDogParser {
                 yield new SummaryCommand();
             }
             case TodayCommand.COMMAND_WORD -> new TodayCommandParser().parse(arguments);
+            // @@author lilosy
             case ResetDisplayCommand.COMMAND_WORD -> {
                 if (!arguments.isBlank()) {
                     throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
@@ -121,6 +128,7 @@ public class WatchDogParser {
                 }
                 yield new ResetDisplayCommand();
             }
+            // @@author
             case ExitCommand.COMMAND_WORD -> new ExitCommand();
             //@@author its-shoutime
             case HelpCommand.COMMAND_WORD -> new HelpCommandParser().parse(arguments);
