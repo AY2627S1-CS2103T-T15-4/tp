@@ -743,7 +743,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **MSS**
 
 1.  User enters the command and the customer details to add a customer.
-2.  System validates the command and customer details.
+2.  System validates the command and customer details, including the uniqueness of the primary phone number and email address.
 3.  System adds the customer and displays a success message.
 
     Use case ends.
@@ -761,6 +761,15 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
     * 2a1. System requests for correct details.
 
       Use case resumes from step 1.
+
+* 2b. System detects that the primary phone number or email address is already used by an existing customer,
+  including customers hidden by filters. Phone comparison ignores spaces; email comparison ignores letter case.
+
+    * 2b1. System identifies the duplicate contact field and displays an error without adding a customer or changing existing records.
+
+      Use case resumes from step 1.
+
+Shared backup contact numbers are allowed.
 
 
 
@@ -788,31 +797,40 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **MSS**
 
 1.  User requests to <ins>list customers (UC06)</ins>.
-2.  User enters the command, customer details and the customer id for the customer to be edited.
-3.  System validates the command, customer details and customer id.
+2.  User enters the command, customer details and the customer ID for the customer to be edited.
+3.  System validates the command, customer details and positive customer ID, including the uniqueness of the resulting primary phone number and email address against other customers.
 4.  System edits the customer and displays a success message.
 
     Use case ends.
 
 **Extensions**
 
-* 1a. User enters an invalid command format.
+* 2a. User enters an invalid command format.
 
-    * 1a1. System displays an unknown-command message.
-
-      Use case resumes from step 1.
-
-* 2a. System detects invalid customer details.
-
-    * 2a1. System requests the correct details.
+    * 2a1. System displays an error message.
 
       Use case resumes from step 2.
 
-* 2b. System cannot find the specified customer id.
+* 3a. System detects invalid customer details or a non-positive customer ID.
 
-    * 2b1. System requests for an existing customer id.
+    * 3a1. System requests the correct details without changing existing records.
 
       Use case resumes from step 2.
+
+* 3b. System cannot find the specified customer ID.
+
+    * 3b1. System requests an existing customer ID without changing existing records.
+
+      Use case resumes from step 2.
+
+* 3c. System detects that the resulting primary phone number or email address is already used by another customer,
+  including customers hidden by filters. Phone comparison ignores spaces; email comparison ignores letter case.
+
+    * 3c1. System identifies the duplicate contact field and displays an error without changing existing records.
+
+      Use case resumes from step 2.
+
+Customers may retain their own primary phone number and email address. Shared backup contact numbers are allowed.
 
 
 
