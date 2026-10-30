@@ -14,6 +14,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.logic.parser.WatchDogParser;
 import seedu.address.model.ModelManager;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
@@ -25,6 +26,30 @@ import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
 
 public class SearchCustomerCommandTest {
+    @Test
+    public void execute_phoneQueries_matchNormalizedNumbersAfterAddAndEdit() throws Exception {
+        ModelManager model = new ModelManager();
+        WatchDogParser parser = new WatchDogParser();
+        parser.parseCommand("addcustomer n/Anna p/+65 9123-4567 e/anna@example.com bc/+44 20-1234-5678")
+                .execute(model);
+        parser.parseCommand("addcustomer n/Bob p/+1 202-555-0123 e/bob@example.com bc/98765432").execute(model);
+        Customer anna = model.getCustomerList().get(0);
+
+        for (String query : List.of("p/91234567", "p/+65 9123-4567", "p/9123-4567 bc/+442012345678")) {
+            parser.parseCommand("searchc " + query).execute(model);
+            assertEquals(List.of(anna), model.getFilteredCustomerList());
+        }
+        parser.parseCommand("searchc p/+1 202 555 0123").execute(model);
+        assertEquals(List.of(model.getCustomerList().get(1)), model.getFilteredCustomerList());
+        parser.parseCommand("searchc p/+442012345678").execute(model);
+        assertTrue(model.getFilteredCustomerList().isEmpty());
+        parser.parseCommand("editcustomer 2 p/+44 20-1234-5678 bc/+65 9876-5432").execute(model);
+        assertEquals(List.of(model.getCustomerList().get(1)), model.getFilteredCustomerList());
+        parser.parseCommand("searchc p/+44 20 1234 5678 bc/+65 9876-5432").execute(model);
+        assertEquals(List.of(model.getCustomerList().get(1)), model.getFilteredCustomerList());
+        assertEquals("+442012345678", model.getCustomerList().get(1).getPhone().value);
+    }
+
     @Test
     public void execute_callerChangesDogIds_preservesOriginalQueryAndLiveOwnership() throws Exception {
         ModelManager model = modelWithCustomersAndDogs();

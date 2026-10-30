@@ -38,6 +38,14 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseCustomerPhones_formattedInternationalValues_normalizesAndTrims() throws Exception {
+        assertEquals("+442012345678", ParserUtil.parseCustomerPhone(" +44 20-1234-5678 ").value);
+        assertEquals("91234567", ParserUtil.parseCustomerPhone(" +65 9123-4567 ").value);
+        assertEquals("+12025550123", ParserUtil.parseCustomerBackupContact(" +1 202-555-0123 ").value);
+        assertEquals("98765432", ParserUtil.parseCustomerBackupContact(" +65 9876-5432 ").value);
+    }
+
+    @Test
     public void parseCustomerFields_invalidValues_reportFieldConstraints() {
         assertThrows(ParseException.class, Name.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseCustomerName("R@chel"));
         assertThrows(ParseException.class, Phone.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseCustomerPhone("12a"));

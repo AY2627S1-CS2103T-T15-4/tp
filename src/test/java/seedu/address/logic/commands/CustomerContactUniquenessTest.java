@@ -26,10 +26,23 @@ public class CustomerContactUniquenessTest {
 
     @Test
     public void add_duplicatePhoneIncludingSpaces_rejected() throws Exception {
-        for (String phone : List.of("91234567", "9 1 2 3 4 5 6 7")) {
+        for (String phone : List.of("91234567", "9 1 2 3 4 5 6 7", "9123-4567", "+65 9123-4567")) {
             assertRejected("addcustomer n/Carol p/" + phone + " e/carol@example.com bc/98765432",
                     CustomerContactValidator.MESSAGE_DUPLICATE_PHONE);
         }
+    }
+
+    @Test
+    public void addAndEdit_duplicateInternationalPhone_rejectedAfterNormalization() throws Exception {
+        parser.parseCommand("addcustomer n/Carol p/+44 20-1234-5678 e/carol@example.com bc/+65 9876-5432")
+                .execute(model);
+        assertEquals("+442012345678", model.getCustomerList().get(2).getPhone().value);
+        assertEquals("98765432", model.getCustomerList().get(2).getBackupContact().value);
+
+        assertRejected("addcustomer n/David p/+442012345678 e/david@example.com bc/98765432",
+                CustomerContactValidator.MESSAGE_DUPLICATE_PHONE);
+        assertRejected("editcustomer 2 p/+44 20 1234 5678", CustomerContactValidator.MESSAGE_DUPLICATE_PHONE);
+        assertRejected("editcustomer 2 p/+65 9123-4567", CustomerContactValidator.MESSAGE_DUPLICATE_PHONE);
     }
 
     @Test

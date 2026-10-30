@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.customer.Phone;
 
 /** Parses arguments for the {@code searchc} command. */
 public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand> {
@@ -70,10 +71,10 @@ public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand
     }
 
     private static String parsePhone(String value, String existing) throws ParseException {
-        if (existing != null || !value.matches("\\d{8}")) {
+        if (existing != null || !Phone.isValidPhone(value)) {
             throw new ParseException(MESSAGE_INVALID_INFO);
         }
-        return value;
+        return new Phone(value).value;
     }
 
     private static String parseSingle(String value, String existing) throws ParseException {

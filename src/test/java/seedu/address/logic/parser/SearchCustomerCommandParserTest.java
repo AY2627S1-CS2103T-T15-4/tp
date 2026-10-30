@@ -26,6 +26,25 @@ public class SearchCustomerCommandParserTest {
     }
 
     @Test
+    public void parse_formattedLocalAndInternationalPhones_normalizesBothFields() throws Exception {
+        assertEquals(new SearchCustomerCommand(null, "91234567", null, "+442012345678", null),
+                parser.parse("p/+65 9123-4567 bc/+44 20-1234-5678"));
+        assertEquals(new SearchCustomerCommand(null, "+1234567", null, "+123456789012345", null),
+                parser.parse("p/+1234567 bc/+123456789012345"));
+        assertEquals(new SearchCustomerCommand(null, "91234567", null, "98765432", null),
+                parser.parse("p/9123-4567 bc/9876 5432"));
+    }
+
+    @Test
+    public void parse_invalidInternationalPhones_rejectsBothFields() {
+        for (String number : new String[]{"+123456", "+1234567890123456", "+01234567",
+            "+44 (20) 1234 5678", "++1234567", "44 20 1234 5678", "91234567-"}) {
+            assertThrows(ParseException.class, () -> parser.parse("p/" + number));
+            assertThrows(ParseException.class, () -> parser.parse("bc/" + number));
+        }
+    }
+
+    @Test
     public void parse_invalidFormatOrDuplicateFields_throwsParseException() {
         String[] invalidInputs = {"", " ", "customer", "x/value", "N/Anna", "n/Anna n/Beth",
             "n/Anna x/value", "n/Anna p/1234567", "n/Anna p/91234567 p/92345678", "n/Anna e/a@b.com e/c@d.com",

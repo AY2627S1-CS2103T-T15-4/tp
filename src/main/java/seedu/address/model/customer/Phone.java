@@ -12,8 +12,10 @@ public class Phone {
 
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Phone numbers should contain exactly 8 digits; spaces are allowed between digits";
-    public static final String VALIDATION_REGEX = "\\d(?: *\\d){7}";
+            "Phone numbers should contain exactly 8 digits, or start with + followed by 7 to 15 digits "
+                    + "including the country code (first digit 1-9); spaces and hyphens are allowed between digits";
+    public static final String VALIDATION_REGEX =
+            "(?:[0-9](?:[ -]*[0-9]){7}|\\+[1-9](?:[ -]*[0-9]){6,14})";
     public final String value;
 
     /**
@@ -24,7 +26,7 @@ public class Phone {
     public Phone(String phone) {
         requireNonNull(phone);
         checkArgument(isValidPhone(phone), MESSAGE_CONSTRAINTS);
-        value = phone.replace(" ", "");
+        value = normalize(phone);
     }
 
     /**
@@ -32,6 +34,15 @@ public class Phone {
      */
     public static boolean isValidPhone(String test) {
         return test.matches(VALIDATION_REGEX);
+    }
+
+    /** Removes formatting from a valid number and stores Singapore +65 numbers in local form. */
+    static String normalize(String phone) {
+        String normalized = phone.replace(" ", "").replace("-", "");
+        if (normalized.startsWith("+65") && normalized.length() == 11) {
+            return normalized.substring(3);
+        }
+        return normalized;
     }
 
     @Override

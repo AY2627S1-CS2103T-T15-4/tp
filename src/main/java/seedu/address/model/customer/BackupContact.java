@@ -11,8 +11,9 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
  */
 public class BackupContact {
     public static final String MESSAGE_CONSTRAINTS =
-            "Backup contact numbers should contain exactly 8 digits; spaces are allowed between digits";
-    public static final String VALIDATION_REGEX = "\\d(?: *\\d){7}";
+            "Backup contact numbers should contain exactly 8 digits, or start with + followed by 7 to 15 digits "
+                    + "including the country code (first digit 1-9); spaces and hyphens are allowed between digits";
+    public static final String VALIDATION_REGEX = Phone.VALIDATION_REGEX;
     public final String value;
 
     /**
@@ -23,14 +24,14 @@ public class BackupContact {
     public BackupContact(String backupContact) {
         requireNonNull(backupContact);
         checkArgument(isValidBackupContact(backupContact), MESSAGE_CONSTRAINTS);
-        value = backupContact.replace(" ", "");
+        value = Phone.normalize(backupContact);
     }
 
     /**
      * Returns true if a given string is a valid phone number.
      */
     public static boolean isValidBackupContact(String test) {
-        return test.matches(VALIDATION_REGEX);
+        return Phone.isValidPhone(test);
     }
 
     @Override

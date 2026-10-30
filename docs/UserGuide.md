@@ -106,8 +106,18 @@ and `O'Neil` are valid names.
 Email addresses must use the `local-part@domain` format. Apostrophes are allowed in the local part
 before `@`.
 
-The contact number and backup contact number must each contain exactly eight digits. You may enter
-spaces between digits; the spaces are removed when the number is stored. All four fields are required.
+The contact number and backup contact number accept either:
+
+* A Singapore number containing exactly eight digits, such as `91234567`.
+* An international number starting with `+` followed by 7 to 15 digits, including the country code.
+  The first digit after `+` must be 1–9. For example, `+442012345678`.
+
+Spaces and hyphens are allowed between digits, for example `9123-4567` or `+44 20-1234-5678`.
+Letters, parentheses, and other symbols are rejected. Numbers without `+` are treated as Singapore numbers.
+These checks validate the format; they do not verify that a number is assigned or callable.
+Spaces and hyphens are removed when numbers are stored and displayed. A number with `+65` followed by
+exactly eight digits is stored as those eight digits, so `+65 9123-4567` and `91234567` are equivalent.
+Other international numbers retain their leading `+`. All four fields are required.
 Each customer's primary phone number and email address must be unique across all customers, including
 those hidden by filters. Email uniqueness ignores letter case. Backup contact numbers may be shared,
 including with another customer's primary phone number.
@@ -138,7 +148,10 @@ Format: `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT]
 Example: `searchc n/Anna d/12 34`
 
 * Name matching is case-insensitive, uses a substring search, and treats repeated spaces as one space.
-* Phone and backup contact numbers require exactly eight digits and use exact matching.
+* Phone and backup contact numbers accept the same formats as `addcustomer` and use exact matching after
+  removing spaces and hyphens. `+65` followed by eight digits matches the equivalent local number.
+  For example, `searchc p/+65 9123-4567` matches a phone stored as `91234567`, and
+  `searchc bc/+44 20-1234-5678` matches a backup contact stored as `+442012345678`.
 * Email matching is case-insensitive and exact.
 * Dog IDs must be positive and exist. A customer must own all specified dog IDs to match.
 * Customer ID must be a positive ID belonging to an existing customer; it matches that customer exactly.
@@ -774,7 +787,7 @@ These tests use the prepared records. Run each row in order; the invalid additio
 Input | Expected result
 ------|----------------
 `addcustomer n/Carol p/93456789 e/carol@example.com` | `Missing required field(s): backup contact.` followed by usage guidance.
-`addcustomer n/Carol p/1234567 e/carol@example.com bc/98765432` | `Invalid phone: Phone numbers should contain exactly 8 digits; spaces are allowed between digits`.
+`addcustomer n/Carol p/1234567 e/carol@example.com bc/98765432` | `Invalid phone:` followed by the phone constraints: eight local digits or `+` followed by 7 to 15 international digits; spaces and hyphens are allowed between digits.
 `searchc i/2`, then `addcustomer n/Carol p/91234567 e/carol@example.com bc/98765432` | Ben is displayed, then `This phone number is already used by another customer.` Alice's hidden record still prevents reuse.
 `addcustomer n/Carol p/93456789 e/ALICE@EXAMPLE.COM bc/98765432` | `This email address is already used by another customer.` Email uniqueness ignores case.
 `reset`, then `editcustomer 1 n/Alice Koh` | Alice's name changes; ID 1, phone, email, and backup contact remain unchanged.

@@ -347,7 +347,12 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 primary phone number, email address, and backup contact. `AddCustomerCommandParser` rejects
 missing, repeated, or invalid fields and creates a customer without an ID. Before adding it,
 `AddCustomerCommand` checks the complete customer list for an existing primary phone number
-or email address. Phone numbers are normalized before comparison, email comparison ignores
+or email address. Phone and backup contact accept eight local digits or `+` followed by 7 to 15
+international digits (the first digit must be 1–9). `Phone` defines their shared validation and
+normalization: spaces and hyphens between digits are removed, and `+65` followed by eight digits
+is stored in local form. Other international numbers retain `+`; cards display the stored values.
+`SearchCustomerCommandParser` uses the same phone validation and normalization before the search
+predicate compares values exactly. Phone numbers are normalized before comparison, email comparison ignores
 letter case, and backup contacts may be shared. `WatchDog` then assigns the customer a
 persistent ID from its next-customer-ID counter, which is saved with the records so deleted
 IDs are not reused.
@@ -898,7 +903,8 @@ change can remain in memory.
 
 * 2a. A required field is missing or invalid: system reports the field error without adding a customer.
 * 2b. The primary phone or email is already in use: system identifies the duplicate field without
-  changing records. Phone comparison ignores spaces; email comparison ignores letter case.
+  changing records. Phone comparison ignores spaces and hyphens and treats `+65` followed by eight digits
+  as the equivalent local number; email comparison ignores letter case.
 
 Backup contacts may be shared.
 
