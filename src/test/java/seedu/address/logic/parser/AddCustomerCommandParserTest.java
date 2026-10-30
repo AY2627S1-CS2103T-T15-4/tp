@@ -39,6 +39,16 @@ public class AddCustomerCommandParserTest {
     }
 
     @Test
+    public void parse_singaporeCountryCodeWithInvalidLength_rejectsBothContactFields() {
+        for (String number : new String[]{"+65 1234567", "+65123456789", "+6-5-123456789"}) {
+            assertParseFailure(parser, " n/Alice p/" + number + " e/alice@example.com bc/98765432",
+                    "Invalid phone: " + Phone.MESSAGE_CONSTRAINTS);
+            assertParseFailure(parser, " n/Alice p/91234567 e/alice@example.com bc/" + number,
+                    "Invalid backup contact: " + BackupContact.MESSAGE_CONSTRAINTS);
+        }
+    }
+
+    @Test
     public void parse_missingRequiredField_failure() {
         String usage = AddCustomerCommand.MESSAGE_USAGE;
 

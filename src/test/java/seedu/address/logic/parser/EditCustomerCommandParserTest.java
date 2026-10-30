@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.EditCustomerCommand;
 import seedu.address.logic.commands.EditCustomerCommand.EditCustomerDescriptor;
+import seedu.address.model.customer.BackupContact;
 import seedu.address.model.customer.Name;
 import seedu.address.model.customer.Phone;
 
@@ -32,6 +33,14 @@ public class EditCustomerCommandParserTest {
 
         assertParseSuccess(parser, " 1 n/New Name p/98765432 e/new@example.com bc/92345678",
                 new EditCustomerCommand(1, descriptor));
+    }
+
+    @Test
+    public void parse_singaporeCountryCodeWithInvalidLength_rejectsBothContactFields() {
+        for (String number : new String[]{"+65 1234567", "+65123456789", "+6-5-123456789"}) {
+            assertParseFailure(parser, " 1 p/" + number, Phone.MESSAGE_CONSTRAINTS);
+            assertParseFailure(parser, " 1 bc/" + number, BackupContact.MESSAGE_CONSTRAINTS);
+        }
     }
 
     @Test

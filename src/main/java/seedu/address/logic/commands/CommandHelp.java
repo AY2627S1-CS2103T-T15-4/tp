@@ -10,8 +10,10 @@ public final class CommandHelp {
     private static final String DOG_FIELDS = "Names may contain letters, numbers, spaces, hyphens and apostrophes. "
             + "Breeds may contain letters, numbers, spaces and hyphens. Both must be nonblank and start with "
             + "a letter or number. Size is small, medium, large or giant (case-insensitive).";
-    private static final String CUSTOMER_FIELDS = "Phone and backup contact must contain exactly eight digits; "
-            + "spaces between digits are removed. Names allow letters, numbers, spaces, hyphens and apostrophes; "
+    private static final String CUSTOMER_FIELDS = "Phone and backup contact use eight local digits or + followed by "
+            + "7 to 15 international digits (first digit 1-9). Spaces and hyphens between digits are removed; "
+            + "+65 requires exactly eight following digits and is stored without +65. "
+            + "Names allow letters, numbers, spaces, hyphens and apostrophes; "
             + "punctuation must be followed by a letter or number. Email must be valid. "
             + "Primary phone and email must be unique across customers (email ignores case); "
             + "backup contacts may be shared.";
@@ -68,7 +70,8 @@ public final class CommandHelp {
                     "searchc n/Anna d/12 34",
                     "Supply at least one field; all supplied fields must match. Name uses case-insensitive "
                             + "substring matching with repeated spaces treated as one. Phone and backup contact "
-                            + "are exactly eight digits and match exactly; email matches exactly ignoring case. "
+                            + "use the same formats as addcustomer and match exactly after normalization; "
+                            + "email matches exactly ignoring case. "
                             + "IDs must exist; customers must own all specified dogs. "
                             + "Also filters owned dogs and their enrolled activities; filters remain active."),
             entry(FilterUnlinkedCommand.COMMAND_WORD, "filterun dog OR filterun customer", "filterun dog",
