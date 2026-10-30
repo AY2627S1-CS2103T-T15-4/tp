@@ -16,7 +16,7 @@ import seedu.address.model.customer.Phone;
 /** Parses arguments for the {@code searchc} command. */
 public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand> {
     private static final Pattern FIELD_FORMAT = Pattern.compile(
-            "(?<prefix>n|p|e|d|bc|i)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
+            "(?<prefix>[A-Za-z]+)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
     private static final String MESSAGE_SEARCH_ERROR = "Error in searching customers:\n";
 
     @Override

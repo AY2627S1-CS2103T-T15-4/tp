@@ -2,6 +2,7 @@
 package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.util.Set;
@@ -93,6 +94,22 @@ public class SearchCustomerCommandParserTest {
         String backupMessage = "Error in searching customers:\nInvalid backup contact (bc/): " + reason;
         assertThrows(ParseException.class, backupMessage, () ->
                 parser.parse("bc/" + number));
+    }
+
+    @Test
+    public void parse_unsupportedPrefixes_reportsInvalidCommandFormat() {
+        String message = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SearchCustomerCommand.MESSAGE_USAGE);
+        for (String query : new String[]{"x/value", "n/Anna x/value", "x/value p/91234567",
+            "P/91234567", "BC/98765432", "phone/91234567"}) {
+            assertThrows(ParseException.class, message, () -> parser.parse(query));
+        }
+    }
+
+    @Test
+    public void parse_multilinePhoneValue_rejectsUnconsumedInput() {
+        String message = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SearchCustomerCommand.MESSAGE_USAGE);
+
+        assertThrows(ParseException.class, message, () -> parser.parse("n/Anna p/9123\n4567"));
     }
 
     @Test
