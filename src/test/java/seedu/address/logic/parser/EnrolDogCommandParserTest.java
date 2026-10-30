@@ -103,6 +103,7 @@ public class EnrolDogCommandParserTest {
 
         assertMessage("hello a/1 date/2028-02-29 d/2", expected);
         assertMessage("x/hello a/1 date/2028-02-29 d/2", expected);
+        assertMessage("a/1 date/2028-02-29 d/2\ninvalid", expected);
     }
 
     @Test
