@@ -103,11 +103,13 @@ final class DatedDogIdsParser {
                         formatGuidance);
             }
             String value = matcher.group("value").trim();
-            switch (prefix) {
-                case "a" -> activityId = value;
-                case "date" -> date = value;
-                case "d" -> dogIds = value;
-                default -> throw error("Invalid command format!", formatGuidance);
+            if (prefix.equals("a")) {
+                activityId = value;
+            } else if (prefix.equals("date")) {
+                date = value;
+            } else {
+                // FIELD_FORMAT matches only a/, date/, or d/; the remaining prefix is d/.
+                dogIds = value;
             }
             end = matcher.end();
         }
