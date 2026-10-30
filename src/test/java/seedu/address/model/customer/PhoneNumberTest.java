@@ -79,6 +79,18 @@ public class PhoneNumberTest {
     }
 
     @Test
+    public void equals_sameInstanceAndDifferentValuesOrTypes_comparesPhoneValuesOnly() {
+        Phone phone = new Phone("91234567");
+
+        assertTrue(phone.equals(phone));
+        assertFalse(phone.equals(null));
+        assertFalse(phone.equals("91234567"));
+        assertFalse(phone.equals(new BackupContact("91234567")));
+        assertFalse(phone.equals(new Phone("92345678")));
+        assertFalse(phone.equals(new Phone("+4491234567")));
+    }
+
+    @Test
     public void constructors_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new Phone(null));
         assertThrows(NullPointerException.class, () -> new BackupContact(null));

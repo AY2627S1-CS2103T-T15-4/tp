@@ -45,10 +45,13 @@ public class Phone {
         return !unformatted.startsWith("+65") || unformatted.length() == 11;
     }
 
-    /** Removes formatting from a valid number and stores Singapore +65 numbers in local form. */
+    /**
+     * Removes formatting from a number already checked by {@link #isValidPhone(String)}
+     * and stores Singapore +65 numbers in local form.
+     */
     static String normalize(String phone) {
         String normalized = removeFormatting(phone);
-        if (normalized.startsWith("+65") && normalized.length() == 11) {
+        if (normalized.startsWith("+65")) {
             return normalized.substring(3);
         }
         return normalized;
