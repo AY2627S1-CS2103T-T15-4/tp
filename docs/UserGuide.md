@@ -141,6 +141,9 @@ Example: `editcustomer 1 p/91234567 e/johndoe@example.com`
   keep your existing phone number and email address. Backup contact numbers need not be unique.
 * Supplied names, phone numbers, backup contacts, and email addresses follow the same validation rules
   as `addcustomer`.
+  This includes requiring exactly eight digits after `+65` for both `p/` and `bc/`.
+  For example, `editcustomer 1 bc/+65 9876-5432` stores `98765432`, while
+  `editcustomer 1 bc/+65123456789` is rejected without changing the customer.
 
 #### Searching customers: `searchc`
 
@@ -155,6 +158,8 @@ Example: `searchc n/Anna d/12 34`
   removing spaces and hyphens. `+65` followed by eight digits matches the equivalent local number.
   For example, `searchc p/+65 9123-4567` matches a phone stored as `91234567`, and
   `searchc bc/+44 20-1234-5678` matches a backup contact stored as `+442012345678`.
+  Enter the complete number: partial queries such as `searchc bc/+55` are rejected.
+  The `+65` length rule also applies to searches; an invalid query leaves the current display unchanged.
 * Email matching is case-insensitive and exact.
 * Dog IDs must be positive and exist. A customer must own all specified dog IDs to match.
 * Customer ID must be a positive ID belonging to an existing customer; it matches that customer exactly.
@@ -791,10 +796,15 @@ Input | Expected result
 ------|----------------
 `addcustomer n/Carol p/93456789 e/carol@example.com` | `Missing required field(s): backup contact.` followed by usage guidance.
 `addcustomer n/Carol p/1234567 e/carol@example.com bc/98765432` | `Invalid phone:` followed by the phone constraints: eight local digits or `+` followed by 7 to 15 international digits; spaces and hyphens are allowed between digits.
+`addcustomer n/Carol p/+65 1234567 e/carol@example.com bc/98765432` | `Invalid phone:` with guidance that exactly eight digits must follow `+65`; no customer is added.
+`addcustomer n/Carol p/93456789 e/carol@example.com bc/+65123456789` | `Invalid backup contact:` with the same `+65` length requirement; no customer is added.
 `searchc i/2`, then `addcustomer n/Carol p/91234567 e/carol@example.com bc/98765432` | Ben is displayed, then `This phone number is already used by another customer.` Alice's hidden record still prevents reuse.
 `addcustomer n/Carol p/93456789 e/ALICE@EXAMPLE.COM bc/98765432` | `This email address is already used by another customer.` Email uniqueness ignores case.
 `reset`, then `editcustomer 1 n/Alice Koh` | Alice's name changes; ID 1, phone, email, and backup contact remain unchanged.
 `editcustomer 1 p/92345678` | Duplicate-phone error; Alice's phone remains `91234567`.
+`editcustomer 1 p/+65 9123-4567 bc/+65 9876-5432` | Accepted as Alice's own existing contacts; stored and displayed as `91234567` and `98765432`.
+`editcustomer 1 p/+65123456789` | Phone constraints are shown; Alice's record is unchanged.
+`editcustomer 1 bc/+65 1234567` | Backup contact constraints are shown; Alice's record is unchanged.
 `editcustomer 1` | `At least one field to edit must be provided.`
 `adddog n/Rex b/Poodle s/Tiny` | `Invalid size. Please enter small, medium, large, or giant.` followed by format guidance.
 `adddog n/Rex s/Small` | `Please enter a breed.` followed by format guidance.
@@ -889,6 +899,8 @@ Input | Expected result
 `searchd n/UD b/POO s/SMALL i/1` | Shows Buddy, Alice, and activities 1 and 2. All supplied fields match together. Morning walk's `Enrolments` section lists only `1. Buddy: 2026-10-29, 2026-10-30`; Training lists Buddy's booking today.
 `searchd i/99` | `Error in searching dogs:` followed by `Please enter a valid dog index`; the previous display remains.
 `searchc n/ALICE p/91234567 e/ALICE@EXAMPLE.COM bc/98765432 d/2 1 i/1` | Shows Alice, Buddy, Cookie, and activities 1 and 2. Alice must own both supplied dog IDs; the success message lists dog IDs in ascending order. Activity enrolment details include only her dogs.
+`searchc p/+65 9123-4567 bc/9876-5432` | Shows Alice and her related dogs and activities, matching the same stored contacts despite the country code and formatting.
+`searchc bc/+55`, then `searchc p/+65123456789` | Both queries report an invalid search format and leave the previous display unchanged; the first is incomplete, and the second has nine digits after `+65`.
 `searchc i/99` | `Error in searching customers:` followed by `Please enter a valid customer index`; the previous display remains.
 `searchc n/Nobody` | Customer, dog, and general activity panels become empty; no records are deleted.
 `searcha n/WALK d/2026-10-29 t/10:00 r/DAILY i/1` | Shows Morning walk, dogs 1 and 2, and Alice. The end time is included in time searches; recurrence searches accept uppercase values.

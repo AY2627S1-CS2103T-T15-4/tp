@@ -373,6 +373,9 @@ It checks the resulting primary phone and email against other customers, excludi
 customer being edited so they may keep their own contact details. `Model.setCustomer`
 replaces the stored record while retaining the ID used by dog ownership links. Unlike a
 dog edit, there is no owner field to copy: each dog's owner ID is stored on the dog.
+Both replacement contact fields use the same validation and normalization as adding customers.
+In particular, a `+65` number requires exactly eight following digits. Invalid contact details
+are rejected before the stored record changes, including when editing a hidden customer.
 
 ### Retired list commands
 
@@ -566,6 +569,13 @@ lowercase fields `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/`. Names are normalised f
 matching, while contact numbers and email addresses use exact matching. Multiple dog IDs are parsed from
 the `d/` field and are retained as a set. The optional customer ID is parsed as a positive integer and
 matched exactly against existing customer IDs.
+
+Both `p/` and `bc/` require complete numbers accepted by `Phone.isValidPhone`; partial phone
+searches are rejected. The parser removes spaces and hyphens and converts `+65` followed by
+eight digits to local form before creating the command. Other international numbers retain
+their leading `+`. Consequently, `searchc p/+65 9123-4567` matches a stored `91234567`.
+An invalid contact query, including a `+65` number with seven or nine following digits, fails
+before the command executes and leaves all current filters unchanged.
 
 `SearchCustomerCommand` validates that the requested customer ID and every requested dog ID exist, then applies
 the customer ID criterion together with `CustomerSearchPredicate` to the filtered customer list. The predicate
@@ -891,10 +901,17 @@ change can remain in memory.
 
 **Use case: UC04 - Add Customer (addcustomer)**
 
+Phone rules shared by UC04, UC05, and UC15: both contact fields accept eight local digits,
+or `+` followed by 7 to 15 digits including the country code (first digit 1–9).
+Numbers beginning with `+65` must have exactly eight following digits. Spaces and hyphens
+between digits are ignored; other symbols and letters are rejected. Normalization removes
+spaces and hyphens and converts valid `+65` numbers to local form; other international numbers
+retain `+`. Stored and displayed contact values use this normalized form.
+
 **MSS**
 
 1. User enters a name, primary phone number, email address, and backup contact.
-2. System validates the fields and checks that no customer, including a filtered-out customer,
+2. System validates and normalizes the fields and checks that no customer, including a filtered-out customer,
    uses the primary phone number or email address.
 3. System assigns a persistent customer ID, stores the customer, and displays a success message.
 
@@ -903,6 +920,7 @@ change can remain in memory.
 **Extensions**
 
 * 2a. A required field is missing or invalid: system reports the field error without adding a customer.
+  This includes a `+65` primary or backup contact with other than eight following digits.
 * 2b. The primary phone or email is already in use: system identifies the duplicate field without
   changing records. Phone comparison ignores spaces and hyphens and treats `+65` followed by eight digits
   as the equivalent local number; email comparison ignores letter case.
@@ -914,8 +932,9 @@ Backup contacts may be shared.
 **MSS**
 
 1. User enters a customer ID and at least one replacement detail.
-2. System finds the customer in the complete list and validates the resulting contact details
-   against other customers, excluding the customer being edited.
+2. System finds the customer in the complete list, validates and normalizes supplied fields using
+   the rules above, and checks the resulting primary phone and email for duplicates against other
+   customers, excluding the customer being edited.
 3. System replaces the customer, preserving the ID used by their dogs, and displays a success message.
 
    Use case ends.
@@ -924,8 +943,10 @@ Backup contacts may be shared.
 
 * 2a. The ID is invalid or unknown, no edit field is supplied, or a detail is invalid:
   system reports the problem without changing the customer.
+  A `+65` primary or backup contact with other than eight following digits is invalid.
 * 2b. Another customer uses the resulting primary phone or email: system identifies the duplicate
-  field without changing records.
+  field without changing records. Phone comparison uses normalized values, so adding or removing
+  `+65`, spaces, or hyphens cannot bypass the duplicate check.
 
 Unspecified details are retained, and backup contacts may be shared.
 
@@ -1075,7 +1096,9 @@ Past occurrence dates are allowed so historical mistakes can be corrected.
 **MSS**
 
 1. User enters one or more customer search fields: name, phone, email, backup contact, dog IDs, or customer ID.
-2. System finds customers matching every supplied field and any required dog ownership.
+2. System validates and normalizes any complete phone or backup contact query using the shared
+   phone rules, then finds customers matching every supplied field and any required dog ownership.
+   Contact numbers match exactly after normalization; `+65 9123-4567` matches `91234567`.
 3. System filters the customer, owned dog, and enrolled activity displays without changing records.
 
    Use case ends.
@@ -1084,6 +1107,8 @@ Past occurrence dates are allowed so historical mistakes can be corrected.
 
 * 1a. A field is invalid or a specified customer or dog ID does not exist:
   system reports the problem and retains the current view.
+  This includes partial contact queries such as `bc/+55` and `+65` numbers with other than
+  eight following digits.
 
 If the specified dogs exist but no customer owns all of them, the search succeeds with no matching customers.
 
@@ -1425,6 +1450,26 @@ Replace the uppercase ID placeholders below with the persistent IDs reported by 
 1. Relink both dogs to Alice. Hide Alice with `searchc n/Ben`, then run `deletecustomer CUSTOMER_ID`.
    Run `reset`. Expect Alice to be gone and both dogs to remain unowned, retaining their IDs and details.
    Ben remains. Repeat the deletion; expect an invalid-ID error.
+
+### Phone formats, normalization, and customer searches
+
+Use a disposable dataset with no customer using the contacts below. Substitute the new customer's
+persistent ID for `CUSTOMER_ID`.
+
+1. Run `addcustomer n/Carol p/+65 9345-6789 e/carol@example.com bc/+44 20-1234-5678`.
+   Expect the card to show `93456789` and `+442012345678`. Save and restart the app;
+   expect these normalized contact values to persist.
+1. Run `searchc p/93456789`, then `searchc p/+65 9345-6789 bc/+44 20 1234 5678`.
+   Expect Carol in both results. Run `searchc bc/+55` and `searchc p/+65123456789`;
+   expect errors with the previous display retained.
+1. Try adding another customer with `p/9345-6789` or `p/+6593456789`, using a fresh email.
+   Expect a duplicate-phone error in both cases. Reusing Carol's backup contact is allowed.
+1. Run `editcustomer CUSTOMER_ID p/+1 202-555-0123 bc/+65 9876-5432`.
+   Expect `+12025550123` and `98765432` on the card. Run
+   `searchc p/+1 202 555 0123 bc/+65 9876-5432`; expect Carol to match.
+1. Try add and edit commands with `+65 1234567` and `+65 123456789` in each of `p/` and `bc/`.
+   Expect a field error explaining that eight digits must follow `+65`, with no stored record changed.
+   Repeat with `+6-5-123456789`; formatting must not bypass the length check.
 
 ### Activity records and booking cards
 
