@@ -12,7 +12,7 @@ public final class CommandHelp {
             + "a letter or number. Size is small, medium, large or giant (case-insensitive).";
     private static final String CUSTOMER_FIELDS = "Phone and backup contact use eight local digits or + followed by "
             + "7 to 15 international digits (first digit 1-9). Spaces and hyphens between digits are removed; "
-            + "+65 followed by eight digits is stored without +65. "
+            + "+65 requires exactly eight following digits and is stored without +65. "
             + "Names allow letters, numbers, spaces, hyphens and apostrophes; "
             + "punctuation must be followed by a letter or number. Email must be valid. "
             + "Primary phone and email must be unique across customers (email ignores case); "

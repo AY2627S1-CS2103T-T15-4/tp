@@ -40,6 +40,17 @@ public class JsonAdaptedCustomerTest {
     }
 
     @Test
+    public void toModelType_singaporeContactsWithInvalidLength_rejectsBothContactFields() {
+        for (String number : new String[]{"+651234567", "+65123456789"}) {
+            assertThrows(IllegalValueException.class, Phone.MESSAGE_CONSTRAINTS,
+                    new JsonAdaptedCustomer(VALID_ID, VALID_NAME, number, VALID_EMAIL,
+                            VALID_BACKUP_CONTACT)::toModelType);
+            assertThrows(IllegalValueException.class, BackupContact.MESSAGE_CONSTRAINTS,
+                    new JsonAdaptedCustomer(VALID_ID, VALID_NAME, VALID_PHONE, VALID_EMAIL, number)::toModelType);
+        }
+    }
+
+    @Test
     public void toModelType_missingFields_throwIllegalValueException() {
         assertMissingField(null, VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_BACKUP_CONTACT, "id");
         assertMissingField(VALID_ID, null, VALID_PHONE, VALID_EMAIL, VALID_BACKUP_CONTACT, "name");

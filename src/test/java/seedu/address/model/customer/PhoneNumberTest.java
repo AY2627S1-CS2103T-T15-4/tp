@@ -19,6 +19,26 @@ public class PhoneNumberTest {
     }
 
     @Test
+    public void validation_singaporeCountryCode_requiresExactlyEightSubscriberDigits() {
+        for (String prefix : new String[]{"+65", "+65 ", "+6-5-", "+6 5 "}) {
+            for (int length = 0; length <= 14; length++) {
+                String number = prefix + "1".repeat(length);
+                assertEquals(length == 8, Phone.isValidPhone(number), number);
+                assertEquals(length == 8, BackupContact.isValidBackupContact(number), number);
+                if (length == 8) {
+                    assertEquals("11111111", new Phone(number).value);
+                    assertEquals("11111111", new BackupContact(number).value);
+                } else {
+                    assertThrows(IllegalArgumentException.class, () -> new Phone(number), number);
+                    assertThrows(IllegalArgumentException.class, () -> new BackupContact(number), number);
+                }
+            }
+        }
+        assertTrue(Phone.isValidPhone("+64 1234567"));
+        assertTrue(Phone.isValidPhone("+66 123456789"));
+    }
+
+    @Test
     public void validation_invalidLengthsOrFormatting_rejectsBothContactFields() {
         String[] invalid = {"", " ", "+", "9123456", "912345678", "+123456", "+1234567890123456",
             "+01234567", "44 20 1234 5678", "++1234567", "123+4567", "+ 1234567", "+-1234567",

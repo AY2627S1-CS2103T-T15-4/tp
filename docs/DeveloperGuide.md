@@ -348,7 +348,8 @@ primary phone number, email address, and backup contact. `AddCustomerCommandPars
 missing, repeated, or invalid fields and creates a customer without an ID. Before adding it,
 `AddCustomerCommand` checks the complete customer list for an existing primary phone number
 or email address. Phone and backup contact accept eight local digits or `+` followed by 7 to 15
-international digits (the first digit must be 1–9). `Phone` defines their shared validation and
+international digits (the first digit must be 1–9). Numbers beginning with `+65` must have exactly
+eight digits after the country code. `Phone` defines their shared validation and
 normalization: spaces and hyphens between digits are removed, and `+65` followed by eight digits
 is stored in local form. Other international numbers retain `+`; cards display the stored values.
 `SearchCustomerCommandParser` uses the same phone validation and normalization before the search

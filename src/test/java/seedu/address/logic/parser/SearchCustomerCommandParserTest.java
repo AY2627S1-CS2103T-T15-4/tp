@@ -38,7 +38,8 @@ public class SearchCustomerCommandParserTest {
     @Test
     public void parse_invalidInternationalPhones_rejectsBothFields() {
         for (String number : new String[]{"+123456", "+1234567890123456", "+01234567",
-            "+44 (20) 1234 5678", "++1234567", "44 20 1234 5678", "91234567-"}) {
+            "+44 (20) 1234 5678", "++1234567", "44 20 1234 5678", "91234567-",
+            "+651234567", "+65123456789", "+6-5-123456789"}) {
             assertThrows(ParseException.class, () -> parser.parse("p/" + number));
             assertThrows(ParseException.class, () -> parser.parse("bc/" + number));
         }

@@ -11,8 +11,13 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
  */
 public class BackupContact {
     public static final String MESSAGE_CONSTRAINTS =
-            "Backup contact numbers should contain exactly 8 digits, or start with + followed by 7 to 15 digits "
-                    + "including the country code (first digit 1-9); spaces and hyphens are allowed between digits";
+            "Enter a backup contact number in either format:\n"
+                    + "Local: exactly 8 digits without a country code, e.g. 91234567.\n"
+                    + "International: + followed by 7 to 15 digits including the country code, "
+                    + "e.g. +6591234567 (10 digits after +).\n"
+                    + "Singapore numbers with +65 must have exactly 8 digits after +65.\n"
+                    + "The + sign does not count as a digit. The first digit after + must be 1-9. "
+                    + "Spaces and hyphens are allowed between digits.";
     public static final String VALIDATION_REGEX = Phone.VALIDATION_REGEX;
     public final String value;
 

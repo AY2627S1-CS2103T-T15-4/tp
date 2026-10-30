@@ -112,6 +112,9 @@ The contact number and backup contact number accept either:
 * An international number starting with `+` followed by 7 to 15 digits, including the country code.
   The first digit after `+` must be 1–9. For example, `+442012345678`.
 
+Singapore numbers entered with `+65` must have exactly eight digits after the country code.
+For example, `+65 9123 4567` is accepted, while `+65 1234567` and `+65 123456789` are rejected.
+
 Spaces and hyphens are allowed between digits, for example `9123-4567` or `+44 20-1234-5678`.
 Letters, parentheses, and other symbols are rejected. Numbers without `+` are treated as Singapore numbers.
 These checks validate the format; they do not verify that a number is assigned or callable.

@@ -12,8 +12,13 @@ public class Phone {
 
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Phone numbers should contain exactly 8 digits, or start with + followed by 7 to 15 digits "
-                    + "including the country code (first digit 1-9); spaces and hyphens are allowed between digits";
+            "Enter a phone number in either format:\n"
+                    + "Local: exactly 8 digits without a country code, e.g. 91234567.\n"
+                    + "International: + followed by 7 to 15 digits including the country code, "
+                    + "e.g. +6591234567 (10 digits after +).\n"
+                    + "Singapore numbers with +65 must have exactly 8 digits after +65.\n"
+                    + "The + sign does not count as a digit. The first digit after + must be 1-9. "
+                    + "Spaces and hyphens are allowed between digits.";
     public static final String VALIDATION_REGEX =
             "(?:[0-9](?:[ -]*[0-9]){7}|\\+[1-9](?:[ -]*[0-9]){6,14})";
     public final String value;
@@ -33,16 +38,24 @@ public class Phone {
      * Returns true if a given string is a valid phone number.
      */
     public static boolean isValidPhone(String test) {
-        return test.matches(VALIDATION_REGEX);
+        if (!test.matches(VALIDATION_REGEX)) {
+            return false;
+        }
+        String unformatted = removeFormatting(test);
+        return !unformatted.startsWith("+65") || unformatted.length() == 11;
     }
 
     /** Removes formatting from a valid number and stores Singapore +65 numbers in local form. */
     static String normalize(String phone) {
-        String normalized = phone.replace(" ", "").replace("-", "");
+        String normalized = removeFormatting(phone);
         if (normalized.startsWith("+65") && normalized.length() == 11) {
             return normalized.substring(3);
         }
         return normalized;
+    }
+
+    private static String removeFormatting(String phone) {
+        return phone.replace(" ", "").replace("-", "");
     }
 
     @Override
