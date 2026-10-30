@@ -576,6 +576,9 @@ eight digits to local form before creating the command. Other international numb
 their leading `+`. Consequently, `searchc p/+65 9123-4567` matches a stored `91234567`.
 An invalid contact query, including a `+65` number with seven or nine following digits, fails
 before the command executes and leaves all current filters unchanged.
+Contact errors identify `p/` or `bc/` and distinguish empty values, invalid characters, incorrect
+formatting, the `+65` length requirement, international numbers starting with zero, and local or
+international length limits. Repeated contact fields have a separate single-value error.
 
 `SearchCustomerCommand` validates that the requested customer ID and every requested dog ID exist, then applies
 the customer ID criterion together with `CustomerSearchPredicate` to the filtered customer list. The predicate
@@ -1108,7 +1111,8 @@ Past occurrence dates are allowed so historical mistakes can be corrected.
 * 1a. A field is invalid or a specified customer or dog ID does not exist:
   system reports the problem and retains the current view.
   This includes partial contact queries such as `bc/+55` and `+65` numbers with other than
-  eight following digits.
+  eight following digits. Contact errors identify the affected field and explain its invalid
+  characters, formatting, or length; repeated contact fields request only one value.
 
 If the specified dogs exist but no customer owns all of them, the search succeeds with no matching customers.
 

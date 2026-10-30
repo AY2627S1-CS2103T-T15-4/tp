@@ -46,6 +46,56 @@ public class SearchCustomerCommandParserTest {
     }
 
     @Test
+    public void parse_invalidPhoneQueries_explainsReasonAndIdentifiesField() {
+        String[][] cases = {
+            {"", "Enter a complete phone number, e.g. 91234567 or +442012345678."},
+            {"+55", "Enter the complete international number: + followed by 7 to 15 digits including the country code, "
+                    + "e.g. +442012345678. Partial phone searches are not supported."},
+            {"+1234567890123456", "Enter the complete international number: + followed by 7 to 15 digits "
+                    + "including the country code, e.g. +442012345678. Partial phone searches are not supported."},
+            {"+65 1234567", "Singapore numbers must contain exactly 8 digits after +65, e.g. +6591234567."},
+            {"+6-5-123456789", "Singapore numbers must contain exactly 8 digits after +65, e.g. +6591234567."},
+            {"+01234567", "The first digit after + must be 1-9."},
+            {"9123", "Local numbers must contain exactly 8 digits without a country code, e.g. 91234567. "
+                    + "For international numbers, include + and the country code. "
+                    + "Partial phone searches are not supported."}
+        };
+        for (String[] example : cases) {
+            assertPhoneQueryError(example[0], example[1]);
+        }
+    }
+
+    @Test
+    public void parse_invalidPhoneSymbols_distinguishesSymbolsFromFormatting() {
+        for (String number : new String[]{"+44 (20) 1234 5678", "9123a567", "9123/4567", "9123\t4567"}) {
+            assertPhoneQueryError(number, "Use digits and an optional leading +. "
+                    + "Only spaces and hyphens are allowed between digits; "
+                    + "letters, parentheses and other symbols are not allowed.");
+        }
+        for (String number : new String[]{"+", "++551234567", "55+1234567", "+ 551234567", "91234567-"}) {
+            assertPhoneQueryError(number, "Place + only at the start, immediately before a digit. "
+                    + "Spaces and hyphens must be between digits.");
+        }
+    }
+
+    @Test
+    public void parse_duplicatePhoneFields_requestsOnlyOneValue() {
+        assertThrows(ParseException.class, "Error in searching customers:\nSpecify phone (p/) only once.", () ->
+                parser.parse("p/91234567 p/+6591234567"));
+        String backupMessage = "Error in searching customers:\nSpecify backup contact (bc/) only once.";
+        assertThrows(ParseException.class, backupMessage, () ->
+                parser.parse("bc/91234567 bc/+6591234567"));
+    }
+
+    private void assertPhoneQueryError(String number, String reason) {
+        assertThrows(ParseException.class, "Error in searching customers:\nInvalid phone (p/): " + reason, () ->
+                parser.parse("p/" + number));
+        String backupMessage = "Error in searching customers:\nInvalid backup contact (bc/): " + reason;
+        assertThrows(ParseException.class, backupMessage, () ->
+                parser.parse("bc/" + number));
+    }
+
+    @Test
     public void parse_invalidFormatOrDuplicateFields_throwsParseException() {
         String[] invalidInputs = {"", " ", "customer", "x/value", "N/Anna", "n/Anna n/Beth",
             "n/Anna x/value", "n/Anna p/1234567", "n/Anna p/91234567 p/92345678", "n/Anna e/a@b.com e/c@d.com",

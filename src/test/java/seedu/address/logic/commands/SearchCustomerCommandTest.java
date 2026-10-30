@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.WatchDogParser;
+import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.ModelManager;
 import seedu.address.model.activity.Activity;
 import seedu.address.model.activity.ActivityName;
@@ -26,6 +27,25 @@ import seedu.address.model.dog.DogName;
 import seedu.address.model.dog.Size;
 
 public class SearchCustomerCommandTest {
+    @Test
+    public void execute_invalidPhoneSearch_retainsExistingFiltersAndRecords() throws Exception {
+        ModelManager model = modelWithCustomersAndDogs();
+        WatchDogParser parser = new WatchDogParser();
+        parser.parseCommand("searchc i/1").execute(model);
+        List<Customer> customersBefore = List.copyOf(model.getCustomerList());
+        List<Customer> visibleCustomersBefore = List.copyOf(model.getFilteredCustomerList());
+        List<Dog> visibleDogsBefore = List.copyOf(model.getFilteredDogList());
+        List<Activity> visibleActivitiesBefore = List.copyOf(model.getFilteredActivityList());
+
+        for (String query : List.of("p/+55", "bc/+65123456789", "p/9123a567", "bc/", "p/91234567-")) {
+            assertThrows(ParseException.class, () -> parser.parseCommand("searchc " + query).execute(model));
+            assertEquals(customersBefore, model.getCustomerList());
+            assertEquals(visibleCustomersBefore, model.getFilteredCustomerList());
+            assertEquals(visibleDogsBefore, model.getFilteredDogList());
+            assertEquals(visibleActivitiesBefore, model.getFilteredActivityList());
+        }
+    }
+
     @Test
     public void execute_phoneQueries_matchNormalizedNumbersAfterAddAndEdit() throws Exception {
         ModelManager model = new ModelManager();

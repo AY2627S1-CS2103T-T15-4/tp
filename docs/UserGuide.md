@@ -160,6 +160,9 @@ Example: `searchc n/Anna d/12 34`
   `searchc bc/+44 20-1234-5678` matches a backup contact stored as `+442012345678`.
   Enter the complete number: partial queries such as `searchc bc/+55` are rejected.
   The `+65` length rule also applies to searches; an invalid query leaves the current display unchanged.
+  Errors identify the invalid field (`phone (p/)` or `backup contact (bc/)`) and explain whether
+  the number is incomplete or has an invalid length, symbols, or formatting. Repeated contact fields
+  report that the field must be specified only once.
 * Email matching is case-insensitive and exact.
 * Dog IDs must be positive and exist. A customer must own all specified dog IDs to match.
 * Customer ID must be a positive ID belonging to an existing customer; it matches that customer exactly.
@@ -900,7 +903,7 @@ Input | Expected result
 `searchd i/99` | `Error in searching dogs:` followed by `Please enter a valid dog index`; the previous display remains.
 `searchc n/ALICE p/91234567 e/ALICE@EXAMPLE.COM bc/98765432 d/2 1 i/1` | Shows Alice, Buddy, Cookie, and activities 1 and 2. Alice must own both supplied dog IDs; the success message lists dog IDs in ascending order. Activity enrolment details include only her dogs.
 `searchc p/+65 9123-4567 bc/9876-5432` | Shows Alice and her related dogs and activities, matching the same stored contacts despite the country code and formatting.
-`searchc bc/+55`, then `searchc p/+65123456789` | Both queries report an invalid search format and leave the previous display unchanged; the first is incomplete, and the second has nine digits after `+65`.
+`searchc bc/+55`, then `searchc p/+65123456789` | Both queries report `Error in searching customers:` and leave the previous display unchanged. The first identifies `backup contact (bc/)` and requests a complete international number with 7 to 15 digits; the second identifies `phone (p/)` and requires exactly eight digits after `+65`.
 `searchc i/99` | `Error in searching customers:` followed by `Please enter a valid customer index`; the previous display remains.
 `searchc n/Nobody` | Customer, dog, and general activity panels become empty; no records are deleted.
 `searcha n/WALK d/2026-10-29 t/10:00 r/DAILY i/1` | Shows Morning walk, dogs 1 and 2, and Alice. The end time is included in time searches; recurrence searches accept uppercase values.

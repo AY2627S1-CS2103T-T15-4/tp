@@ -17,8 +17,7 @@ import seedu.address.model.customer.Phone;
 public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand> {
     private static final Pattern FIELD_FORMAT = Pattern.compile(
             "(?<prefix>n|p|e|d|bc|i)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
-    private static final String MESSAGE_INVALID_INFO = "Error in searching customers:\n"
-            + "Info is in the wrong format. Input in the correct format";
+    private static final String MESSAGE_SEARCH_ERROR = "Error in searching customers:\n";
 
     @Override
     public SearchCustomerCommand parse(String args) throws ParseException {
@@ -40,19 +39,20 @@ public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand
                 throw invalidFormat();
             }
             String value = matcher.group("value").trim();
-            if (value.isEmpty()) {
+            String prefix = matcher.group("prefix");
+            if (value.isEmpty() && !prefix.equals("p") && !prefix.equals("bc")) {
                 throw invalidFormat();
             }
-            switch (matcher.group("prefix")) {
+            switch (prefix) {
                 case "n" -> {
                     if (name != null) {
                         throw invalidFormat();
                     }
                     name = value.replaceAll("\\s+", " ");
                 }
-                case "p" -> phone = parsePhone(value, phone);
+                case "p" -> phone = parsePhone(value, phone, "phone (p/)");
                 case "e" -> email = parseSingle(value, email);
-                case "bc" -> backupContact = parsePhone(value, backupContact);
+                case "bc" -> backupContact = parsePhone(value, backupContact, "backup contact (bc/)");
                 case "d" -> {
                     if (dogIds != null) {
                         throw invalidFormat();
@@ -70,11 +70,43 @@ public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand
         return new SearchCustomerCommand(name, phone, email, backupContact, dogIds, customerId);
     }
 
-    private static String parsePhone(String value, String existing) throws ParseException {
-        if (existing != null || !Phone.isValidPhone(value)) {
-            throw new ParseException(MESSAGE_INVALID_INFO);
+    private static String parsePhone(String value, String existing, String field) throws ParseException {
+        if (existing != null) {
+            throw new ParseException(MESSAGE_SEARCH_ERROR + "Specify " + field + " only once.");
+        }
+        if (!Phone.isValidPhone(value)) {
+            throw new ParseException(MESSAGE_SEARCH_ERROR + "Invalid " + field + ": " + phoneError(value));
         }
         return new Phone(value).value;
+    }
+
+    /** Explains why a contact query failed the shared phone validation. */
+    private static String phoneError(String value) {
+        if (value.isEmpty()) {
+            return "Enter a complete phone number, e.g. 91234567 or +442012345678.";
+        }
+        if (!value.matches("[+0-9 -]+")) {
+            return "Use digits and an optional leading +. Only spaces and hyphens are allowed between digits; "
+                    + "letters, parentheses and other symbols are not allowed.";
+        }
+        if (!value.matches("\\+?[0-9](?:[0-9 -]*[0-9])?")) {
+            return "Place + only at the start, immediately before a digit. "
+                    + "Spaces and hyphens must be between digits.";
+        }
+        String unformatted = value.replace(" ", "").replace("-", "");
+        if (unformatted.startsWith("+65")) {
+            return "Singapore numbers must contain exactly 8 digits after +65, e.g. +6591234567.";
+        }
+        if (unformatted.startsWith("+0")) {
+            return "The first digit after + must be 1-9.";
+        }
+        if (unformatted.startsWith("+")) {
+            return "Enter the complete international number: + followed by 7 to 15 digits "
+                    + "including the country code, e.g. +442012345678. Partial phone searches are not supported.";
+        }
+        return "Local numbers must contain exactly 8 digits without a country code, e.g. 91234567. "
+                + "For international numbers, include + and the country code. "
+                + "Partial phone searches are not supported.";
     }
 
     private static String parseSingle(String value, String existing) throws ParseException {
