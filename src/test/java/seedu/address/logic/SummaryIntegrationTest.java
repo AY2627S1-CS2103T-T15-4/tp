@@ -1,6 +1,7 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 import java.time.Clock;
@@ -80,8 +81,13 @@ public class SummaryIntegrationTest {
         var customerView = List.copyOf(model.getFilteredCustomerList());
         var activityView = List.copyOf(model.getFilteredActivityList());
 
-        // Exercise parsed summary's history/save handling; its clock remains the system clock.
-        logic.execute("summary");
+        LocalDate dateBeforeExecution = LocalDate.now();
+        String feedback = logic.execute("summary").getFeedbackToUser();
+        LocalDate dateAfterExecution = LocalDate.now();
+        // Either date is valid if execution crosses midnight; expectations use the known fixture, not Activity APIs.
+        assertTrue(List.of(expectedFeedback(dateBeforeExecution, dogs, enrolledToday),
+                expectedFeedback(dateAfterExecution, dogs, enrolledToday)).contains(feedback),
+                "Unexpected feedback returned by LogicManager: " + feedback);
         // Use the public clock seam for stable counts over the persisted, fixed-date bookings.
         assertEquals("Overall: " + dogs + " dogs | 1 customers\n"
                 + "Activity schedules: 5 total | 4 from today onwards\n"
@@ -92,6 +98,28 @@ public class SummaryIntegrationTest {
         assertEquals(customerView, model.getFilteredCustomerList());
         assertEquals(activityView, model.getFilteredActivityList());
         assertEquals(before, storage.readWatchDog().orElseThrow());
+    }
+
+    private static String expectedFeedback(LocalDate today, int dogs, int enrolledOnFixtureDate) {
+        List<LocalDate> oneTimeDates = List.of(DATE.minusDays(1), DATE, DATE.plusDays(1));
+        long upcoming = 2 + oneTimeDates.stream().filter(date -> !date.isBefore(today)).count();
+        long occurringToday = oneTimeDates.stream().filter(today::equals).count();
+        if (!today.isBefore(DATE.minusDays(1))) {
+            occurringToday++; // The daily schedule starts the day before the fixture date.
+        }
+        if (!today.isBefore(DATE) && today.getDayOfWeek() == DATE.getDayOfWeek()) {
+            occurringToday++; // The weekly schedule starts on the fixture date.
+        }
+        int enrolledToday = 0;
+        if (today.equals(DATE)) {
+            enrolledToday = enrolledOnFixtureDate;
+        } else if (today.equals(DATE.plusDays(1))) {
+            enrolledToday = 1; // Dog 2's booking survives every deletion/undo/redo checkpoint.
+        }
+        return "Overall: " + dogs + " dogs | 1 customers\n"
+                + "Activity schedules: 5 total | " + upcoming + " from today onwards\n"
+                + "Today (" + today + "): " + occurringToday + " activities | " + enrolledToday
+                + " distinct dogs enrolled";
     }
 
     private static WatchDog populatedBook() {
