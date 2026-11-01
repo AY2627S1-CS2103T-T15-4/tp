@@ -281,9 +281,9 @@ help, `clear` and JSON storage remain in use.
 
 <!-- @@author Kenneth-Chia -->
 Existing JSON files may contain a legacy `persons` field. It is ignored on loading and omitted
-on the next save; its records are not converted to customers. Customer/dog records, ownership
-links and both next-ID counters are preserved. A file containing only legacy persons loads
-as an empty WatchDog book. No startup sample person records are created.
+on the next save; its records are not converted to customers. Customer/dog records, activity schedules,
+dated enrolments, ownership links and all three persistent-ID counters are preserved. A file containing only
+legacy persons loads as an empty WatchDog book. No startup sample person records are created.
 <!-- @@author -->
 
 ### Common classes
