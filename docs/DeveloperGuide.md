@@ -1335,21 +1335,42 @@ testers are expected to do more *exploratory* testing.
 <!-- @@author Kenneth-Chia -->
 ### Daycare summary
 
-Use a disposable data folder for this test. Substitute the computer's current local date for
-`TODAY`, the preceding date for `YESTERDAY`, and the following date for `TOMORROW`.
+Launch the JAR in a disposable, writable test folder; see the
+[User Guide launch instructions](UserGuide.md#launching-and-preparing-test-records).
+Substitute the computer's current local date for `TODAY`, the preceding date for `YESTERDAY`,
+and the following date for `TOMORROW`. Enter each command separately and complete the test on the same local date.
 
-1. With no records, run `summary`. Expect zero for all six counts and today's date.
-1. Add two dogs and one customer; leave both dogs unowned and the customer without dogs.
-   Add five schedules: one-time yesterday, today and tomorrow, daily starting yesterday, and
-   weekly starting today. Use non-overlapping times for the today and daily schedules.
-1. Enrol the first dog in the one-time today schedule and the daily schedule on `TODAY`.
-   Enrol the second dog in the daily schedule on `TOMORROW`. Leave the weekly activity empty.
+1. In that disposable folder only, run `clear`, confirm with `Y`, then run `reset` and `summary`.
+   Expect zero for all six counts and today's date. Clearing also restarts the persistent-ID counters.
+1. Enter these commands in order. The dogs receive IDs 1 and 2, the customer receives ID 1,
+   and the activities receive IDs 1 to 5 in creation order. Both dogs remain unowned.
+
+   ```text
+   adddog n/Buddy b/Poodle s/Small
+   adddog n/Cookie b/Beagle s/Medium
+   addcustomer n/Alice Tan p/91234567 e/alice@example.com bc/98765432
+   addactivity n/Past date/YESTERDAY start/06:00 end/07:00 r/once
+   addactivity n/Today date/TODAY start/08:00 end/09:00 r/once
+   addactivity n/Future date/TOMORROW start/08:00 end/09:00 r/once
+   addactivity n/Daily date/YESTERDAY start/09:00 end/10:00 r/daily
+   addactivity n/Weekly date/TODAY start/10:00 end/11:00 r/weekly
+   enrol a/2 date/TODAY d/1
+   enrol a/4 date/TODAY d/1
+   enrol a/4 date/TOMORROW d/2
+   ```
+
+   Dog 1 attends two non-overlapping activities today; dog 2 attends only tomorrow.
+   Leave the weekly activity empty.
 1. Run `summary`. Expect `2 dogs | 1 customers`, `5 total | 4 from today onwards`, and
    `3 activities | 1 distinct dogs enrolled` for today, even after today's sessions have ended.
-1. Hide records using search/filter commands and run `summary` again. Expect identical counts
-   and unchanged panels. Run `summary extra`; expect the usage error and unchanged data/view.
-1. Delete the first dog and run `summary` again. Expect one dog and zero dogs enrolled today;
+1. Run `searchd n/Nobody`, then `summary`. Expect identical counts and unchanged empty general panels.
+   Run `summary extra`; expect the usage error and unchanged data/view.
+1. Exit and relaunch from the same test folder, then run `summary`. Expect the same six counts,
+   confirming the schedules and dated bookings survived saving and reloading.
+1. Run `searchd n/Nobody`, then `deletedog 1` and `summary`. Expect one dog and zero dogs enrolled today;
    the customer and all five schedules remain counted.
+1. Run `undo`, then `summary`. Expect the original two dogs and one distinct dog enrolled today.
+   Run `redo`, then `summary`. Expect one dog and zero dogs enrolled today again; summary preserved redo.
 1. At the minimum window size and normal/larger display scaling, verify that all three feedback
    lines can be read, scrolling within the result area if needed. Repeat with larger counts.
 <!-- @@author -->
