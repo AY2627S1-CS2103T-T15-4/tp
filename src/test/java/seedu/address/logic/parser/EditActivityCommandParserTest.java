@@ -71,6 +71,24 @@ public class EditActivityCommandParserTest {
     }
 
     @Test
+    public void parse_invalidFields_identifiesFieldAndPreservesGuidance() {
+        assertThrows(ParseException.class, "Invalid activity name (n/): " + ActivityName.MESSAGE_CONSTRAINTS,
+                () -> parser.parse(" 3 n/"));
+        assertThrows(ParseException.class, "Invalid activity date (date/): "
+                        + AddActivityCommandParser.MESSAGE_DATE,
+                () -> parser.parse(" 3 date/2027-02-29"));
+        assertThrows(ParseException.class, "Invalid activity start time (start/): "
+                        + AddActivityCommandParser.MESSAGE_TIME,
+                () -> parser.parse(" 3 start/24:00"));
+        assertThrows(ParseException.class, "Invalid activity end time (end/): "
+                        + AddActivityCommandParser.MESSAGE_TIME,
+                () -> parser.parse(" 3 end/25:00"));
+        assertThrows(ParseException.class, "Invalid activity recurrence (r/): "
+                        + AddActivityCommandParser.MESSAGE_RECURRENCE,
+                () -> parser.parse(" 3 r/Weekly"));
+    }
+
+    @Test
     public void parse_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> parser.parse(null));
     }

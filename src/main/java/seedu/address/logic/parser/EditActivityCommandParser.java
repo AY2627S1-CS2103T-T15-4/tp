@@ -51,24 +51,43 @@ public class EditActivityCommandParser implements Parser<EditActivityCommand> {
 
         EditActivityDescriptor descriptor = new EditActivityDescriptor();
         if (arguments.getValue(PREFIX_NAME).isPresent()) {
-            descriptor.setName(ParserUtil.parseActivityName(arguments.getValue(PREFIX_NAME).get()));
+            descriptor.setName(parseField("activity name (n/)", ParserUtil::parseActivityName,
+                    arguments.getValue(PREFIX_NAME).get()));
         }
         if (arguments.getValue(PREFIX_DATE).isPresent()) {
-            descriptor.setDate(parseDate(arguments.getValue(PREFIX_DATE).get()));
+            descriptor.setDate(parseField("activity date (date/)", EditActivityCommandParser::parseDate,
+                    arguments.getValue(PREFIX_DATE).get()));
         }
         if (arguments.getValue(PREFIX_START).isPresent()) {
-            descriptor.setStartTime(parseTime(arguments.getValue(PREFIX_START).get()));
+            descriptor.setStartTime(parseField("activity start time (start/)", EditActivityCommandParser::parseTime,
+                    arguments.getValue(PREFIX_START).get()));
         }
         if (arguments.getValue(PREFIX_END).isPresent()) {
-            descriptor.setEndTime(parseTime(arguments.getValue(PREFIX_END).get()));
+            descriptor.setEndTime(parseField("activity end time (end/)", EditActivityCommandParser::parseTime,
+                    arguments.getValue(PREFIX_END).get()));
         }
         if (arguments.getValue(PREFIX_RECURRENCE).isPresent()) {
-            descriptor.setRecurrence(parseRecurrence(arguments.getValue(PREFIX_RECURRENCE).get()));
+            descriptor.setRecurrence(parseField("activity recurrence (r/)", EditActivityCommandParser::parseRecurrence,
+                    arguments.getValue(PREFIX_RECURRENCE).get()));
         }
         if (!descriptor.isAnyFieldEdited()) {
             throw new ParseException(EditActivityCommand.MESSAGE_NOT_EDITED);
         }
         return new EditActivityCommand(activityId, descriptor);
+    }
+
+    /** Identifies the field while preserving its existing validation guidance. */
+    private static <T> T parseField(String field, FieldParser<T> parser, String value) throws ParseException {
+        try {
+            return parser.parse(value);
+        } catch (ParseException e) {
+            throw new ParseException("Invalid " + field + ": " + e.getMessage(), e);
+        }
+    }
+
+    @FunctionalInterface
+    private interface FieldParser<T> {
+        T parse(String value) throws ParseException;
     }
 
     private static int parseActivityId(String value) throws ParseException {

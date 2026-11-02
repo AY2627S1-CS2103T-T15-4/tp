@@ -38,8 +38,9 @@ public class EditCustomerCommandParserTest {
     @Test
     public void parse_singaporeCountryCodeWithInvalidLength_rejectsBothContactFields() {
         for (String number : new String[]{"+65 1234567", "+65123456789", "+6-5-123456789"}) {
-            assertParseFailure(parser, " 1 p/" + number, Phone.MESSAGE_CONSTRAINTS);
-            assertParseFailure(parser, " 1 bc/" + number, BackupContact.MESSAGE_CONSTRAINTS);
+            assertParseFailure(parser, " 1 p/" + number, "Invalid phone (p/): " + Phone.MESSAGE_CONSTRAINTS);
+            assertParseFailure(parser, " 1 bc/" + number,
+                    "Invalid backup contact (bc/): " + BackupContact.MESSAGE_CONSTRAINTS);
         }
     }
 
@@ -62,8 +63,11 @@ public class EditCustomerCommandParserTest {
     public void parse_duplicateOrInvalidField_failure() {
         assertParseFailure(parser, " 1 n/New Name n/Other", "Multiple values specified for the following "
                 + "single-valued field(s): n/");
-        assertParseFailure(parser, " 1 p/12", Phone.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, " 1 e/invalid", seedu.address.model.customer.Email.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, " 1 bc/12", seedu.address.model.customer.BackupContact.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " 1 n/!", "Invalid name (n/): " + Name.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " 1 p/12", "Invalid phone (p/): " + Phone.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " 1 e/invalid",
+                "Invalid email (e/): " + seedu.address.model.customer.Email.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " 1 bc/12",
+                "Invalid backup contact (bc/): " + BackupContact.MESSAGE_CONSTRAINTS);
     }
 }
