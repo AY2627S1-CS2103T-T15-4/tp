@@ -175,6 +175,15 @@
         "watchdog": "WatchDog"
       },
       "headingKeywords": {}
+    },
+    {
+      "src": "team/kenneth-chia.md",
+      "title": "Kenneth Chia's Project Portfolio Page",
+      "headings": {
+        "kenneth-chia-s-project-portfolio-page": "Kenneth Chia's Project Portfolio Page",
+        "project-watchdog": "Project: WatchDog"
+      },
+      "headingKeywords": {}
     }
   ]
 }
