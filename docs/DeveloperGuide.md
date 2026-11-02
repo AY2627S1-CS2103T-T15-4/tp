@@ -20,7 +20,7 @@
 
 * Kenneth-Chia used OpenAI Codex as a development aid throughout his project contributions, including
   implementation, debugging, test development, documentation and UML diagrams, PR reviews, and
-  release-readiness checks. This consolidated declaration covers his widespread AI-assisted work.
+  release-readiness checks.
 
 --------------------------------------------------------------------------------------------------------------------
 
