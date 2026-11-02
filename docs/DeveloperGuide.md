@@ -1315,6 +1315,17 @@ NFR-10. **Privacy**: WatchDog shall store dog and customer records locally and s
 
 ## **Appendix: Instructions for manual testing**
 
+### Recovery from an invalid data file
+
+In a disposable home folder, close WatchDog and replace `data/watchdog.json` with malformed JSON.
+Relaunch and run `summary`. Expect an empty model and a byte-for-byte copy of the invalid file named
+`watchdog.json.invalid-UNIQUE_ID.bak` beside the data file. Subsequent saves retain that backup.
+Repeat with an invalid record such as `{"dogs":[null]}`; expect a separate backup. A failed backup
+must prevent replacement of the original; the storage error is logged and mutations report a save error.
+
+`JsonWatchDogStorage` tracks paths whose reads failed and copies each original before permitting its
+first replacement. It removes the guard only after the copy succeeds, so a failed copy can be retried.
+
 Given below are instructions to test the app manually.
 
 <box type="info" seamless>

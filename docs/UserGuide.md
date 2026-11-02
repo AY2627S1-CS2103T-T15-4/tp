@@ -663,7 +663,12 @@ WatchDog data is saved automatically as `data/watchdog.json` inside the folder f
 <box type="warning" seamless>
 
 **Caution:**
-If your changes make the data file invalid, WatchDog starts with no saved records at the next run. The invalid file remains on disk until you run a command (WatchDog saves after every command). Still, we recommend backing up the file before editing it.<br>
+If your changes make the data file invalid, WatchDog starts with no saved records at the next run.
+Before its first save, it preserves the original as `watchdog.json.invalid-UNIQUE_ID.bak` in the same folder.
+Existing backups are never replaced. If the backup cannot be created, saving is refused; check the
+application log and folder permissions. To recover, close WatchDog, repair a copy of the backup, and
+replace `watchdog.json` with that repaired copy. Keep your backup until recovery is verified.
+We still recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause WatchDog to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
 
