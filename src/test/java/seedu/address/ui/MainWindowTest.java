@@ -474,6 +474,18 @@ public class MainWindowTest {
                     false, true, true, false));
             assertEquals(0, scrollPane.getHvalue());
 
+            for (KeyCode key : List.of(KeyCode.DIGIT2, KeyCode.DIGIT3, KeyCode.DIGIT4)) {
+                command.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", key,
+                        false, true, true, false));
+                assertTrue(scrollPane.getHvalue() > 0);
+                command.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.DIGIT1,
+                        false, true, true, false));
+                assertEquals(0, scrollPane.getHvalue());
+            }
+            command.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.DIGIT5,
+                    false, true, true, false));
+            assertEquals(0, scrollPane.getHvalue());
+
             window.getPrimaryStage().close();
         });
     }
@@ -484,6 +496,8 @@ public class MainWindowTest {
         GuiSettings saved = new GuiSettings(1100, 650, 2000, 1000);
 
         assertEquals(new Rectangle2D(0, 0, 853, 450), MainWindow.fitWindowToBounds(saved, screen));
+        assertEquals(new Rectangle2D(100, 50, 600, 300), MainWindow.fitWindowToBounds(
+                new GuiSettings(600, 300, 100, 50), screen));
     }
 
     @Test
