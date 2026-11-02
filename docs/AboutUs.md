@@ -24,7 +24,7 @@ Report bugs and suggestions through the [WatchDog issue tracker](https://github.
 
 <img src="images/kenneth-chia.png" width="200px">
 
-[[github](http://github.com/Kenneth-Chia)]
+[[github](http://github.com/Kenneth-Chia)] [[portfolio](team/kenneth-chia.md)]
 
 * Role: Team Lead
 * Responsibilities: UI, Code Quality, Testing
