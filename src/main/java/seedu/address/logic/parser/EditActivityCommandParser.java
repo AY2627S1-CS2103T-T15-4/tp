@@ -2,7 +2,6 @@
 package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_DATE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_END;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
@@ -91,15 +90,18 @@ public class EditActivityCommandParser implements Parser<EditActivityCommand> {
     }
 
     private static int parseActivityId(String value) throws ParseException {
+        String trimmedId = value.trim();
+        if (trimmedId.isEmpty()) {
+            throw new ParseException("Activity ID is required. Enter a positive whole number.");
+        }
         try {
-            int activityId = Integer.parseInt(value.trim());
+            int activityId = Integer.parseInt(trimmedId);
             if (activityId <= 0) {
                 throw new NumberFormatException();
             }
             return activityId;
         } catch (NumberFormatException e) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
-                    EditActivityCommand.MESSAGE_USAGE), e);
+            throw new ParseException("Please provide a positive, valid activity ID.", e);
         }
     }
 

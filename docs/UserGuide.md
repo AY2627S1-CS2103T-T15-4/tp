@@ -136,6 +136,9 @@ Format: `editcustomer CUSTOMER_ID [n/NAME] [p/PHONE] [e/EMAIL] [bc/BACKUP_CONTAC
 Example: `editcustomer 1 p/91234567 e/johndoe@example.com`
 
 * `CUSTOMER_ID` must identify an existing customer.
+  A missing ID is reported as required. For example, `editcustomer abc n/Alice` reports
+  `Please provide a positive, valid customer ID.`, while an unknown ID such as `999`
+  reports `Customer ID 999 does not exist.`
 * Any supplied field replaces its existing value.
 * The resulting primary phone number and email address must not belong to another customer. You may
   keep your existing phone number and email address. Backup contact numbers need not be unique.
@@ -400,6 +403,10 @@ Format: `editactivity ACTIVITY_ID [n/NAME] [date/YYYY-MM-DD] [start/HH:mm] [end/
 
 Example: `editactivity 21 n/Morning walk start/09:00 end/10:00` changes activity 21's name and times,
 provided it exists and has no enrolments. Its other details remain unchanged.
+
+A missing activity ID is reported as required. For example, `editactivity abc n/Walk` reports
+`Please provide a positive, valid activity ID.`, while an unknown ID such as `999`
+reports `Activity ID 999 does not exist.`
 
 #### Searching activities: `searcha`
 

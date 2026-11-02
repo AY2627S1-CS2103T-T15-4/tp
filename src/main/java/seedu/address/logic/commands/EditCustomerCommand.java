@@ -41,7 +41,7 @@ public class EditCustomerCommand extends Command {
 
     public static final String MESSAGE_EDIT_CUSTOMER_SUCCESS = "Edited customer: %1$s";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
-    public static final String MESSAGE_CUSTOMER_NOT_FOUND = "This customer does not exist.";
+    public static final String MESSAGE_CUSTOMER_NOT_FOUND = "Customer ID %d does not exist.";
 
     private final int customerId;
     private final EditCustomerDescriptor editCustomerDescriptor;
@@ -68,7 +68,7 @@ public class EditCustomerCommand extends Command {
         Customer customerToEdit = model.getWatchDog().getCustomerList().stream()
                 .filter(customer -> customer.getId() == customerId)
                 .findFirst()
-                .orElseThrow(() -> new CommandException(MESSAGE_CUSTOMER_NOT_FOUND));
+                .orElseThrow(() -> new CommandException(String.format(MESSAGE_CUSTOMER_NOT_FOUND, customerId)));
         Customer editedCustomer = createEditedCustomer(customerToEdit, editCustomerDescriptor);
 
         CustomerContactValidator.validate(editedCustomer, model.getCustomerList(), customerId);

@@ -20,7 +20,7 @@ public class EditCustomerCommandParser implements Parser<EditCustomerCommand> {
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_BACKUP_CONTACT);
 
-        int customerId = ParserUtil.parseCustomerId(argMultimap.getPreamble());
+        int customerId = parseCustomerId(argMultimap.getPreamble());
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_BACKUP_CONTACT);
 
         EditCustomerDescriptor descriptor = new EditCustomerDescriptor();
@@ -60,5 +60,17 @@ public class EditCustomerCommandParser implements Parser<EditCustomerCommand> {
     @FunctionalInterface
     private interface FieldParser<T> {
         T parse(String value) throws ParseException;
+    }
+
+    private static int parseCustomerId(String value) throws ParseException {
+        String trimmedId = value.trim();
+        if (trimmedId.isEmpty()) {
+            throw new ParseException("Customer ID is required. Enter a positive whole number.");
+        }
+        try {
+            return ParserUtil.parseCustomerId(trimmedId);
+        } catch (ParseException e) {
+            throw new ParseException("Please provide a positive, valid customer ID.", e);
+        }
     }
 }

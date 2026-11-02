@@ -956,7 +956,8 @@ Backup contacts may be shared.
 **Extensions**
 
 * 2a. The ID is invalid or unknown, no edit field is supplied, or a detail is invalid:
-  system reports the problem without changing the customer.
+  system reports the problem without changing the customer. Missing IDs, malformed IDs, and
+  well-formed IDs with no matching customer receive distinct errors; only the unknown-record error includes the ID.
   A `+65` primary or backup contact with other than eight following digits is invalid.
   Use case ends.
 * 2b. Another customer uses the resulting primary phone or email: system identifies the duplicate
@@ -1047,7 +1048,8 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 **Extensions**
 
 * 2a. The ID is invalid or unknown, no edit field is supplied, or the resulting schedule is invalid:
-  system reports the problem without changing the activity.
+  system reports the problem without changing the activity. Missing IDs, malformed IDs, and
+  well-formed IDs with no matching activity receive distinct errors; only the unknown-record error includes the ID.
   Use case ends.
 * 2b. The activity has enrolments: system rejects the edit and suggests creating a new activity.
   Use case ends.

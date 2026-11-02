@@ -40,7 +40,7 @@ public class EditCustomerCommandTest {
         EditCustomerDescriptor descriptor = new EditCustomerDescriptor();
         descriptor.setName(new Name("Alice Tan"));
 
-        assertThrows(CommandException.class, EditCustomerCommand.MESSAGE_CUSTOMER_NOT_FOUND, () ->
+        assertThrows(CommandException.class, String.format(EditCustomerCommand.MESSAGE_CUSTOMER_NOT_FOUND, 1), () ->
                 new EditCustomerCommand(1, descriptor).execute(new ModelManager()));
     }
 

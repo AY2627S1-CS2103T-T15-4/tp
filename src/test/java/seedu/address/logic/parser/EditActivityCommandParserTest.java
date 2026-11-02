@@ -71,6 +71,18 @@ public class EditActivityCommandParserTest {
     }
 
     @Test
+    public void parse_missingOrInvalidActivityId_reportsReason() {
+        assertThrows(ParseException.class, "Activity ID is required. Enter a positive whole number.",
+                () -> parser.parse(" n/Training"));
+        assertThrows(ParseException.class, "Please provide a positive, valid activity ID.",
+                () -> parser.parse(" abc n/Training"));
+        assertThrows(ParseException.class, "Please provide a positive, valid activity ID.",
+                () -> parser.parse(" 0 n/Training"));
+        assertThrows(ParseException.class, "Please provide a positive, valid activity ID.",
+                () -> parser.parse(" 2147483648 n/Training"));
+    }
+
+    @Test
     public void parse_invalidFields_identifiesFieldAndPreservesGuidance() {
         assertThrows(ParseException.class, "Invalid activity name (n/): " + ActivityName.MESSAGE_CONSTRAINTS,
                 () -> parser.parse(" 3 n/"));
