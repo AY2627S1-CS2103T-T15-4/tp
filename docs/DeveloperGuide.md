@@ -879,7 +879,7 @@ change can remain in memory.
 **MSS**
 
 1. User enters a dog ID and at least one replacement detail.
-2. System finds the dog in the complete list and validates the supplied details.
+2. System confirms the ID identifies a dog and validates the supplied details.
 3. System replaces the dog, preserving its ID, owner, and enrolments, and displays a success message.
 
    Use case ends.
@@ -895,7 +895,7 @@ change can remain in memory.
 **MSS**
 
 1. User enters a dog ID.
-2. System finds the dog in the complete list.
+2. System confirms the ID identifies a dog.
 3. System deletes the dog and all its dated activity enrolments, including past enrolments,
    while retaining its former owner and the activity schedules.
 
@@ -918,8 +918,7 @@ retain `+`. Stored and displayed contact values use this normalized form.
 **MSS**
 
 1. User enters a name, primary phone number, email address, and backup contact.
-2. System validates and normalizes the fields and checks that no customer, including a filtered-out customer,
-   uses the primary phone number or email address.
+2. System validates the fields and confirms the primary phone number and email address are available.
 3. System assigns a persistent customer ID, stores the customer, and displays a success message.
 
    Use case ends.
@@ -941,9 +940,8 @@ Backup contacts may be shared.
 **MSS**
 
 1. User enters a customer ID and at least one replacement detail.
-2. System finds the customer in the complete list, validates and normalizes supplied fields using
-   the rules above, and checks the resulting primary phone and email for duplicates against other
-   customers, excluding the customer being edited.
+2. System confirms the ID identifies a customer, validates the supplied details, and checks that
+   the resulting primary phone and email are not used by another customer.
 3. System replaces the customer, preserving the ID used by their dogs, and displays a success message.
 
    Use case ends.
@@ -966,7 +964,7 @@ Unspecified details are retained, and backup contacts may be shared.
 **MSS**
 
 1. User enters a customer ID.
-2. System finds the customer in the complete list.
+2. System confirms the ID identifies a customer.
 3. System deletes the customer and unlinks their dogs without deleting the dogs.
 
    Use case ends.
@@ -997,7 +995,7 @@ Unspecified details are retained, and backup contacts may be shared.
 **MSS**
 
 1. User enters either an existing customer ID or one or more distinct dog IDs.
-2. System finds the linked dogs and validates the entire request.
+2. System confirms the selected dogs are linked and the entire request is valid.
 3. System removes their ownership links while retaining the dog and customer records.
 
    Use case ends.
@@ -1033,7 +1031,7 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 **MSS**
 
 1. User enters an activity ID and at least one replacement field.
-2. System finds the activity in the complete list, validates the resulting schedule, and confirms
+2. System confirms the ID identifies an activity, validates the resulting schedule, and confirms
    that the activity has no enrolments on any occurrence.
 3. System updates the entire schedule, preserving its ID and unspecified fields.
 
@@ -1052,7 +1050,7 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 **MSS**
 
 1. User enters an activity ID.
-2. System finds the activity in the complete list.
+2. System confirms the ID identifies an activity.
 3. System deletes the entire schedule and all its dated enrolments while retaining dogs,
    customers, and other activities.
 
@@ -1118,9 +1116,7 @@ Past occurrence dates are allowed so historical mistakes can be corrected.
 **MSS**
 
 1. User enters one or more customer search fields: name, phone, email, backup contact, dog IDs, or customer ID.
-2. System validates and normalizes any complete phone or backup contact query using the shared
-   phone rules, then finds customers matching every supplied field and any required dog ownership.
-   Contact numbers match exactly after normalization; `+65 9123-4567` matches `91234567`.
+2. System finds customers matching every supplied field and any required dog ownership.
 3. System filters the customer, owned dog, and enrolled activity displays without changing records.
 
    Use case ends.
@@ -1134,6 +1130,8 @@ Past occurrence dates are allowed so historical mistakes can be corrected.
   characters, formatting, or length; repeated contact fields request only one value.
   Use case ends.
 
+Contact queries use the shared phone rules and match exactly after normalization;
+`+65 9123-4567` matches `91234567`.
 If the specified dogs exist but no customer owns all of them, the search succeeds with no matching customers.
 
 **Use case: UC16 - Search Activities (searcha)**
@@ -1159,9 +1157,11 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 2. System shows dogs without owners or customers without dogs, respectively, and clears the
    other record panel. The dog form also shows activities booked by unowned dogs; the customer
    form clears the activity panel.
-3. System keeps the filter active as records and ownership change.
 
    Use case ends.
+
+**Guarantee**: The selected filter remains active as records and ownership change, until another
+display command replaces it.
 
 **Extensions**
 
@@ -1189,9 +1189,10 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 
 1. User enters reset.
 2. System shows all customers and dogs and activity schedules with an occurrence today or later.
-3. System preserves the stored records.
 
    Use case ends.
+
+**Guarantee**: Resetting the display does not change stored records.
 
 **Extensions**
 
@@ -1205,9 +1206,10 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 1. User enters summary.
 2. System reports total customers and dogs, total and upcoming activity schedules,
    and today's activities and distinct enrolled dogs.
-3. System preserves records, filters, and undo/redo history.
 
    Use case ends.
+
+**Guarantee**: Viewing the summary does not change records, filters, or undo/redo availability.
 
 **Extensions**
 
@@ -1220,9 +1222,10 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 
 1. User enters undo.
 2. System restores the records and view from before the most recent undoable command.
-3. System makes that command available for redo.
 
    Use case ends.
+
+**Guarantee**: After a successful undo, the undone command is available for redo.
 
 **Extensions**
 
@@ -1237,9 +1240,10 @@ Only the most recent undoable command can be undone; confirmed clear discards th
 
 1. User enters redo.
 2. System restores the records and view from just before the last undo.
-3. System makes the redone command available for undo.
 
    Use case ends.
+
+**Guarantee**: After a successful redo, the redone command is available for undo.
 
 **Extensions**
 
@@ -1253,9 +1257,11 @@ Only the most recent undoable command can be undone; confirmed clear discards th
 1. User enters clear.
 2. System warns that clearing cannot be undone and requests Y/N confirmation.
 3. User enters Y.
-4. System removes all customers, dogs, activities, and enrolments and discards undo/redo history.
+4. System removes all customers, dogs, activities, and enrolments.
 
    Use case ends.
+
+**Guarantee**: After confirmed clearing, undo and redo are unavailable.
 
 **Extensions**
 
@@ -1276,9 +1282,10 @@ Confirmation ignores letter case and surrounding whitespace; active filters rema
 
 1. User enters help, optionally followed by a command name.
 2. System opens the help window or displays that command's format and description.
-3. System preserves records, the current view, and undo/redo history.
 
    Use case ends.
+
+**Guarantee**: Getting help does not change records, the current view, or undo/redo availability.
 
 **Extensions**
 
