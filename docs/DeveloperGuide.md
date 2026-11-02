@@ -354,11 +354,12 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 primary phone number, email address, and backup contact. `AddCustomerCommandParser` rejects
 missing, repeated, or invalid fields and creates a customer without an ID. Before adding it,
 `AddCustomerCommand` checks the complete customer list for an existing primary phone number
-or email address. Phone and backup contact accept eight local digits or `+` followed by 7 to 15
-international digits (the first digit must be 1–9). Numbers beginning with `+65` must have exactly
-eight digits after the country code. `Phone` defines their shared validation and
-normalization: spaces and hyphens between digits are removed, and `+65` followed by eight digits
-is stored in local form. Other international numbers retain `+`; cards display the stored values.
+or email address and reports the conflicting customer's persistent ID. Phone and backup contact
+accept eight local digits or `+` followed by 7 to 15 international digits (the first digit must be 1–9).
+Numbers beginning with `+65` must have exactly eight digits after the country code. `Phone` defines
+their shared validation and normalization: spaces and hyphens between digits are removed, and `+65`
+followed by eight digits is stored in local form. Other international numbers retain `+`; cards display
+the stored values.
 `SearchCustomerCommandParser` uses the same phone validation and normalization before the search
 predicate compares values exactly. Phone numbers are normalized before comparison, email comparison ignores
 letter case, and backup contacts may be shared. `WatchDog` then assigns the customer a
@@ -377,9 +378,10 @@ position in a filtered list. `EditCustomerCommandParser` requires a positive ID 
 one replacement field. The command copies the edit descriptor, combines supplied values
 with the stored customer's unchanged fields, and creates a replacement with the same ID.
 It checks the resulting primary phone and email against other customers, excluding the
-customer being edited so they may keep their own contact details. `Model.setCustomer`
-replaces the stored record while retaining the ID used by dog ownership links. Unlike a
-dog edit, there is no owner field to copy: each dog's owner ID is stored on the dog.
+customer being edited so they may keep their own contact details. A duplicate error identifies
+the other customer's persistent ID. `Model.setCustomer` replaces the stored record while retaining
+the ID used by dog ownership links. Unlike a dog edit, there is no owner field to copy: each dog's
+owner ID is stored on the dog.
 Both replacement contact fields use the same validation and normalization as adding customers.
 In particular, a `+65` number requires exactly eight following digits. Invalid contact details
 are rejected before the stored record changes, including when editing a hidden customer.
@@ -935,9 +937,10 @@ retain `+`. Stored and displayed contact values use this normalized form.
 * 2a. A required field is missing or invalid: system reports the field error without adding a customer.
   This includes a `+65` primary or backup contact with other than eight following digits.
   Use case ends.
-* 2b. The primary phone or email is already in use: system identifies the duplicate field without
-  changing records. Phone comparison ignores spaces and hyphens and treats `+65` followed by eight digits
-  as the equivalent local number; email comparison ignores letter case.
+* 2b. The primary phone or email is already in use: system identifies the duplicate field and
+  conflicting customer's ID without changing records. Phone comparison ignores spaces and hyphens
+  and treats `+65` followed by eight digits as the equivalent local number; email comparison ignores
+  letter case.
   Use case ends.
 
 Backup contacts may be shared.
@@ -961,8 +964,8 @@ Backup contacts may be shared.
   A `+65` primary or backup contact with other than eight following digits is invalid.
   Use case ends.
 * 2b. Another customer uses the resulting primary phone or email: system identifies the duplicate
-  field without changing records. Phone comparison uses normalized values, so adding or removing
-  `+65`, spaces, or hyphens cannot bypass the duplicate check.
+  field and the conflicting customer ID without changing records. Phone comparison uses normalized values,
+  so adding or removing `+65`, spaces, or hyphens cannot bypass the duplicate check.
   Use case ends.
 
 Unspecified details are retained, and backup contacts may be shared.
@@ -1507,10 +1510,12 @@ Replace the uppercase ID placeholders below with the persistent IDs reported by 
    `addcustomer n/Ben Lim p/92345678 e/ben@example.com bc/98765432`.
    Expect separate IDs; sharing the backup number is allowed.
 1. Try adding another customer with Alice's primary phone, then with `e/ALICE@example.com` and a fresh phone.
-   Expect duplicate-contact errors and no addition, even after hiding Alice with `searchc n/Ben`.
+   Expect duplicate-contact errors naming Alice's ID and no addition, even after hiding Alice with
+   `searchc n/Ben`.
    Try a missing field and a seven-digit phone; expect errors without adding records.
 1. Run `editcustomer CUSTOMER_ID n/Alice Koh` using Alice's ID. Expect the same ID and unchanged unspecified
-   fields. Try changing Alice's primary phone to Ben's, then omit all edit fields; expect errors and no changes.
+   fields. Try changing Alice's primary phone to Ben's; expect a duplicate error naming Ben's ID.
+   Then omit all edit fields; expect an error and no changes.
 1. Run `link c/CUSTOMER_ID d/DOG_ID_1 DOG_ID_2`. Expect both dogs to show Alice's ID and Alice's card to list
    both dog IDs, including when the dogs are filtered out. Run `reset` to inspect all cards.
 1. Run `unlink d/DOG_ID_1 DOG_ID_2`, then link only the second dog to Ben.

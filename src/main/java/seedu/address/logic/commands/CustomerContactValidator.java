@@ -12,8 +12,8 @@ import seedu.address.model.customer.Customer;
  * Checks that customer commands do not reuse another customer's primary contact details.
  */
 final class CustomerContactValidator {
-    static final String MESSAGE_DUPLICATE_PHONE = "This phone number is already used by another customer.";
-    static final String MESSAGE_DUPLICATE_EMAIL = "This email address is already used by another customer.";
+    static final String MESSAGE_DUPLICATE_PHONE = "This phone number is already used by customer ID %d.";
+    static final String MESSAGE_DUPLICATE_EMAIL = "This email address is already used by customer ID %d.";
 
     private CustomerContactValidator() {
     }
@@ -32,10 +32,10 @@ final class CustomerContactValidator {
                 continue;
             }
             if (customer.getPhone().equals(candidate.getPhone())) {
-                throw new CommandException(MESSAGE_DUPLICATE_PHONE);
+                throw new CommandException(String.format(MESSAGE_DUPLICATE_PHONE, customer.getId()));
             }
             if (customer.getEmail().value.equalsIgnoreCase(candidate.getEmail().value)) {
-                throw new CommandException(MESSAGE_DUPLICATE_EMAIL);
+                throw new CommandException(String.format(MESSAGE_DUPLICATE_EMAIL, customer.getId()));
             }
         }
     }

@@ -124,6 +124,7 @@ Other international numbers retain their leading `+`. All four fields are requir
 Each customer's primary phone number and email address must be unique across all customers, including
 those hidden by filters. Email uniqueness ignores letter case. Backup contact numbers may be shared,
 including with another customer's primary phone number.
+If a primary phone number or email address is already used, the error names the customer ID that owns it.
 If fields are missing, WatchDog lists them and shows the command format. If a value is invalid, it
 reports the first invalid field and its constraints.
 
@@ -141,7 +142,8 @@ Example: `editcustomer 1 p/91234567 e/johndoe@example.com`
   reports `Customer ID 999 does not exist.`
 * Any supplied field replaces its existing value.
 * The resulting primary phone number and email address must not belong to another customer. You may
-  keep your existing phone number and email address. Backup contact numbers need not be unique.
+  keep your existing phone number and email address. A duplicate-contact error identifies the other
+  customer's ID. Backup contact numbers need not be unique.
 * Supplied names, phone numbers, backup contacts, and email addresses follow the same validation rules
   as `addcustomer`.
   This includes requiring exactly eight digits after `+65` for both `p/` and `bc/`.
@@ -808,10 +810,10 @@ Input | Expected result
 `addcustomer n/Carol p/1234567 e/carol@example.com bc/98765432` | `Invalid phone:` followed by the phone constraints: eight local digits or `+` followed by 7 to 15 international digits; spaces and hyphens are allowed between digits.
 `addcustomer n/Carol p/+65 1234567 e/carol@example.com bc/98765432` | `Invalid phone:` with guidance that exactly eight digits must follow `+65`; no customer is added.
 `addcustomer n/Carol p/93456789 e/carol@example.com bc/+65123456789` | `Invalid backup contact:` with the same `+65` length requirement; no customer is added.
-`searchc i/2`, then `addcustomer n/Carol p/91234567 e/carol@example.com bc/98765432` | Ben is displayed, then `This phone number is already used by another customer.` Alice's hidden record still prevents reuse.
-`addcustomer n/Carol p/93456789 e/ALICE@EXAMPLE.COM bc/98765432` | `This email address is already used by another customer.` Email uniqueness ignores case.
+`searchc i/2`, then `addcustomer n/Carol p/91234567 e/carol@example.com bc/98765432` | Ben is displayed, then `This phone number is already used by customer ID 1.` Alice's hidden record still prevents reuse.
+`addcustomer n/Carol p/93456789 e/ALICE@EXAMPLE.COM bc/98765432` | `This email address is already used by customer ID 1.` Email uniqueness ignores case.
 `reset`, then `editcustomer 1 n/Alice Koh` | Alice's name changes; ID 1, phone, email, and backup contact remain unchanged.
-`editcustomer 1 p/92345678` | Duplicate-phone error; Alice's phone remains `91234567`.
+`editcustomer 1 p/92345678` | `This phone number is already used by customer ID 2.` Alice's phone remains `91234567`.
 `editcustomer 1 p/+65 9123-4567 bc/+65 9876-5432` | Accepted as Alice's own existing contacts; stored and displayed as `91234567` and `98765432`.
 `editcustomer 1 p/+65123456789` | Phone constraints are shown; Alice's record is unchanged.
 `editcustomer 1 bc/+65 1234567` | Backup contact constraints are shown; Alice's record is unchanged.
