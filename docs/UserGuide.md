@@ -655,6 +655,9 @@ customers and dogs, plus activities occurring today or later.
 #### Saving the data
 
 WatchDog automatically saves data after every command. You do not need to save manually.
+Each save writes a complete temporary file in the destination folder before replacing the saved file.
+Replacement is atomic when supported by the file system; otherwise WatchDog uses a regular replacement.
+This reduces the risk of an incomplete save but does not replace keeping your own backups.
 
 #### Editing the data file
 

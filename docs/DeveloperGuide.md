@@ -429,8 +429,9 @@ the history slots, then saves WatchDog. `redo` symmetrically captures the curren
 undo, restores the redo snapshot, moves the slots, and saves. An ordinary command updates history
 immediately after successful execution and before saving. This ordering matches the existing policy
 of retaining in-memory changes when a save fails: the corresponding inverse remains available,
-and `clear` still invalidates history. The disk may contain an older state, or a partially written
-state if an actual write had started. Missing history produces a `CommandException`; save failures
+and `clear` still invalidates history. A failed write to the temporary file leaves the saved state intact;
+a file system without atomic moves uses regular replacement and cannot guarantee atomicity during replacement.
+Missing history produces a `CommandException`; save failures
 are reported as command errors. History is held only in memory and is unavailable after a restart.
 
 `LogicManagerTest` and `LogicManagerHistoryTest` cover the undo/redo cycle, neutral commands,
@@ -1365,6 +1366,11 @@ must prevent replacement of the original; the storage error is logged and mutati
 `JsonWatchDogStorage` tracks paths whose reads failed and copies each original before permitting its
 first replacement. It removes the guard only after the copy succeeds, so a failed copy can be retried.
 
+`FileUtil.writeToFile` writes to a temporary sibling, closes it, and then moves it over the destination.
+Only `AtomicMoveNotSupportedException` triggers a regular replacement; other failures propagate.
+Temporary files are removed on success and failure. JSON serialization finishes before writing begins,
+and storage no longer pre-creates an empty destination. In a disposable folder, verify saving and
+reloading records and preferences, and confirm that completed saves leave no `.watchdog-*.tmp` files.
 
 Given below are instructions to test the app manually.
 
