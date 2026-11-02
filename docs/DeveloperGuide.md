@@ -1317,6 +1317,12 @@ NFR-10. **Privacy**: WatchDog shall store dog and customer records locally and s
 
 ### Recovery from an invalid data file
 
+Packaged runs resolve data, preferences, and application logs through `ApplicationHome` relative to
+the JAR's directory. Class-directory runs use the working directory for development. To verify,
+place the JAR in a folder with spaces, launch it from another directory, and run `summary`.
+Expect all generated application files beside the JAR or in its `data` subfolder, with none in the
+launch directory. An unwritable home must report file errors rather than redirecting writes elsewhere.
+
 In a disposable home folder, close WatchDog and replace `data/watchdog.json` with malformed JSON.
 Relaunch and run `summary`. Expect an empty model and a byte-for-byte copy of the invalid file named
 `watchdog.json.invalid-UNIQUE_ID.bak` beside the data file. Subsequent saves retain that backup.

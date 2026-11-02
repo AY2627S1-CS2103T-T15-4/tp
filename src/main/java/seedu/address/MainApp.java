@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -12,6 +11,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
+import seedu.address.commons.util.ApplicationHome;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
@@ -37,8 +37,8 @@ public class MainApp extends Application {
     public static final String VERSION = "V1.5";
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
-    private static final Path USER_PREFS_FILE_PATH = Paths.get("preferences.json");
-    private static final Path WATCHDOG_DATA_FILE_PATH = Paths.get("data", "watchdog.json");
+    private static final Path USER_PREFS_FILE_PATH = ApplicationHome.getHome().resolve("preferences.json");
+    private static final Path WATCHDOG_DATA_FILE_PATH = ApplicationHome.getHome().resolve("data/watchdog.json");
 
     protected Ui ui;
     protected Logic logic;
