@@ -103,6 +103,11 @@
 
 .stack-pane { -fx-background-color: #90D1CA; }
 .record-lists { -fx-background-color: transparent; -fx-padding: 10 24 10 24; }
+#recordScrollPane, #recordScrollPane > .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+}
 .top-content { -fx-background-color: transparent; }
 .panel { -fx-background-color: #90D1CA; -fx-background-radius: 12; -fx-padding: 8; }
 .panel > .label-header, .today-panel > .label-header { -fx-padding: 0 0 0 8; }

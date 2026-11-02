@@ -66,7 +66,7 @@ You can use `searchc`, `searchd`, or
 
 **Notes about the command format:**<br>
 
-* Record IDs are persistent positive integers. Activity IDs range from `1` to `2147483647`.
+* Customer, dog, and activity IDs are persistent positive integers from `1` to `2147483647`. Each type has its own ID sequence, so IDs can overlap across types.
 
 * Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
   For example, in `adddog n/NAME b/BREED s/SIZE`, replace `NAME` with a value such as `Cookie`.
@@ -228,6 +228,8 @@ Format: `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`
 
 Example: `editdog 1 s/Large`
 
+Replacement names, breeds, and sizes follow the same rules as [`adddog`](#adding-a-dog-adddog).
+
 * `DOG_ID` must identify an existing dog.
 * At least one dog field must be provided.
 * Any omitted field keeps its existing value.
@@ -286,6 +288,11 @@ If the ID does not exist, WatchDog displays:
 The customer and dog panels are separate scrollable areas. Customer cards show contact details and the IDs of
 their dogs. Dog cards show the persistent dog ID and name, followed by breed, size, and customer ID when linked.
 Newly added records appear automatically. Customer and dog IDs belong to separate categories and may overlap.
+On a narrow window, the four record panels remain in one row and can be reached with the horizontal scrollbar.
+Use `Ctrl+Alt+1`, `Ctrl+Alt+2`, `Ctrl+Alt+3`, or `Ctrl+Alt+4` to jump to Customers, Dogs, Activities, or Today.
+Successful commands bring their relevant panel into view. The command box and result message remain visible while
+the record panels scroll horizontally. WatchDog also fits a saved window size and position to the visible screen
+when it starts.
 
 Hover over a contact-detail or dog-detail row to see its full value when the displayed text is shortened.
 Right-click a customer card to copy its phone number, email address, backup contact, or all details.
@@ -488,8 +495,8 @@ must also be positive integers and are supplied separately using `a/`.
   bookings are added or removed. Existing search filters remain active, and affected cards refresh.
 
 Invalid input reports the specific field or formatting problem, followed by the complete command format and an
-example. `enrol` rejects past dates and states that the date must be today or later. `unenrol` permits past dates so
-that a historical enrolment can be corrected, provided the activity occurred and the dog was enrolled on that date.
+example. `enrol` accepts only today's or future dates. A missed booking for a past date cannot be added later.
+`unenrol` accepts a past date only to remove a booking that already exists for that activity and date.
 
 ### Viewing and filtering
 

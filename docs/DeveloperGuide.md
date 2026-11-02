@@ -176,6 +176,9 @@ ordinary edits, ownership changes, and enrolment changes. Commands that intentio
 result set, such as search, filter, reset, and today, scroll the panels to the first result. JavaFX still creates
 card nodes only as cells need them. Customer ownership summaries use the complete dog list independently of
 the current dog filter.
+The four-panel row sits in a horizontal `ScrollPane` when the window is narrow. Successful record commands reveal
+their relevant panel, and `Ctrl+Alt+1` through `Ctrl+Alt+4` provide keyboard navigation. At startup, saved window
+bounds are clamped to the selected screen's visual bounds so all controls remain reachable.
 
 Customer and dog cards install their tooltips and copy menus through `CardInteractionUtil`. Clipboard writes
 return a success result through `ClipboardWriter`, so the UI shows `Copied!` only after a successful write and
