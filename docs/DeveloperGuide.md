@@ -870,7 +870,9 @@ change can remain in memory.
 **Extensions**
 
 * 2a. A required field is missing or invalid: system reports the field error and does not add a dog.
+  Use case ends.
 * 2b. No dog IDs remain: system reports exhaustion without changing the records.
+  Use case ends.
 
 **Use case: UC02 - Edit Dog (editdog)**
 
@@ -886,6 +888,7 @@ change can remain in memory.
 
 * 2a. The ID is invalid or unknown, no edit field is supplied, or a detail is invalid:
   system reports the problem without changing the dog.
+  Use case ends.
 
 **Use case: UC03 - Delete Dog (deletedog)**
 
@@ -901,6 +904,7 @@ change can remain in memory.
 **Extensions**
 
 * 2a. The ID is invalid or unknown: system reports the problem without deleting a record.
+  Use case ends.
 
 **Use case: UC04 - Add Customer (addcustomer)**
 
@@ -924,9 +928,11 @@ retain `+`. Stored and displayed contact values use this normalized form.
 
 * 2a. A required field is missing or invalid: system reports the field error without adding a customer.
   This includes a `+65` primary or backup contact with other than eight following digits.
+  Use case ends.
 * 2b. The primary phone or email is already in use: system identifies the duplicate field without
   changing records. Phone comparison ignores spaces and hyphens and treats `+65` followed by eight digits
   as the equivalent local number; email comparison ignores letter case.
+  Use case ends.
 
 Backup contacts may be shared.
 
@@ -947,9 +953,11 @@ Backup contacts may be shared.
 * 2a. The ID is invalid or unknown, no edit field is supplied, or a detail is invalid:
   system reports the problem without changing the customer.
   A `+65` primary or backup contact with other than eight following digits is invalid.
+  Use case ends.
 * 2b. Another customer uses the resulting primary phone or email: system identifies the duplicate
   field without changing records. Phone comparison uses normalized values, so adding or removing
   `+65`, spaces, or hyphens cannot bypass the duplicate check.
+  Use case ends.
 
 Unspecified details are retained, and backup contacts may be shared.
 
@@ -966,6 +974,7 @@ Unspecified details are retained, and backup contacts may be shared.
 **Extensions**
 
 * 2a. The ID is invalid or unknown: system reports the problem without changing records.
+  Use case ends.
 
 **Use case: UC07 - Link Dogs to a Customer (link)**
 
@@ -981,6 +990,7 @@ Unspecified details are retained, and backup contacts may be shared.
 
 * 2a. Any ID is invalid or missing, a dog is already owned, or a dog ID is repeated:
   system rejects the entire batch without changing ownership.
+  Use case ends.
 
 **Use case: UC08 - Unlink Dogs (unlink)**
 
@@ -996,6 +1006,7 @@ Unspecified details are retained, and backup contacts may be shared.
 
 * 2a. A selected dog is missing or unowned, an ID is repeated, or the selected customer is
   missing or has no linked dogs: system rejects the entire request without changing ownership.
+  Use case ends.
 
 **Use case: UC09 - Add Activity (addactivity)**
 
@@ -1011,7 +1022,9 @@ Unspecified details are retained, and backup contacts may be shared.
 
 * 2a. A field is missing or invalid, or the end time is not later than the start time:
   system reports the problem without creating an activity.
+  Use case ends.
 * 2b. No activity IDs remain: system reports exhaustion without changing records.
+  Use case ends.
 
 Past first dates and overlapping activities without enrolled dogs are permitted.
 
@@ -1030,7 +1043,9 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 
 * 2a. The ID is invalid or unknown, no edit field is supplied, or the resulting schedule is invalid:
   system reports the problem without changing the activity.
+  Use case ends.
 * 2b. The activity has enrolments: system rejects the edit and suggests creating a new activity.
+  Use case ends.
 
 **Use case: UC11 - Delete Activity (deleteactivity)**
 
@@ -1046,6 +1061,7 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 **Extensions**
 
 * 2a. The ID is invalid or unknown: system reports the problem without changing records.
+  Use case ends.
 
 **Use case: UC12 - Enrol Dogs (enrol)**
 
@@ -1062,6 +1078,7 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 
 * 2a. An ID or date is invalid, the date is before today or is not an occurrence, a dog is
   already enrolled, or a booking overlaps: system rejects the entire batch.
+  Use case ends.
 
 **Use case: UC13 - Unenrol Dogs (unenrol)**
 
@@ -1077,6 +1094,7 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 
 * 2a. Any record, date, or specified enrolment is invalid or missing: system rejects the
   entire batch without removing an enrolment.
+  Use case ends.
 
 Past occurrence dates are allowed so historical mistakes can be corrected.
 
@@ -1093,6 +1111,7 @@ Past occurrence dates are allowed so historical mistakes can be corrected.
 **Extensions**
 
 * 1a. A field is invalid or the ID does not exist: system reports the problem and retains the current view.
+  Use case ends.
 
 **Use case: UC15 - Search Customers (searchc)**
 
@@ -1113,6 +1132,7 @@ Past occurrence dates are allowed so historical mistakes can be corrected.
   This includes partial contact queries such as `bc/+55` and `+65` numbers with other than
   eight following digits. Contact errors identify the affected field and explain its invalid
   characters, formatting, or length; repeated contact fields request only one value.
+  Use case ends.
 
 If the specified dogs exist but no customer owns all of them, the search succeeds with no matching customers.
 
@@ -1129,6 +1149,7 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 **Extensions**
 
 * 1a. A field or ID is invalid: system reports the problem and retains the current view.
+  Use case ends.
 
 **Use case: UC17 - Filter Unlinked Records (filterun)**
 
@@ -1145,6 +1166,7 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 **Extensions**
 
 * 1a. The category is missing or invalid: system reports the accepted categories and retains the view.
+  Use case ends.
 
 **Use case: UC18 - Show Today's Activities (today)**
 
@@ -1159,6 +1181,7 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 **Extensions**
 
 * 1a. User supplies extra arguments: system reports the format and retains the current view.
+  Use case ends.
 
 **Use case: UC19 - Reset the Display (reset)**
 
@@ -1173,6 +1196,7 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 **Extensions**
 
 * 1a. User supplies extra arguments: system reports the format and retains the current view.
+  Use case ends.
 
 **Use case: UC20 - View Daycare Summary (summary)**
 
@@ -1188,6 +1212,7 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 **Extensions**
 
 * 1a. User supplies extra arguments: system reports the format without changing the view.
+  Use case ends.
 
 **Use case: UC21 - Undo a Command (undo)**
 
@@ -1202,6 +1227,7 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 **Extensions**
 
 * 2a. No undoable command is available: system reports that there is nothing to undo.
+  Use case ends.
 
 Only the most recent undoable command can be undone; confirmed clear discards the history.
 
@@ -1218,6 +1244,7 @@ Only the most recent undoable command can be undone; confirmed clear discards th
 **Extensions**
 
 * 2a. No redo is available: system reports that there is nothing to redo.
+  Use case ends.
 
 **Use case: UC23 - Clear All Records (clear)**
 
@@ -1233,9 +1260,13 @@ Only the most recent undoable command can be undone; confirmed clear discards th
 **Extensions**
 
 * 1a. User supplies arguments after clear: system rejects the command before requesting confirmation.
+  Use case ends.
 * 3a. User enters N: system cancels without changing records or history.
+  Use case ends.
 * 3b. User enters a different response: system requests Y/N again without executing another command.
+  Use case resumes at step 3.
 * 4a. Saving fails: system reports the error; memory remains cleared and undo/redo remain unavailable.
+  Use case ends.
 
 Confirmation ignores letter case and surrounding whitespace; active filters remain in effect.
 
@@ -1251,7 +1282,8 @@ Confirmation ignores letter case and surrounding whitespace; active filters rema
 
 **Extensions**
 
-* 2a. The command name is unknown: system lists supported help topics without changing the view.
+* 1a. The command name is unknown: system lists supported help topics without changing the view.
+  Use case ends.
 
 **Use case: UC25 - Exit (exit)**
 
