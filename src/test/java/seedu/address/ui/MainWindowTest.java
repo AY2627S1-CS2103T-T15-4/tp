@@ -45,6 +45,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Ellipse;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import seedu.address.commons.core.GuiSettings;
@@ -498,6 +499,32 @@ public class MainWindowTest {
         assertEquals(new Rectangle2D(0, 0, 853, 450), MainWindow.fitWindowToBounds(saved, screen));
         assertEquals(new Rectangle2D(100, 50, 600, 300), MainWindow.fitWindowToBounds(
                 new GuiSettings(600, 300, 100, 50), screen));
+    }
+
+    @Test
+    public void restoredWindow_usesSavedScreenOrPrimaryScreen() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-restored-screen");
+        Model model = new ModelManager();
+        Logic logic = new LogicManager(model, new StorageManager(
+                new JsonWatchDogStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            Rectangle2D primaryBounds = Screen.getPrimary().getVisualBounds();
+            int savedX = (int) primaryBounds.getMinX() + 10;
+            int savedY = (int) primaryBounds.getMinY() + 10;
+            logic.setGuiSettings(new GuiSettings(600, 300, savedX, savedY));
+            MainWindow onScreen = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            assertEquals(savedX, onScreen.getPrimaryStage().getX());
+            assertEquals(savedY, onScreen.getPrimaryStage().getY());
+            onScreen.getPrimaryStage().close();
+
+            logic.setGuiSettings(new GuiSettings(600, 300, 1000000, 1000000));
+            MainWindow offScreen = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            assertTrue(primaryBounds.contains(offScreen.getPrimaryStage().getX(),
+                    offScreen.getPrimaryStage().getY()));
+            offScreen.getPrimaryStage().close();
+        });
     }
 
     @Test
