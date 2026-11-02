@@ -18,7 +18,8 @@
 
 ### Notable uses of AI
 
-* Kenneth-Chia used OpenAI Codex as a development aid throughout his project contributions, including
+* Kenneth-Chia, its-shoutime, xandergoh, Umaiza-15 and lilosy used OpenAI Codex as a development aid
+  throughout their project contributions, including
   implementation, debugging, test development, documentation and UML diagrams, PR reviews, and
   release-readiness checks.
 
