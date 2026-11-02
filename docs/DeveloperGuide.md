@@ -16,6 +16,13 @@
 * WatchDog adapts the architecture, utilities and documentation of [AddressBook Level-3](https://github.com/se-edu/addressbook-level3).
 * Libraries used: [JavaFX](https://openjfx.io/), [Jackson](https://github.com/FasterXML/jackson), [JUnit5](https://github.com/junit-team/junit5)
 
+### Notable uses of AI
+
+* Kenneth-Chia, its-shoutime, XanderGoh, Umaiza-15 and lilosy used OpenAI Codex as a development aid
+  throughout their project contributions, including
+  implementation, debugging, test development, documentation and UML diagrams, PR reviews, and
+  release-readiness checks.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Setting up, getting started**
