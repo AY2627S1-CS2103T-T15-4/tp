@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -387,8 +388,12 @@ public class MainWindowTest {
     public void executeCommand_displayChangingCommandResetsListsToTop() throws Exception {
         Path folder = Files.createTempDirectory("mainwindow-scroll-reset");
         Model model = new ModelManager();
+        LocalDate today = LocalDate.now();
+        model.addActivity(new ActivityName("Today's walk"), today,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         for (int index = 1; index <= 20; index++) {
             model.addDog(new Dog(new DogName("Dog " + index), new Breed("Poodle"), new Size("Small")));
+            model.enrolDogs(1, today, List.of(index));
         }
         Logic logic = new LogicManager(model, new StorageManager(
                 new JsonWatchDogStorage(folder.resolve("addressbook.json")),
@@ -406,6 +411,16 @@ public class MainWindowTest {
             window.executeCommand("reset");
             dogs.layout();
 
+            assertEquals(0, firstVisibleIndex(dogs));
+
+            dogs.scrollTo(dogs.getItems().size() - 1);
+            dogs.layout();
+            assertTrue(firstVisibleIndex(dogs) > 0);
+
+            window.executeCommand("today");
+            dogs.layout();
+
+            assertEquals(20, dogs.getItems().size());
             assertEquals(0, firstVisibleIndex(dogs));
             window.getPrimaryStage().close();
         });

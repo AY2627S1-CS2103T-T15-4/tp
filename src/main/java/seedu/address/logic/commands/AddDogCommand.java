@@ -11,7 +11,7 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.dog.Dog;
 
-/** Adds a dog to WatchDog. */
+/** Adds a dog to WatchDog with a new persistent ID, even if another dog has identical details. */
 public class AddDogCommand extends Command {
 
     public static final String COMMAND_WORD = "adddog";
@@ -34,7 +34,6 @@ public class AddDogCommand extends Command {
             + "\nValid sizes: small, medium, large, giant.";
 
     public static final String MESSAGE_SUCCESS = "New dog added: %1$s";
-    public static final String MESSAGE_DUPLICATE_DOG = "This dog already exists.";
 
     private final Dog toAdd;
 
@@ -48,9 +47,6 @@ public class AddDogCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
 
-        if (model.hasDog(toAdd)) {
-            throw new CommandException(MESSAGE_DUPLICATE_DOG);
-        }
         Dog addedDog;
         try {
             addedDog = model.addDog(toAdd);

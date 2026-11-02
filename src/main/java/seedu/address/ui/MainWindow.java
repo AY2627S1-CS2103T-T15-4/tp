@@ -32,6 +32,7 @@ import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.SearchActivityCommand;
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.commands.SearchDogCommand;
+import seedu.address.logic.commands.TodayCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 
@@ -49,7 +50,8 @@ public class MainWindow extends UiPart<Stage> {
             ResetDisplayCommand.COMMAND_WORD,
             SearchActivityCommand.COMMAND_WORD,
             SearchCustomerCommand.COMMAND_WORD,
-            SearchDogCommand.COMMAND_WORD);
+            SearchDogCommand.COMMAND_WORD,
+            TodayCommand.COMMAND_WORD);
 
     private final Logger logger = LogsCenter.getLogger(getClass());
 

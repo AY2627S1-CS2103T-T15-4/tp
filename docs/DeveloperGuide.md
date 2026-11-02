@@ -173,7 +173,7 @@ implementation and filters it to schedules occurring today. Visible GUI parts in
 Each list panel observes its model data and uses `CardListUpdater` to reconcile stable, ID-keyed card factories.
 Unchanged entries are retained instead of rebuilding the entire list, which preserves the visible record during
 ordinary edits, ownership changes, and enrolment changes. Commands that intentionally replace the displayed
-result set, such as search, filter, and reset, scroll the panels to the first result. JavaFX still creates
+result set, such as search, filter, reset, and today, scroll the panels to the first result. JavaFX still creates
 card nodes only as cells need them. Customer ownership summaries use the complete dog list independently of
 the current dog filter.
 
@@ -609,7 +609,7 @@ Name matching uses a case-insensitive substring, date matching delegates to `Act
 so recurring activities are handled correctly, and time matching includes both endpoints.
 Recurrence matching compares the activity's stored recurrence. The optional activity ID must be positive
 and identify an existing activity, including one hidden by filters. Invalid or nonexistent IDs produce
-`Error in searching activities:` followed by `Please enter a valid activity index` without changing the display.
+`Error in searching activities:` followed by `Please enter a valid activity ID` without changing the display.
 ID matching is exact. Multiple fields are combined with AND semantics.
  The activity panel observes this filtered list, while the
 underlying stored schedules remain unchanged. The success message reports only the supplied fields, in the
@@ -784,7 +784,7 @@ Search command tests cover parser validation, field combinations, related-record
 * Prefers typing to mouse interactions
 * Is reasonably comfortable using CLI apps
 
-**Value proposition**: WatchDog helps dog day care centre managers to manage and keep track of all their clients’ dogs, each of the dog’s needs and client information in a centralised application, faster than with a typical mouse-driven GUI application.
+**Value proposition**: WatchDog helps dog day care centre managers keep track of their clients' dogs, each dog's details and activity bookings, and their owners' contact information in a centralised application, faster than with a typical mouse-driven GUI application.
 
 
 ### User stories
@@ -1269,7 +1269,7 @@ NFR-01. **Platform compatibility**: Should work on any _mainstream OS_ as long a
 <!-- @@author Kenneth-Chia -->
 NFR-02. **Offline operation**: After installation and setup, all core dog and customer management operations shall work without an internet connection.
 
-NFR-03. **Performance**: With up to 500 dog records and 500 customer records, WatchDog shall display the result of an add, edit, delete, list or search command within 2 seconds of submission on the agreed test laptop.
+NFR-03. **Performance**: With up to 500 dog records and 500 customer records, WatchDog shall display the result of a dog or customer add, edit, delete, or search command, or `reset`, within 2 seconds of submission on the agreed test laptop.
 
 NFR-04. **Startup time**: With the same dataset, WatchDog shall load its saved records and become ready to accept commands within 10 seconds of launch on the agreed test laptop.
 
@@ -1277,7 +1277,7 @@ NFR-05. **Keyboard usability**: After launch, users shall be able to perform all
 
 NFR-06. **Typing efficiency**: A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
 
-NFR-07. **Error clarity**: For invalid command syntax, missing required fields or invalid field values, WatchDog shall display an English error message identifying the problem and providing the expected format or accepted values.
+NFR-07. **Error clarity**: For invalid command syntax, missing required fields, or invalid field values, WatchDog shall display an English error message identifying the problem. Missing-field errors shall also show the relevant command format.
 
 NFR-08. **Robustness**: An invalid command or an input that fails validation shall not terminate the application or change existing records. The application shall remain ready to accept the next command.
 
@@ -1585,11 +1585,16 @@ Use a disposable copy of the app folder for these tests.
 
    1. Ensure the app is closed, then replace the contents of `data/watchdog.json` with text that is not
       valid JSON and launch the app.<br>
-      Expected: The app starts with an empty WatchDog data file and records a data-loading warning in the log.
+      Expected: The app starts with no WatchDog records in memory and logs a data-loading warning.
+      The invalid JSON file remains unchanged until a command triggers a save. Before replacing it,
+      WatchDog creates a uniquely named `.bak` copy beside it. Check that the backup contains the original
+      invalid JSON.
 
 1. Invalid persisted dog counter
 
    1. Save at least one dog, close the app, and change `nextDogId` in `data/watchdog.json` to zero,
       a non-integer value, or a value not greater than every stored dog ID. Relaunch the app.<br>
-      Expected: The app rejects the inconsistent file, starts with an empty WatchDog data file, and records a
-      data-loading warning. Restore the disposable file before continuing other tests.
+      Expected: The app rejects the inconsistent file, starts with no WatchDog records in memory, and logs a
+      data-loading warning. The inconsistent data file remains unchanged until a command triggers a save;
+      WatchDog creates a `.bak` copy before replacing it. Check that the backup contains the original
+      inconsistent data. Restore the disposable file before continuing other tests.
