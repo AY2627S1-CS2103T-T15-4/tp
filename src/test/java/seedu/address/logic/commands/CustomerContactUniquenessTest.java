@@ -59,9 +59,9 @@ public class CustomerContactUniquenessTest {
         parser.parseCommand("addcustomer n/Carol p/93456789 e/_carol+_work+@example.com bc/98765432")
                 .execute(model);
         assertRejected("addcustomer n/David p/94567890 e/_CAROL+_WORK+@EXAMPLE.COM bc/98765432",
-                CustomerContactValidator.MESSAGE_DUPLICATE_EMAIL);
+                duplicateEmail(3));
         assertRejected("editcustomer 2 e/_CAROL+_WORK+@EXAMPLE.COM",
-                CustomerContactValidator.MESSAGE_DUPLICATE_EMAIL);
+                duplicateEmail(3));
     }
 
     @Test
