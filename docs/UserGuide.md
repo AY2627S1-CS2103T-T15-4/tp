@@ -665,6 +665,11 @@ WatchDog data is saved automatically as `data/watchdog.json` inside the folder c
 (the home folder in Quick Start), even when you launch it from another directory. Preferences and
 application logs also stay in the home folder. Advanced users may edit the data file while WatchDog is closed.
 
+**Upgrading from an earlier version:** Previously, data was loaded relative to the launch directory.
+If you launched WatchDog from a different folder, close WatchDog and back up your existing
+`data/watchdog.json`. Before using this version, copy that file from the old launch directory into
+the JAR folder's `data` directory. Back up any destination file before replacing it.
+
 <box type="warning" seamless>
 
 **Caution:**
