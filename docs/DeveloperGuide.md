@@ -391,20 +391,6 @@ Both replacement contact fields use the same validation and normalization as add
 In particular, a `+65` number requires exactly eight following digits. Invalid contact details
 are rejected before the stored record changes, including when editing a hidden customer.
 
-### Retired list commands
-
-The former list dog and list customer commands are no longer routed by WatchDogParser.
-Use reset to restore all customers and dogs and upcoming activities, or searchc/searchd
-to narrow the display. Retired list-dog source and tests are preserved under unused/@xandergoh/;
-list-customer source, parser, and tests are under unused/@its-shoutime/. These archives are
-excluded from Gradle source and test sets and retain authorship annotations.
-
-### Retired select commands
-
-The former select dog and select customer implementations are retained under
-unused/@its-shoutime/ for authorship reference only. They are not routed by the active
-WatchDogParser and are not supported by the final product.
-
 <!--@@author-->
 <!--@@author its-shoutime-->
 ### Undo and redo
@@ -773,6 +759,20 @@ The active category searches are `searcha`, `searchc`, and `searchd`. Each parse
 The global search command and its category compatibility routes have been retired. Use the field-based searchc, searchd, and searcha commands (i/ for persistent IDs). Retired global search code, tests, and orphaned helpers are preserved under unused/@Kenneth-Chia/. The list commands are also retired; use `reset` to restore all customers and dogs and upcoming activities.
 
 Search command tests cover parser validation, field combinations, related-record updates, persistent IDs, and unchanged stored records.
+
+### Retired list commands
+
+The former list dog and list customer commands are no longer routed by WatchDogParser.
+Use reset to restore all customers and dogs and upcoming activities, or searchc/searchd
+to narrow the display. Retired list-dog source and tests are preserved under unused/@xandergoh/;
+list-customer source, parser, and tests are under unused/@its-shoutime/. These archives are
+excluded from Gradle source and test sets and retain authorship annotations.
+
+### Retired select commands
+
+The former select dog and select customer implementations are retained under
+unused/@its-shoutime/ for authorship reference only. They are not routed by the active
+WatchDogParser and are not supported by the final product.
 
 --------------------------------------------------------------------------------------------------------------------
 
