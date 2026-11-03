@@ -12,24 +12,27 @@ public class Email {
 
     public static final String MESSAGE_CONSTRAINTS = "Emails should be of the format local-part@domain "
             + "and adhere to the following constraints:\n"
-            + "1. The local-part should only contain alphanumeric characters and these special characters, excluding "
-            + "the parentheses, (" + Email.SPECIAL_CHARACTERS
-            + "). The local-part may not start or end with any special "
-            + "characters.\n"
+            + "1. The local-part must be nonempty and contain only ASCII letters, digits, "
+            + "and these special characters, "
+            + "excluding the parentheses, (" + Email.SPECIAL_CHARACTERS
+            + "). Dots must not appear at the start or end, or consecutively. "
+            + "Other supported special characters may appear anywhere, including consecutively.\n"
             + "2. The local-part is followed by an '@' and then a domain name. The domain name is made up of domain "
-            + "labels separated by periods.\n"
+            + "labels separated by periods. A single label is allowed; a period is not required.\n"
             + "The domain name must:\n"
             + "    - end with a domain label at least 2 characters long\n"
-            + "    - have each domain label start and end with alphanumeric characters\n"
-            + "    - have each domain label consist of alphanumeric characters, separated only by hyphens, if any.";
+            + "    - have each domain label start and end with an ASCII letter or digit\n"
+            + "    - contain only ASCII letters, digits, and single hyphens within each label; "
+            + "consecutive hyphens are not supported.";
     public static final String VALIDATION_REGEX = Email.LOCAL_PART_REGEX + "@" + Email.DOMAIN_REGEX;
 
     // Keep the hyphen last so it is treated literally in the regex character group.
     private static final String SPECIAL_CHARACTERS = "+_.'-";
     // alphanumeric and special characters
     private static final String ALPHANUMERIC_NO_UNDERSCORE = "[^\\W_]+"; // alphanumeric characters except underscore
-    private static final String LOCAL_PART_REGEX = "^" + ALPHANUMERIC_NO_UNDERSCORE + "([" + SPECIAL_CHARACTERS + "]"
-            + ALPHANUMERIC_NO_UNDERSCORE + ")*";
+    // A nonempty sequence of dot-separated atoms; only dots have placement restrictions.
+    private static final String LOCAL_ATOM_REGEX = "[a-zA-Z0-9+_'-]+";
+    private static final String LOCAL_PART_REGEX = "^" + LOCAL_ATOM_REGEX + "(?:\\." + LOCAL_ATOM_REGEX + ")*";
     private static final String DOMAIN_PART_REGEX = ALPHANUMERIC_NO_UNDERSCORE
             + "(-" + ALPHANUMERIC_NO_UNDERSCORE + ")*";
     private static final String DOMAIN_LAST_PART_REGEX = "(?=.{2,}$)" + DOMAIN_PART_REGEX;

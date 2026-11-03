@@ -12,6 +12,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.WatchDogParser;
+import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -22,6 +23,35 @@ import seedu.address.storage.JsonWatchDogStorage;
 public class AddCustomerCommandIntegrationTest {
 
     private final WatchDogParser parser = new WatchDogParser();
+
+    @Test
+    public void execute_invalidEmailPlacement_rejectsAddAndEditWithoutChangingRecords() throws Exception {
+        Model model = new ModelManager();
+        execute(model, "Alice Tan", "91234567", "alice@example.com");
+        List<Customer> before = List.copyOf(model.getCustomerList());
+        for (String email : List.of(".alice@example.com", "alice.@example.com", "alice..tan@example.com",
+                "alice!work@example.com", "alice/bob@example.com", "alice&bob@example.com",
+                "alice=work@example.com", "\"alice\"@example.com", "@example.com", "alice@")) {
+            assertThrows(ParseException.class, () -> execute(model, "Bob Tan", "92345678", email));
+            assertThrows(ParseException.class, () -> parser.parseCommand("editcustomer 1 e/" + email).execute(model));
+            assertEquals(before, model.getCustomerList());
+        }
+    }
+
+    @Test
+    public void execute_emailSpecialCharacters_surviveEditingSearchingAndReload(@TempDir Path directory)
+            throws Exception {
+        Model model = new ModelManager();
+        execute(model, "Alice Tan", "91234567", "alice+_work@example.com");
+        assertEquals("alice+_work@example.com", model.getCustomerList().get(0).getEmail().value);
+        parser.parseCommand("editcustomer 1 e/_alice+@example.com").execute(model);
+        JsonWatchDogStorage storage = new JsonWatchDogStorage(directory.resolve("watchdog.json"));
+        storage.saveWatchDog(model.getWatchDog());
+        Model reloaded = new ModelManager(storage.readWatchDog().orElseThrow(), new UserPrefs());
+        parser.parseCommand("searchc e/_ALICE+@EXAMPLE.COM").execute(reloaded);
+        assertEquals(List.of(1), reloaded.getFilteredCustomerList().stream().map(Customer::getId).toList());
+        assertEquals("_alice+@example.com", reloaded.getCustomerList().get(0).getEmail().value);
+    }
 
     @Test
     public void execute_unicodeAndSlashNames_surviveEditingSearchingAndReload(@TempDir Path directory)

@@ -40,8 +40,23 @@ public class CustomerFieldTest {
         assertFalse(BackupContact.isValidBackupContact("987654321"));
         assertFalse(BackupContact.isValidBackupContact("9876543 "));
         assertFalse(Email.isValidEmail("alice@example.c"));
-        assertFalse(Email.isValidEmail("o''neil@example.com"));
-        assertFalse(Email.isValidEmail("'oneil@example.com"));
+        assertFalse(Email.isValidEmail(".alice@example.com"));
+        assertFalse(Email.isValidEmail("alice.@example.com"));
+        assertFalse(Email.isValidEmail("alice..tan@example.com"));
+    }
+
+    @Test
+    public void emails_allowSupportedSpecialCharactersExceptMisplacedDots() {
+        for (String local : new String[]{"_alice", "alice+", "alice+_work", "o''neil", "'oneil",
+            "-alice", "alice_", "alice'", "alice-", "+_'-", "alice._work"}) {
+            assertTrue(Email.isValidEmail(local + "@example.com"), local);
+        }
+        for (String local : new String[]{"", ".alice", "alice.", "alice..tan", "alice!work", "alice/bob",
+            "alice&bob", "alice=work", "\"john doe\"", "alice tan", "alice@work"}) {
+            assertFalse(Email.isValidEmail(local + "@example.com"), local);
+        }
+        assertFalse(Email.isValidEmail("alice@-example.com"));
+        assertFalse(Email.isValidEmail("alice@example..com"));
     }
 
     @Test

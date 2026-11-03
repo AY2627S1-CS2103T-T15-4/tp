@@ -105,8 +105,17 @@ equivalent composed and decomposed accents. Control characters are not allowed.
 The space-separated command prefixes `n/`, `p/`, `e/`, and `bc/` remain reserved and cannot be used
 as literal name text. Other slash-containing text, such as `s/o` and `d/o`, is accepted.
 
-Email addresses must use the `local-part@domain` format. Apostrophes are allowed in the local part
-before `@`.
+Email addresses must use the `local-part@domain` format. The nonempty local part before `@` supports
+English letters, digits, and `+`, `_`, `.`, `'`, and `-`. Supported special characters may appear at
+the start, end, or consecutively, except that dots cannot start or end the local part or occur consecutively.
+For example, `_alice@example.com`, `alice+@example.com`, and `alice+_work@example.com` are accepted.
+Other special characters and quoted local parts are not supported.
+
+The domain consists of one or more nonempty labels separated by dots. A single-label domain such as
+`alice@gmail` is accepted; a dot is not required. Each label must start and end with an ASCII letter
+or digit and contain only ASCII letters, digits, and single hyphens. Consecutive hyphens are not supported,
+including in punycode labels starting with `xn--`. The final label must be at least two characters long.
+These format checks do not establish whether the domain or mailbox exists.
 
 The contact number and backup contact number accept either:
 
