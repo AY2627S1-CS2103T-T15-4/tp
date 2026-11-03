@@ -356,6 +356,19 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 
 <puml src="diagrams/EditDogSequenceDiagram.puml" alt="Editing a dog using its persistent ID" />
 
+### Deleting dogs
+
+`DeleteDogCommandParser` parses a positive dog ID. `DeleteDogCommand` looks up that ID in the
+complete dog list, so a dog can be deleted even when a search hides it. A missing dog produces a
+command error without changing stored records.
+
+The command calls `Model.deleteDog`; `ModelManager` delegates to `WatchDog.removeDog` and refreshes
+the displayed records. `WatchDog` removes the dog and every enrolment with its ID in the same model
+operation, including past bookings. Other dogs, their enrolments, and the activity schedules remain.
+The deleted dog's ID is not reused. The [architecture sequence](#architecture) shows command
+execution and saving, while the [Logic component sequence](#logic-component) expands parsing of
+`deletedog 1`.
+
 ### Adding customers
 
 `addcustomer` follows the same parser–command–model flow as `adddog`, but requires a name,
@@ -409,6 +422,17 @@ Both replacement contact fields use the same validation and normalization as add
 In particular, a `+65` number requires exactly eight following digits. Invalid contact details
 are rejected before the stored record changes, including when editing a hidden customer.
 
+### Deleting customers
+
+`DeleteCustomerCommandParser` parses a positive customer ID. `DeleteCustomerCommand` looks it up
+in the complete customer list rather than the filtered display, so hidden customers can be deleted.
+An invalid or missing ID produces an error without changing stored records.
+
+The command calls `Model.deleteCustomer`; `ModelManager` delegates to `WatchDog.removeCustomer`
+and refreshes the displayed records. `WatchDog` removes the customer and clears that customer's
+ID from each owned dog. The dog records keep their IDs and other details, and their activity enrolments
+remain. Other customers and dogs are unaffected. The deleted customer's ID is not reused.
+
 <!--@@author-->
 <!--@@author its-shoutime-->
 ### Undo and redo
@@ -419,12 +443,7 @@ cannot restore history. `LogicManager` keeps one undo snapshot and one redo snap
 with the original command text for feedback. A successful undoable command replaces the undo
 snapshot with the state captured before its execution and clears the redo snapshot. View-changing
 commands are undoable. `help`, `summary`, and `exit` preserve both slots, as do parse errors and
-commands rejected during execution. `WatchDogParser` rejects arguments after `clear` before
-`LogicManager` enters the pending confirmation state. A valid `clear` then puts `LogicManager` into that
-state and returns a warning without saving or changing history. The next input must be `Y` or `N`
-(case-insensitive, with surrounding whitespace accepted). Invalid answers leave confirmation pending;
-`N` cancels without changing data or history. `Y` executes `ClearCommand`, discards both snapshots,
-and cannot itself be undone. Confirmation is consumed even if saving the cleared data fails.
+commands rejected during execution. Confirmed `clear` discards both history slots, as described below.
 
 `Model.createState()` copies the `WatchDog`, including its records and all three next-ID counters, and captures
 the active customer, dog and activity predicates and the dog predicate used for activity enrolment summaries.
@@ -451,6 +470,22 @@ invalidated history, `clear`, failed commands, dependent filters, and save failu
 `WatchDogParserTest` checks argument validation.
 
 <!--@@author-->
+### Clearing data
+
+`WatchDogParser` accepts `clear` only without arguments. `LogicManager` intercepts the parsed
+`ClearCommand` and enters a pending confirmation state, returning a warning without changing data,
+history, or the saved file. While confirmation is pending, the next input is treated as an answer:
+
+* `N` cancels without changing data or history. `Y` executes `ClearCommand`, which replaces the stored
+  customers, dogs, activities, and enrolments with an empty `WatchDog`.
+* Answers are case-insensitive and may have surrounding whitespace. Any other answer leaves
+  confirmation pending.
+
+After confirmation, `LogicManager` discards both undo and redo snapshots, so clearing cannot be undone.
+It then attempts to save the empty data. If saving fails, the data remains cleared in memory and the
+history remains discarded. The active display filters are retained; `ModelManager` refreshes the
+filtered lists after replacing the stored data.
+
 ### Daycare summary
 
 `WatchDogParser` accepts `summary` with blank arguments only and constructs `SummaryCommand`.
@@ -672,6 +707,18 @@ form hides both dogs and activities. Its predicates are stored by `ModelManager`
 after later record or relationship changes.
 
 <puml src="diagrams/FilterUnlinkedSequenceDiagram.puml" alt="Filtering unlinked dogs or customers" />
+
+### Resetting the display
+
+`WatchDogParser` accepts `reset` only without arguments and creates a `ResetDisplayCommand`.
+At execution, the command reads the current date once from its `Clock`, then uses `ModelManager` to
+show all customers and dogs and activities for which `nextOccurrenceOnOrAfter(today)` exists.
+This includes recurring schedules with future occurrences even when their start date has passed,
+but excludes past one-time activities.
+
+`reset` replaces the active display predicates without changing stored records. It clears the
+dog-specific enrolment context used by activity cards, so their booking summaries return to the
+general view. As a view-changing command, it participates in the undo/redo history described above.
 
 ### Activity enrolment
 
