@@ -25,6 +25,22 @@ public class AddCustomerCommandIntegrationTest {
     private final WatchDogParser parser = new WatchDogParser();
 
     @Test
+    public void execute_slashNamesAcceptedByAdd_areSearchable() throws Exception {
+        for (String token : List.of("x/y", "abc/def", "X/Y", "s/o", "d/o", "d/1", "i/2", "d/abc",
+                "x/y/z", "/", "\u9648/\u4f1f", "p/e")) {
+            String name = token.equals("p/e") ? "Alexp/e Ali" : "Alex " + token + " Ali";
+            Model model = new ModelManager();
+            execute(model, name, "91234567", "alex@example.com");
+            parser.parseCommand("searchc n/\"" + name + "\" i/1").execute(model);
+            assertEquals(List.of(1), model.getFilteredCustomerList().stream().map(Customer::getId).toList(), name);
+            if (!token.startsWith("d/") && !token.startsWith("i/")) {
+                parser.parseCommand("searchc n/" + name).execute(model);
+                assertEquals(List.of(1), model.getFilteredCustomerList().stream().map(Customer::getId).toList(), name);
+            }
+        }
+    }
+
+    @Test
     public void execute_invalidEmailPlacement_rejectsAddAndEditWithoutChangingRecords() throws Exception {
         Model model = new ModelManager();
         execute(model, "Alice Tan", "91234567", "alice@example.com");
@@ -62,8 +78,16 @@ public class AddCustomerCommandIntegrationTest {
         execute(model, "\u9648\u4f1f", "93456789", "chen@example.com");
         assertEquals("Ahmad s/o Ali", model.getCustomerList().get(0).getName().fullName);
         assertEquals("91234567", model.getCustomerList().get(0).getPhone().value);
-        parser.parseCommand("searchc n/s/o").execute(model);
-        assertEquals(List.of(1), model.getFilteredCustomerList().stream().map(Customer::getId).toList());
+        for (String query : List.of("s/o", "Ahmad s/o Ali", "AHMAD S/O ALI")) {
+            parser.parseCommand("searchc n/" + query).execute(model);
+            assertEquals(List.of(1), model.getFilteredCustomerList().stream().map(Customer::getId).toList());
+        }
+        parser.parseCommand("searchc n/Devi d/o Kumar").execute(model);
+        assertEquals(List.of(2), model.getFilteredCustomerList().stream().map(Customer::getId).toList());
+        parser.parseCommand("adddog n/Buddy b/Poodle s/Small").execute(model);
+        parser.parseCommand("link c/2 d/1").execute(model);
+        parser.parseCommand("searchc n/Devi d/o Kumar d/1 i/2").execute(model);
+        assertEquals(List.of(2), model.getFilteredCustomerList().stream().map(Customer::getId).toList());
 
         parser.parseCommand("editcustomer 1 n/Jose\u0301 O\u2019Neil").execute(model);
         assertEquals("Jos\u00e9 O\u2019Neil", model.getCustomerList().get(0).getName().fullName);
@@ -72,6 +96,8 @@ public class AddCustomerCommandIntegrationTest {
         storage.saveWatchDog(model.getWatchDog());
         Model reloaded = new ModelManager(storage.readWatchDog().orElseThrow(), new UserPrefs());
         assertEquals(model.getCustomerList(), reloaded.getCustomerList());
+        parser.parseCommand("searchc n/Devi d/o Kumar d/1").execute(reloaded);
+        assertEquals(List.of(2), reloaded.getFilteredCustomerList().stream().map(Customer::getId).toList());
         for (String query : List.of("JOS\u00c9", "JOSE\u0301")) {
             parser.parseCommand("searchc n/" + query).execute(reloaded);
             assertEquals(List.of(1), reloaded.getFilteredCustomerList().stream().map(Customer::getId).toList());

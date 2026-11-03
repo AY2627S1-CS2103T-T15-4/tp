@@ -69,7 +69,9 @@ public final class CommandHelp {
                     "searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]",
                     "searchc n/Anna d/12 34",
                     "Supply at least one field; all supplied fields must match. Name uses case-insensitive "
-                            + "substring matching with repeated spaces treated as one. Phone and backup contact "
+                            + "substring matching with repeated spaces treated as one; unknown slash tokens and d/o "
+                            + "remain name text. Quote names containing search prefixes, e.g. n/\"Alex d/1\". "
+                            + "Phone and backup contact "
                             + "use the same formats as addcustomer and match exactly after normalization; "
                             + "email matches exactly ignoring case. "
                             + "IDs must exist; customers must own all specified dogs. "

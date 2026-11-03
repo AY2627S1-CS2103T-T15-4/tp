@@ -165,6 +165,12 @@ Format: `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT]
 Example: `searchc n/Anna d/12 34`
 
 * Name matching is case-insensitive, uses a substring search, and treats repeated spaces as one space.
+  Full-name queries such as `searchc n/Ahmad s/o Ali` and `searchc n/Devi d/o Kumar` are supported.
+  Standalone `s/o` and `d/o` (ignoring case) remain name text rather than field delimiters.
+  A separate `d/` field still filters by dog IDs, for example `searchc n/Devi d/o Kumar d/1`.
+  Other slash text, such as `searchc n/Ahmad x/y Ali`, is also supported. If name text contains a
+  search prefix such as `d/` or `i/`, quote the whole name: `searchc n/"Ahmad d/1 Ali"`.
+  Quoted names can be combined with filters, for example `searchc n/"Ahmad d/1 Ali" i/2`.
 * Phone and backup contact numbers accept the same formats as `addcustomer` and use exact matching after
   removing spaces and hyphens. `+65` followed by eight digits matches the equivalent local number.
   For example, `searchc p/+65 9123-4567` matches a phone stored as `91234567`, and
@@ -185,7 +191,8 @@ Example: `searchc n/Anna d/12 34`
   Dog IDs display `Please enter a valid dog index`; customer IDs display `Please enter a valid customer index`.
   Zero, negative, nonnumeric, and out-of-range IDs are invalid. If any ID is invalid, the entire search is rejected
   and the previous display is preserved.
-* Unsupported field prefixes are rejected as invalid command formats.
+* Unsupported field prefixes outside name values are rejected as invalid command formats.
+  Within an unquoted name, unrecognized slash tokens are literal name text.
 * If no customers match, the customer panel is empty.
 * The filter remains active while customers or their linked dogs are added, edited, deleted, linked, or unlinked.
   The activity panel shows only activities with enrolments belonging to the matching customers. Each activity

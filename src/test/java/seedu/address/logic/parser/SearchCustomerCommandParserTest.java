@@ -17,6 +17,46 @@ public class SearchCustomerCommandParserTest {
     private final SearchCustomerCommandParser parser = new SearchCustomerCommandParser();
 
     @Test
+    public void parse_arbitrarySlashNamesAndQuotedReservedPrefixes_preservesName() throws Exception {
+        for (String name : new String[]{"Alex x/y Ali", "Alex abc/def Ali", "Alex X/Y Ali",
+            "Alex / Ali", "Alex x/y/z Ali", "Alex \u9648/\u4f1f Ali"}) {
+            assertEquals(new SearchCustomerCommand(name, null, null, null, null), parser.parse("n/" + name));
+        }
+        for (String name : new String[]{"Alex d/1 Ali", "Alex i/2 Ali", "Alex d/abc Ali", "Alex x/y Ali"}) {
+            assertEquals(new SearchCustomerCommand(name, null, null, null, Set.of(1), 2),
+                    parser.parse("n/\"" + name + "\" d/1 i/2"));
+        }
+    }
+
+    @Test
+    public void parse_emptyOrMalformedQuotedNames_rejectsInput() {
+        for (String query : new String[]{"n/\"\"", "n/\"   \"", "n/\"Alex d/1", "n/Alex\"",
+            "n/\"Alex\" extra", "n/\"Alex\" n/Bob"}) {
+            assertThrows(ParseException.class, () -> parser.parse(query));
+        }
+    }
+
+    @Test
+    public void parse_fullSlashNames_preservesRelationshipMarkers() throws Exception {
+        for (String name : new String[]{"Ahmad s/o Ali", "Devi d/o Kumar", "Ahmad S/O Ali", "Devi D/O Kumar"}) {
+            assertEquals(new SearchCustomerCommand(name, null, null, null, null), parser.parse("n/" + name));
+        }
+        assertEquals(new SearchCustomerCommand("Devi d/o Kumar", null, null, null, Set.of(1, 2), 3),
+                parser.parse("n/Devi d/o Kumar d/1 2 i/3"));
+        assertEquals(new SearchCustomerCommand("Ahmad s/o Ali", "91234567", null, null, Set.of(1)),
+                parser.parse("d/1 n/Ahmad s/o Ali p/91234567"));
+        assertEquals(new SearchCustomerCommand("Devi d/o", null, null, null, null), parser.parse("n/Devi d/o"));
+    }
+
+    @Test
+    public void parse_slashNamesWithInvalidOrDuplicateDogFields_stillRejectsFields() {
+        for (String query : new String[]{"n/Devi d/o Kumar d/abc", "n/Devi d/o Kumar d/0",
+            "n/Devi d/o Kumar d/1 d/2", "d/o", "s/o"}) {
+            assertThrows(ParseException.class, () -> parser.parse(query));
+        }
+    }
+
+    @Test
     public void parse_validFields_normalizesValues() throws Exception {
         SearchCustomerCommand expected = new SearchCustomerCommand(
                 "Anna Lee", "91234567", "anna@example.com", "98765432", Set.of(12, 34), 7);
@@ -99,7 +139,7 @@ public class SearchCustomerCommandParserTest {
     @Test
     public void parse_unsupportedPrefixes_reportsInvalidCommandFormat() {
         String message = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SearchCustomerCommand.MESSAGE_USAGE);
-        for (String query : new String[]{"x/value", "n/Anna x/value", "x/value p/91234567",
+        for (String query : new String[]{"x/value", "p/91234567 x/value", "x/value p/91234567",
             "P/91234567", "BC/98765432", "phone/91234567"}) {
             assertThrows(ParseException.class, message, () -> parser.parse(query));
         }
@@ -115,7 +155,7 @@ public class SearchCustomerCommandParserTest {
     @Test
     public void parse_invalidFormatOrDuplicateFields_throwsParseException() {
         String[] invalidInputs = {"", " ", "customer", "x/value", "N/Anna", "n/Anna n/Beth",
-            "n/Anna x/value", "n/Anna p/1234567", "n/Anna p/91234567 p/92345678", "n/Anna e/a@b.com e/c@d.com",
+            "n/Anna p/1234567", "n/Anna p/91234567 p/92345678", "n/Anna e/a@b.com e/c@d.com",
             "n/Anna bc/91234567 bc/92345678", "n/Anna d/12 d/13", "i/12 i/13", "extra n/Anna", "n/"};
 
         for (String invalidInput : invalidInputs) {
