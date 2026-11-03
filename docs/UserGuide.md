@@ -97,11 +97,13 @@ Example:
 
 * `addcustomer n/Priya Menon p/97654321 e/priya@example.com bc/88776655`
 
-Customer names may contain only English letters (`A-Z`, `a-z`), digits (`0-9`), spaces, hyphens (`-`),
-and straight apostrophes (`'`). Accented letters (such as `é`), Chinese characters, and curly apostrophes
-(`’`) are not supported. Names must start with an English letter or digit. A hyphen or apostrophe must
-be followed by an English letter or digit; repeated punctuation is not allowed. For example, `Jean-Luc`
-and `O'Neil` are valid names.
+Customer names may contain Unicode letters (including accented letters and Chinese characters), combining
+marks, numbers, spaces, hyphens (`-`), straight or curly apostrophes (`'`, `’`), and slashes (`/`).
+Names must start with a letter or number. For example, `Ahmad s/o Ali`, `Devi d/o Kumar`, `José Tan`,
+`陈伟`, and `O’Neil` are valid names. Names are stored in Unicode NFC form, and name searches recognize
+equivalent composed and decomposed accents. Control characters are not allowed.
+The space-separated command prefixes `n/`, `p/`, `e/`, and `bc/` remain reserved and cannot be used
+as literal name text. Other slash-containing text, such as `s/o` and `d/o`, is accepted.
 
 Email addresses must use the `local-part@domain` format. Apostrophes are allowed in the local part
 before `@`.

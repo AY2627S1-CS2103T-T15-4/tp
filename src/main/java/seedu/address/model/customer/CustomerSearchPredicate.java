@@ -3,6 +3,7 @@ package seedu.address.model.customer;
 
 import static java.util.Objects.requireNonNull;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -89,7 +90,8 @@ public class CustomerSearchPredicate implements Predicate<Customer> {
     }
 
     private static String normalize(String value) {
-        return value.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
+        return Normalizer.normalize(value, Normalizer.Form.NFC)
+                .trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
     }
 
     private static String validateName(String value) {

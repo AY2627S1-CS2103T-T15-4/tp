@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.nio.file.Path;
@@ -21,6 +22,35 @@ import seedu.address.storage.JsonWatchDogStorage;
 public class AddCustomerCommandIntegrationTest {
 
     private final WatchDogParser parser = new WatchDogParser();
+
+    @Test
+    public void execute_unicodeAndSlashNames_surviveEditingSearchingAndReload(@TempDir Path directory)
+            throws Exception {
+        Model model = new ModelManager();
+        execute(model, "Ahmad s/o Ali", "91234567", "ahmad@example.com");
+        execute(model, "Devi d/o Kumar", "92345678", "devi@example.com");
+        execute(model, "\u9648\u4f1f", "93456789", "chen@example.com");
+        assertEquals("Ahmad s/o Ali", model.getCustomerList().get(0).getName().fullName);
+        assertEquals("91234567", model.getCustomerList().get(0).getPhone().value);
+        parser.parseCommand("searchc n/s/o").execute(model);
+        assertEquals(List.of(1), model.getFilteredCustomerList().stream().map(Customer::getId).toList());
+
+        parser.parseCommand("editcustomer 1 n/Jose\u0301 O\u2019Neil").execute(model);
+        assertEquals("Jos\u00e9 O\u2019Neil", model.getCustomerList().get(0).getName().fullName);
+        assertEquals("ahmad@example.com", model.getCustomerList().get(0).getEmail().value);
+        JsonWatchDogStorage storage = new JsonWatchDogStorage(directory.resolve("watchdog.json"));
+        storage.saveWatchDog(model.getWatchDog());
+        Model reloaded = new ModelManager(storage.readWatchDog().orElseThrow(), new UserPrefs());
+        assertEquals(model.getCustomerList(), reloaded.getCustomerList());
+        for (String query : List.of("JOS\u00c9", "JOSE\u0301")) {
+            parser.parseCommand("searchc n/" + query).execute(reloaded);
+            assertEquals(List.of(1), reloaded.getFilteredCustomerList().stream().map(Customer::getId).toList());
+        }
+        parser.parseCommand("searchc n/\u9648").execute(reloaded);
+        assertEquals(List.of(3), reloaded.getFilteredCustomerList().stream().map(Customer::getId).toList());
+        assertTrue(reloaded.getCustomerList().stream()
+                .anyMatch(customer -> customer.getName().fullName.equals("Devi d/o Kumar")));
+    }
 
     @Test
     public void execute_exhaustedIds_reportsErrorAfterDeletionAndReload(@TempDir Path directory) throws Exception {
