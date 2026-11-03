@@ -1363,8 +1363,10 @@ NFR-10. **Privacy**: WatchDog shall store dog and customer records locally and s
 * **Occurrence**: A date on which an activity takes place according to its start date and recurrence.
 * **Enrolment**: A dated booking for a dog in an activity occurrence. It does not indicate actual attendance or check-in.
 
+#### Illustrative dog size reference
+
 The following weight ranges and breeds are illustrative examples adapted from
-[vetcarenews' dog size guide](https://vetcarenews.com/small-medium-large-dog-size-by-weight-guide/).
+[Monika Sragova's dog size guide on vetcarenews](https://vetcarenews.com/small-medium-large-dog-size-by-weight-guide/).
 They are not official criteria; users decide which category best fits each dog.
 
 | Size | Approximate weight | Example breeds |

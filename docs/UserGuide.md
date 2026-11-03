@@ -216,6 +216,10 @@ Example:
 * `adddog n/Cookie b/Chihuahua s/Small`
 
 Valid sizes are `small`, `medium`, `large`, and `giant`. Size input is case-insensitive.
+If you are unsure which size to choose, use the
+[illustrative dog size reference in the Developer Guide](DeveloperGuide.md#illustrative-dog-size-reference)
+as a starting point. You decide which category fits the dog; WatchDog does not check its weight.
+
 Dog names may contain letters, numbers, spaces, hyphens, and straight apostrophes (`'`), and must not be blank.
 Curly apostrophes (`‘`, `’`) are not supported. Breeds may contain letters, numbers, spaces, and
 hyphens, and must not be blank. Leading and trailing spaces in field values are ignored.
