@@ -72,32 +72,28 @@ public class EditActivityCommandParserTest {
 
     @Test
     public void parse_missingOrInvalidActivityId_reportsReason() {
-        assertThrows(ParseException.class, "Activity ID is required. Enter a positive whole number.",
-                () -> parser.parse(" n/Training"));
-        assertThrows(ParseException.class, "Please provide a positive, valid activity ID.",
-                () -> parser.parse(" abc n/Training"));
-        assertThrows(ParseException.class, "Please provide a positive, valid activity ID.",
-                () -> parser.parse(" 0 n/Training"));
-        assertThrows(ParseException.class, "Please provide a positive, valid activity ID.",
-                () -> parser.parse(" 2147483648 n/Training"));
+        assertThrows(ParseException.class, "Activity ID is required. Enter a positive whole number.", () ->
+                parser.parse(" n/Training"));
+        assertThrows(ParseException.class, "Please provide a positive, valid activity ID.", () ->
+                parser.parse(" abc n/Training"));
+        assertThrows(ParseException.class, "Please provide a positive, valid activity ID.", () ->
+                parser.parse(" 0 n/Training"));
+        assertThrows(ParseException.class, "Please provide a positive, valid activity ID.", () ->
+                parser.parse(" 2147483648 n/Training"));
     }
 
     @Test
     public void parse_invalidFields_identifiesFieldAndPreservesGuidance() {
-        assertThrows(ParseException.class, "Invalid activity name (n/): " + ActivityName.MESSAGE_CONSTRAINTS,
-                () -> parser.parse(" 3 n/"));
+        assertThrows(ParseException.class, "Invalid activity name (n/): " + ActivityName.MESSAGE_CONSTRAINTS, () ->
+                parser.parse(" 3 n/"));
         assertThrows(ParseException.class, "Invalid activity date (date/): "
-                        + AddActivityCommandParser.MESSAGE_DATE,
-                () -> parser.parse(" 3 date/2027-02-29"));
+                        + AddActivityCommandParser.MESSAGE_DATE, () -> parser.parse(" 3 date/2027-02-29"));
         assertThrows(ParseException.class, "Invalid activity start time (start/): "
-                        + AddActivityCommandParser.MESSAGE_TIME,
-                () -> parser.parse(" 3 start/24:00"));
+                        + AddActivityCommandParser.MESSAGE_TIME, () -> parser.parse(" 3 start/24:00"));
         assertThrows(ParseException.class, "Invalid activity end time (end/): "
-                        + AddActivityCommandParser.MESSAGE_TIME,
-                () -> parser.parse(" 3 end/25:00"));
+                        + AddActivityCommandParser.MESSAGE_TIME, () -> parser.parse(" 3 end/25:00"));
         assertThrows(ParseException.class, "Invalid activity recurrence (r/): "
-                        + AddActivityCommandParser.MESSAGE_RECURRENCE,
-                () -> parser.parse(" 3 r/Weekly"));
+                        + AddActivityCommandParser.MESSAGE_RECURRENCE, () -> parser.parse(" 3 r/Weekly"));
     }
 
     @Test
