@@ -101,25 +101,31 @@ Example:
 
 * `addcustomer n/Priya Menon p/97654321 e/priya@example.com bc/88776655`
 
-Customer names may contain Unicode letters (including accented letters and Chinese characters), combining
-marks, numbers, spaces, hyphens (`-`), straight or curly apostrophes (`'`, `’`), and slashes (`/`).
-Names must start with a letter or number. For example, `Ahmad s/o Ali`, `Devi d/o Kumar`, `José Tan`,
-`陈伟`, and `O’Neil` are valid names. Names are stored in Unicode NFC form, and name searches recognize
-equivalent composed and decomposed accents. Control characters are not allowed.
-The space-separated command prefixes `n/`, `p/`, `e/`, and `bc/` remain reserved and cannot be used
-as literal name text. Other slash-containing text, such as `s/o` and `d/o`, is accepted.
+**Name (`n/`)**
 
-Email addresses must use the `local-part@domain` format. The nonempty local part before `@` supports
-English letters, digits, and `+`, `_`, `.`, `'`, and `-`. Supported special characters may appear at
-the start, end, or consecutively, except that dots cannot start or end the local part or occur consecutively.
-For example, `_alice@example.com`, `alice+@example.com`, and `alice+_work@example.com` are accepted.
-Other special characters and quoted local parts are not supported.
+* Customer names may contain Unicode letters (including accented letters and Chinese characters), combining
+  marks, numbers, spaces, hyphens (`-`), straight or curly apostrophes (`'`, `’`), and slashes (`/`).
+  Names must start with a letter or number. For example, `Ahmad s/o Ali`, `Devi d/o Kumar`, `José Tan`,
+  `陈伟`, and `O’Neil` are valid names.
+* Names are stored in Unicode NFC form, and name searches recognize equivalent composed and decomposed
+  accents. Control characters are not allowed.
+* The space-separated command prefixes `n/`, `p/`, `e/`, and `bc/` remain reserved and cannot be used
+  as literal name text. Other slash-containing text, such as `s/o` and `d/o`, is accepted.
 
-The domain consists of one or more nonempty labels separated by dots. A single-label domain such as
-`alice@gmail` is accepted; a dot is not required. Each label must start and end with an ASCII letter
-or digit and contain only ASCII letters, digits, and single hyphens. Consecutive hyphens are not supported,
-including in punycode labels starting with `xn--`. The final label must be at least two characters long.
-These format checks do not establish whether the domain or mailbox exists.
+**Email (`e/`)**
+
+* Email addresses must use the `local-part@domain` format. The nonempty local part before `@` supports
+  English letters, digits, and `+`, `_`, `.`, `'`, and `-`. Supported special characters may appear at
+  the start, end, or consecutively, except that dots cannot start or end the local part or occur consecutively.
+  For example, `_alice@example.com`, `alice+@example.com`, and `alice+_work@example.com` are accepted.
+  Other special characters and quoted local parts are not supported.
+* The domain consists of one or more nonempty labels separated by dots. A single-label domain such as
+  `alice@gmail` is accepted; a dot is not required. Each label must start and end with an ASCII letter
+  or digit and contain only ASCII letters, digits, and single hyphens. Consecutive hyphens are not supported,
+  including in punycode labels starting with `xn--`. The final label must be at least two characters long.
+  These format checks do not establish whether the domain or mailbox exists.
+
+**Phone and backup contact (`p/` and `bc/`)**
 
 The contact number and backup contact number accept either:
 
@@ -127,21 +133,24 @@ The contact number and backup contact number accept either:
 * An international number starting with `+` followed by 7 to 15 digits, including the country code.
   The first digit after `+` must be 1–9. For example, `+442012345678`.
 
-Singapore numbers entered with `+65` must have exactly eight digits after the country code.
-For example, `+65 9123 4567` is accepted, while `+65 1234567` and `+65 123456789` are rejected.
+* Singapore numbers entered with `+65` must have exactly eight digits after the country code.
+  For example, `+65 9123 4567` is accepted, while `+65 1234567` and `+65 123456789` are rejected.
+* Spaces and hyphens are allowed between digits, for example `9123-4567` or `+44 20-1234-5678`.
+  Letters, parentheses, and other symbols are rejected. Numbers without `+` are treated as Singapore numbers.
+  These checks validate the format; they do not verify that a number is assigned or callable.
+* Spaces and hyphens are removed when numbers are stored and displayed. A number with `+65` followed by
+  exactly eight digits is stored as those eight digits, so `+65 9123-4567` and `91234567` are equivalent.
+  Other international numbers retain their leading `+`.
 
-Spaces and hyphens are allowed between digits, for example `9123-4567` or `+44 20-1234-5678`.
-Letters, parentheses, and other symbols are rejected. Numbers without `+` are treated as Singapore numbers.
-These checks validate the format; they do not verify that a number is assigned or callable.
-Spaces and hyphens are removed when numbers are stored and displayed. A number with `+65` followed by
-exactly eight digits is stored as those eight digits, so `+65 9123-4567` and `91234567` are equivalent.
-Other international numbers retain their leading `+`. All four fields are required.
-Each customer's primary phone number and email address must be unique across all customers, including
-those hidden by filters. Email uniqueness ignores letter case. Backup contact numbers may be shared,
-including with another customer's primary phone number.
-If a primary phone number or email address is already used, the error names the customer ID that owns it.
-If fields are missing, WatchDog lists them and shows the command format. If a value is invalid, it
-reports the first invalid field and its constraints.
+**Required fields and duplicates**
+
+* All four fields are required.
+* Each customer's primary phone number and email address must be unique across all customers, including
+  those hidden by filters. Email uniqueness ignores letter case. Backup contact numbers may be shared,
+  including with another customer's primary phone number.
+* If a primary phone number or email address is already used, the error names the customer ID that owns it.
+* If fields are missing, WatchDog lists them and shows the command format. If a value is invalid, it
+  reports the first invalid field and its constraints.
 
 #### Editing a customer: `editcustomer`
 
@@ -211,7 +220,7 @@ Example: `searchc n/Anna d/12 34`
 #### Deleting a customer: `deletecustomer`
 
 Deletes an existing customer using its persistent ID and removes their dogs' ownership links.
-The dogs and their activity bookings remain, and the dogs can be linked to another customer.
+**The dogs and their activity bookings remain**, and the dogs can be linked to another customer.
 The customer can be deleted even when hidden by a search or filter.
 
 Format: `deletecustomer ID`
@@ -238,7 +247,7 @@ Example:
 
 * `adddog n/Cookie b/Chihuahua s/Small`
 
-Valid sizes are `small`, `medium`, `large`, and `giant`. Size input is case-insensitive.
+Valid sizes are `small`, `medium`, `large`, and `giant`. Size input is **case-insensitive**.
 If you are unsure which size to choose, use the
 [illustrative dog size reference in the Developer Guide](DeveloperGuide.md#illustrative-dog-size-reference)
 as a starting point. You decide which category fits the dog; WatchDog does not check its weight.
@@ -287,8 +296,8 @@ Example: `searchd b/Golden Retriever s/Medium`
 
 #### Deleting a dog: `deletedog`
 
-Deletes a dog using its persistent dog ID and removes all of that dog's activity enrolments, including past
-occurrences. Other dogs' enrolments and the activity schedules remain unchanged.
+Deletes a dog using its persistent dog ID and **removes all of that dog's activity enrolments, including past
+occurrences**. Other dogs' enrolments and the activity schedules remain unchanged.
 
 Format: `deletedog ID`
 
@@ -312,21 +321,21 @@ If the ID does not exist, WatchDog displays:
 <!--@@author its-shoutime-->
 #### Customer and dog cards
 
-The customer and dog panels are separate scrollable areas. Customer cards show contact details and the IDs of
-their dogs. Dog cards show the persistent dog ID and name, followed by breed, size, and customer ID when linked.
-Newly added records appear automatically. Customer and dog IDs belong to separate categories and may overlap.
-On a narrow window, the four record panels remain in one row and can be reached with the horizontal scrollbar.
-Use `Ctrl+Alt+1`, `Ctrl+Alt+2`, `Ctrl+Alt+3`, or `Ctrl+Alt+4` to jump to Customers, Dogs, Activities, or Today.
-Successful commands bring their relevant panel into view. The command box and result message remain visible while
-the record panels scroll horizontally. WatchDog also fits a saved window size and position to the visible screen
-when it starts.
+The customer and dog panels are separate scrollable areas. Newly added records appear automatically.
 
-Hover over a contact-detail or dog-detail row to see its full value when the displayed text is shortened.
-Right-click a customer card to copy its phone number, email address, backup contact, or all details.
-Right-click a dog card to copy its breed, linked customer ID, or all details. The all-details output is labelled
-and multiline.
-An unlinked dog's customer-ID action is disabled. The app briefly confirms a successful copy and reports when
-the operating system clipboard rejects it.
+* Customer cards show contact details and the IDs of their dogs. Dog cards show the persistent dog ID and name,
+  followed by breed, size, and customer ID when linked. Customer and dog IDs belong to separate categories and
+  may overlap.
+* On a narrow window, the four record panels remain in one row and can be reached with the horizontal scrollbar.
+  Use `Ctrl+Alt+1`, `Ctrl+Alt+2`, `Ctrl+Alt+3`, or `Ctrl+Alt+4` to jump to Customers, Dogs, Activities, or Today.
+* Successful commands bring their relevant panel into view. The command box and result message remain visible while
+  the record panels scroll horizontally. WatchDog also fits a saved window size and position to the visible screen
+  when it starts.
+* Hover over a contact-detail or dog-detail row to see its full value when the displayed text is shortened.
+* Right-click a customer card to copy its phone number, email address, backup contact, or all details.
+  Right-click a dog card to copy its breed, linked customer ID, or all details. The all-details output is labelled
+  and multiline. An unlinked dog's customer-ID action is disabled. The app briefly confirms a successful copy and
+  reports when the operating system clipboard rejects it.
 
 <!--@@author-->
 
@@ -390,12 +399,14 @@ across restarts. Activities with identical names or times are allowed and receiv
 
 Format: `addactivity n/NAME date/YYYY-MM-DD start/HH:mm end/HH:mm r/RECURRENCE`
 
-All five fields are required exactly once, in any order. Prefixes and recurrence values are lowercase.
-Use a nonblank name, a valid calendar date, and 24-hour times from `00:00` to `23:59`.
-The end must be later than the start on the same day; overnight schedules are unsupported.
-Past start dates are permitted. Leading and trailing spaces in values are ignored.
-Space-separated alphabetic tokens ending in `/` are reserved for prefixes, including within names;
-unknown prefixes and extra text before the fields are rejected without creating an activity.
+* All five fields are required exactly once, in any order. Prefixes and recurrence values are lowercase.
+* Use a nonblank name, a valid calendar date, and 24-hour times from `00:00` to `23:59`.
+  The end must be later than the start on the same day; overnight schedules are unsupported.
+  Past start dates are permitted. Leading and trailing spaces in values are ignored.
+* Space-separated alphabetic tokens ending in `/` are reserved for prefixes, including within names;
+  unknown prefixes and extra text before the fields are rejected without creating an activity.
+
+Recurrence options:
 
 * `r/once`: occurs only on the supplied date.
 * `r/daily`: occurs every day from that date, with no end date.
@@ -432,7 +443,7 @@ timer; after midnight, the next successful command or activity/enrolment refresh
 
 #### Editing an activity: `editactivity`
 
-Edits an activity with the specified persistent ID. An activity can be edited only when it has no enrolments.
+Edits an activity with the specified persistent ID. **An activity can be edited only when it has no enrolments.**
 If dogs are enrolled, the command leaves the activity unchanged and suggests creating a new activity instead.
 Supply at least one field to change; omitted fields retain their current values. For a recurring activity,
 the changes apply to the entire schedule.
@@ -476,8 +487,8 @@ Example: `searcha n/Dog run t/16:00`
 
 #### Deleting an activity: `deleteactivity`
 
-Deletes the activity with the specified persistent ID. For a recurring activity, this deletes the
-entire series. All dogs enrolled in that activity are unenrolled; the dogs themselves and their
+Deletes the activity with the specified persistent ID. **For a recurring activity, this deletes the
+entire series. All dogs enrolled in that activity are unenrolled**; the dogs themselves and their
 enrolments in other activities remain. Deleted activity IDs are not reused.
 
 Format: `deleteactivity ACTIVITY_ID`
@@ -605,10 +616,12 @@ Examples:
 #### Resetting the display: `reset`
 
 Shows all stored customers and dogs, plus activities with an occurrence today or later according to
-the computer's local date. One-time activities before today are hidden. A daily or weekly activity
-remains visible while it has a future occurrence, even if its first date is in the past. Activity
-cards continue to show the schedule's first date. This command changes the view only; stored records
-are not changed.
+the computer's local date.
+
+* One-time activities before today are hidden. A daily or weekly activity remains visible while it has a
+  future occurrence, even if its first date is in the past. Activity cards continue to show the schedule's
+  first date.
+* This command changes the view only; stored records are not changed.
 
 Format: `reset`
 
@@ -658,14 +671,14 @@ Formats: `undo` or `redo`
 For example, after `adddog n/Cookie b/Chihuahua s/Small`, enter `undo` to remove Cookie,
 then `redo` to bring Cookie back. You can undo the redone command again.
 
-Only one command can be undone at a time. A later successful undoable command replaces that history
-and makes `redo` unavailable. View-changing commands such as search, filter, `today`, and
-`reset` are undoable too. `help`, `summary`, and `exit` preserve both undo and redo history;
-parse errors and commands rejected before execution also leave history unchanged. The history is
-cleared after confirming `clear` with `Y` and is not retained when WatchDog restarts. Surrounding whitespace is accepted,
-but neither command accepts arguments.
-If no command is available, WatchDog displays `There is no command to undo.` or
-`There is no command to redo.`
+* Only one command can be undone at a time. A later successful undoable command replaces that history
+  and makes `redo` unavailable. View-changing commands such as search, filter, `today`, and
+  `reset` are undoable too.
+* `help`, `summary`, and `exit` preserve both undo and redo history; parse errors and commands rejected
+  before execution also leave history unchanged. The history is cleared after confirming `clear` with `Y`
+  and is not retained when WatchDog restarts.
+* Surrounding whitespace is accepted, but neither command accepts arguments. If no command is available,
+  WatchDog displays `There is no command to undo.` or `There is no command to redo.`
 
 A save error can occur after an undoable command, `undo`, `redo`, or `clear` has changed memory.
 The change remains visible in the current session, with the corresponding undo or redo operation
@@ -675,7 +688,7 @@ available where applicable, but the data file may not contain that change.
 
 #### Clearing all entries: `clear`
 
-Clears all customers, dogs, activities, and enrolments from WatchDog after confirmation.
+**Clears all customers, dogs, activities, and enrolments from WatchDog after confirmation.**
 
 Format: `clear`
 
@@ -691,7 +704,7 @@ Examples:
 * Enter `clear`, then enter `y` to permanently delete all entries.
 * Enter `clear`, then enter `n` to cancel and keep all entries and undo/redo history.
 
-Clearing also discards the undo and redo history, so `clear` cannot be undone. This remains true
+**Clearing also discards the undo and redo history, so `clear` cannot be undone.** This remains true
 if the command changes memory but its save fails.
 
 Clearing preserves the current search filters. Newly added records appear only
@@ -701,8 +714,9 @@ customers and dogs, plus activities occurring today or later.
 
 #### Saving the data
 
-WatchDog attempts to save after a successfully executed command, an undo or redo, or a confirmed clear.
-Failed commands and an unanswered or cancelled clear do not save. You do not need to save manually.
+You do not need to save manually. WatchDog attempts to save after a successfully executed command,
+an undo or redo, or a confirmed clear. Failed commands and an unanswered or cancelled clear do not save.
+
 Each save writes a complete temporary file in the destination folder before replacing the saved file.
 Replacement is atomic when supported by the file system; otherwise WatchDog uses a regular replacement.
 This reduces the risk of an incomplete save but does not replace keeping your own backups.
