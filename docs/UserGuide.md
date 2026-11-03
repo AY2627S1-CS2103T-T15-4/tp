@@ -127,11 +127,15 @@ Example:
 
 **Phone and backup contact (`p/` and `bc/`)**
 
+**Accepted formats**
+
 The contact number and backup contact number accept either:
 
 * A Singapore number containing exactly eight digits, such as `91234567`.
 * An international number starting with `+` followed by 7 to 15 digits, including the country code.
   The first digit after `+` must be 1–9. For example, `+442012345678`.
+
+**Additional rules**
 
 * Singapore numbers entered with `+65` must have exactly eight digits after the country code.
   For example, `+65 9123 4567` is accepted, while `+65 1234567` and `+65 123456789` are rejected.
