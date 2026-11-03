@@ -4,24 +4,30 @@ import java.nio.file.Path;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Ellipse;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
@@ -32,6 +38,7 @@ import seedu.address.logic.commands.ResetDisplayCommand;
 import seedu.address.logic.commands.SearchActivityCommand;
 import seedu.address.logic.commands.SearchCustomerCommand;
 import seedu.address.logic.commands.SearchDogCommand;
+import seedu.address.logic.commands.TodayCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 
@@ -49,7 +56,8 @@ public class MainWindow extends UiPart<Stage> {
             ResetDisplayCommand.COMMAND_WORD,
             SearchActivityCommand.COMMAND_WORD,
             SearchCustomerCommand.COMMAND_WORD,
-            SearchDogCommand.COMMAND_WORD);
+            SearchDogCommand.COMMAND_WORD,
+            TodayCommand.COMMAND_WORD);
 
     private final Logger logger = LogsCenter.getLogger(getClass());
 
@@ -92,6 +100,12 @@ public class MainWindow extends UiPart<Stage> {
     @FXML
     private StackPane resultDisplayPlaceholder;
 
+    @FXML
+    private HBox recordLists;
+
+    @FXML
+    private ScrollPane recordScrollPane;
+
     /**
      * Creates a {@code MainWindow} with the given {@code Stage} and {@code Logic}.
      * The data-file path parameter is retained for compatibility with the UI construction API.
@@ -110,6 +124,7 @@ public class MainWindow extends UiPart<Stage> {
         this.clock = Objects.requireNonNull(clock);
         // Configure the UI
         setWindowDefaultSize(logic.getGuiSettings());
+        configureRecordScrolling();
 
         setAccelerators();
 
@@ -122,6 +137,29 @@ public class MainWindow extends UiPart<Stage> {
 
     private void setAccelerators() {
         setAccelerator(helpMenuItem, KeyCombination.valueOf("F1"));
+        getRoot().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (!event.isControlDown() || !event.isAltDown()) {
+                return;
+            }
+            int panelIndex = switch (event.getCode()) {
+                case DIGIT1 -> 0;
+                case DIGIT2 -> 1;
+                case DIGIT3 -> 2;
+                case DIGIT4 -> 3;
+                default -> -1;
+            };
+            if (panelIndex >= 0) {
+                revealPanel(panelIndex);
+                event.consume();
+            }
+        });
+    }
+
+    /** Keeps the four-panel row wide enough for readable cards and scrolls it only when needed. */
+    private void configureRecordScrolling() {
+        recordLists.prefWidthProperty().bind(Bindings.createDoubleBinding(() ->
+                Math.max(recordLists.minWidth(-1), recordScrollPane.getWidth() - 2),
+                recordScrollPane.widthProperty()));
     }
 
     /**
@@ -244,16 +282,29 @@ public class MainWindow extends UiPart<Stage> {
         return toe;
     }
 
-    /**
-     * Sets the default size based on {@code guiSettings}.
-     */
+    /** Fits restored window settings within the visible bounds of the saved screen, or the primary screen. */
     private void setWindowDefaultSize(GuiSettings guiSettings) {
-        primaryStage.setHeight(guiSettings.getWindowHeight());
-        primaryStage.setWidth(guiSettings.getWindowWidth());
-        if (guiSettings.getWindowCoordinates() != null) {
-            primaryStage.setX(guiSettings.getWindowCoordinates().getX());
-            primaryStage.setY(guiSettings.getWindowCoordinates().getY());
-        }
+        var savedPosition = guiSettings.getWindowCoordinates();
+        List<Screen> matchingScreens = savedPosition == null ? List.of()
+                : Screen.getScreensForRectangle(savedPosition.x, savedPosition.y, 1, 1);
+        Screen screen = matchingScreens.isEmpty() ? Screen.getPrimary() : matchingScreens.get(0);
+        Rectangle2D fitted = fitWindowToBounds(guiSettings, screen.getVisualBounds());
+        primaryStage.setWidth(fitted.getWidth());
+        primaryStage.setHeight(fitted.getHeight());
+        primaryStage.setX(fitted.getMinX());
+        primaryStage.setY(fitted.getMinY());
+    }
+
+    /** Calculates a restored size and position that remain entirely inside a screen's visual bounds. */
+    static Rectangle2D fitWindowToBounds(GuiSettings guiSettings, Rectangle2D bounds) {
+        var savedPosition = guiSettings.getWindowCoordinates();
+        double width = Math.min(guiSettings.getWindowWidth(), bounds.getWidth());
+        double height = Math.min(guiSettings.getWindowHeight(), bounds.getHeight());
+        double x = savedPosition == null ? bounds.getMinX() + (bounds.getWidth() - width) / 2 : savedPosition.x;
+        double y = savedPosition == null ? bounds.getMinY() + (bounds.getHeight() - height) / 2 : savedPosition.y;
+        x = Math.max(bounds.getMinX(), Math.min(x, bounds.getMaxX() - width));
+        y = Math.max(bounds.getMinY(), Math.min(y, bounds.getMaxY() - height));
+        return new Rectangle2D(x, y, width, height);
     }
 
     /**
@@ -306,6 +357,7 @@ public class MainWindow extends UiPart<Stage> {
             CommandResult commandResult = logic.execute(commandText);
             refreshActivityPanels();
             resetListScrollForDisplayCommand(commandText);
+            revealCommandPanel(commandText);
             logger.info("Result: " + commandResult.getFeedbackToUser());
             resultDisplay.setFeedbackToUser(commandResult.getFeedbackToUser());
 
@@ -347,5 +399,38 @@ public class MainWindow extends UiPart<Stage> {
         dogListPanel.scrollToTop();
         activityListPanel.scrollToTop();
         todayActivityListPanel.scrollToTop();
+    }
+
+    /** Reveals the panel most relevant to a successful command while preserving the other card scroll positions. */
+    private void revealCommandPanel(String commandText) {
+        String commandWord = commandText.stripLeading().split("\\s+", 2)[0];
+        int panelIndex = switch (commandWord) {
+            case "addcustomer", "editcustomer", "deletecustomer", "searchc", "reset" -> 0;
+            case "adddog", "editdog", "deletedog", "searchd", "link", "unlink" -> 1;
+            case "addactivity", "editactivity", "deleteactivity", "searcha", "enrol", "unenrol" -> 2;
+            case "filterun" -> commandText.stripTrailing().endsWith("dog") ? 1 : 0;
+            case "today" -> 3;
+            default -> -1;
+        };
+        if (panelIndex >= 0) {
+            revealPanel(panelIndex);
+        }
+    }
+
+    /** Scrolls the panel row horizontally until the requested panel is visible. */
+    private void revealPanel(int panelIndex) {
+        if (panelIndex == 0) {
+            recordScrollPane.setHvalue(0);
+            return;
+        }
+        recordLists.applyCss();
+        recordLists.layout();
+        double overflow = recordLists.getWidth() - recordScrollPane.getViewportBounds().getWidth();
+        if (overflow <= 0) {
+            recordScrollPane.setHvalue(0);
+            return;
+        }
+        double panelX = recordLists.getChildren().get(panelIndex).getBoundsInParent().getMinX();
+        recordScrollPane.setHvalue(Math.max(0, Math.min(1, panelX / overflow)));
     }
 }

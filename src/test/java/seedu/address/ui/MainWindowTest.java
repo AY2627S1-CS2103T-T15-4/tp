@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
 import javafx.css.PseudoClass;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -32,6 +34,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -42,8 +45,10 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Ellipse;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -105,9 +110,9 @@ public class MainWindowTest {
             ListView<Supplier<Region>> customers = listView(window.getCustomerListPanel());
             ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
             ListView<Supplier<Region>> activities = listView(window.getActivityListPanel());
-            StackPane todayPanelPlaceholder = (StackPane) window.getPrimaryStage().getScene()
+            StackPane todayPanelPlaceholder = (StackPane) recordRow(window)
                     .lookup("#todayActivityListPanelPlaceholder");
-            Label todayHeader = (Label) window.getPrimaryStage().getScene().lookup("#todayActivitiesHeader");
+            Label todayHeader = (Label) recordRow(window).lookup("#todayActivitiesHeader");
             @SuppressWarnings("unchecked")
             ListView<Supplier<Region>> todaysActivities = (ListView<Supplier<Region>>) todayPanelPlaceholder
                     .lookup("#recordListView");
@@ -198,8 +203,7 @@ public class MainWindowTest {
             window.fillInnerParts();
             ListView<Supplier<Region>> dogs = listView(window.getDogListPanel());
             ListView<Supplier<Region>> activities = listView(window.getActivityListPanel());
-            StackPane todayPlaceholder = (StackPane) window.getPrimaryStage().getScene()
-                    .lookup("#todayActivityListPanelPlaceholder");
+            StackPane todayPlaceholder = (StackPane) recordRow(window).lookup("#todayActivityListPanelPlaceholder");
             @SuppressWarnings("unchecked")
             ListView<Supplier<Region>> todayActivities = (ListView<Supplier<Region>>) todayPlaceholder
                     .lookup("#recordListView");
@@ -209,7 +213,7 @@ public class MainWindowTest {
                     label(activities.getItems().get(0).get(), "dogSummary"));
             assertEquals("Dogs enrolled on " + FIXED_TODAY + ": 1",
                     label(todayActivities.getItems().get(0).get(), "dogSummary"));
-            assertEquals("Today · 28 Oct 2026", ((Label) window.getPrimaryStage().getScene()
+            assertEquals("Today · 28 Oct 2026", ((Label) recordRow(window)
                     .lookup("#todayActivitiesHeader")).getText());
             assertEquals("Dogs with upcoming bookings: None",
                     label(activities.getItems().get(1).get(), "dogSummary"));
@@ -387,8 +391,12 @@ public class MainWindowTest {
     public void executeCommand_displayChangingCommandResetsListsToTop() throws Exception {
         Path folder = Files.createTempDirectory("mainwindow-scroll-reset");
         Model model = new ModelManager();
+        LocalDate today = LocalDate.now();
+        model.addActivity(new ActivityName("Today's walk"), today,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
         for (int index = 1; index <= 20; index++) {
             model.addDog(new Dog(new DogName("Dog " + index), new Breed("Poodle"), new Size("Small")));
+            model.enrolDogs(1, today, List.of(index));
         }
         Logic logic = new LogicManager(model, new StorageManager(
                 new JsonWatchDogStorage(folder.resolve("addressbook.json")),
@@ -407,7 +415,115 @@ public class MainWindowTest {
             dogs.layout();
 
             assertEquals(0, firstVisibleIndex(dogs));
+
+            dogs.scrollTo(dogs.getItems().size() - 1);
+            dogs.layout();
+            assertTrue(firstVisibleIndex(dogs) > 0);
+
+            window.executeCommand("today");
+            dogs.layout();
+
+            assertEquals(20, dogs.getItems().size());
+            assertEquals(0, firstVisibleIndex(dogs));
             window.getPrimaryStage().close();
+        });
+    }
+
+    @Test
+    public void compactWindow_revealsCommandPanelAndSupportsKeyboardNavigation() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-compact");
+        Model model = new ModelManager();
+        model.addActivity(new ActivityName("Walk"), LocalDate.now(),
+                LocalTime.of(9, 0), LocalTime.of(10, 0), Recurrence.ONCE);
+        Logic logic = new LogicManager(model, new StorageManager(
+                new JsonWatchDogStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            MainWindow window = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            window.fillInnerParts();
+            window.show();
+            window.getPrimaryStage().setWidth(800);
+            Region sceneRoot = (Region) window.getPrimaryStage().getScene().getRoot();
+            sceneRoot.resize(800, 450);
+            sceneRoot.applyCss();
+            sceneRoot.layout();
+            ScrollPane scrollPane = (ScrollPane) window.getPrimaryStage().getScene().lookup("#recordScrollPane");
+            scrollPane.applyCss();
+            scrollPane.layout();
+            assertTrue(recordRow(window).getBoundsInLocal().getWidth()
+                    > scrollPane.getViewportBounds().getWidth());
+            assertTrue(scrollPane.getBackground().getFills().stream()
+                    .allMatch(fill -> Color.TRANSPARENT.equals(fill.getFill())));
+            Region viewport = (Region) scrollPane.lookup(".viewport");
+            assertTrue(viewport.getBackground().getFills().stream()
+                    .allMatch(fill -> Color.TRANSPARENT.equals(fill.getFill())));
+
+            window.executeCommand("today");
+            assertTrue(scrollPane.getHvalue() > 0);
+
+            window.executeCommand("searcha i/1");
+            assertTrue(scrollPane.getHvalue() > 0);
+
+            window.executeCommand("filterun customer");
+            assertEquals(0, scrollPane.getHvalue());
+            window.executeCommand("filterun dog");
+            assertTrue(scrollPane.getHvalue() > 0);
+
+            TextField command = (TextField) window.getPrimaryStage().getScene().lookup("#commandTextField");
+            command.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.DIGIT1,
+                    false, true, true, false));
+            assertEquals(0, scrollPane.getHvalue());
+
+            for (KeyCode key : List.of(KeyCode.DIGIT2, KeyCode.DIGIT3, KeyCode.DIGIT4)) {
+                command.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", key,
+                        false, true, true, false));
+                assertTrue(scrollPane.getHvalue() > 0);
+                command.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.DIGIT1,
+                        false, true, true, false));
+                assertEquals(0, scrollPane.getHvalue());
+            }
+            command.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.DIGIT5,
+                    false, true, true, false));
+            assertEquals(0, scrollPane.getHvalue());
+
+            window.getPrimaryStage().close();
+        });
+    }
+
+    @Test
+    public void fitWindowToBounds_smallScreenAndOffscreenPosition_clampsSizeAndLocation() {
+        Rectangle2D screen = new Rectangle2D(0, 0, 853, 450);
+        GuiSettings saved = new GuiSettings(1100, 650, 2000, 1000);
+
+        assertEquals(new Rectangle2D(0, 0, 853, 450), MainWindow.fitWindowToBounds(saved, screen));
+        assertEquals(new Rectangle2D(100, 50, 600, 300), MainWindow.fitWindowToBounds(
+                new GuiSettings(600, 300, 100, 50), screen));
+    }
+
+    @Test
+    public void restoredWindow_usesSavedScreenOrPrimaryScreen() throws Exception {
+        Path folder = Files.createTempDirectory("mainwindow-restored-screen");
+        Model model = new ModelManager();
+        Logic logic = new LogicManager(model, new StorageManager(
+                new JsonWatchDogStorage(folder.resolve("addressbook.json")),
+                new JsonUserPrefsStorage(folder.resolve("userprefs.json"))));
+
+        runOnFxThread(() -> {
+            Rectangle2D primaryBounds = Screen.getPrimary().getVisualBounds();
+            int savedX = (int) primaryBounds.getMinX() + 10;
+            int savedY = (int) primaryBounds.getMinY() + 10;
+            logic.setGuiSettings(new GuiSettings(600, 300, savedX, savedY));
+            MainWindow onScreen = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            assertEquals(savedX, onScreen.getPrimaryStage().getX());
+            assertEquals(savedY, onScreen.getPrimaryStage().getY());
+            onScreen.getPrimaryStage().close();
+
+            logic.setGuiSettings(new GuiSettings(600, 300, 1000000, 1000000));
+            MainWindow offScreen = new MainWindow(new Stage(), logic, folder.resolve("addressbook.json"));
+            assertTrue(primaryBounds.contains(offScreen.getPrimaryStage().getX(),
+                    offScreen.getPrimaryStage().getY()));
+            offScreen.getPrimaryStage().close();
         });
     }
 
@@ -435,6 +551,11 @@ public class MainWindowTest {
 
     private static String label(Region card, String id) {
         return ((Label) card.lookup("#" + id)).getText();
+    }
+
+    private static Node recordRow(MainWindow window) {
+        ScrollPane scrollPane = (ScrollPane) window.getPrimaryStage().getScene().lookup("#recordScrollPane");
+        return scrollPane.getContent();
     }
 
     private static int firstVisibleIndex(ListView<?> listView) {

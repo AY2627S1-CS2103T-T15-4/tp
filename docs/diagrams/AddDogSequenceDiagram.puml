@@ -11,8 +11,6 @@ participant ":ModelManager" as Model MODEL_COLOR
 note over Command
   The parser has supplied an unassigned Dog.
 end note
-Command -> Model : hasDog(dog)
-Model --> Command : false
 Command -> Model : addDog(dog)
 note right of Model
   Delegates to WatchDog.addDog(dog),

@@ -20,7 +20,11 @@ WatchDog is a **desktop application for managing dog daycare customers and dogs,
 
 1. Download the latest `.jar` file from [here](https://github.com/AY2627S1-CS2103T-T15-4/tp/releases).
 
-1. Copy the file to the folder you want to use as the _home folder_ for WatchDog.
+   Do not rely on double-clicking the JAR file to start WatchDog; this may not work on some systems.
+   Launch it from a terminal using the command below.
+
+1. Copy the file to a folder where you have permission to create and edit files. WatchDog saves its data
+   in this folder, so avoid write-protected locations such as a system application folder.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar WatchDog.jar`.<br>
    A GUI similar to the one below should appear in a few seconds. On a fresh launch without saved data,
@@ -62,7 +66,7 @@ You can use `searchc`, `searchd`, or
 
 **Notes about the command format:**<br>
 
-* Record IDs are persistent positive integers. Activity IDs range from `1` to `2147483647`.
+* Customer, dog, and activity IDs are persistent positive integers from `1` to `2147483647`. Each type has its own ID sequence, so IDs can overlap across types.
 
 * Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
   For example, in `adddog n/NAME b/BREED s/SIZE`, replace `NAME` with a value such as `Cookie`.
@@ -176,7 +180,7 @@ Example: `searchc n/Anna d/12 34`
 * Dog IDs and customer ID appear in the success message only when supplied; dog IDs are displayed in ascending numeric order.
 * Only lowercase `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/` prefixes are accepted.
 * Invalid field values display `Error in searching customers:` followed by the applicable error message. Invalid or nonexistent dog and customer IDs have specific messages.
-  Dog IDs display `Please enter a valid dog index`; customer IDs display `Please enter a valid customer index`.
+  Dog IDs display `Please enter a valid dog ID`; customer IDs display `Please enter a valid customer ID`.
   Zero, negative, nonnumeric, and out-of-range IDs are invalid. If any ID is invalid, the entire search is rejected
   and the previous display is preserved.
 * Unsupported field prefixes are rejected as invalid command formats.
@@ -208,6 +212,7 @@ Leading and trailing whitespace and multiple spaces between the command name and
 #### Adding a dog: `adddog`
 
 Adds a dog and assigns it a unique persistent ID.
+Dogs with identical names, breeds, and sizes are allowed; each receives a different ID.
 
 Format: `adddog n/NAME b/BREED s/SIZE`
 
@@ -228,6 +233,8 @@ Format: `editdog DOG_ID [n/NAME] [b/BREED] [s/SIZE]`
 
 Example: `editdog 1 s/Large`
 
+Replacement names, breeds, and sizes follow the same rules as [`adddog`](#adding-a-dog-adddog).
+
 * `DOG_ID` must identify an existing dog.
 * At least one dog field must be provided.
 * Any omitted field keeps its existing value.
@@ -245,7 +252,7 @@ Example: `searchd b/Golden Retriever s/Medium`
 * ID matching is exact; dog IDs are positive integers and must belong to a dog in the database.
 * A successful command displays `Successfully searched dogs by` followed by only the supplied fields.
 * Invalid input displays `Error in searching dogs:` followed by the applicable error message. Invalid or nonexistent
-  dog IDs display `Please enter a valid dog index`.
+  dog IDs display `Please enter a valid dog ID`.
 * Invalid sizes display `Invalid dog size. Please input small/medium/large/giant only.`
 * The customer panel is also filtered to customers linked to the matching dogs.
 * The activity panel shows activities in which a matching dog is enrolled.
@@ -276,7 +283,7 @@ Upon success, WatchDog displays:
 
 If the ID does not exist, WatchDog displays:
 
-`Error in deleting dog:`<br>`Please enter a valid dog index`
+`Error in deleting dog:`<br>`Please enter a valid dog ID`
 
 ### Dog ownership
 
@@ -286,9 +293,16 @@ If the ID does not exist, WatchDog displays:
 The customer and dog panels are separate scrollable areas. Customer cards show contact details and the IDs of
 their dogs. Dog cards show the persistent dog ID and name, followed by breed, size, and customer ID when linked.
 Newly added records appear automatically. Customer and dog IDs belong to separate categories and may overlap.
+On a narrow window, the four record panels remain in one row and can be reached with the horizontal scrollbar.
+Use `Ctrl+Alt+1`, `Ctrl+Alt+2`, `Ctrl+Alt+3`, or `Ctrl+Alt+4` to jump to Customers, Dogs, Activities, or Today.
+Successful commands bring their relevant panel into view. The command box and result message remain visible while
+the record panels scroll horizontally. WatchDog also fits a saved window size and position to the visible screen
+when it starts.
 
 Hover over a contact-detail or dog-detail row to see its full value when the displayed text is shortened.
-Right-click a customer or dog card to copy an individual field or all details in a labelled, multiline format.
+Right-click a customer card to copy its phone number, email address, backup contact, or all details.
+Right-click a dog card to copy its breed, linked customer ID, or all details. The all-details output is labelled
+and multiline.
 An unlinked dog's customer-ID action is disabled. The app briefly confirms a successful copy and reports when
 the operating system clipboard rejects it.
 
@@ -429,8 +443,9 @@ Example: `searcha n/Dog run t/16:00`
   Invalid IDs reject the entire search and preserve the previous display. Repeated field prefixes are rejected.
 * Dates must use `YYYY-MM-DD`, and times must use 24-hour `HH:mm` format.
 * Only lowercase `n/`, `d/`, `t/`, `r/`, and `i/` field prefixes are accepted.
-* A successful command displays `Successfully searched activities by` followed by the supplied values, in the form
+* A successful command displays `Successfully searched activities by` followed by the parsed values, in the form
   `name: NAME`, `date: YYYY-MM-DD`, `time: HH:mm`, `recurrence: Once|Weekly|Daily`, and `activity id: ACTIVITY_ID`. Unused fields are omitted.
+  Name search text is shown in lowercase.
   If there are no matches, the activity panel is empty.
 * The dog panel shows dogs enrolled in the matching activities; when a date is supplied, only enrolments on that
   occurrence date are included. The customer panel shows owners of those dogs.
@@ -489,14 +504,15 @@ must also be positive integers and are supplied separately using `a/`.
   bookings are added or removed. Existing search filters remain active, and affected cards refresh.
 
 Invalid input reports the specific field or formatting problem, followed by the complete command format and an
-example. `enrol` rejects past dates and states that the date must be today or later. `unenrol` permits past dates so
-that a historical enrolment can be corrected, provided the activity occurred and the dog was enrolled on that date.
+example. `enrol` accepts only today's or future dates. A missed booking for a past date cannot be added later.
+`unenrol` accepts a past date only to remove a booking that already exists for that activity and date.
 
 ### Viewing and filtering
 
 #### Showing today's activities: `today`
 
 Shows activities occurring today, the dogs enrolled in today's occurrences, and their owners.
+The customer, dog, and activity panels scroll to their first results when this view is shown.
 
 Format: `today`
 
@@ -663,7 +679,8 @@ customers and dogs, plus activities occurring today or later.
 
 #### Saving the data
 
-WatchDog automatically saves data after every command. You do not need to save manually.
+WatchDog attempts to save after a successfully executed command, an undo or redo, or a confirmed clear.
+Failed commands and an unanswered or cancelled clear do not save. You do not need to save manually.
 Each save writes a complete temporary file in the destination folder before replacing the saved file.
 Replacement is atomic when supported by the file system; otherwise WatchDog uses a regular replacement.
 This reduces the risk of an incomplete save but does not replace keeping your own backups.
@@ -682,10 +699,12 @@ and copy the replacement to `<JAR folder>/data/watchdog.json`. Do not replace it
 
 **Caution:**
 If your changes make the data file invalid, WatchDog starts with no saved records at the next run.
-Before its first save, it preserves the original as `watchdog.json.invalid-UNIQUE_ID.bak` in the same folder.
-Existing backups are never replaced. If the backup cannot be created, saving is refused; check the
-application log and folder permissions. To recover, close WatchDog, repair a copy of the backup, and
-replace `watchdog.json` with that repaired copy. Keep your backup until recovery is verified.
+The invalid file remains unchanged until a command triggers a save; `summary`, for example, does so.
+Before replacing the invalid file, WatchDog copies it to a uniquely named
+`watchdog.json.invalid-UNIQUE_ID.bak` file in the same folder. If the backup cannot be created, the save
+fails and the invalid file is not replaced; check the application log and folder permissions. Existing
+backups are never replaced. To recover your records, close WatchDog, repair a copy of the backup, and
+replace `watchdog.json` with that copy. Keep the backup until you have verified the recovery.
 We still recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause WatchDog to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
@@ -919,11 +938,11 @@ general activity panel; the separate Today panel continues to show all today's s
 Input | Expected result
 ------|----------------
 `searchd n/UD b/POO s/SMALL i/1` | Shows Buddy, Alice, and activities 1 and 2. All supplied fields match together. Morning walk's `Enrolments` section lists only `1. Buddy: 2026-11-03, 2026-11-04`; Training lists Buddy's booking today.
-`searchd i/99` | `Error in searching dogs:` followed by `Please enter a valid dog index`; the previous display remains.
+`searchd i/99` | `Error in searching dogs:` followed by `Please enter a valid dog ID`; the previous display remains.
 `searchc n/ALICE p/91234567 e/ALICE@EXAMPLE.COM bc/98765432 d/2 1 i/1` | Shows Alice, Buddy, Cookie, and activities 1 and 2. Alice must own both supplied dog IDs; the success message lists dog IDs in ascending order. Activity enrolment details include only her dogs.
 `searchc p/+65 9123-4567 bc/9876-5432` | Shows Alice and her related dogs and activities, matching the same stored contacts despite the country code and formatting.
 `searchc bc/+55`, then `searchc p/+65123456789` | Both queries report `Error in searching customers:` and leave the previous display unchanged. The first identifies `backup contact (bc/)` and requests a complete international number with 7 to 15 digits; the second identifies `phone (p/)` and requires exactly eight digits after `+65`.
-`searchc i/99` | `Error in searching customers:` followed by `Please enter a valid customer index`; the previous display remains.
+`searchc i/99` | `Error in searching customers:` followed by `Please enter a valid customer ID`; the previous display remains.
 `searchc n/Nobody` | Customer, dog, and general activity panels become empty; no records are deleted.
 `searcha n/WALK d/2026-11-03 t/10:00 r/DAILY i/1` | Shows Morning walk, dogs 1 and 2, and Alice. The end time is included in time searches; recurrence searches accept uppercase values.
 `searcha i/1 d/2026-11-04` | Shows Morning walk, dogs 1 and 3, and Alice. Cookie is excluded because Cookie has no booking tomorrow.
@@ -1023,7 +1042,7 @@ These tests deliberately change the shared dataset. Run them in order after the 
 1. Run `deletedog 1`.<br>
    Expected: Buddy and all three of Buddy's bookings are removed. Cookie and Milo remain; Morning walk's
    general summary becomes `2, 3` and its Today summary becomes `2`. Training remains with `None`.
-   Repeat `deletedog 1`; expect `Error in deleting dog:` and `Please enter a valid dog index`.
+   Repeat `deletedog 1`; expect `Error in deleting dog:` and `Please enter a valid dog ID`.
 1. Run `deleteactivity 1`.<br>
    Expected: Morning walk and its remaining bookings for today and tomorrow disappear. Dogs 2 and 3,
    Ben, and activities 2–5 remain. Repeat `deleteactivity 1`; expect `Activity ID 1 does not exist.`

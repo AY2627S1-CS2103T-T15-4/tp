@@ -32,12 +32,17 @@ public class AddDogCommandTest {
     }
 
     @Test
-    public void execute_duplicateDog_throwsCommandException() throws Exception {
+    public void execute_sameDetails_addsDistinctDogs() throws Exception {
         ModelManager model = new ModelManager();
-        Dog existing = model.addDog(new Dog(new DogName("Cookie"),
-                new Breed("Poodle"), new Size("Large")));
+        new AddDogCommand(DOG).execute(model);
+        new AddDogCommand(DOG).execute(model);
 
-        assertThrows(CommandException.class, () -> new AddDogCommand(existing).execute(model));
+        assertEquals(2, model.getDogList().size());
+        assertEquals(1, model.getDogList().get(0).getId());
+        assertEquals(2, model.getDogList().get(1).getId());
+        assertEquals(model.getDogList().get(0).getName(), model.getDogList().get(1).getName());
+        assertEquals(model.getDogList().get(0).getBreed(), model.getDogList().get(1).getBreed());
+        assertEquals(model.getDogList().get(0).getSize(), model.getDogList().get(1).getSize());
     }
 
     @Test
