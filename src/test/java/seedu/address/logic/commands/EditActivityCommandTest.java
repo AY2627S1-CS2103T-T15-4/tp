@@ -138,7 +138,7 @@ public class EditActivityCommandTest {
 
         assertThrows(CommandException.class, EditActivityCommand.MESSAGE_NOT_EDITED, () ->
                 new EditActivityCommand(1, empty).execute(model));
-        assertThrows(CommandException.class, EditActivityCommand.MESSAGE_INVALID_ACTIVITY_ID, () ->
+        assertThrows(CommandException.class, String.format(EditActivityCommand.MESSAGE_INVALID_ACTIVITY_ID, 99), () ->
                 new EditActivityCommand(99, renamed).execute(model));
         assertEquals(originalActivities, model.getActivityList());
     }

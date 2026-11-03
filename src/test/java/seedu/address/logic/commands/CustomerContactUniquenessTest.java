@@ -28,7 +28,7 @@ public class CustomerContactUniquenessTest {
     public void add_duplicatePhoneIncludingSpaces_rejected() throws Exception {
         for (String phone : List.of("91234567", "9 1 2 3 4 5 6 7", "9123-4567", "+65 9123-4567")) {
             assertRejected("addcustomer n/Carol p/" + phone + " e/carol@example.com bc/98765432",
-                    CustomerContactValidator.MESSAGE_DUPLICATE_PHONE);
+                    duplicatePhone(1));
         }
     }
 
@@ -40,17 +40,18 @@ public class CustomerContactUniquenessTest {
         assertEquals("98765432", model.getCustomerList().get(2).getBackupContact().value);
 
         assertRejected("addcustomer n/David p/+442012345678 e/david@example.com bc/98765432",
-                CustomerContactValidator.MESSAGE_DUPLICATE_PHONE);
-        assertRejected("editcustomer 2 p/+44 20 1234 5678", CustomerContactValidator.MESSAGE_DUPLICATE_PHONE);
-        assertRejected("editcustomer 2 p/+65 9123-4567", CustomerContactValidator.MESSAGE_DUPLICATE_PHONE);
+                duplicatePhone(3));
+        assertRejected("editcustomer 2 p/+44 20 1234 5678", duplicatePhone(3));
+        assertRejected("editcustomer 2 p/+65 9123-4567", duplicatePhone(1));
     }
 
     @Test
     public void add_duplicateEmailIgnoringCase_rejected() throws Exception {
         for (String email : List.of("alice@example.com", "ALICE@EXAMPLE.COM")) {
             assertRejected("addcustomer n/Carol p/93456789 e/" + email + " bc/98765432",
-                    CustomerContactValidator.MESSAGE_DUPLICATE_EMAIL);
+                    duplicateEmail(1));
         }
+        assertRejected("addcustomer n/Carol p/93456789 e/bob@example.com bc/98765432", duplicateEmail(2));
     }
 
     @Test
@@ -58,9 +59,9 @@ public class CustomerContactUniquenessTest {
         model.updateFilteredCustomerList(customer -> customer.getId() == 2);
 
         assertRejected("addcustomer n/Carol p/91234567 e/carol@example.com bc/98765432",
-                CustomerContactValidator.MESSAGE_DUPLICATE_PHONE);
+                duplicatePhone(1));
         assertRejected("addcustomer n/Carol p/93456789 e/alice@example.com bc/98765432",
-                CustomerContactValidator.MESSAGE_DUPLICATE_EMAIL);
+                duplicateEmail(1));
     }
 
     @Test
@@ -82,10 +83,9 @@ public class CustomerContactUniquenessTest {
 
     @Test
     public void edit_duplicatePhoneOrEmail_rejected() throws Exception {
-        assertRejected("editcustomer 2 p/9 1 2 3 4 5 6 7",
-                CustomerContactValidator.MESSAGE_DUPLICATE_PHONE);
-        assertRejected("editcustomer 2 e/alice@example.com", CustomerContactValidator.MESSAGE_DUPLICATE_EMAIL);
-        assertRejected("editcustomer 2 e/ALICE@EXAMPLE.COM", CustomerContactValidator.MESSAGE_DUPLICATE_EMAIL);
+        assertRejected("editcustomer 2 p/9 1 2 3 4 5 6 7", duplicatePhone(1));
+        assertRejected("editcustomer 2 e/alice@example.com", duplicateEmail(1));
+        assertRejected("editcustomer 2 e/ALICE@EXAMPLE.COM", duplicateEmail(1));
     }
 
     @Test
@@ -93,9 +93,9 @@ public class CustomerContactUniquenessTest {
         model.updateFilteredCustomerList(customer -> customer.getId() == 2);
 
         assertRejected("editcustomer 2 n/Bob Lee p/91234567 e/new@example.com",
-                CustomerContactValidator.MESSAGE_DUPLICATE_PHONE);
+                duplicatePhone(1));
         assertRejected("editcustomer 2 n/Bob Lee p/93456789 e/alice@example.com",
-                CustomerContactValidator.MESSAGE_DUPLICATE_EMAIL);
+                duplicateEmail(1));
     }
 
     @Test
@@ -139,5 +139,13 @@ public class CustomerContactUniquenessTest {
         assertEquals(customersBefore, model.getCustomerList());
         assertEquals(visibleBefore, model.getFilteredCustomerList());
         assertEquals(nextCustomerId, model.getWatchDog().getNextCustomerId());
+    }
+
+    private static String duplicatePhone(int customerId) {
+        return "This phone number is already used by customer ID " + customerId + ".";
+    }
+
+    private static String duplicateEmail(int customerId) {
+        return "This email address is already used by customer ID " + customerId + ".";
     }
 }

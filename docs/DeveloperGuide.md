@@ -359,11 +359,12 @@ filtered-list position. The replacement dog retains both its ID and owner relati
 primary phone number, email address, and backup contact. `AddCustomerCommandParser` rejects
 missing, repeated, or invalid fields and creates a customer without an ID. Before adding it,
 `AddCustomerCommand` checks the complete customer list for an existing primary phone number
-or email address. Phone and backup contact accept eight local digits or `+` followed by 7 to 15
-international digits (the first digit must be 1–9). Numbers beginning with `+65` must have exactly
-eight digits after the country code. `Phone` defines their shared validation and
-normalization: spaces and hyphens between digits are removed, and `+65` followed by eight digits
-is stored in local form. Other international numbers retain `+`; cards display the stored values.
+or email address and reports the conflicting customer's persistent ID. Phone and backup contact
+accept eight local digits or `+` followed by 7 to 15 international digits (the first digit must be 1–9).
+Numbers beginning with `+65` must have exactly eight digits after the country code. `Phone` defines
+their shared validation and normalization: spaces and hyphens between digits are removed, and `+65`
+followed by eight digits is stored in local form. Other international numbers retain `+`; cards display
+the stored values.
 `SearchCustomerCommandParser` uses the same phone validation and normalization before the search
 predicate compares values exactly. Phone numbers are normalized before comparison, email comparison ignores
 letter case, and backup contacts may be shared. `WatchDog` then assigns the customer a
@@ -382,9 +383,10 @@ position in a filtered list. `EditCustomerCommandParser` requires a positive ID 
 one replacement field. The command copies the edit descriptor, combines supplied values
 with the stored customer's unchanged fields, and creates a replacement with the same ID.
 It checks the resulting primary phone and email against other customers, excluding the
-customer being edited so they may keep their own contact details. `Model.setCustomer`
-replaces the stored record while retaining the ID used by dog ownership links. Unlike a
-dog edit, there is no owner field to copy: each dog's owner ID is stored on the dog.
+customer being edited so they may keep their own contact details. A duplicate error identifies
+the other customer's persistent ID. `Model.setCustomer` replaces the stored record while retaining
+the ID used by dog ownership links. Unlike a dog edit, there is no owner field to copy: each dog's
+owner ID is stored on the dog.
 Both replacement contact fields use the same validation and normalization as adding customers.
 In particular, a `+65` number requires exactly eight following digits. Invalid contact details
 are rejected before the stored record changes, including when editing a hidden customer.
@@ -804,6 +806,9 @@ Search command tests cover parser validation, field combinations, related-record
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
+These stories include current and future requirements; inclusion in this table and priority do not
+indicate implementation status.
+
 | Priority | As a/an                                                | I want to...                                                               | So that I can...                                                  |
 |----------|--------------------------------------------------------|----------------------------------------------------------------------------|-------------------------------------------------------------------|
 | `* * *`  | Dog day-care manager setting up the system             | Create a customer profile                                                  | I can store each customer’s information in one place              |
@@ -817,6 +822,10 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | Dog day-care manager managing multiple dogs            | Schedule activities for the dogs                                           | I can keep track of upcoming activities                           |
 | `* * *`  | Dog day-care manager preparing for the day             | View all activities scheduled for a particular day                         | I know what needs to be prepared each day                         |
 | `* * *`  | Dog day-care manager entering information              | View clear error messages when invalid information or commands are entered | I can correct mistakes without crashing the program               |
+| `* * *`  | Dog day-care manager                                   | Remove ownership without deleting dogs or customers                        | I can correct ownership information                               |
+| `* * *`  | Dog day-care manager                                   | Enrol and unenrol several dogs in a dated activity occurrence              | I can manage bookings efficiently                                 |
+| `* * *`  | Dog day-care manager                                   | Reject a whole batch booking if any dog has a conflicting activity         | I can avoid double bookings without partially applying my request |
+| `* * *`  | Dog day-care manager                                   | Recover saved records after restarting                                     | I can continue managing the daycare across sessions               |
 | `* *`    | Dog day-care manager                                   | Record when a dog checks in and checks out                                 | I can accurately track which dogs are currently present           |
 | `* *`    | Dog day-care manager                                   | Mark scheduled activities as completed                                     | I can keep track of which tasks have been carried out             |
 | `* *`    | Forgetful dog day-care manager                         | Maintain a checklist for each dog                                          | I can ensure that all required tasks are completed                |
@@ -837,30 +846,20 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* *`    | Dog day-care manager                                   | Record notes or incidents for each dog                                     | I can keep track of important events during a dog’s stay          |
 | `* *`    | Dog day-care manager                                   | View a dog’s activity and attendance history                               | I can review the dog’s previous visits and care                   |
 | `* *`    | Busy dog day-care manager                              | View upcoming bookings in a calendar or list                               | I can plan staffing and resources in advance                      |
+| `* *`    | Dog day-care manager                                   | Find dogs without owners and customers without dogs                        | I can identify incomplete ownership records                      |
+| `* *`    | Dog day-care manager                                   | Delete an activity and its bookings                                        | I can remove cancelled schedules                                  |
+| `* *`    | Dog day-care manager                                   | View overall counts and today's distinct enrolled dogs                    | I can assess today's workload                                     |
+| `* *`    | Dog day-care manager                                   | Search activities by name, date, time, recurrence, or ID                   | I can locate schedules and their booked dogs and owners           |
+| `* *`    | Dog day-care manager                                   | Restore the full display after searching                                   | I can return to my overview                                       |
+| `* *`    | Dog day-care manager                                   | Confirm or cancel clearing all records before it executes                 | I can deliberately reset my data while avoiding accidental loss  |
+| `* *`    | Dog day-care manager                                   | Redo a command I just undid                                                | I can restore an intended change                                  |
+| `* *`    | Dog day-care manager                                   | Copy card details and read shortened values in full                        | I can reuse accurate information without retyping                |
+| `* *`    | New dog day-care manager                               | View help for a specific command                                           | I can learn its format while keeping my current view              |
 | `*`      | New dog day-care manager                               | Access a quick-start guide                                                 | I can learn to use WatchDog quickly and confidently               |
 | `*`      | Careless dog day-care manager                          | Recover recently deleted data                                              | I can undo accidental deletions                                   |
 | `*`      | Dog day-care manager working with colleagues           | Share the database with colleagues                                         | My colleagues can also access and manage dog information          |
 | `*`      | Dog day-care manager concerned about dietary safety    | Use AI to review a dog’s diet based on its recorded information            | I can identify potential dietary concerns                         |
 | `*`      | Dog day-care manager concerned about medication safety | Use AI to review a dog’s medication based on its recorded information      | I can identify potential medication concerns                      |
-
-The following stories also describe needs supported by the current version. Unimplemented stories above
-remain requirements for future iterations; priority does not indicate implementation status.
-
-| Priority | As a/an | I want to... | So that I can... |
-|----------|---------|--------------|-----------------|
-| `* * *` | Dog day-care manager | Remove ownership without deleting dogs or customers | I can correct ownership information |
-| `* * *` | Dog day-care manager | Enrol and unenrol several dogs in a dated activity occurrence | I can manage bookings efficiently |
-| `* * *` | Dog day-care manager | Reject a whole batch booking if any dog has a conflicting activity | I can avoid double bookings without partially applying my request |
-| `* *` | Dog day-care manager | Find dogs without owners and customers without dogs | I can identify incomplete ownership records |
-| `* *` | Dog day-care manager | Delete an activity and its bookings | I can remove cancelled schedules |
-| `* *` | Dog day-care manager | View overall counts and today's distinct enrolled dogs | I can assess today's workload |
-| `* *` | Dog day-care manager | Search activities by name, date, time, recurrence, or ID | I can locate schedules and their booked dogs and owners |
-| `* *` | Dog day-care manager | Restore the full display after searching | I can return to my overview |
-| `* *` | Dog day-care manager | Confirm or cancel clearing all records before it executes | I can deliberately reset my data while avoiding accidental loss |
-| `* *` | Dog day-care manager | Redo a command I just undid | I can restore an intended change |
-| `* *` | Dog day-care manager | Copy card details and read shortened values in full | I can reuse accurate information without retyping |
-| `* *` | New dog day-care manager | View help for a specific command | I can learn its format while keeping my current view |
-| `* * *` | Dog day-care manager | Recover saved records after restarting | I can continue managing the daycare across sessions |
 
 ### Use cases
 
@@ -941,9 +940,10 @@ retain `+`. Stored and displayed contact values use this normalized form.
 * 2a. A required field is missing or invalid: system reports the field error without adding a customer.
   This includes a `+65` primary or backup contact with other than eight following digits.
   Use case ends.
-* 2b. The primary phone or email is already in use: system identifies the duplicate field without
-  changing records. Phone comparison ignores spaces and hyphens and treats `+65` followed by eight digits
-  as the equivalent local number; email comparison ignores letter case.
+* 2b. The primary phone or email is already in use: system identifies the duplicate field and
+  conflicting customer's ID without changing records. Phone comparison ignores spaces and hyphens
+  and treats `+65` followed by eight digits as the equivalent local number; email comparison ignores
+  letter case.
   Use case ends.
 
 Backup contacts may be shared.
@@ -962,12 +962,13 @@ Backup contacts may be shared.
 **Extensions**
 
 * 2a. The ID is invalid or unknown, no edit field is supplied, or a detail is invalid:
-  system reports the problem without changing the customer.
+  system reports the problem without changing the customer. Missing IDs, malformed IDs, and
+  well-formed IDs with no matching customer receive distinct errors; only the unknown-record error includes the ID.
   A `+65` primary or backup contact with other than eight following digits is invalid.
   Use case ends.
 * 2b. Another customer uses the resulting primary phone or email: system identifies the duplicate
-  field without changing records. Phone comparison uses normalized values, so adding or removing
-  `+65`, spaces, or hyphens cannot bypass the duplicate check.
+  field and the conflicting customer ID without changing records. Phone comparison uses normalized values,
+  so adding or removing `+65`, spaces, or hyphens cannot bypass the duplicate check.
   Use case ends.
 
 Unspecified details are retained, and backup contacts may be shared.
@@ -1053,7 +1054,8 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 **Extensions**
 
 * 2a. The ID is invalid or unknown, no edit field is supplied, or the resulting schedule is invalid:
-  system reports the problem without changing the activity.
+  system reports the problem without changing the activity. Missing IDs, malformed IDs, and
+  well-formed IDs with no matching activity receive distinct errors; only the unknown-record error includes the ID.
   Use case ends.
 * 2b. The activity has enrolments: system rejects the edit and suggests creating a new activity.
   Use case ends.
@@ -1345,17 +1347,20 @@ NFR-10. **Privacy**: WatchDog shall store dog and customer records locally and s
 * **User**: The person operating WatchDog, primarily the dog daycare manager.
 * **Customer**: A person whose contact details are recorded because they use the daycare's services for their dog or dogs.
 * **Dog record**: The information stored about an individual dog, including its ID, name, breed and size.
-* **Customer record**: The information stored about a customer, including their ID, name, primary contact number, email and backup contact number.
+* **Customer record**: The information stored about a customer, including their ID, name, primary phone number, email and backup contact.
 * **Dog ID**: A unique integer assigned by WatchDog to identify a dog record. Dogs with the same name are distinguished by their IDs.
 * **Customer ID**: A unique integer assigned by WatchDog to identify a customer record. Customers with the same name are distinguished by their IDs.
-* **List index**: A record's position in the currently displayed list. Unlike a record ID, this position may change when the list is filtered or reordered.
-* **Dog-customer association**: The recorded relationship indicating which customer owns a dog.
-* **Primary contact number**: The customer's main telephone number, used as the first contact option.
-* **Backup contact number**: An alternative telephone number used when the customer cannot be reached through their primary number.
+* **List position**: A record's position in the currently displayed list. Unlike a record ID, this position may change when the list is filtered or reordered.
+* **Ownership**: The recorded relationship indicating which customer owns a dog.
+* **Primary phone number**: The customer's main telephone number, used as the first contact option.
+* **Backup contact**: An alternative telephone number used when the customer cannot be reached through their primary phone number.
 * **Breed**: The recorded breed or breed mix of a dog, such as Chihuahua, Shiba Inu or a mixed breed.
-* **Dog size**: The dog's recorded size category: small, medium, large or giant, according to the size chart adopted by the team.
-* **Scheduled attendance**: A planned visit by a dog to the daycare. A scheduled dog is not necessarily currently present.
-* **Activity**: A care task planned for a dog, such as feeding, grooming or exercise.
+* **Size**: The dog's recorded size category: small, medium, large or giant, according to the size chart adopted by the team.
+* **Activity**: A reusable schedule for a care task, such as feeding, grooming or exercise. Dogs are booked into its dated occurrences through enrolments.
+* **Activity ID**: A unique integer assigned by WatchDog to identify an activity schedule. It remains stable across application restarts.
+* **Recurrence**: The rule determining whether an activity occurs once, daily or weekly.
+* **Occurrence**: A date on which an activity takes place according to its start date and recurrence.
+* **Enrolment**: A dated booking for a dog in an activity occurrence. It does not indicate actual attendance or check-in.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -1538,10 +1543,12 @@ Replace the uppercase ID placeholders below with the persistent IDs reported by 
    `addcustomer n/Ben Lim p/92345678 e/ben@example.com bc/98765432`.
    Expect separate IDs; sharing the backup number is allowed.
 1. Try adding another customer with Alice's primary phone, then with `e/ALICE@example.com` and a fresh phone.
-   Expect duplicate-contact errors and no addition, even after hiding Alice with `searchc n/Ben`.
+   Expect duplicate-contact errors naming Alice's ID and no addition, even after hiding Alice with
+   `searchc n/Ben`.
    Try a missing field and a seven-digit phone; expect errors without adding records.
 1. Run `editcustomer CUSTOMER_ID n/Alice Koh` using Alice's ID. Expect the same ID and unchanged unspecified
-   fields. Try changing Alice's primary phone to Ben's, then omit all edit fields; expect errors and no changes.
+   fields. Try changing Alice's primary phone to Ben's; expect a duplicate error naming Ben's ID.
+   Then omit all edit fields; expect an error and no changes.
 1. Run `link c/CUSTOMER_ID d/DOG_ID_1 DOG_ID_2`. Expect both dogs to show Alice's ID and Alice's card to list
    both dog IDs, including when the dogs are filtered out. Run `reset` to inspect all cards.
 1. Run `unlink d/DOG_ID_1 DOG_ID_2`, then link only the second dog to Ben.
