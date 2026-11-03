@@ -1,8 +1,12 @@
 package seedu.address.commons.util;
 
 import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.CopyOption;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Writes and reads files
@@ -44,11 +48,33 @@ public class FileUtil {
     }
 
     /**
-     * Writes given string to a file.
-     * Will create the file if it does not exist yet.
+     * Writes a complete sibling file before replacing the destination, atomically where supported.
+     * A non-atomic replacement is used only when the file system rejects atomic moves.
+     * Existing symbolic links are preserved; dangling links fail without replacement.
      */
     public static void writeToFile(Path file, String content) throws IOException {
-        Files.write(file, content.getBytes(CHARSET));
+        writeToFile(file, content, Files::move);
     }
 
+    /** Allows deterministic testing of file-system replacement failures. */
+    static void writeToFile(Path file, String content, FileMover mover) throws IOException {
+        Path destination = Files.isSymbolicLink(file) ? file.toRealPath() : file.toAbsolutePath();
+        createParentDirsOfFile(destination);
+        Path temporary = Files.createTempFile(destination.getParent(), ".watchdog-", ".tmp");
+        try {
+            Files.write(temporary, content.getBytes(CHARSET));
+            try {
+                mover.move(temporary, destination, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException | FileAlreadyExistsException e) {
+                mover.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
+    }
+
+    @FunctionalInterface
+    interface FileMover {
+        void move(Path source, Path destination, CopyOption... options) throws IOException;
+    }
 }

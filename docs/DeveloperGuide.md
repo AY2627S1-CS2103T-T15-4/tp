@@ -16,6 +16,13 @@
 * WatchDog adapts the architecture, utilities and documentation of [AddressBook Level-3](https://github.com/se-edu/addressbook-level3).
 * Libraries used: [JavaFX](https://openjfx.io/), [Jackson](https://github.com/FasterXML/jackson), [JUnit5](https://github.com/junit-team/junit5)
 
+### Notable uses of AI
+
+* Kenneth-Chia, its-shoutime, XanderGoh, Umaiza-15 and lilosy used OpenAI Codex as a development aid
+  throughout their project contributions, including
+  implementation, debugging, test development, documentation and UML diagrams, PR reviews, and
+  release-readiness checks.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Setting up, getting started**
@@ -140,8 +147,12 @@ The *Sequence Diagram* below shows how the components interact with each other f
 
 <puml src="diagrams/ArchitectureSequenceDiagram.puml" alt="Successful dog deletion and saving at component boundaries" />
 
-This view separates `LogicManager` orchestration from `DeleteDogCommand`, which looks up and deletes
-the dog through `Model`. Parsing is summarised; observable-list notifications are omitted. For this undoable deletion,
+`UI`, `Logic`, `Model`, and `Storage` represent whole components in this view, rather than individual objects.
+`UI` includes command input through `CommandBox` and command dispatch through `MainWindow`.
+Calls from `Logic` include those made by `LogicManager` and `DeleteDogCommand`; the command looks up
+and deletes the dog through `Model`. The `Parse delete-dog command` reference is expanded in the
+[Logic component](#logic-component) section. Internal command execution calls and observable-list
+notifications are omitted. For this undoable deletion,
 `LogicManager` captures a model snapshot before execution and updates history before saving.
 Ordinary successful commands, including queries, use the same save path; a save failure is reported
 as a command error. History-neutral `help`, `summary`, and `exit` still return their results if saving fails.
@@ -213,7 +224,8 @@ Here's a (partial) class diagram of the `Logic` component:
 
 <puml src="diagrams/LogicClassDiagram.puml" alt="Logic interfaces, command execution, and representative commands" />
 
-The sequence diagram below expands the parsing stage of `LogicManager.execute("deletedog 1")`.
+The sequence diagram below expands the `Parse delete-dog command` reference in the architecture
+sequence, showing the parsing stage of `LogicManager.execute("deletedog 1")`.
 The returned command is then executed by `LogicManager`. Model interactions and saving are shown
 in the architecture sequence.
 
@@ -425,13 +437,14 @@ the history slots, then saves WatchDog. `redo` symmetrically captures the curren
 undo, restores the redo snapshot, moves the slots, and saves. An ordinary command updates history
 immediately after successful execution and before saving. This ordering matches the existing policy
 of retaining in-memory changes when a save fails: the corresponding inverse remains available,
-and `clear` still invalidates history. The disk may contain an older state, or a partially written
-state if an actual write had started. Missing history produces a `CommandException`; save failures
+and `clear` still invalidates history. A failed write to the temporary file leaves the saved state intact;
+a file system without atomic moves uses regular replacement and cannot guarantee atomicity during replacement.
+Missing history produces a `CommandException`; save failures
 are reported as command errors. History is held only in memory and is unavailable after a restart.
 
 `LogicManagerTest` and `LogicManagerHistoryTest` cover the undo/redo cycle, neutral commands,
 invalidated history, `clear`, failed commands, dependent filters, and save failures.
-`ModelManagerTest` checks restoration of data, ID counters, relationships, filters, and selection, while
+`ModelManagerTest` checks restoration of data, ID counters, relationships, and filters, while
 `WatchDogParserTest` checks argument validation.
 
 <!--@@author-->
@@ -440,7 +453,7 @@ invalidated history, `clear`, failed commands, dependent filters, and save failu
 `WatchDogParser` accepts `summary` with blank arguments only and constructs `SummaryCommand`.
 At execution, the command captures `LocalDate.now(clock)` once and uses that date for every count
 and the feedback date. The default clock uses the system's local zone; tests inject a clock.
-Counts use the full model lists, so filters and dog/customer selection remain unchanged.
+Counts use the full model lists, so the active filters and displayed view remain unchanged.
 
 <!-- @@author Kenneth-Chia -->
 Each stored activity schedule contributes once to the total. A schedule contributes to the
@@ -461,8 +474,8 @@ activity schedule counts and feedback formatting are omitted.
 <puml src="diagrams/DogsEnrolledOnSequenceDiagram.puml" alt="Resolving distinct dogs enrolled on the summary date from stored IDs" />
 <!-- @@author -->
 
-Feedback follows the existing `CommandResult` and `ResultDisplay` path. No records, filters or
-selection are mutated, and no storage schema changes are needed. `LogicManager` still attempts
+Feedback follows the existing `CommandResult` and `ResultDisplay` path. Records and filters remain
+unchanged, and no storage schema changes are needed. `LogicManager` still attempts
 to save after successful execution, preserving its existing save-error handling. Summary neither
 creates an undo entry nor discards redo history.
 
@@ -806,8 +819,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | Dog day-care manager                                   | Create and edit activity records                                           | I can update activities when plans change                         |
 | `* * *`  | Dog day-care manager managing multiple dogs            | Schedule activities for the dogs                                           | I can keep track of upcoming activities                           |
 | `* * *`  | Dog day-care manager preparing for the day             | View all activities scheduled for a particular day                         | I know what needs to be prepared each day                         |
-| `* * *`  | Dog day-care manager                                   | Record when a dog checks in and checks out                                 | I can accurately track which dogs are currently present           |
 | `* * *`  | Dog day-care manager entering information              | View clear error messages when invalid information or commands are entered | I can correct mistakes without crashing the program               |
+| `* *`    | Dog day-care manager                                   | Record when a dog checks in and checks out                                 | I can accurately track which dogs are currently present           |
 | `* *`    | Dog day-care manager                                   | Mark scheduled activities as completed                                     | I can keep track of which tasks have been carried out             |
 | `* *`    | Forgetful dog day-care manager                         | Maintain a checklist for each dog                                          | I can ensure that all required tasks are completed                |
 | `* *`    | Dog day-care manager                                   | View all dogs belonging to a specific customer                             | I can see every dog owned by that customer                        |
@@ -873,14 +886,16 @@ change can remain in memory.
 **Extensions**
 
 * 2a. A required field is missing or invalid: system reports the field error and does not add a dog.
+  Use case ends.
 * 2b. No dog IDs remain: system reports exhaustion without changing the records.
+  Use case ends.
 
 **Use case: UC02 - Edit Dog (editdog)**
 
 **MSS**
 
 1. User enters a dog ID and at least one replacement detail.
-2. System finds the dog in the complete list and validates the supplied details.
+2. System confirms the ID identifies a dog and validates the supplied details.
 3. System replaces the dog, preserving its ID, owner, and enrolments, and displays a success message.
 
    Use case ends.
@@ -889,13 +904,14 @@ change can remain in memory.
 
 * 2a. The ID is invalid or unknown, no edit field is supplied, or a detail is invalid:
   system reports the problem without changing the dog.
+  Use case ends.
 
 **Use case: UC03 - Delete Dog (deletedog)**
 
 **MSS**
 
 1. User enters a dog ID.
-2. System finds the dog in the complete list.
+2. System confirms the ID identifies a dog.
 3. System deletes the dog and all its dated activity enrolments, including past enrolments,
    while retaining its former owner and the activity schedules.
 
@@ -904,6 +920,7 @@ change can remain in memory.
 **Extensions**
 
 * 2a. The ID is invalid or unknown: system reports the problem without deleting a record.
+  Use case ends.
 
 **Use case: UC04 - Add Customer (addcustomer)**
 
@@ -917,8 +934,7 @@ retain `+`. Stored and displayed contact values use this normalized form.
 **MSS**
 
 1. User enters a name, primary phone number, email address, and backup contact.
-2. System validates and normalizes the fields and checks that no customer, including a filtered-out customer,
-   uses the primary phone number or email address.
+2. System validates the fields and confirms the primary phone number and email address are available.
 3. System assigns a persistent customer ID, stores the customer, and displays a success message.
 
    Use case ends.
@@ -927,9 +943,11 @@ retain `+`. Stored and displayed contact values use this normalized form.
 
 * 2a. A required field is missing or invalid: system reports the field error without adding a customer.
   This includes a `+65` primary or backup contact with other than eight following digits.
+  Use case ends.
 * 2b. The primary phone or email is already in use: system identifies the duplicate field without
   changing records. Phone comparison ignores spaces and hyphens and treats `+65` followed by eight digits
   as the equivalent local number; email comparison ignores letter case.
+  Use case ends.
 
 Backup contacts may be shared.
 
@@ -938,9 +956,8 @@ Backup contacts may be shared.
 **MSS**
 
 1. User enters a customer ID and at least one replacement detail.
-2. System finds the customer in the complete list, validates and normalizes supplied fields using
-   the rules above, and checks the resulting primary phone and email for duplicates against other
-   customers, excluding the customer being edited.
+2. System confirms the ID identifies a customer, validates the supplied details, and checks that
+   the resulting primary phone and email are not used by another customer.
 3. System replaces the customer, preserving the ID used by their dogs, and displays a success message.
 
    Use case ends.
@@ -950,9 +967,11 @@ Backup contacts may be shared.
 * 2a. The ID is invalid or unknown, no edit field is supplied, or a detail is invalid:
   system reports the problem without changing the customer.
   A `+65` primary or backup contact with other than eight following digits is invalid.
+  Use case ends.
 * 2b. Another customer uses the resulting primary phone or email: system identifies the duplicate
   field without changing records. Phone comparison uses normalized values, so adding or removing
   `+65`, spaces, or hyphens cannot bypass the duplicate check.
+  Use case ends.
 
 Unspecified details are retained, and backup contacts may be shared.
 
@@ -961,7 +980,7 @@ Unspecified details are retained, and backup contacts may be shared.
 **MSS**
 
 1. User enters a customer ID.
-2. System finds the customer in the complete list.
+2. System confirms the ID identifies a customer.
 3. System deletes the customer and unlinks their dogs without deleting the dogs.
 
    Use case ends.
@@ -969,6 +988,7 @@ Unspecified details are retained, and backup contacts may be shared.
 **Extensions**
 
 * 2a. The ID is invalid or unknown: system reports the problem without changing records.
+  Use case ends.
 
 **Use case: UC07 - Link Dogs to a Customer (link)**
 
@@ -984,13 +1004,14 @@ Unspecified details are retained, and backup contacts may be shared.
 
 * 2a. Any ID is invalid or missing, a dog is already owned, or a dog ID is repeated:
   system rejects the entire batch without changing ownership.
+  Use case ends.
 
 **Use case: UC08 - Unlink Dogs (unlink)**
 
 **MSS**
 
 1. User enters either an existing customer ID or one or more distinct dog IDs.
-2. System finds the linked dogs and validates the entire request.
+2. System confirms the selected dogs are linked and the entire request is valid.
 3. System removes their ownership links while retaining the dog and customer records.
 
    Use case ends.
@@ -999,6 +1020,7 @@ Unspecified details are retained, and backup contacts may be shared.
 
 * 2a. A selected dog is missing or unowned, an ID is repeated, or the selected customer is
   missing or has no linked dogs: system rejects the entire request without changing ownership.
+  Use case ends.
 
 **Use case: UC09 - Add Activity (addactivity)**
 
@@ -1014,7 +1036,9 @@ Unspecified details are retained, and backup contacts may be shared.
 
 * 2a. A field is missing or invalid, or the end time is not later than the start time:
   system reports the problem without creating an activity.
+  Use case ends.
 * 2b. No activity IDs remain: system reports exhaustion without changing records.
+  Use case ends.
 
 Past first dates and overlapping activities without enrolled dogs are permitted.
 
@@ -1023,7 +1047,7 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 **MSS**
 
 1. User enters an activity ID and at least one replacement field.
-2. System finds the activity in the complete list, validates the resulting schedule, and confirms
+2. System confirms the ID identifies an activity, validates the resulting schedule, and confirms
    that the activity has no enrolments on any occurrence.
 3. System updates the entire schedule, preserving its ID and unspecified fields.
 
@@ -1033,14 +1057,16 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 
 * 2a. The ID is invalid or unknown, no edit field is supplied, or the resulting schedule is invalid:
   system reports the problem without changing the activity.
+  Use case ends.
 * 2b. The activity has enrolments: system rejects the edit and suggests creating a new activity.
+  Use case ends.
 
 **Use case: UC11 - Delete Activity (deleteactivity)**
 
 **MSS**
 
 1. User enters an activity ID.
-2. System finds the activity in the complete list.
+2. System confirms the ID identifies an activity.
 3. System deletes the entire schedule and all its dated enrolments while retaining dogs,
    customers, and other activities.
 
@@ -1049,6 +1075,7 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 **Extensions**
 
 * 2a. The ID is invalid or unknown: system reports the problem without changing records.
+  Use case ends.
 
 **Use case: UC12 - Enrol Dogs (enrol)**
 
@@ -1065,6 +1092,7 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 
 * 2a. An ID or date is invalid, the date is before today or is not an occurrence, a dog is
   already enrolled, or a booking overlaps: system rejects the entire batch.
+  Use case ends.
 
 **Use case: UC13 - Unenrol Dogs (unenrol)**
 
@@ -1080,6 +1108,7 @@ Past first dates and overlapping activities without enrolled dogs are permitted.
 
 * 2a. Any record, date, or specified enrolment is invalid or missing: system rejects the
   entire batch without removing an enrolment.
+  Use case ends.
 
 Past occurrence dates are allowed so historical mistakes can be corrected.
 
@@ -1088,35 +1117,37 @@ Past occurrence dates are allowed so historical mistakes can be corrected.
 **MSS**
 
 1. User enters one or more dog search fields: name, breed, size, or ID.
-2. System finds dogs matching every supplied field.
+2. System validates the fields and finds dogs matching every supplied field.
 3. System filters the dog, related customer, and enrolled activity displays without changing records.
 
    Use case ends.
 
 **Extensions**
 
-* 1a. A field is invalid or the ID does not exist: system reports the problem and retains the current view.
+* 2a. A field is invalid or the ID does not exist: system reports the problem and retains the current view.
+  Use case ends.
 
 **Use case: UC15 - Search Customers (searchc)**
 
 **MSS**
 
 1. User enters one or more customer search fields: name, phone, email, backup contact, dog IDs, or customer ID.
-2. System validates and normalizes any complete phone or backup contact query using the shared
-   phone rules, then finds customers matching every supplied field and any required dog ownership.
-   Contact numbers match exactly after normalization; `+65 9123-4567` matches `91234567`.
+2. System validates the fields and finds customers matching every supplied field and any required dog ownership.
 3. System filters the customer, owned dog, and enrolled activity displays without changing records.
 
    Use case ends.
 
 **Extensions**
 
-* 1a. A field is invalid or a specified customer or dog ID does not exist:
+* 2a. A field is invalid or a specified customer or dog ID does not exist:
   system reports the problem and retains the current view.
   This includes partial contact queries such as `bc/+55` and `+65` numbers with other than
   eight following digits. Contact errors identify the affected field and explain its invalid
   characters, formatting, or length; repeated contact fields request only one value.
+  Use case ends.
 
+Contact queries use the shared phone rules and match exactly after normalization;
+`+65 9123-4567` matches `91234567`.
 If the specified dogs exist but no customer owns all of them, the search succeeds with no matching customers.
 
 **Use case: UC16 - Search Activities (searcha)**
@@ -1124,14 +1155,15 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 **MSS**
 
 1. User enters one or more activity search fields: name, date, time, recurrence, or ID.
-2. System finds schedules matching every supplied field.
+2. System validates the fields and finds schedules matching every supplied field.
 3. System filters the activity, enrolled dog, and owner displays without changing records.
 
    Use case ends.
 
 **Extensions**
 
-* 1a. A field or ID is invalid: system reports the problem and retains the current view.
+* 2a. A field or ID is invalid: system reports the problem and retains the current view.
+  Use case ends.
 
 **Use case: UC17 - Filter Unlinked Records (filterun)**
 
@@ -1141,13 +1173,16 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 2. System shows dogs without owners or customers without dogs, respectively, and clears the
    other record panel. The dog form also shows activities booked by unowned dogs; the customer
    form clears the activity panel.
-3. System keeps the filter active as records and ownership change.
 
    Use case ends.
+
+**Guarantee**: The selected filter remains active as records and ownership change, until another
+display command replaces it.
 
 **Extensions**
 
 * 1a. The category is missing or invalid: system reports the accepted categories and retains the view.
+  Use case ends.
 
 **Use case: UC18 - Show Today's Activities (today)**
 
@@ -1162,6 +1197,7 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 **Extensions**
 
 * 1a. User supplies extra arguments: system reports the format and retains the current view.
+  Use case ends.
 
 **Use case: UC19 - Reset the Display (reset)**
 
@@ -1169,13 +1205,15 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 
 1. User enters reset.
 2. System shows all customers and dogs and activity schedules with an occurrence today or later.
-3. System preserves the stored records.
 
    Use case ends.
+
+**Guarantee**: Resetting the display does not change stored records.
 
 **Extensions**
 
 * 1a. User supplies extra arguments: system reports the format and retains the current view.
+  Use case ends.
 
 **Use case: UC20 - View Daycare Summary (summary)**
 
@@ -1184,13 +1222,15 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 1. User enters summary.
 2. System reports total customers and dogs, total and upcoming activity schedules,
    and today's activities and distinct enrolled dogs.
-3. System preserves records, filters, and undo/redo history.
 
    Use case ends.
+
+**Guarantee**: Viewing the summary does not change records, filters, or undo/redo availability.
 
 **Extensions**
 
 * 1a. User supplies extra arguments: system reports the format without changing the view.
+  Use case ends.
 
 **Use case: UC21 - Undo a Command (undo)**
 
@@ -1198,13 +1238,15 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 
 1. User enters undo.
 2. System restores the records and view from before the most recent undoable command.
-3. System makes that command available for redo.
 
    Use case ends.
+
+**Guarantee**: After a successful undo, the undone command is available for redo.
 
 **Extensions**
 
 * 2a. No undoable command is available: system reports that there is nothing to undo.
+  Use case ends.
 
 Only the most recent undoable command can be undone; confirmed clear discards the history.
 
@@ -1214,13 +1256,15 @@ Only the most recent undoable command can be undone; confirmed clear discards th
 
 1. User enters redo.
 2. System restores the records and view from just before the last undo.
-3. System makes the redone command available for undo.
 
    Use case ends.
+
+**Guarantee**: After a successful redo, the redone command is available for undo.
 
 **Extensions**
 
 * 2a. No redo is available: system reports that there is nothing to redo.
+  Use case ends.
 
 **Use case: UC23 - Clear All Records (clear)**
 
@@ -1229,16 +1273,22 @@ Only the most recent undoable command can be undone; confirmed clear discards th
 1. User enters clear.
 2. System warns that clearing cannot be undone and requests Y/N confirmation.
 3. User enters Y.
-4. System removes all customers, dogs, activities, and enrolments and discards undo/redo history.
+4. System removes all customers, dogs, activities, and enrolments.
 
    Use case ends.
+
+**Guarantee**: After confirmed clearing, undo and redo are unavailable.
 
 **Extensions**
 
 * 1a. User supplies arguments after clear: system rejects the command before requesting confirmation.
+  Use case ends.
 * 3a. User enters N: system cancels without changing records or history.
+  Use case ends.
 * 3b. User enters a different response: system requests Y/N again without executing another command.
+  Use case resumes at step 3.
 * 4a. Saving fails: system reports the error; memory remains cleared and undo/redo remain unavailable.
+  Use case ends.
 
 Confirmation ignores letter case and surrounding whitespace; active filters remain in effect.
 
@@ -1247,14 +1297,17 @@ Confirmation ignores letter case and surrounding whitespace; active filters rema
 **MSS**
 
 1. User enters help, optionally followed by a command name.
-2. System opens the help window or displays that command's format and description.
-3. System preserves records, the current view, and undo/redo history.
+2. System validates the supplied help topic, if any.
+3. System opens the help window or displays that command's format and description.
 
    Use case ends.
+
+**Guarantee**: Getting help does not change records, the current view, or undo/redo availability.
 
 **Extensions**
 
 * 2a. The command name is unknown: system lists supported help topics without changing the view.
+  Use case ends.
 
 **Use case: UC25 - Exit (exit)**
 
@@ -1310,6 +1363,32 @@ NFR-10. **Privacy**: WatchDog shall store dog and customer records locally and s
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Appendix: Instructions for manual testing**
+
+### Recovery from an invalid data file
+
+Packaged runs resolve data, preferences, and application logs through `ApplicationHome` relative to
+the JAR's directory. Class-directory runs use the working directory for development. To verify,
+place the JAR in a folder with spaces, launch it from another directory, and run `summary`.
+Expect all generated application files beside the JAR or in its `data` subfolder, with none in the
+launch directory. An unwritable home must report file errors rather than redirecting writes elsewhere.
+
+In a disposable home folder, close WatchDog and replace `data/watchdog.json` with malformed JSON.
+Relaunch and run `summary`. Expect an empty model and a byte-for-byte copy of the invalid file named
+`watchdog.json.invalid-UNIQUE_ID.bak` beside the data file. Subsequent saves retain that backup.
+Repeat with an invalid record such as `{"dogs":[null]}`; expect a separate backup. A failed backup
+must prevent replacement of the original; the storage error is logged and mutations report a save error.
+
+`JsonWatchDogStorage` tracks paths whose reads failed and copies each original before permitting its
+first replacement. It removes the guard only after the copy succeeds, so a failed copy can be retried.
+
+`FileUtil.writeToFile` writes to a temporary sibling, closes it, and then moves it over the destination.
+For a symbolic-link destination, it resolves the existing target first and replaces that target while
+preserving the link. Dangling links fail without replacement.
+`AtomicMoveNotSupportedException` or `FileAlreadyExistsException` triggers a regular replacement;
+other failures propagate.
+Temporary files are removed on success and failure. JSON serialization finishes before writing begins,
+and storage no longer pre-creates an empty destination. In a disposable folder, verify saving and
+reloading records and preferences, and confirm that completed saves leave no `.watchdog-*.tmp` files.
 
 Given below are instructions to test the app manually.
 

@@ -5,27 +5,24 @@ skinparam ParticipantFontColor #FFFFFF
 skinparam maxMessageSize 180
 
 actor User USER_COLOR
-participant ":MainWindow" as UI UI_COLOR
-participant ":LogicManager" as Logic LOGIC_COLOR
-participant "command:DeleteDogCommand" as Command LOGIC_COLOR
-participant ":ModelManager" as Model MODEL_COLOR
-participant ":StorageManager" as Storage STORAGE_COLOR
+participant "UI" as UI UI_COLOR
+participant "Logic" as Logic LOGIC_COLOR
+participant "Model" as Model MODEL_COLOR
+participant "Storage" as Storage STORAGE_COLOR
 
 User -> UI : deletedog 1
 UI -> Logic : execute("deletedog 1")
-ref over Logic, Command
-  Parse deletedog 1 and return command
+ref over Logic
+  Parse delete-dog command
 end ref
 Logic -> Model : createState()
 Model --> Logic : stateBeforeCommand
-Logic -> Command : execute(model)
-Command -> Model : getDogList()
-Model --> Command : dogs
-note over Command
+Logic -> Model : getDogList()
+Model --> Logic : dogs
+note right of Logic
   Finds dog with persistent ID 1.
 end note
-Command -> Model : deleteDog(dog)
-Command --> Logic : commandResult
+Logic -> Model : deleteDog(dog)
 note right of Logic
   Keeps the pre-command state for undo
   and clears redo before saving.
@@ -37,8 +34,11 @@ Logic --> UI : commandResult
 UI --> User : feedback displayed
 
 legend bottom
-  Successful deletion and saving; model and storage internals are omitted.
-  Parser construction is expanded in the Logic sequence.
+  Successful deletion and saving; UI, Logic, Model and Storage are components.
+  UI includes CommandBox input and MainWindow command dispatch.
+  Calls from Logic include calls made by its command objects.
+  Parsing is expanded in "Parse delete-dog command".
+  Internal execution calls and model/storage internals are omitted.
   Observable-list updates refresh the UI; notifications are omitted.
 endlegend
 @enduml

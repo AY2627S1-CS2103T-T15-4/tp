@@ -75,7 +75,7 @@ public class MainAppTest {
     }
 
     @Test
-    public void init_malformedData_startsEmptyAndPreservesFileUntilCommand() throws Exception {
+    public void init_malformedData_preservesBackupBeforeSummaryAndMutation() throws Exception {
         String invalidData = "{not valid json";
         Files.createDirectories(dataPath().getParent());
         Files.writeString(dataPath(), invalidData);
@@ -86,6 +86,12 @@ public class MainAppTest {
         assertEquals(new WatchDog(), app.model.getWatchDog());
         assertEquals(invalidData, Files.readString(dataPath()));
 
+        app.logic.execute("summary");
+        try (var files = Files.list(dataPath().getParent())) {
+            Path backup = files.filter(path -> path.getFileName().toString().endsWith(".bak"))
+                    .findFirst().orElseThrow();
+            assertEquals(invalidData, Files.readString(backup));
+        }
         app.logic.execute("adddog n/Cookie b/Poodle s/Small");
         assertEquals(1, app.model.getDogList().size());
         assertEquals(app.model.getWatchDog(), dataStorage().readWatchDog().orElseThrow());
