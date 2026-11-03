@@ -502,8 +502,8 @@ leave the activity and enrolments unchanged.
 
 `enrol` books one or more existing dogs into a specific dated occurrence of an existing activity.
 Create the dogs and activity first, then supply their persistent IDs and the date to book.
-For a daily or weekly activity, each command books only the supplied date; it does not automatically
-book the dogs into every future occurrence. Dogs can be enrolled whether or not they have an owner.
+For a daily or weekly activity, **each command books only the supplied date; it does not automatically
+book the dogs into every future occurrence.** Dogs can be enrolled whether or not they have an owner.
 
 `unenrol` cancels the selected dogs' bookings for that activity on the supplied date. Bookings for
 other dates and activities remain. The activity schedule and the dog and customer records also remain,
@@ -533,8 +533,8 @@ must also be positive integers and are supplied separately using `a/`.
   overlapping time on the same date. Adjacent activities, where one ends exactly when another starts,
   are allowed.
 * `unenrol` requires every selected dog to have a booking for that exact activity and date.
-* Both commands apply to the whole batch: if any dog or booking is invalid, none of the requested
-  bookings are added or removed. Existing search filters remain active, and affected cards refresh.
+* Both commands apply to the whole batch: **if any dog or booking is invalid, none of the requested
+  bookings are added or removed.** Existing search filters remain active, and affected cards refresh.
 
 Invalid input reports the specific field or formatting problem, followed by the complete command format and an
 example. `enrol` accepts only today's or future dates. A missed booking for a past date cannot be added later.
@@ -734,7 +734,7 @@ and copy the replacement to `<JAR folder>/data/watchdog.json`. Do not replace it
 <box type="warning" seamless>
 
 **Caution:**
-If your changes make the data file invalid, WatchDog starts with no saved records at the next run.
+**If your changes make the data file invalid, WatchDog starts with no saved records at the next run.**
 The invalid file remains unchanged until a command triggers a save; `summary`, for example, does so.
 Before replacing the invalid file, WatchDog copies it to a uniquely named
 `watchdog.json.invalid-UNIQUE_ID.bak` file in the same folder. If the backup cannot be created, the save
