@@ -347,8 +347,8 @@ after the command reaches the model layer.
 
 `EditDogCommandParser` parses the persistent dog ID and the fields to be edited. The command uses
 the ID to locate the dog in the complete dog list rather than relying on a filtered-list position.
-`WatchDog` validates the replacement details and publishes the updated dog while preserving its
-persistent ID and current owner relationship.
+`EditDogCommand` builds the replacement dog with the existing dog's persistent ID and owner ID.
+`WatchDog` validates the replacement's owner reference and publishes the updated dog.
 
 The following diagram shows the edit-dog command flow. The command locates the dog using its
 persistent ID, so editing remains independent of the current
