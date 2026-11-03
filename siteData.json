@@ -84,6 +84,7 @@
         "non-functional-requirements": "Non-Functional Requirements",
         "glossary": "Glossary",
         "appendix-instructions-for-manual-testing": "Appendix: Instructions for manual testing",
+        "recovery-from-an-invalid-data-file": "Recovery from an invalid data file",
         "launch-and-shutdown": "Launch and shutdown",
         "daycare-summary-2": "Daycare summary",
         "undo-and-redo-2": "Undo and redo",
