@@ -6,6 +6,7 @@ import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalWatchDog.getTypicalWatchDog;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -41,6 +42,45 @@ public class JsonWatchDogStorageTest {
     @Test
     public void read_missingFile_emptyResult() throws Exception {
         assertFalse(readWatchDog("NonExistentFile.json").isPresent());
+    }
+
+    @Test
+    public void save_afterInvalidLoad_preservesEachOriginalWithoutReplacingBackups() throws Exception {
+        Path path = testFolder.resolve("watchdog.json");
+        for (String invalid : new String[]{"{bad json", "{\"dogs\":[null]}"}) {
+            Files.writeString(path, invalid);
+            JsonWatchDogStorage storage = new JsonWatchDogStorage(path);
+            assertThrows(DataLoadingException.class, storage::readWatchDog);
+            assertEquals(invalid, Files.readString(path));
+            storage.saveWatchDog(new WatchDog());
+            storage.saveWatchDog(new WatchDog());
+        }
+        try (var files = Files.list(testFolder)) {
+            var backups = files.filter(file -> file.toString().endsWith(".bak")).toList();
+            assertEquals(2, backups.size());
+            var contents = new java.util.HashSet<String>();
+            for (Path backup : backups) {
+                contents.add(Files.readString(backup));
+            }
+            assertEquals(java.util.Set.of("{bad json", "{\"dogs\":[null]}"), contents);
+        }
+    }
+
+    @Test
+    public void save_backupFailure_refusesOverwriteAndRetriesPreservation() throws Exception {
+        Path path = testFolder.resolve("watchdog.json");
+        Files.writeString(path, "{invalid");
+        JsonWatchDogStorage storage = new JsonWatchDogStorage(path);
+        assertThrows(DataLoadingException.class, storage::readWatchDog);
+        Files.delete(path);
+        assertThrows(IOException.class, () -> storage.saveWatchDog(new WatchDog()));
+        assertFalse(Files.exists(path));
+        Files.writeString(path, "{invalid");
+        storage.saveWatchDog(new WatchDog());
+        try (var files = Files.list(testFolder)) {
+            Path backup = files.filter(file -> file.toString().endsWith(".bak")).findFirst().orElseThrow();
+            assertEquals("{invalid", Files.readString(backup));
+        }
     }
 
     @Test

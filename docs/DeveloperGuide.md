@@ -147,8 +147,12 @@ The *Sequence Diagram* below shows how the components interact with each other f
 
 <puml src="diagrams/ArchitectureSequenceDiagram.puml" alt="Successful dog deletion and saving at component boundaries" />
 
-This view separates `LogicManager` orchestration from `DeleteDogCommand`, which looks up and deletes
-the dog through `Model`. Parsing is summarised; observable-list notifications are omitted. For this undoable deletion,
+`UI`, `Logic`, `Model`, and `Storage` represent whole components in this view, rather than individual objects.
+`UI` includes command input through `CommandBox` and command dispatch through `MainWindow`.
+Calls from `Logic` include those made by `LogicManager` and `DeleteDogCommand`; the command looks up
+and deletes the dog through `Model`. The `Parse delete-dog command` reference is expanded in the
+[Logic component](#logic-component) section. Internal command execution calls and observable-list
+notifications are omitted. For this undoable deletion,
 `LogicManager` captures a model snapshot before execution and updates history before saving.
 Ordinary successful commands, including queries, use the same save path; a save failure is reported
 as a command error. History-neutral `help`, `summary`, and `exit` still return their results if saving fails.
@@ -217,7 +221,8 @@ Here's a (partial) class diagram of the `Logic` component:
 
 <puml src="diagrams/LogicClassDiagram.puml" alt="Logic interfaces, command execution, and representative commands" />
 
-The sequence diagram below expands the parsing stage of `LogicManager.execute("deletedog 1")`.
+The sequence diagram below expands the `Parse delete-dog command` reference in the architecture
+sequence, showing the parsing stage of `LogicManager.execute("deletedog 1")`.
 The returned command is then executed by `LogicManager`. Model interactions and saving are shown
 in the architecture sequence.
 
@@ -429,13 +434,14 @@ the history slots, then saves WatchDog. `redo` symmetrically captures the curren
 undo, restores the redo snapshot, moves the slots, and saves. An ordinary command updates history
 immediately after successful execution and before saving. This ordering matches the existing policy
 of retaining in-memory changes when a save fails: the corresponding inverse remains available,
-and `clear` still invalidates history. The disk may contain an older state, or a partially written
-state if an actual write had started. Missing history produces a `CommandException`; save failures
+and `clear` still invalidates history. A failed write to the temporary file leaves the saved state intact;
+a file system without atomic moves uses regular replacement and cannot guarantee atomicity during replacement.
+Missing history produces a `CommandException`; save failures
 are reported as command errors. History is held only in memory and is unavailable after a restart.
 
 `LogicManagerTest` and `LogicManagerHistoryTest` cover the undo/redo cycle, neutral commands,
 invalidated history, `clear`, failed commands, dependent filters, and save failures.
-`ModelManagerTest` checks restoration of data, ID counters, relationships, filters, and selection, while
+`ModelManagerTest` checks restoration of data, ID counters, relationships, and filters, while
 `WatchDogParserTest` checks argument validation.
 
 <!--@@author-->
@@ -444,7 +450,7 @@ invalidated history, `clear`, failed commands, dependent filters, and save failu
 `WatchDogParser` accepts `summary` with blank arguments only and constructs `SummaryCommand`.
 At execution, the command captures `LocalDate.now(clock)` once and uses that date for every count
 and the feedback date. The default clock uses the system's local zone; tests inject a clock.
-Counts use the full model lists, so filters and dog/customer selection remain unchanged.
+Counts use the full model lists, so the active filters and displayed view remain unchanged.
 
 <!-- @@author Kenneth-Chia -->
 Each stored activity schedule contributes once to the total. A schedule contributes to the
@@ -465,8 +471,8 @@ activity schedule counts and feedback formatting are omitted.
 <puml src="diagrams/DogsEnrolledOnSequenceDiagram.puml" alt="Resolving distinct dogs enrolled on the summary date from stored IDs" />
 <!-- @@author -->
 
-Feedback follows the existing `CommandResult` and `ResultDisplay` path. No records, filters or
-selection are mutated, and no storage schema changes are needed. `LogicManager` still attempts
+Feedback follows the existing `CommandResult` and `ResultDisplay` path. Records and filters remain
+unchanged, and no storage schema changes are needed. `LogicManager` still attempts
 to save after successful execution, preserving its existing save-error handling. Summary neither
 creates an undo entry nor discards redo history.
 
@@ -616,7 +622,7 @@ Name matching uses a case-insensitive substring, date matching delegates to `Act
 so recurring activities are handled correctly, and time matching includes both endpoints.
 Recurrence matching compares the activity's stored recurrence. The optional activity ID must be positive
 and identify an existing activity, including one hidden by filters. Invalid or nonexistent IDs produce
-`Error in searching activities:` followed by `Please enter a valid activity index` without changing the display.
+`Error in searching activities:` followed by `Please enter a valid activity ID` without changing the display.
 ID matching is exact. Multiple fields are combined with AND semantics.
  The activity panel observes this filtered list, while the
 underlying stored schedules remain unchanged. The success message reports only the supplied fields, in the
@@ -1108,14 +1114,14 @@ Past occurrence dates are allowed so historical mistakes can be corrected.
 **MSS**
 
 1. User enters one or more dog search fields: name, breed, size, or ID.
-2. System finds dogs matching every supplied field.
+2. System validates the fields and finds dogs matching every supplied field.
 3. System filters the dog, related customer, and enrolled activity displays without changing records.
 
    Use case ends.
 
 **Extensions**
 
-* 1a. A field is invalid or the ID does not exist: system reports the problem and retains the current view.
+* 2a. A field is invalid or the ID does not exist: system reports the problem and retains the current view.
   Use case ends.
 
 **Use case: UC15 - Search Customers (searchc)**
@@ -1123,14 +1129,14 @@ Past occurrence dates are allowed so historical mistakes can be corrected.
 **MSS**
 
 1. User enters one or more customer search fields: name, phone, email, backup contact, dog IDs, or customer ID.
-2. System finds customers matching every supplied field and any required dog ownership.
+2. System validates the fields and finds customers matching every supplied field and any required dog ownership.
 3. System filters the customer, owned dog, and enrolled activity displays without changing records.
 
    Use case ends.
 
 **Extensions**
 
-* 1a. A field is invalid or a specified customer or dog ID does not exist:
+* 2a. A field is invalid or a specified customer or dog ID does not exist:
   system reports the problem and retains the current view.
   This includes partial contact queries such as `bc/+55` and `+65` numbers with other than
   eight following digits. Contact errors identify the affected field and explain its invalid
@@ -1146,14 +1152,14 @@ If the specified dogs exist but no customer owns all of them, the search succeed
 **MSS**
 
 1. User enters one or more activity search fields: name, date, time, recurrence, or ID.
-2. System finds schedules matching every supplied field.
+2. System validates the fields and finds schedules matching every supplied field.
 3. System filters the activity, enrolled dog, and owner displays without changing records.
 
    Use case ends.
 
 **Extensions**
 
-* 1a. A field or ID is invalid: system reports the problem and retains the current view.
+* 2a. A field or ID is invalid: system reports the problem and retains the current view.
   Use case ends.
 
 **Use case: UC17 - Filter Unlinked Records (filterun)**
@@ -1288,7 +1294,8 @@ Confirmation ignores letter case and surrounding whitespace; active filters rema
 **MSS**
 
 1. User enters help, optionally followed by a command name.
-2. System opens the help window or displays that command's format and description.
+2. System validates the supplied help topic, if any.
+3. System opens the help window or displays that command's format and description.
 
    Use case ends.
 
@@ -1296,7 +1303,7 @@ Confirmation ignores letter case and surrounding whitespace; active filters rema
 
 **Extensions**
 
-* 1a. The command name is unknown: system lists supported help topics without changing the view.
+* 2a. The command name is unknown: system lists supported help topics without changing the view.
   Use case ends.
 
 **Use case: UC25 - Exit (exit)**
@@ -1315,7 +1322,7 @@ NFR-01. **Platform compatibility**: Should work on any _mainstream OS_ as long a
 <!-- @@author Kenneth-Chia -->
 NFR-02. **Offline operation**: After installation and setup, all core dog and customer management operations shall work without an internet connection.
 
-NFR-03. **Performance**: With up to 500 dog records and 500 customer records, WatchDog shall display the result of an add, edit, delete, list or search command within 2 seconds of submission on the agreed test laptop.
+NFR-03. **Performance**: With up to 500 dog records and 500 customer records, WatchDog shall display the result of an add, edit, delete or search command within 2 seconds of submission on the agreed test laptop.
 
 NFR-04. **Startup time**: With the same dataset, WatchDog shall load its saved records and become ready to accept commands within 10 seconds of launch on the agreed test laptop.
 
@@ -1353,6 +1360,32 @@ NFR-10. **Privacy**: WatchDog shall store dog and customer records locally and s
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Appendix: Instructions for manual testing**
+
+### Recovery from an invalid data file
+
+Packaged runs resolve data, preferences, and application logs through `ApplicationHome` relative to
+the JAR's directory. Class-directory runs use the working directory for development. To verify,
+place the JAR in a folder with spaces, launch it from another directory, and run `summary`.
+Expect all generated application files beside the JAR or in its `data` subfolder, with none in the
+launch directory. An unwritable home must report file errors rather than redirecting writes elsewhere.
+
+In a disposable home folder, close WatchDog and replace `data/watchdog.json` with malformed JSON.
+Relaunch and run `summary`. Expect an empty model and a byte-for-byte copy of the invalid file named
+`watchdog.json.invalid-UNIQUE_ID.bak` beside the data file. Subsequent saves retain that backup.
+Repeat with an invalid record such as `{"dogs":[null]}`; expect a separate backup. A failed backup
+must prevent replacement of the original; the storage error is logged and mutations report a save error.
+
+`JsonWatchDogStorage` tracks paths whose reads failed and copies each original before permitting its
+first replacement. It removes the guard only after the copy succeeds, so a failed copy can be retried.
+
+`FileUtil.writeToFile` writes to a temporary sibling, closes it, and then moves it over the destination.
+For a symbolic-link destination, it resolves the existing target first and replaces that target while
+preserving the link. Dangling links fail without replacement.
+`AtomicMoveNotSupportedException` or `FileAlreadyExistsException` triggers a regular replacement;
+other failures propagate.
+Temporary files are removed on success and failure. JSON serialization finishes before writing begins,
+and storage no longer pre-creates an empty destination. In a disposable folder, verify saving and
+reloading records and preferences, and confirm that completed saves leave no `.watchdog-*.tmp` files.
 
 Given below are instructions to test the app manually.
 
