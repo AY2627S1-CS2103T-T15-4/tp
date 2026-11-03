@@ -5,7 +5,7 @@ skinparam ParticipantFontColor #FFFFFF
 skinparam maxMessageSize 180
 
 actor User USER_COLOR
-participant ":MainWindow" as UI UI_COLOR
+participant "UI" as UI UI_COLOR
 participant "Logic" as Logic LOGIC_COLOR
 participant "Model" as Model MODEL_COLOR
 participant "Storage" as Storage STORAGE_COLOR
@@ -34,7 +34,8 @@ Logic --> UI : commandResult
 UI --> User : feedback displayed
 
 legend bottom
-  Successful deletion and saving; Logic, Model and Storage are components.
+  Successful deletion and saving; UI, Logic, Model and Storage are components.
+  UI includes CommandBox input and MainWindow command dispatch.
   Calls from Logic include calls made by its command objects.
   Parsing is expanded in "Parse delete-dog command".
   Internal execution calls and model/storage internals are omitted.

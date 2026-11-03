@@ -147,7 +147,8 @@ The *Sequence Diagram* below shows how the components interact with each other f
 
 <puml src="diagrams/ArchitectureSequenceDiagram.puml" alt="Successful dog deletion and saving at component boundaries" />
 
-`Logic`, `Model`, and `Storage` represent whole components in this view, rather than individual objects.
+`UI`, `Logic`, `Model`, and `Storage` represent whole components in this view, rather than individual objects.
+`UI` includes command input through `CommandBox` and command dispatch through `MainWindow`.
 Calls from `Logic` include those made by `LogicManager` and `DeleteDogCommand`; the command looks up
 and deletes the dog through `Model`. The `Parse delete-dog command` reference is expanded in the
 [Logic component](#logic-component) section. Internal command execution calls and observable-list
