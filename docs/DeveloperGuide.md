@@ -409,20 +409,6 @@ Both replacement contact fields use the same validation and normalization as add
 In particular, a `+65` number requires exactly eight following digits. Invalid contact details
 are rejected before the stored record changes, including when editing a hidden customer.
 
-### Retired list commands
-
-The former list dog and list customer commands are no longer routed by WatchDogParser.
-Use reset to restore all customers and dogs and upcoming activities, or searchc/searchd
-to narrow the display. Retired list-dog source and tests are preserved under unused/@xandergoh/;
-list-customer source, parser, and tests are under unused/@its-shoutime/. These archives are
-excluded from Gradle source and test sets and retain authorship annotations.
-
-### Retired select commands
-
-The former select dog and select customer implementations are retained under
-unused/@its-shoutime/ for authorship reference only. They are not routed by the active
-WatchDogParser and are not supported by the final product.
-
 <!--@@author-->
 <!--@@author its-shoutime-->
 ### Undo and redo
@@ -798,6 +784,20 @@ The active category searches are `searcha`, `searchc`, and `searchd`. Each parse
 The global search command and its category compatibility routes have been retired. Use the field-based searchc, searchd, and searcha commands (i/ for persistent IDs). Retired global search code, tests, and orphaned helpers are preserved under unused/@Kenneth-Chia/. The list commands are also retired; use `reset` to restore all customers and dogs and upcoming activities.
 
 Search command tests cover parser validation, field combinations, related-record updates, persistent IDs, and unchanged stored records.
+
+### Retired list commands
+
+The former list dog and list customer commands are no longer routed by WatchDogParser.
+Use reset to restore all customers and dogs and upcoming activities, or searchc/searchd
+to narrow the display. Retired list-dog source and tests are preserved under unused/@xandergoh/;
+list-customer source, parser, and tests are under unused/@its-shoutime/. These archives are
+excluded from Gradle source and test sets and retain authorship annotations.
+
+### Retired select commands
+
+The former select dog and select customer implementations are retained under
+unused/@its-shoutime/ for authorship reference only. They are not routed by the active
+WatchDogParser and are not supported by the final product.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -1380,12 +1380,26 @@ NFR-10. **Privacy**: WatchDog shall store dog and customer records locally and s
 * **Primary phone number**: The customer's main telephone number, used as the first contact option.
 * **Backup contact**: An alternative telephone number used when the customer cannot be reached through their primary phone number.
 * **Breed**: The recorded breed or breed mix of a dog, such as Chihuahua, Shiba Inu or a mixed breed.
-* **Size**: The dog's recorded size category: small, medium, large or giant, according to the size chart adopted by the team.
+* **Size**: A user-selected category for a dog: small, medium, large or giant. WatchDog does not infer
+  this category from weight or enforce weight thresholds.
 * **Activity**: A reusable schedule for a care task, such as feeding, grooming or exercise. Dogs are booked into its dated occurrences through enrolments.
 * **Activity ID**: A unique integer assigned by WatchDog to identify an activity schedule. It remains stable across application restarts.
 * **Recurrence**: The rule determining whether an activity occurs once, daily or weekly.
 * **Occurrence**: A date on which an activity takes place according to its start date and recurrence.
 * **Enrolment**: A dated booking for a dog in an activity occurrence. It does not indicate actual attendance or check-in.
+
+#### Illustrative dog size reference
+
+The following weight ranges and breeds are illustrative examples adapted from
+[Monika Sragova's dog size guide on vetcarenews](https://vetcarenews.com/small-medium-large-dog-size-by-weight-guide/).
+They are not official criteria; users decide which category best fits each dog.
+
+| Size | Approximate weight | Example breeds |
+|------|--------------------|----------------|
+| Small | Up to 24 lb (10 kg) | Chihuahua, Yorkshire Terrier |
+| Medium | About 24–59 lb (10–26 kg) | Australian Shepherd, Border Collie |
+| Large | About 60–99 lb (27–45 kg) | Golden Retriever, Rottweiler |
+| Giant | Over 100 lb (over 45 kg) | Great Dane, Mastiff |
 
 --------------------------------------------------------------------------------------------------------------------
 
