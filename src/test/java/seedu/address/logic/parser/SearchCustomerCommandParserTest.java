@@ -30,7 +30,7 @@ public class SearchCustomerCommandParserTest {
 
     @Test
     public void parse_emptyOrMalformedQuotedNames_rejectsInput() {
-        for (String query : new String[]{"n/\"\"", "n/\"   \"", "n/\"Alex d/1", "n/Alex\"",
+        for (String query : new String[]{"n/\"", "n/\"\"", "n/\"   \"", "n/\"Alex d/1", "n/Alex\"",
             "n/\"Alex\" extra", "n/\"Alex\" n/Bob"}) {
             assertThrows(ParseException.class, () -> parser.parse(query));
         }
