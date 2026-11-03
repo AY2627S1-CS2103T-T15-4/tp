@@ -147,8 +147,11 @@ The *Sequence Diagram* below shows how the components interact with each other f
 
 <puml src="diagrams/ArchitectureSequenceDiagram.puml" alt="Successful dog deletion and saving at component boundaries" />
 
-This view separates `LogicManager` orchestration from `DeleteDogCommand`, which looks up and deletes
-the dog through `Model`. Parsing is summarised; observable-list notifications are omitted. For this undoable deletion,
+`Logic`, `Model`, and `Storage` represent whole components in this view, rather than individual objects.
+Calls from `Logic` include those made by `LogicManager` and `DeleteDogCommand`; the command looks up
+and deletes the dog through `Model`. The `Parse delete-dog command` reference is expanded in the
+[Logic component](#logic-component) section. Internal command execution calls and observable-list
+notifications are omitted. For this undoable deletion,
 `LogicManager` captures a model snapshot before execution and updates history before saving.
 Ordinary successful commands, including queries, use the same save path; a save failure is reported
 as a command error. History-neutral `help`, `summary`, and `exit` still return their results if saving fails.
@@ -217,7 +220,8 @@ Here's a (partial) class diagram of the `Logic` component:
 
 <puml src="diagrams/LogicClassDiagram.puml" alt="Logic interfaces, command execution, and representative commands" />
 
-The sequence diagram below expands the parsing stage of `LogicManager.execute("deletedog 1")`.
+The sequence diagram below expands the `Parse delete-dog command` reference in the architecture
+sequence, showing the parsing stage of `LogicManager.execute("deletedog 1")`.
 The returned command is then executed by `LogicManager`. Model interactions and saving are shown
 in the architecture sequence.
 
