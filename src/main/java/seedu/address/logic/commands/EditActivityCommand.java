@@ -35,7 +35,7 @@ public class EditActivityCommand extends Command {
     public static final String MESSAGE_ACTIVITY_HAS_ENROLMENTS =
             "Activity ID %d has enrolments and cannot be edited. Create a new activity instead.";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
-    public static final String MESSAGE_INVALID_ACTIVITY_ID = "The activity ID provided is invalid.";
+    public static final String MESSAGE_INVALID_ACTIVITY_ID = "Activity ID %d does not exist.";
     public static final String MESSAGE_INVALID_ACTIVITY_LIST = "Cannot edit activity: the activity list is invalid.";
 
     private static final Logger logger = LogsCenter.getLogger(EditActivityCommand.class);
@@ -72,7 +72,7 @@ public class EditActivityCommand extends Command {
                 .findFirst()
                 .orElseThrow(() -> {
                     logger.warning("No activity found with ID " + activityId);
-                    return new CommandException(MESSAGE_INVALID_ACTIVITY_ID);
+                    return new CommandException(String.format(MESSAGE_INVALID_ACTIVITY_ID, activityId));
                 });
 
         try {

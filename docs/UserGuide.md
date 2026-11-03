@@ -135,6 +135,7 @@ Other international numbers retain their leading `+`. All four fields are requir
 Each customer's primary phone number and email address must be unique across all customers, including
 those hidden by filters. Email uniqueness ignores letter case. Backup contact numbers may be shared,
 including with another customer's primary phone number.
+If a primary phone number or email address is already used, the error names the customer ID that owns it.
 If fields are missing, WatchDog lists them and shows the command format. If a value is invalid, it
 reports the first invalid field and its constraints.
 
@@ -147,9 +148,13 @@ Format: `editcustomer CUSTOMER_ID [n/NAME] [p/PHONE] [e/EMAIL] [bc/BACKUP_CONTAC
 Example: `editcustomer 1 p/91234567 e/johndoe@example.com`
 
 * `CUSTOMER_ID` must identify an existing customer.
+  A missing ID is reported as required. For example, `editcustomer abc n/Alice` reports
+  `Please provide a positive, valid customer ID.`, while an unknown ID such as `999`
+  reports `Customer ID 999 does not exist.`
 * Any supplied field replaces its existing value.
 * The resulting primary phone number and email address must not belong to another customer. You may
-  keep your existing phone number and email address. Backup contact numbers need not be unique.
+  keep your existing phone number and email address. A duplicate-contact error identifies the other
+  customer's ID. Backup contact numbers need not be unique.
 * Supplied names, phone numbers, backup contacts, and email addresses follow the same validation rules
   as `addcustomer`.
   This includes requiring exactly eight digits after `+65` for both `p/` and `bc/`.
@@ -229,9 +234,9 @@ Example:
 * `adddog n/Cookie b/Chihuahua s/Small`
 
 Valid sizes are `small`, `medium`, `large`, and `giant`. Size input is case-insensitive.
-Dog names may contain letters, numbers, spaces, hyphens, and apostrophes, and must not be blank. Breeds may contain
-letters, numbers, spaces, and hyphens, and must not be blank. Leading and trailing
-spaces in field values are ignored.
+Dog names may contain letters, numbers, spaces, hyphens, and straight apostrophes (`'`), and must not be blank.
+Curly apostrophes (`‘`, `’`) are not supported. Breeds may contain letters, numbers, spaces, and
+hyphens, and must not be blank. Leading and trailing spaces in field values are ignored.
 
 #### Editing a dog: `editdog`
 
@@ -419,6 +424,10 @@ Format: `editactivity ACTIVITY_ID [n/NAME] [date/YYYY-MM-DD] [start/HH:mm] [end/
 Example: `editactivity 21 n/Morning walk start/09:00 end/10:00` changes activity 21's name and times,
 provided it exists and has no enrolments. Its other details remain unchanged.
 
+A missing activity ID is reported as required. For example, `editactivity abc n/Walk` reports
+`Please provide a positive, valid activity ID.`, while an unknown ID such as `999`
+reports `Activity ID 999 does not exist.`
+
 #### Searching activities: `searcha`
 
 Searches activities by name, date, time, recurrence, and/or activity ID. At least one field must be provided, and all supplied
@@ -434,7 +443,7 @@ Example: `searcha n/Dog run t/16:00`
 * Recurrence matching accepts `Once`, `Weekly`, or `Daily`, and is case-insensitive.
 * Activity ID must be a positive ID in the database and matches exactly. It combines with other fields using AND.
   Invalid or nonexistent IDs display `Error in searching activities:` followed by
-  `Please enter a valid activity index`. Zero, negative, nonnumeric, and out-of-range IDs are invalid.
+  `Please enter a valid activity ID`. Zero, negative, nonnumeric, and out-of-range IDs are invalid.
   Invalid IDs reject the entire search and preserve the previous display. Repeated field prefixes are rejected.
 * Dates must use `YYYY-MM-DD`, and times must use 24-hour `HH:mm` format.
 * Only lowercase `n/`, `d/`, `t/`, `r/`, and `i/` field prefixes are accepted.
@@ -630,7 +639,7 @@ For example, after `adddog n/Cookie b/Chihuahua s/Small`, enter `undo` to remove
 then `redo` to bring Cookie back. You can undo the redone command again.
 
 Only one command can be undone at a time. A later successful undoable command replaces that history
-and makes `redo` unavailable. View-changing commands such as search, filter, selection, and
+and makes `redo` unavailable. View-changing commands such as search, filter, `today`, and
 `reset` are undoable too. `help`, `summary`, and `exit` preserve both undo and redo history;
 parse errors and commands rejected before execution also leave history unchanged. The history is
 cleared after confirming `clear` with `Y` and is not retained when WatchDog restarts. Surrounding whitespace is accepted,
@@ -665,7 +674,7 @@ Examples:
 Clearing also discards the undo and redo history, so `clear` cannot be undone. This remains true
 if the command changes memory but its save fails.
 
-Clearing preserves the current search filters and display selection. Newly added records appear only
+Clearing preserves the current search filters. Newly added records appear only
 if they match the active view. For example, after `searchc n/Alice` followed by `clear` and `Y`, adding
 a customer named Bob succeeds but does not display Bob in the customer panel. Use `reset` to show all
 customers and dogs, plus activities occurring today or later.
@@ -673,15 +682,29 @@ customers and dogs, plus activities occurring today or later.
 #### Saving the data
 
 WatchDog automatically saves data after every command. You do not need to save manually.
+Each save writes a complete temporary file in the destination folder before replacing the saved file.
+Replacement is atomic when supported by the file system; otherwise WatchDog uses a regular replacement.
+This reduces the risk of an incomplete save but does not replace keeping your own backups.
 
 #### Editing the data file
 
-WatchDog data is saved automatically as `data/watchdog.json` inside the folder from which you launch WatchDog (the home folder in Quick Start). Advanced users are welcome to update data directly by editing that data file.
+WatchDog data is saved automatically as `data/watchdog.json` inside the folder containing the JAR
+(the home folder in Quick Start), even when you launch it from another directory. Preferences and
+application logs also stay in the home folder. Advanced users may edit the data file while WatchDog is closed.
+
+Keep `watchdog.json` in the JAR folder's `data` directory; WatchDog does not load data from the
+directory you launch it from. To replace the data file, close WatchDog, back up the current file,
+and copy the replacement to `<JAR folder>/data/watchdog.json`. Do not replace it while WatchDog is running.
 
 <box type="warning" seamless>
 
 **Caution:**
-If your changes make the data file invalid, WatchDog starts with no saved records at the next run. The invalid file remains on disk until you run a command (WatchDog saves after every command). Still, we recommend backing up the file before editing it.<br>
+If your changes make the data file invalid, WatchDog starts with no saved records at the next run.
+Before its first save, it preserves the original as `watchdog.json.invalid-UNIQUE_ID.bak` in the same folder.
+Existing backups are never replaced. If the backup cannot be created, saving is refused; check the
+application log and folder permissions. To recover, close WatchDog, repair a copy of the backup, and
+replace `watchdog.json` with that repaired copy. Keep your backup until recovery is verified.
+We still recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause WatchDog to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
 
@@ -693,10 +716,6 @@ when the application shuts down. Undo and redo history is not retained after exi
 Format: `exit`
 
 Example: `exit` closes WatchDog.
-
-#### Archiving data files `[coming in v2.0]`
-
-_Details coming soon ..._
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -749,7 +768,7 @@ Action     | Format, Examples
 
 This appendix provides a path through WatchDog's current features, with representative inputs you can extend
 through exploratory testing. Refer to [Features](#features) for full command specifications. Unchanged AB3
-behaviour is not tested separately, and the planned archiving feature is excluded.
+behaviour is not tested separately.
 
 <box type="info" seamless>
 
@@ -759,8 +778,8 @@ Do not insert extra successful commands between an action and its `undo` or `red
 IDs below are persistent record IDs, not positions in a filtered list. To repeat the whole walkthrough,
 start again at the preparation step.
 
-**Dates:** The examples use **2026-10-29 as today**, **2026-10-28 as yesterday**, **2026-10-30 as tomorrow**,
-and **2026-11-05 as one week from today**. If testing on another date, copy the instructions into a text
+**Dates:** The examples use **2026-11-03 as today**, **2026-11-02 as yesterday**, **2026-11-04 as tomorrow**,
+and **2026-11-10 as one week from today**. If testing on another date, copy the instructions into a text
 editor and replace these four dates with the corresponding dates from your computer's local calendar,
 in `YYYY-MM-DD` format, before pasting commands. Keep `2026-02-30` unchanged: it is deliberately invalid.
 Complete the walkthrough on the same local day; restart preparation if midnight passes.
@@ -819,10 +838,10 @@ Input | Expected result
 `addcustomer n/Carol p/1234567 e/carol@example.com bc/98765432` | `Invalid phone:` followed by the phone constraints: eight local digits or `+` followed by 7 to 15 international digits; spaces and hyphens are allowed between digits.
 `addcustomer n/Carol p/+65 1234567 e/carol@example.com bc/98765432` | `Invalid phone:` with guidance that exactly eight digits must follow `+65`; no customer is added.
 `addcustomer n/Carol p/93456789 e/carol@example.com bc/+65123456789` | `Invalid backup contact:` with the same `+65` length requirement; no customer is added.
-`searchc i/2`, then `addcustomer n/Carol p/91234567 e/carol@example.com bc/98765432` | Ben is displayed, then `This phone number is already used by another customer.` Alice's hidden record still prevents reuse.
-`addcustomer n/Carol p/93456789 e/ALICE@EXAMPLE.COM bc/98765432` | `This email address is already used by another customer.` Email uniqueness ignores case.
+`searchc i/2`, then `addcustomer n/Carol p/91234567 e/carol@example.com bc/98765432` | Ben is displayed, then `This phone number is already used by customer ID 1.` Alice's hidden record still prevents reuse.
+`addcustomer n/Carol p/93456789 e/ALICE@EXAMPLE.COM bc/98765432` | `This email address is already used by customer ID 1.` Email uniqueness ignores case.
 `reset`, then `editcustomer 1 n/Alice Koh` | Alice's name changes; ID 1, phone, email, and backup contact remain unchanged.
-`editcustomer 1 p/92345678` | Duplicate-phone error; Alice's phone remains `91234567`.
+`editcustomer 1 p/92345678` | `This phone number is already used by customer ID 2.` Alice's phone remains `91234567`.
 `editcustomer 1 p/+65 9123-4567 bc/+65 9876-5432` | Accepted as Alice's own existing contacts; stored and displayed as `91234567` and `98765432`.
 `editcustomer 1 p/+65123456789` | Phone constraints are shown; Alice's record is unchanged.
 `editcustomer 1 bc/+65 1234567` | Backup contact constraints are shown; Alice's record is unchanged.
@@ -859,11 +878,11 @@ Prerequisite: two customers and three unowned dogs from the preceding sections; 
 Prerequisite: no activities exist. Apply the date substitutions described above, then enter:
 
 ```text
-addactivity n/Morning walk date/2026-10-29 start/09:00 end/10:00 r/daily
-addactivity n/Training date/2026-10-29 start/10:00 end/11:00 r/weekly
-addactivity n/Grooming date/2026-10-29 start/09:30 end/10:30 r/once
-addactivity n/Previous visit date/2026-10-28 start/12:00 end/13:00 r/once
-addactivity n/Future visit date/2026-10-30 start/12:00 end/13:00 r/once
+addactivity n/Morning walk date/2026-11-03 start/09:00 end/10:00 r/daily
+addactivity n/Training date/2026-11-03 start/10:00 end/11:00 r/weekly
+addactivity n/Grooming date/2026-11-03 start/09:30 end/10:30 r/once
+addactivity n/Previous visit date/2026-11-02 start/12:00 end/13:00 r/once
+addactivity n/Future visit date/2026-11-04 start/12:00 end/13:00 r/once
 ```
 
 Expected: success feedback assigns activity IDs 1–5 in that order. Activities start with no bookings;
@@ -873,8 +892,8 @@ while past one-time activity 4 is hidden. The separate Today panel shows activit
 Input | Expected result
 ------|----------------
 `addactivity n/Invalid date/2026-02-30 start/09:00 end/10:00 r/once` | `Activity date must be a valid date in YYYY-MM-DD format.` No activity is added.
-`addactivity n/Invalid date/2026-10-29 start/10:00 end/10:00 r/once` | `Activity end time must be later than its start time on the same day.` No activity is added.
-`addactivity n/Invalid date/2026-10-29 start/09:00 end/10:00 r/Daily` | `Recurrence must be once, daily, or weekly (lowercase).` No activity is added.
+`addactivity n/Invalid date/2026-11-03 start/10:00 end/10:00 r/once` | `Activity end time must be later than its start time on the same day.` No activity is added.
+`addactivity n/Invalid date/2026-11-03 start/09:00 end/10:00 r/Daily` | `Recurrence must be once, daily, or weekly (lowercase).` No activity is added.
 `editactivity 3 n/Grooming session` | `Edited activity ID 3.` Its date, times, recurrence, and ID remain unchanged.
 `editactivity 3` | `At least one field to edit must be provided.`
 
@@ -883,14 +902,14 @@ Input | Expected result
 Prerequisite: the five schedules above, with no bookings. Enter:
 
 ```text
-enrol d/1 2 date/2026-10-29 a/1
-enrol a/1 date/2026-10-30 d/1 3
-enrol a/2 date/2026-10-29 d/1
+enrol d/1 2 date/2026-11-03 a/1
+enrol a/1 date/2026-11-04 d/1 3
+enrol a/2 date/2026-11-03 d/1
 ```
 
 Expected: both dogs in each batch are booked for only the specified date. The last booking is accepted
 because Training begins exactly when Morning walk ends. Morning walk's general card shows
-`Dogs with upcoming bookings: 1, 2, 3`; its Today card shows `Dogs enrolled on 2026-10-29: 1, 2`.
+`Dogs with upcoming bookings: 1, 2, 3`; its Today card shows `Dogs enrolled on 2026-11-03: 1, 2`.
 Buddy appears only once in the general summary despite having two dated bookings. Training shows dog 1;
 Grooming session and Future visit show `None`. Schedule start dates remain unchanged.
 
@@ -898,16 +917,16 @@ Run these checks in order:
 
 Input | Expected result
 ------|----------------
-`enrol a/1 date/2026-10-29 d/1` | Reports that dog 1 is already enrolled in activity 1 on that date; no duplicate booking.
-`enrol a/3 date/2026-10-29 d/3 1` | Reports Buddy's overlap with Morning walk. Neither dog gains a Grooming session booking, including Milo, who was checked first.
-`enrol a/2 date/2026-10-30 d/3` | Reports that Training does not occur on that date and identifies its weekly recurrence.
-`enrol a/1 date/2026-10-28 d/3` | Reports that the enrolment date must be today or later.
-`enrol a/1 date/2026-10-29 d/3 3` | `Dog ID 3 is listed more than once. Please provide each dog ID only once.` followed by guidance.
+`enrol a/1 date/2026-11-03 d/1` | Reports that dog 1 is already enrolled in activity 1 on that date; no duplicate booking.
+`enrol a/3 date/2026-11-03 d/3 1` | Reports Buddy's overlap with Morning walk. Neither dog gains a Grooming session booking, including Milo, who was checked first.
+`enrol a/2 date/2026-11-04 d/3` | Reports that Training does not occur on that date and identifies its weekly recurrence.
+`enrol a/1 date/2026-11-02 d/3` | Reports that the enrolment date must be today or later.
+`enrol a/1 date/2026-11-03 d/3 3` | `Dog ID 3 is listed more than once. Please provide each dog ID only once.` followed by guidance.
 `editactivity 1 n/Changed walk` | `Activity ID 1 has enrolments and cannot be edited. Create a new activity instead.` The schedule and bookings remain unchanged.
-`unenrol a/1 date/2026-10-29 d/1 3` | Reports that dog 3 is not enrolled on that date. Buddy's booking remains; the batch is rejected.
-`unenrol date/2026-10-29 d/2 a/1` | Reports dog 2 unenrolled. Morning walk's Today summary now contains only dog 1; its general summary contains `1, 3`.
-`unenrol a/1 date/2026-10-29 d/2` | Reports that dog 2 is not enrolled; no further changes.
-`enrol a/1 date/2026-10-29 d/2` | Restores Cookie's booking, returning to the booking state at the start of these checks.
+`unenrol a/1 date/2026-11-03 d/1 3` | Reports that dog 3 is not enrolled on that date. Buddy's booking remains; the batch is rejected.
+`unenrol date/2026-11-03 d/2 a/1` | Reports dog 2 unenrolled. Morning walk's Today summary now contains only dog 1; its general summary contains `1, 3`.
+`unenrol a/1 date/2026-11-03 d/2` | Reports that dog 2 is not enrolled; no further changes.
+`enrol a/1 date/2026-11-03 d/2` | Restores Cookie's booking, returning to the booking state at the start of these checks.
 
 ### Searching, filtering, today's view, and statistics
 
@@ -917,18 +936,18 @@ general activity panel; the separate Today panel continues to show all today's s
 
 Input | Expected result
 ------|----------------
-`searchd n/UD b/POO s/SMALL i/1` | Shows Buddy, Alice, and activities 1 and 2. All supplied fields match together. Morning walk's `Enrolments` section lists only `1. Buddy: 2026-10-29, 2026-10-30`; Training lists Buddy's booking today.
+`searchd n/UD b/POO s/SMALL i/1` | Shows Buddy, Alice, and activities 1 and 2. All supplied fields match together. Morning walk's `Enrolments` section lists only `1. Buddy: 2026-11-03, 2026-11-04`; Training lists Buddy's booking today.
 `searchd i/99` | `Error in searching dogs:` followed by `Please enter a valid dog index`; the previous display remains.
 `searchc n/ALICE p/91234567 e/ALICE@EXAMPLE.COM bc/98765432 d/2 1 i/1` | Shows Alice, Buddy, Cookie, and activities 1 and 2. Alice must own both supplied dog IDs; the success message lists dog IDs in ascending order. Activity enrolment details include only her dogs.
 `searchc p/+65 9123-4567 bc/9876-5432` | Shows Alice and her related dogs and activities, matching the same stored contacts despite the country code and formatting.
 `searchc bc/+55`, then `searchc p/+65123456789` | Both queries report `Error in searching customers:` and leave the previous display unchanged. The first identifies `backup contact (bc/)` and requests a complete international number with 7 to 15 digits; the second identifies `phone (p/)` and requires exactly eight digits after `+65`.
 `searchc i/99` | `Error in searching customers:` followed by `Please enter a valid customer index`; the previous display remains.
 `searchc n/Nobody` | Customer, dog, and general activity panels become empty; no records are deleted.
-`searcha n/WALK d/2026-10-29 t/10:00 r/DAILY i/1` | Shows Morning walk, dogs 1 and 2, and Alice. The end time is included in time searches; recurrence searches accept uppercase values.
-`searcha i/1 d/2026-10-30` | Shows Morning walk, dogs 1 and 3, and Alice. Cookie is excluded because Cookie has no booking tomorrow.
-`searcha i/2 d/2026-10-30` | No matching activity, dog, or customer: Training does not occur tomorrow.
-`searcha i/2 d/2026-11-05` | Shows Training, but no dogs or customers: the weekly schedule recurs, while today's booking does not automatically recur.
-`searcha i/0` | `Error in searching activities:` followed by `Please enter a valid activity index`; the previous display remains.
+`searcha n/WALK d/2026-11-03 t/10:00 r/DAILY i/1` | Shows Morning walk, dogs 1 and 2, and Alice. The end time is included in time searches; recurrence searches accept uppercase values.
+`searcha i/1 d/2026-11-04` | Shows Morning walk, dogs 1 and 3, and Alice. Cookie is excluded because Cookie has no booking tomorrow.
+`searcha i/2 d/2026-11-04` | No matching activity, dog, or customer: Training does not occur tomorrow.
+`searcha i/2 d/2026-11-10` | Shows Training, but no dogs or customers: the weekly schedule recurs, while today's booking does not automatically recur.
+`searcha i/0` | `Error in searching activities:` followed by `Please enter a valid activity ID`; the previous display remains.
 `searcha i/2 i/1` | `Invalid command format!` followed by search guidance; the previous display remains.
 `today` | Shows activities 1, 2, and 3, dogs 1 and 2, and Alice. Empty Grooming session is included; Milo's tomorrow-only booking is excluded.
 `today extra` | `Error in showing today:` followed by `Info is in the wrong format. Input in the correct format`.
@@ -943,7 +962,7 @@ Run `summary` while only Ben is displayed. Expected output, with your substitute
 ```text
 Overall: 3 dogs | 2 customers
 Activity schedules: 5 total | 4 from today onwards
-Today (2026-10-29): 3 activities | 2 distinct dogs enrolled
+Today (2026-11-03): 3 activities | 2 distinct dogs enrolled
 ```
 
 The panels stay unchanged. Buddy counts once today despite having two activities; empty schedules and
@@ -1026,7 +1045,7 @@ These tests deliberately change the shared dataset. Run them in order after the 
 1. Run `deleteactivity 1`.<br>
    Expected: Morning walk and its remaining bookings for today and tomorrow disappear. Dogs 2 and 3,
    Ben, and activities 2–5 remain. Repeat `deleteactivity 1`; expect `Activity ID 1 does not exist.`
-1. Run `addactivity n/Replacement walk date/2026-10-29 start/09:00 end/10:00 r/daily`.<br>
+1. Run `addactivity n/Replacement walk date/2026-11-03 start/09:00 end/10:00 r/daily`.<br>
    Expected: the new activity has ID 6, not the deleted ID 1, and has no bookings.
 
 <!--@@author-->

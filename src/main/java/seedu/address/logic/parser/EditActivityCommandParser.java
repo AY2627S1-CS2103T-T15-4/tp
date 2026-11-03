@@ -2,7 +2,6 @@
 package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_DATE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_END;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
@@ -51,19 +50,24 @@ public class EditActivityCommandParser implements Parser<EditActivityCommand> {
 
         EditActivityDescriptor descriptor = new EditActivityDescriptor();
         if (arguments.getValue(PREFIX_NAME).isPresent()) {
-            descriptor.setName(ParserUtil.parseActivityName(arguments.getValue(PREFIX_NAME).get()));
+            descriptor.setName(parseField("activity name (n/)", ParserUtil::parseActivityName,
+                    arguments.getValue(PREFIX_NAME).get()));
         }
         if (arguments.getValue(PREFIX_DATE).isPresent()) {
-            descriptor.setDate(parseDate(arguments.getValue(PREFIX_DATE).get()));
+            descriptor.setDate(parseField("activity date (date/)", EditActivityCommandParser::parseDate,
+                    arguments.getValue(PREFIX_DATE).get()));
         }
         if (arguments.getValue(PREFIX_START).isPresent()) {
-            descriptor.setStartTime(parseTime(arguments.getValue(PREFIX_START).get()));
+            descriptor.setStartTime(parseField("activity start time (start/)", EditActivityCommandParser::parseTime,
+                    arguments.getValue(PREFIX_START).get()));
         }
         if (arguments.getValue(PREFIX_END).isPresent()) {
-            descriptor.setEndTime(parseTime(arguments.getValue(PREFIX_END).get()));
+            descriptor.setEndTime(parseField("activity end time (end/)", EditActivityCommandParser::parseTime,
+                    arguments.getValue(PREFIX_END).get()));
         }
         if (arguments.getValue(PREFIX_RECURRENCE).isPresent()) {
-            descriptor.setRecurrence(parseRecurrence(arguments.getValue(PREFIX_RECURRENCE).get()));
+            descriptor.setRecurrence(parseField("activity recurrence (r/)", EditActivityCommandParser::parseRecurrence,
+                    arguments.getValue(PREFIX_RECURRENCE).get()));
         }
         if (!descriptor.isAnyFieldEdited()) {
             throw new ParseException(EditActivityCommand.MESSAGE_NOT_EDITED);
@@ -71,16 +75,33 @@ public class EditActivityCommandParser implements Parser<EditActivityCommand> {
         return new EditActivityCommand(activityId, descriptor);
     }
 
-    private static int parseActivityId(String value) throws ParseException {
+    /** Identifies the field while preserving its existing validation guidance. */
+    private static <T> T parseField(String field, FieldParser<T> parser, String value) throws ParseException {
         try {
-            int activityId = Integer.parseInt(value.trim());
+            return parser.parse(value);
+        } catch (ParseException e) {
+            throw new ParseException("Invalid " + field + ": " + e.getMessage(), e);
+        }
+    }
+
+    @FunctionalInterface
+    private interface FieldParser<T> {
+        T parse(String value) throws ParseException;
+    }
+
+    private static int parseActivityId(String value) throws ParseException {
+        String trimmedId = value.trim();
+        if (trimmedId.isEmpty()) {
+            throw new ParseException("Activity ID is required. Enter a positive whole number.");
+        }
+        try {
+            int activityId = Integer.parseInt(trimmedId);
             if (activityId <= 0) {
                 throw new NumberFormatException();
             }
             return activityId;
         } catch (NumberFormatException e) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
-                    EditActivityCommand.MESSAGE_USAGE), e);
+            throw new ParseException("Please provide a positive, valid activity ID.", e);
         }
     }
 
