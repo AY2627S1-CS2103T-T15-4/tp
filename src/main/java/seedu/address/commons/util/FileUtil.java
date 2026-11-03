@@ -3,6 +3,7 @@ package seedu.address.commons.util;
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.CopyOption;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -63,7 +64,7 @@ public class FileUtil {
             Files.write(temporary, content.getBytes(CHARSET));
             try {
                 mover.move(temporary, destination, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-            } catch (AtomicMoveNotSupportedException e) {
+            } catch (AtomicMoveNotSupportedException | FileAlreadyExistsException e) {
                 mover.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING);
             }
         } finally {
