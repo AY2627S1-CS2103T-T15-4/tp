@@ -374,6 +374,21 @@ letter case, and backup contacts may be shared. `WatchDog` then assigns the cust
 persistent ID from its next-customer-ID counter, which is saved with the records so deleted
 IDs are not reused.
 
+Customer names support Unicode letters, combining marks, and slashes. `ArgumentTokenizer` treats
+space-prefixed `n/`, `p/`, `e/`, and `bc/` as field delimiters, so these sequences cannot be entered
+literally within a name through `addcustomer` or `editcustomer`. Other sequences, such as `s/o` and
+`d/o`, remain name text. `Name` normalizes stored names to Unicode NFC, and
+`CustomerSearchPredicate` applies the same normalization to names and search queries before matching.
+
+`Email` validates a nonempty local part made of English letters, digits, and `+`, `_`, `.`, `'`, or `-`.
+Its regex accepts dot-separated nonempty atoms: supported non-dot punctuation may start or end an atom
+or repeat, while leading, trailing, and consecutive dots are rejected. Other punctuation and quoted
+local parts remain unsupported. Adding, editing, and loading customers share this validation;
+email searches match the stored value ignoring case. The domain regex permits one or more nonempty
+dot-separated labels, including single-label domains. Each label starts and ends with an ASCII letter
+or digit; internal hyphens must be single, and the final label has at least two characters.
+Consecutive hyphens (including the `xn--` prefix of punycode labels) are unsupported.
+
 When restoring a `ReadOnlyWatchDog`, `resetData` derives a missing customer counter from the
 largest incoming customer ID. An explicit counter must exceed every incoming customer ID and
 cannot exceed `Integer.MAX_VALUE + 1`. Duplicate customer IDs and invalid counters are rejected
@@ -582,6 +597,13 @@ IDs and sizes use the `Error in searching dogs:` prefix with their specific vali
 
 ### Customer search
 
+The field-boundary regex treats unknown slash tokens within name values as literal text rather than
+unsupported fields. Standalone `d/o` (case-insensitive) is also name text; `s/o` is an unrecognized
+slash token. Other recognized prefixes still delimit unquoted names, including dog-ID fields such as
+`d/1`. Double-quoted name values preserve all slash text, including literal `d/` and `i/`, so any name
+accepted by `addcustomer` can be searched without ambiguity. Quotes are removed before matching.
+Empty or malformed quoted names, duplicate fields, and invalid dog IDs are rejected.
+
 `WatchDogParser` routes `searchc` to `SearchCustomerCommandParser`. The parser accepts the optional
 lowercase fields `n/`, `p/`, `e/`, `d/`, `bc/`, and `i/`. Names are normalised for case-insensitive substring
 matching, while contact numbers and email addresses use exact matching. Multiple dog IDs are parsed from
@@ -608,8 +630,8 @@ It also filters the activity panel to activities with enrolments belonging to th
 the same per-dog enrolment summary used by `searchd`. An activity with no matching enrolment is omitted, so the
 activity panel cannot show unrelated cards or cards with misleading empty enrolment details.
 Invalid or nonexistent dog and customer IDs produce specific errors under the `Error in searching customers:` prefix.
-The parser stops field values at any field-like prefix, including unsupported prefixes, so inputs such as
-`searchc n/Anna x/value` are rejected rather than treating `x/value` as part of the name. `ModelManager`
+Non-name field values stop at any field-like prefix, including unsupported prefixes. Within names,
+`searchc n/Anna x/value` searches for the literal name text `Anna x/value`. `ModelManager`
 reapplies active customer and dog predicates after customer edits, dog edits, and relationship changes so
 both filtered views remain consistent.
 

@@ -15,8 +15,11 @@ import seedu.address.model.customer.Phone;
 
 /** Parses arguments for the {@code searchc} command. */
 public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand> {
+    // Names preserve unknown slash tokens. Quotes disambiguate literal search prefixes in name text.
     private static final Pattern FIELD_FORMAT = Pattern.compile(
-            "(?<prefix>[A-Za-z]+)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
+            "(?<namePrefix>n)/(?<nameValue>\"[^\"]*\"|.*?)"
+                    + "(?=\\s+(?!(?i:d/o)(?:\\s|$))(?:n|p|e|bc|d|i)/|$)"
+                    + "|(?<prefix>[A-Za-z]+)/(?<value>.*?)(?=\\s+[A-Za-z]+/|$)");
     private static final String MESSAGE_SEARCH_ERROR = "Error in searching customers:\n";
 
     @Override
@@ -38,14 +41,21 @@ public class SearchCustomerCommandParser implements Parser<SearchCustomerCommand
             if (!input.substring(end, matcher.start()).isBlank()) {
                 throw invalidFormat();
             }
-            String value = matcher.group("value").trim();
-            String prefix = matcher.group("prefix");
+            boolean nameField = matcher.group("namePrefix") != null;
+            String value = matcher.group(nameField ? "nameValue" : "value").trim();
+            String prefix = nameField ? "n" : matcher.group("prefix");
             if (value.isEmpty() && !prefix.equals("p") && !prefix.equals("bc")) {
                 throw invalidFormat();
             }
             switch (prefix) {
                 case "n" -> {
                     if (name != null) {
+                        throw invalidFormat();
+                    }
+                    if (value.startsWith("\"") && value.endsWith("\"") && value.length() >= 2) {
+                        value = value.substring(1, value.length() - 1).trim();
+                    }
+                    if (value.isEmpty() || value.contains("\"")) {
                         throw invalidFormat();
                     }
                     name = value.replaceAll("\\s+", " ");

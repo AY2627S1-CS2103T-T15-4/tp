@@ -25,9 +25,13 @@ public class CustomerFieldTest {
     @Test
     public void validation_rejectsInvalidValues() {
         assertFalse(Name.isValidName(" Alice"));
-        assertFalse(Name.isValidName("Jean--Luc"));
-        assertFalse(Name.isValidName("O''Neil"));
-        assertFalse(Name.isValidName("Jean-"));
+        assertFalse(Name.isValidName(""));
+        assertFalse(Name.isValidName("   "));
+        assertFalse(Name.isValidName("/Alice"));
+        assertFalse(Name.isValidName("Alice\nTan"));
+        assertFalse(Name.isValidName("Alice\tTan"));
+        assertFalse(Name.isValidName("Alice\u0000Tan"));
+        assertFalse(Name.isValidName("Alice@example.com"));
         assertFalse(Phone.isValidPhone("12a"));
         assertFalse(Phone.isValidPhone("9123456"));
         assertFalse(Phone.isValidPhone("912345678"));
@@ -36,8 +40,33 @@ public class CustomerFieldTest {
         assertFalse(BackupContact.isValidBackupContact("987654321"));
         assertFalse(BackupContact.isValidBackupContact("9876543 "));
         assertFalse(Email.isValidEmail("alice@example.c"));
-        assertFalse(Email.isValidEmail("o''neil@example.com"));
-        assertFalse(Email.isValidEmail("'oneil@example.com"));
+        assertFalse(Email.isValidEmail(".alice@example.com"));
+        assertFalse(Email.isValidEmail("alice.@example.com"));
+        assertFalse(Email.isValidEmail("alice..tan@example.com"));
+    }
+
+    @Test
+    public void emails_allowSupportedSpecialCharactersExceptMisplacedDots() {
+        for (String local : new String[]{"_alice", "alice+", "alice+_work", "o''neil", "'oneil",
+            "-alice", "alice_", "alice'", "alice-", "+_'-", "alice._work"}) {
+            assertTrue(Email.isValidEmail(local + "@example.com"), local);
+        }
+        for (String local : new String[]{"", ".alice", "alice.", "alice..tan", "alice!work", "alice/bob",
+            "alice&bob", "alice=work", "\"john doe\"", "alice tan", "alice@work"}) {
+            assertFalse(Email.isValidEmail(local + "@example.com"), local);
+        }
+        assertFalse(Email.isValidEmail("alice@-example.com"));
+        assertFalse(Email.isValidEmail("alice@example..com"));
+    }
+
+    @Test
+    public void names_acceptUnicodeAndSlashesAndNormalizeAccents() {
+        for (String name : new String[]{"Ahmad s/o Ali", "Devi d/o Kumar", "Jos\u00e9 Tan", "\u9648\u4f1f",
+            "O\u2019Neil", "Jose\u0301 Tan", "Jean--Luc", "O''Neil", "Jean-", "Alice 2"}) {
+            assertTrue(Name.isValidName(name), name);
+        }
+        assertEquals(new Name("Jos\u00e9 Tan"), new Name("Jose\u0301 Tan"));
+        assertEquals("Jos\u00e9 Tan", new Name("Jose\u0301 Tan").fullName);
     }
 
     @Test

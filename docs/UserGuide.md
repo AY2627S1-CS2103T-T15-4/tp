@@ -101,14 +101,25 @@ Example:
 
 * `addcustomer n/Priya Menon p/97654321 e/priya@example.com bc/88776655`
 
-Customer names may contain only English letters (`A-Z`, `a-z`), digits (`0-9`), spaces, hyphens (`-`),
-and straight apostrophes (`'`). Accented letters (such as `é`), Chinese characters, and curly apostrophes
-(`’`) are not supported. Names must start with an English letter or digit. A hyphen or apostrophe must
-be followed by an English letter or digit; repeated punctuation is not allowed. For example, `Jean-Luc`
-and `O'Neil` are valid names.
+Customer names may contain Unicode letters (including accented letters and Chinese characters), combining
+marks, numbers, spaces, hyphens (`-`), straight or curly apostrophes (`'`, `’`), and slashes (`/`).
+Names must start with a letter or number. For example, `Ahmad s/o Ali`, `Devi d/o Kumar`, `José Tan`,
+`陈伟`, and `O’Neil` are valid names. Names are stored in Unicode NFC form, and name searches recognize
+equivalent composed and decomposed accents. Control characters are not allowed.
+The space-separated command prefixes `n/`, `p/`, `e/`, and `bc/` remain reserved and cannot be used
+as literal name text. Other slash-containing text, such as `s/o` and `d/o`, is accepted.
 
-Email addresses must use the `local-part@domain` format. Apostrophes are allowed in the local part
-before `@`.
+Email addresses must use the `local-part@domain` format. The nonempty local part before `@` supports
+English letters, digits, and `+`, `_`, `.`, `'`, and `-`. Supported special characters may appear at
+the start, end, or consecutively, except that dots cannot start or end the local part or occur consecutively.
+For example, `_alice@example.com`, `alice+@example.com`, and `alice+_work@example.com` are accepted.
+Other special characters and quoted local parts are not supported.
+
+The domain consists of one or more nonempty labels separated by dots. A single-label domain such as
+`alice@gmail` is accepted; a dot is not required. Each label must start and end with an ASCII letter
+or digit and contain only ASCII letters, digits, and single hyphens. Consecutive hyphens are not supported,
+including in punycode labels starting with `xn--`. The final label must be at least two characters long.
+These format checks do not establish whether the domain or mailbox exists.
 
 The contact number and backup contact number accept either:
 
@@ -163,6 +174,12 @@ Format: `searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT]
 Example: `searchc n/Anna d/12 34`
 
 * Name matching is case-insensitive, uses a substring search, and treats repeated spaces as one space.
+  Full-name queries such as `searchc n/Ahmad s/o Ali` and `searchc n/Devi d/o Kumar` are supported.
+  Standalone `s/o` and `d/o` (ignoring case) remain name text rather than field delimiters.
+  A separate `d/` field still filters by dog IDs, for example `searchc n/Devi d/o Kumar d/1`.
+  Other slash text, such as `searchc n/Ahmad x/y Ali`, is also supported. If name text contains a
+  search prefix such as `d/` or `i/`, quote the whole name: `searchc n/"Ahmad d/1 Ali"`.
+  Quoted names can be combined with filters, for example `searchc n/"Ahmad d/1 Ali" i/2`.
 * Phone and backup contact numbers accept the same formats as `addcustomer` and use exact matching after
   removing spaces and hyphens. `+65` followed by eight digits matches the equivalent local number.
   For example, `searchc p/+65 9123-4567` matches a phone stored as `91234567`, and
@@ -183,7 +200,8 @@ Example: `searchc n/Anna d/12 34`
   Dog IDs display `Please enter a valid dog ID`; customer IDs display `Please enter a valid customer ID`.
   Zero, negative, nonnumeric, and out-of-range IDs are invalid. If any ID is invalid, the entire search is rejected
   and the previous display is preserved.
-* Unsupported field prefixes are rejected as invalid command formats.
+* Unsupported field prefixes outside name values are rejected as invalid command formats.
+  Within an unquoted name, unrecognized slash tokens are literal name text.
 * If no customers match, the customer panel is empty.
 * The filter remains active while customers or their linked dogs are added, edited, deleted, linked, or unlinked.
   The activity panel shows only activities with enrolments belonging to the matching customers. Each activity

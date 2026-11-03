@@ -4,19 +4,21 @@ package seedu.address.model.customer;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
+import java.text.Normalizer;
+
 /**
  * Represents a customer's name and validates its format.
  */
 public class Name {
     public static final String MESSAGE_CONSTRAINTS =
-            "Names should only contain alphanumeric characters, spaces, hyphens, and apostrophes, "
-                    + "and should not be blank";
+            "Names must start with a letter or number and contain only Unicode letters, combining marks, "
+                    + "numbers, spaces, hyphens, apostrophes (straight or curly), and slashes";
 
     /*
      * The first character of the name must not be a whitespace,
      * otherwise " " (a blank string) becomes a valid input.
      */
-    public static final String VALIDATION_REGEX = "[\\p{Alnum}](?:[\\p{Alnum} ]|[-'][\\p{Alnum}])*";
+    public static final String VALIDATION_REGEX = "[\\p{L}\\p{N}][\\p{L}\\p{M}\\p{N} '/\u2019-]*";
 
     public final String fullName;
 
@@ -28,7 +30,7 @@ public class Name {
     public Name(String name) {
         requireNonNull(name);
         checkArgument(isValidName(name), MESSAGE_CONSTRAINTS);
-        fullName = name;
+        fullName = Normalizer.normalize(name, Normalizer.Form.NFC);
     }
 
     /**

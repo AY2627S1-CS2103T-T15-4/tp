@@ -13,8 +13,8 @@ public final class CommandHelp {
     private static final String CUSTOMER_FIELDS = "Phone and backup contact use eight local digits or + followed by "
             + "7 to 15 international digits (first digit 1-9). Spaces and hyphens between digits are removed; "
             + "+65 requires exactly eight following digits and is stored without +65. "
-            + "Names allow letters, numbers, spaces, hyphens and apostrophes; "
-            + "punctuation must be followed by a letter or number. Email must be valid. "
+            + "Names start with a letter or number and allow Unicode letters, combining marks, numbers, "
+            + "spaces, hyphens, straight or curly apostrophes, and slashes. Email must be valid. "
             + "Primary phone and email must be unique across customers (email ignores case); "
             + "backup contacts may be shared.";
     private static final String IDS = "Use persistent record IDs, including hidden records. "
@@ -69,7 +69,9 @@ public final class CommandHelp {
                     "searchc [n/NAME] [p/PHONE] [e/EMAIL] [d/DOG_ID ...] [bc/BACKUP_CONTACT] [i/CUSTOMER_ID]",
                     "searchc n/Anna d/12 34",
                     "Supply at least one field; all supplied fields must match. Name uses case-insensitive "
-                            + "substring matching with repeated spaces treated as one. Phone and backup contact "
+                            + "substring matching with repeated spaces treated as one; unknown slash tokens and d/o "
+                            + "remain name text. Quote names containing search prefixes, e.g. n/\"Alex d/1\". "
+                            + "Phone and backup contact "
                             + "use the same formats as addcustomer and match exactly after normalization; "
                             + "email matches exactly ignoring case. "
                             + "IDs must exist; customers must own all specified dogs. "
