@@ -216,9 +216,9 @@ Example:
 * `adddog n/Cookie b/Chihuahua s/Small`
 
 Valid sizes are `small`, `medium`, `large`, and `giant`. Size input is case-insensitive.
-Dog names may contain letters, numbers, spaces, hyphens, and apostrophes, and must not be blank. Breeds may contain
-letters, numbers, spaces, and hyphens, and must not be blank. Leading and trailing
-spaces in field values are ignored.
+Dog names may contain letters, numbers, spaces, hyphens, and straight apostrophes (`'`), and must not be blank.
+Curly apostrophes (`‘`, `’`) are not supported. Breeds may contain letters, numbers, spaces, and
+hyphens, and must not be blank. Leading and trailing spaces in field values are ignored.
 
 #### Editing a dog: `editdog`
 
