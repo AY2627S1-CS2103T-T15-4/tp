@@ -1378,6 +1378,8 @@ must prevent replacement of the original; the storage error is logged and mutati
 first replacement. It removes the guard only after the copy succeeds, so a failed copy can be retried.
 
 `FileUtil.writeToFile` writes to a temporary sibling, closes it, and then moves it over the destination.
+For a symbolic-link destination, it resolves the existing target first and replaces that target while
+preserving the link. Dangling links fail without replacement.
 `AtomicMoveNotSupportedException` or `FileAlreadyExistsException` triggers a regular replacement;
 other failures propagate.
 Temporary files are removed on success and failure. JSON serialization finishes before writing begins,

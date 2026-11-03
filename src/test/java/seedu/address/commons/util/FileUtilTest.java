@@ -2,12 +2,15 @@ package seedu.address.commons.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.CopyOption;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -122,6 +125,73 @@ public class FileUtilTest {
         assertEquals("Original records", Files.readString(destination));
         try (var files = Files.list(temporaryFolder)) {
             assertEquals(List.of(destination), files.toList());
+        }
+    }
+
+    @Test
+    public void writeToFile_relativeSymlinkChain_updatesTargetAndPreservesLinks() throws Exception {
+        Path shared = Files.createDirectory(temporaryFolder.resolve("shared"));
+        Path target = Files.writeString(shared.resolve("watchdog.json"), "Original records");
+        Path intermediate = createSymbolicLink(temporaryFolder.resolve("shared.json"),
+                temporaryFolder.relativize(target));
+        Path home = Files.createDirectory(temporaryFolder.resolve("home"));
+        Path link = createSymbolicLink(home.resolve("watchdog.json"), home.relativize(intermediate));
+        FileUtil.writeToFile(link, "Replacement records", (source, destination, options) -> {
+            assertEquals(target.toRealPath(), destination);
+            assertEquals(target.toRealPath().getParent(), source.getParent());
+            assertEquals("Original records", Files.readString(target));
+            assertEquals("Replacement records", Files.readString(source));
+            Files.move(source, destination, options);
+        });
+        assertTrue(Files.isSymbolicLink(link));
+        assertTrue(Files.isSymbolicLink(intermediate));
+        assertEquals(home.relativize(intermediate), Files.readSymbolicLink(link));
+        assertEquals("Replacement records", Files.readString(target));
+        assertEquals("Replacement records", FileUtil.readFromFile(link));
+        try (var files = Files.list(shared)) {
+            assertEquals(List.of(target), files.toList());
+        }
+    }
+
+    @Test
+    public void writeToFile_symlinkReplacementFailure_preservesLinkAndTarget() throws Exception {
+        Path target = Files.writeString(temporaryFolder.resolve("shared.json"), "Original records");
+        Path link = createSymbolicLink(temporaryFolder.resolve("watchdog.json"), target);
+        assertThrows(IOException.class, () -> FileUtil.writeToFile(link, "Replacement records", (
+                source, destination, options) -> {
+                    throw new IOException("Replacement refused");
+                }));
+        assertTrue(Files.isSymbolicLink(link));
+        assertEquals(target, Files.readSymbolicLink(link));
+        assertEquals("Original records", Files.readString(target));
+        try (var files = Files.list(temporaryFolder)) {
+            assertEquals(2, files.count());
+        }
+    }
+
+    @Test
+    public void writeToFile_danglingSymlink_rejectsWithoutReplacingLink() throws Exception {
+        Path target = temporaryFolder.resolve("missing.json");
+        Path link = createSymbolicLink(temporaryFolder.resolve("watchdog.json"), target);
+        assertThrows(NoSuchFileException.class, () -> FileUtil.writeToFile(link, "Replacement records"));
+        assertTrue(Files.isSymbolicLink(link));
+        assertEquals(target, Files.readSymbolicLink(link));
+        try (var files = Files.list(temporaryFolder)) {
+            assertEquals(List.of(link), files.toList());
+        }
+    }
+
+    private Path createSymbolicLink(Path link, Path target) throws IOException {
+        try {
+            return Files.createSymbolicLink(link, target);
+        } catch (UnsupportedOperationException e) {
+            assumeTrue(false, "Symbolic links are unsupported: " + e);
+            throw e;
+        } catch (java.nio.file.FileSystemException e) {
+            assumeTrue(!System.getProperty("os.name").startsWith("Windows")
+                    || e.getReason() == null || !e.getReason().contains("privilege"),
+                    "Windows symbolic-link privilege is unavailable: " + e);
+            throw e;
         }
     }
 

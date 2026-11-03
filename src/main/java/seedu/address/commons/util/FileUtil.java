@@ -50,6 +50,7 @@ public class FileUtil {
     /**
      * Writes a complete sibling file before replacing the destination, atomically where supported.
      * A non-atomic replacement is used only when the file system rejects atomic moves.
+     * Existing symbolic links are preserved; dangling links fail without replacement.
      */
     public static void writeToFile(Path file, String content) throws IOException {
         writeToFile(file, content, Files::move);
@@ -57,7 +58,7 @@ public class FileUtil {
 
     /** Allows deterministic testing of file-system replacement failures. */
     static void writeToFile(Path file, String content, FileMover mover) throws IOException {
-        Path destination = file.toAbsolutePath();
+        Path destination = Files.isSymbolicLink(file) ? file.toRealPath() : file.toAbsolutePath();
         createParentDirsOfFile(destination);
         Path temporary = Files.createTempFile(destination.getParent(), ".watchdog-", ".tmp");
         try {
